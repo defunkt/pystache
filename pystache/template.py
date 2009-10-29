@@ -23,8 +23,11 @@ class Template(object):
 
     def render_sections(self, template, context):
         """Expands sections."""
-        match = SECTION_RE.search(template)
-        while match:
+        while 1:
+            match = SECTION_RE.search(template)
+            if match is None:
+                break
+            
             section, section_name, inner = match.group(0, 1, 2)
             if section_name in context and context[section_name]:
                 if hasattr(context[section_name], '__iter__'):
@@ -38,22 +41,22 @@ class Template(object):
                     template = template.replace(section, inner)
             else:
                 template = template.replace(section, '')
-            match = SECTION_RE.search(template)
 
         return template
 
     def render_tags(self, template, context):
         """Renders all the tags in a template for a context."""
-        match = TAG_RE.search(template)
-        while match:
+        while 1:
+            match = TAG_RE.search(template)
+            if match is None:
+                break
+            
             tag, tag_type, tag_name = match.group(0, 1, 2)
             func = 'render_' + self.tag_types[tag_type]
 
             if hasattr(self, func):
                 replacement = getattr(self, func)(tag_name, context)
                 template = template.replace(tag, replacement)
-
-            match = TAG_RE.search(template)
 
         return template
 
