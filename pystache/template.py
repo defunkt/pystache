@@ -1,5 +1,7 @@
 import re
 
+SECTION_RE = re.compile(r"{{\#([^\}]*)}}\s*(.+?)\s*{{/\1}}", re.M | re.S)
+
 class Template(object):
     tag_types = {
         None: 'tag',
@@ -20,8 +22,7 @@ class Template(object):
 
     def render_sections(self, template, context):
         """Expands sections."""
-        regexp = re.compile(r"{{\#([^\}]*)}}\s*(.+?)\s*{{/\1}}", re.M | re.S)
-        match = re.search(regexp, template)
+        match = SECTION_RE.search(template)
 
         while match:
             section, section_name, inner = match.group(0, 1, 2)
@@ -37,7 +38,7 @@ class Template(object):
                     template = template.replace(section, inner)
             else:
                 template = template.replace(section, '')
-            match = re.search(regexp, template)
+            match = SECTION_RE.search(template)
 
         return template
 
