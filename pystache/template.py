@@ -1,6 +1,7 @@
 import re
 
 SECTION_RE = re.compile(r"{{\#([^\}]*)}}\s*(.+?)\s*{{/\1}}", re.M | re.S)
+TAG_RE = re.compile(r"{{(#|=|!|<|>|\{)?(.+?)\1?}}+")
 
 class Template(object):
     tag_types = {
@@ -22,6 +23,7 @@ class Template(object):
 
     def render_sections(self, template, context):
         """Expands sections."""
+        regexp = re.compile(r"{{\#([^\}]*)}}\s*(.+?)\s*{{/\1}}", re.M | re.S)
         match = SECTION_RE.search(template)
 
         while match:
@@ -46,7 +48,7 @@ class Template(object):
         """Renders all the tags in a template for a context."""
         regexp = re.compile(r"{{(#|=|!|<|>|\{)?(.+?)\1?}}+")
 
-        match = re.search(regexp, template)
+        match = TAG_RE.search(template)
         while match:
             tag, tag_type, tag_name = match.group(0, 1, 2)
             func = 'render_' + self.tag_types[tag_type]
@@ -55,7 +57,7 @@ class Template(object):
                 replacement = getattr(self, func)(tag_name, context)
                 template = template.replace(tag, replacement)
 
-            match = re.search(regexp, template)
+            match = TAG_RE.search(template)
 
         return template
 
