@@ -23,9 +23,7 @@ class Template(object):
 
     def render_sections(self, template, context):
         """Expands sections."""
-        regexp = re.compile(r"{{\#([^\}]*)}}\s*(.+?)\s*{{/\1}}", re.M | re.S)
         match = SECTION_RE.search(template)
-
         while match:
             section, section_name, inner = match.group(0, 1, 2)
             if section_name in context and context[section_name]:
@@ -46,8 +44,6 @@ class Template(object):
 
     def render_tags(self, template, context):
         """Renders all the tags in a template for a context."""
-        regexp = re.compile(r"{{(#|=|!|<|>|\{)?(.+?)\1?}}+")
-
         match = TAG_RE.search(template)
         while match:
             tag, tag_type, tag_name = match.group(0, 1, 2)
