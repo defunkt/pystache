@@ -31,12 +31,12 @@ class Template(object):
             section, section_name, inner = match.group(0, 1, 2)
             if section_name in context and context[section_name]:
                 if hasattr(context[section_name], '__iter__'):
-                    insides = ''
+                    insides = []
                     for item in context[section_name]:
                         ctx = context.copy()
                         ctx.update(item)
-                        insides += self.render(inner, ctx)
-                    template = template.replace(section, insides)
+                        insides.append(self.render(inner, ctx))
+                    template = template.replace(section, ''.join(insides))
                 else:
                     template = template.replace(section, inner)
             else:
