@@ -19,7 +19,23 @@ class Template(object):
         """Turns a Mustache template into something wonderful."""
         template = template or self.template
         context = context or self.context
+
+        template = self.render_sections(template, context)
         return self.render_tags(template, context)
+
+    def render_sections(self, template, context):
+        regexp = re.compile(r"{{\#([^\}]*)}}\s*(.+?){{/\1}}")
+        match = re.search(regexp, template)
+
+        while match:
+            section, section_name, inner = match.group(0, 1, 2)
+            if section_name in context and context[section_name]:
+                return template.replace(section, inner)
+            else:
+                return template.replace(section, '')
+            match = re.search(regexp, template)
+
+        return template
 
     def render_tags(self, template, context):
         """Renders all the tags in a template for a context."""
