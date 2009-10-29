@@ -60,10 +60,7 @@ class Template(object):
 
     def render_tag(self, tag_name, context):
         """Given a tag name and context, finds and renders the tag."""
-        if tag_name in context:
-            return context[tag_name]
-        else:
-            return ''
+        return context.get(tag_name, '')
 
     def render_comment(self, tag_name=None, context=None):
         """Rendering a comment always returns nothing."""
