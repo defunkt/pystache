@@ -19,15 +19,24 @@ class Template(object):
         return self.render_tags(template, context)
 
     def render_sections(self, template, context):
-        regexp = re.compile(r"{{\#([^\}]*)}}\s*(.+?){{/\1}}")
+        """Expands sections."""
+        regexp = re.compile(r"{{\#([^\}]*)}}\s*(.+?)\s*{{/\1}}", re.M | re.S)
         match = re.search(regexp, template)
 
         while match:
             section, section_name, inner = match.group(0, 1, 2)
             if section_name in context and context[section_name]:
-                return template.replace(section, inner)
+                if hasattr(context[section_name], '__iter__'):
+                    insides = ''
+                    for item in context[section_name]:
+                        ctx = context.copy()
+                        ctx.update(item)
+                        insides += self.render(inner, ctx)
+                    template = template.replace(section, insides)
+                else:
+                    template = template.replace(section, inner)
             else:
-                return template.replace(section, '')
+                template = template.replace(section, '')
             match = re.search(regexp, template)
 
         return template

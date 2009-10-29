@@ -31,7 +31,7 @@ class TestPystache(unittest.TestCase):
         ret = Pystache.render(template, { 'set': True })
         self.assertEquals(ret, "Ready set go!")
 
-    def aaxtest_sections(self):
+    def test_sections(self):
         template = """
 <ul>
   {{#users}}
@@ -42,8 +42,8 @@ class TestPystache(unittest.TestCase):
 
         context = { 'users': [ {'name': 'Chris'}, {'name': 'Tom'}, {'name': 'PJ'} ] }
         ret = Pystache.render(template, context)
-        self.assertEquals(ret, """<ul>
-  <li>Chris</li>
-  <li>Tom</li>
-  <li>PJ</li>
-</ul>""")
+        self.assertEquals(ret, """
+<ul>
+  <li>Chris</li><li>Tom</li><li>PJ</li>
+</ul>
+""")
