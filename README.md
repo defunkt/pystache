@@ -24,6 +24,21 @@ Use It
     >>> pystache.render('Hi {{person}}!', {'person': 'Mom'})
     'Hi Mom!'
 
+You can also create dedicated view classes to hold your view logic.
+
+Here's your simple.py:
+    import pystache
+    class Simple(pystache.View):
+       def thing(self):
+            return "pizza"
+
+Then your template, simple.mustache:
+    Hi {{thing}}!
+
+Pull it together:
+    >>> Simple().render()
+    'Hi pizza!'
+
 
 Test It
 -------
