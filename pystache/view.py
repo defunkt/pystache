@@ -30,7 +30,10 @@ class View(object):
             name = self.template_name() + '.' + self.template_extension
             self.template_file = os.path.join(self.template_path, name)
 
-        return open(self.template_file, 'r').read()
+        f = open(self.template_file, 'r')
+        template = f.read()
+        f.close()
+        return template
 
     def template_name(self):
         return self.__class__.__name__
