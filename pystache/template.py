@@ -9,9 +9,9 @@ class Template(object):
         '!': 'comment'
     }
 
-    def __init__(self, template, context={}):
+    def __init__(self, template, context=None):
         self.template = template
-        self.context = context
+        self.context = context or {}
 
     def render(self, template=None, context=None):
         """Turns a Mustache template into something wonderful."""

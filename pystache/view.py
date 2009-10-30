@@ -15,9 +15,9 @@ class View(object):
     # Contents of the template.
     template = None
 
-    def __init__(self, template=None, context={}, **kwargs):
+    def __init__(self, template=None, context=None, **kwargs):
         self.template = template
-        self.context = context
+        self.context = context or {}
         self.context.update(kwargs)
 
     def load_template(self):
