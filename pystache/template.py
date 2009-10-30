@@ -27,7 +27,7 @@ class Template(object):
             match = SECTION_RE.search(template)
             if match is None:
                 break
-            
+
             section, section_name, inner = match.group(0, 1, 2)
 
             it = context.get(section_name)
@@ -41,7 +41,7 @@ class Template(object):
                     ctx.update(item)
                     insides.append(self.render(inner, ctx))
                 replacer = ''.join(insides)
-            
+
             template = template.replace(section, replacer)
 
         return template
@@ -52,7 +52,7 @@ class Template(object):
             match = TAG_RE.search(template)
             if match is None:
                 break
-            
+
             tag, tag_type, tag_name = match.group(0, 1, 2)
             func = 'render_' + self.tag_types[tag_type]
 
