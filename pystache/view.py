@@ -15,12 +15,10 @@ class View(object):
     # Contents of the template.
     template = None
 
-    def __init__(self, template=None, context={}, **kwargs):
+    def __init__(self, template=None, context=None, **kwargs):
         self.template = template
-        self.context = context
-
-        for key in kwargs:
-            self.context[key] = kwargs[key]
+        self.context = context or {}
+        self.context.update(kwargs)
 
     def load_template(self):
         if self.template:
