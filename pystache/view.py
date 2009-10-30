@@ -36,7 +36,9 @@ class View(object):
         return self.__class__.__name__
 
     def get(self, attr, default):
-        if hasattr(self, attr):
+        if attr in self.context:
+            return self.context[attr]
+        elif hasattr(self, attr):
             return getattr(self, attr)()
         else:
             return default
