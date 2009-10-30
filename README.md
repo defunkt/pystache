@@ -17,10 +17,18 @@ Documentation
 For now check out the [ctemplate][3] or [Mustache][4] docs.
 
 
-Tests
------
+Use It
+------
 
-Want to run the tests? [nose][n] works great!
+    >>> import pystache
+    >>> pystache.render('Hi {{person}}!', {'person': 'Mom'})
+    'Hi Mom!'
+
+
+Test It
+-------
+
+[nose][n] works great!
 
     easy_install nose
     cd pystache
@@ -31,7 +39,7 @@ Author
 ------
 
     context = { 'author': 'Chris Wanstrath', 'email': 'chris@ozmm.org' }
-    Pystache.render("{{author}} :: {{email}}", context)
+    pystache.render("{{author}} :: {{email}}", context)
 
 
 [1]: http://code.google.com/p/google-ctemplate/
