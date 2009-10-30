@@ -6,6 +6,10 @@ class TestPystache(unittest.TestCase):
         ret = pystache.render("Hi {{thing}}!", { 'thing': 'world' })
         self.assertEquals(ret, "Hi world!")
 
+    def test_kwargs(self):
+        ret = pystache.render("Hi {{thing}}!", thing='world')
+        self.assertEquals(ret, "Hi world!")
+
     def test_less_basic(self):
         template = "It's a nice day for {{beverage}}, right {{person}}?"
         ret = pystache.render(template, { 'beverage': 'soda', 'person': 'Bob' })
