@@ -18,9 +18,7 @@ class View(object):
     def __init__(self, template=None, context={}, **kwargs):
         self.template = template
         self.context = context
-
-        for key in kwargs:
-            self.context[key] = kwargs[key]
+        self.context.update(kwargs)
 
     def load_template(self):
         if self.template:
