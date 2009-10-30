@@ -1,4 +1,4 @@
-import pystache
+from pystache import Template
 import os.path
 
 class View(object):
@@ -35,7 +35,12 @@ class View(object):
     def template_name(self):
         return self.__class__.__name__
 
+    def get(self, attr, default):
+        if hasattr(self, attr):
+            return getattr(self, attr)()
+        else:
+            return default
+
     def render(self):
         template = self.load_template()
-        return pystache.render(template, self.context)
-
+        return Template(template, self).render()
