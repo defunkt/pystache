@@ -14,3 +14,8 @@ class TestView(unittest.TestCase):
     def test_template_load(self):
         view = Simple(thing='world')
         self.assertEquals(view.render(), "Hi world!")
+
+    def test_basic_method_calls(self):
+        view = Simple()
+        self.assertEquals(view.render(), "Hi pizza!")
+
