@@ -1,4 +1,5 @@
 from pystache.template import Template
+from pystache.view import View
 
 def render(template, context={}, **kwargs):
     context = context.copy()
