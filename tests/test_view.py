@@ -1,6 +1,7 @@
 import unittest
 import pystache
 from examples.simple import Simple
+from examples.complex_view import ComplexView
 
 class TestView(unittest.TestCase):
     def test_basic(self):
@@ -19,3 +20,11 @@ class TestView(unittest.TestCase):
         view = Simple()
         self.assertEquals(view.render(), "Hi pizza!")
 
+    def test_complex(self):
+        self.assertEquals(ComplexView().render(), """<h1>Colors</h1>
+<ul>
+  <li><strong>red</strong></li>
+    <li><a href="#Green">green</a></li>
+    <li><a href="#Blue">blue</a></li>
+    </ul>
+""")

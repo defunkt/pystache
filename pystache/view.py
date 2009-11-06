@@ -1,5 +1,6 @@
 from pystache import Template
 import os.path
+import re
 
 class View(object):
     # Path where this view's template(s) live
@@ -33,8 +34,18 @@ class View(object):
         f.close()
         return template
 
-    def template_name(self):
-        return self.__class__.__name__
+    def template_name(self, name=None):
+        """TemplatePartial => template_partial
+        Takes a string but defaults to using the current class' name.
+        """
+
+        if not name:
+            name = self.__class__.__name__
+
+        def repl(match):
+            return '_' + match.group(0).lower()
+
+        return re.sub('[A-Z]', repl, name)[1:]
 
     def get(self, attr, default):
         if attr in self.context:
