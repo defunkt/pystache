@@ -38,7 +38,6 @@ class View(object):
         """TemplatePartial => template_partial
         Takes a string but defaults to using the current class' name.
         """
-
         if not name:
             name = self.__class__.__name__
 
