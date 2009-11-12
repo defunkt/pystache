@@ -23,7 +23,7 @@ class Template(object):
 
     def render_sections(self, template, context):
         """Expands sections."""
-        while True:
+        while 1:
             match = SECTION_RE.search(template)
             if match is None:
                 break
