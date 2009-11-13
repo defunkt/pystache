@@ -6,6 +6,7 @@ from examples.double_section import DoubleSection
 from examples.escaped import Escaped
 from examples.unescaped import Unescaped
 from examples.template_partial import TemplatePartial
+from examples.delimiters import Delimiters
 
 class TestView(unittest.TestCase):
     def test_comments(self):
@@ -34,4 +35,14 @@ Again, Welcome!""")
 -------
 
 Again, Welcome!
+""")
+
+
+    def test_delimiters(self):
+        self.assertEquals(Delimiters().render(), """
+* It worked the first time.
+
+* And it worked the second time.
+
+* Then, surprisingly, it worked the third time.
 """)

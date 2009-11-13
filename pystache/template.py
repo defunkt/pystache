@@ -1,20 +1,32 @@
 import re
 import cgi
 
-SECTION_RE = re.compile(r"{{\#([^\}]*)}}\s*(.+?)\s*{{/\1}}", re.M | re.S)
-TAG_RE = re.compile(r"{{(#|=|!|<|>|\{)?(.+?)\1?}}+")
-
 class Template(object):
+    # The regular expression used to find a #section
+    section_re = None
+
+    # The regular expression used to find a tag.
+    tag_re = None
+
+    # Opening tag delimiter
+    otag = '{{'
+
+    # Closing tag delimiter
+    ctag = '}}'
+
+    # Names of different tag modifiers, used to render them.
     tag_types = {
         None: 'tag',
         '!': 'comment',
         '{': 'unescaped',
-        '>': 'partial'
+        '>': 'partial',
+        '=': 'delimiter'
     }
 
     def __init__(self, template, context=None):
         self.template = template
         self.context = context or {}
+        self.compile_regexps()
 
     def render(self, template=None, context=None):
         """Turns a Mustache template into something wonderful."""
@@ -24,10 +36,20 @@ class Template(object):
         template = self.render_sections(template, context)
         return self.render_tags(template, context)
 
+    def compile_regexps(self):
+        """Compiles our section and tag regular expressions."""
+        tags = { 'otag': re.escape(self.otag), 'ctag': re.escape(self.ctag) }
+
+        section = r"%(otag)s\#([^\}]*)%(ctag)s\s*(.+?)\s*%(otag)s/\1%(ctag)s"
+        self.section_re = re.compile(section % tags, re.M|re.S)
+
+        tag = r"%(otag)s(#|=|!|>|\{)?\s*(.+?)\s*\1?%(ctag)s+"
+        self.tag_re = re.compile(tag % tags)
+
     def render_sections(self, template, context):
         """Expands sections."""
         while 1:
-            match = SECTION_RE.search(template)
+            match = self.section_re.search(template)
             if match is None:
                 break
 
@@ -50,7 +72,7 @@ class Template(object):
     def render_tags(self, template, context):
         """Renders all the tags in a template for a context."""
         while 1:
-            match = TAG_RE.search(template)
+            match = self.tag_re.search(template)
             if match is None:
                 break
 
@@ -84,3 +106,9 @@ class Template(object):
         view.template_name = tag_name
 
         return view.render()
+
+    def render_delimiter(self, tag_name=None, context=None):
+        """Changes the Mustache delimiter."""
+        self.otag, self.ctag = tag_name.split(' ')
+        self.compile_regexps()
+        return ''
