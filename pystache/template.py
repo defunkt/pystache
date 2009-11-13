@@ -43,7 +43,7 @@ class Template(object):
         section = r"%(otag)s\#([^\}]*)%(ctag)s\s*(.+?)\s*%(otag)s/\1%(ctag)s"
         self.section_re = re.compile(section % tags, re.M|re.S)
 
-        tag = r"%(otag)s(#|=|!|>|\{)?\s*(.+?)\s*\1?%(ctag)s+"
+        tag = r"%(otag)s(#|=|!|>|\{)?(.+?)\1?%(ctag)s+"
         self.tag_re = re.compile(tag % tags)
 
     def render_sections(self, template, context):
@@ -54,6 +54,7 @@ class Template(object):
                 break
 
             section, section_name, inner = match.group(0, 1, 2)
+            section_name = section_name.strip()
 
             it = context.get(section_name, None)
             replacer = ''
@@ -77,6 +78,7 @@ class Template(object):
                 break
 
             tag, tag_type, tag_name = match.group(0, 1, 2)
+            tag_name = tag_name.strip()
             func = 'render_' + self.tag_types[tag_type]
 
             if hasattr(self, func):
