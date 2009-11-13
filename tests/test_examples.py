@@ -26,3 +26,12 @@ class TestView(unittest.TestCase):
     def test_template_partial(self):
         self.assertEquals(TemplatePartial().render(), """<h1>Welcome</h1>
 Again, Welcome!""")
+
+    def test_template_partial_extension(self):
+        view = TemplatePartial()
+        view.template_extension = 'txt'
+        self.assertEquals(view.render(), """Welcome
+-------
+
+Again, Welcome!
+""")
