@@ -1,4 +1,5 @@
 import re
+import cgi
 
 SECTION_RE = re.compile(r"{{\#([^\}]*)}}\s*(.+?)\s*{{/\1}}", re.M | re.S)
 TAG_RE = re.compile(r"{{(#|=|!|<|>|\{)?(.+?)\1?}}+")
@@ -6,7 +7,8 @@ TAG_RE = re.compile(r"{{(#|=|!|<|>|\{)?(.+?)\1?}}+")
 class Template(object):
     tag_types = {
         None: 'tag',
-        '!': 'comment'
+        '!': 'comment',
+        '{': 'unescaped'
     }
 
     def __init__(self, template, context=None):
@@ -62,8 +64,12 @@ class Template(object):
 
     def render_tag(self, tag_name, context):
         """Given a tag name and context, finds and renders the tag."""
-        return context.get(tag_name, '')
+        return cgi.escape(context.get(tag_name, ''))
 
     def render_comment(self, tag_name=None, context=None):
         """Rendering a comment always returns nothing."""
         return ''
+
+    def render_unescaped(self, tag_name=None, context=None):
+        """Render a tag without escaping it."""
+        return context.get(tag_name, '')
