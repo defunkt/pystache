@@ -35,6 +35,15 @@ class TestPystache(unittest.TestCase):
         ret = pystache.render(template, { 'set': True })
         self.assertEquals(ret, "Ready set go!")
 
+    def test_non_strings(self):
+        template = "{{#stats}}({{key}} & {{value}}){{/stats}}"
+        stats = []
+        stats.append({'key': 123, 'value': ['something']})
+        stats.append({'key': u"chris", 'value': 0.900})
+
+        ret = pystache.render(template, { 'stats': stats })
+        self.assertEquals(ret, """(123 & ['something'])(chris & 0.9)""")
+
     def test_sections(self):
         template = """
 <ul>
