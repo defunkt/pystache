@@ -28,3 +28,7 @@ class TestView(unittest.TestCase):
     <li><a href="#Blue">blue</a></li>
   </ul>
 """)
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -46,3 +46,6 @@ Again, Welcome!
 
 * Then, surprisingly, it worked the third time.
 """)
+
+if __name__ == '__main__':
+    unittest.main()

@@ -60,3 +60,6 @@ class TestPystache(unittest.TestCase):
   <li>Chris</li><li>Tom</li><li>PJ</li>
 </ul>
 """)
+
+if __name__ == '__main__':
+    unittest.main()
