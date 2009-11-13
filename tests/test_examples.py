@@ -4,6 +4,7 @@ import pystache
 from examples.comments import Comments
 from examples.double_section import DoubleSection
 from examples.escaped import Escaped
+from examples.unescaped import Unescaped
 
 class TestView(unittest.TestCase):
     def test_comments(self):
@@ -17,3 +18,7 @@ class TestView(unittest.TestCase):
 
     def test_escaped(self):
         self.assertEquals(Escaped().render(), "<h1>Bear &gt; Shark</h1>")
+
+    def test_unescaped(self):
+        self.assertEquals(Unescaped().render(), "<h1>Bear > Shark</h1>")
+
