@@ -8,7 +8,8 @@ class Template(object):
     tag_types = {
         None: 'tag',
         '!': 'comment',
-        '{': 'unescaped'
+        '{': 'unescaped',
+        '>': 'partial'
     }
 
     def __init__(self, template, context=None):
@@ -63,7 +64,7 @@ class Template(object):
         return template
 
     def render_tag(self, tag_name, context):
-        """Given a tag name and context, finds and renders the tag."""
+        """Given a tag name and context, finds, escapes, and renders the tag."""
         return cgi.escape(context.get(tag_name, ''))
 
     def render_comment(self, tag_name=None, context=None):
@@ -73,3 +74,13 @@ class Template(object):
     def render_unescaped(self, tag_name=None, context=None):
         """Render a tag without escaping it."""
         return context.get(tag_name, '')
+
+    def render_partial(self, tag_name=None, context=None):
+        """Renders a partial within the current context."""
+        # Import view here to avoid import loop
+        from pystache.view import View
+
+        view = View(context=context)
+        view.template_name = tag_name
+
+        return view.render()

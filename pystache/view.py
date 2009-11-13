@@ -9,6 +9,10 @@ class View(object):
     # Extension for templates
     template_extension = 'mustache'
 
+    # The name of this template. If none is given the View will try
+    # to infer it based on the class name.
+    template_name = None
+
     # Absolute path to the template itself. Pystache will try to guess
     # if it's not provided.
     template_file = None
@@ -19,14 +23,35 @@ class View(object):
     def __init__(self, template=None, context=None, **kwargs):
         self.template = template
         self.context = context or {}
-        self.context.update(kwargs)
+
+        # If the context we're handed is a View, we want to inherit
+        # its settings.
+        if isinstance(context, View):
+            self.inherit_settings(context)
+
+        if kwargs:
+            self.context.update(kwargs)
+
+    def inherit_settings(self, view):
+        """Given another View, copies its settings."""
+        if view.template_path:
+            self.template_path = view.template_path
+
+        if view.template_name:
+            self.template_name = view.template_name
+
+    def __contains__(self, needle):
+        return hasattr(self, needle)
+
+    def __getitem__(self, attr):
+        return getattr(self, attr)()
 
     def load_template(self):
         if self.template:
             return self.template
 
         if not self.template_file:
-            name = self.template_name() + '.' + self.template_extension
+            name = self.get_template_name() + '.' + self.template_extension
             self.template_file = os.path.join(self.template_path, name)
 
         f = open(self.template_file, 'r')
@@ -34,10 +59,14 @@ class View(object):
         f.close()
         return template
 
-    def template_name(self, name=None):
+    def get_template_name(self, name=None):
         """TemplatePartial => template_partial
-        Takes a string but defaults to using the current class' name.
+        Takes a string but defaults to using the current class' name or
+        the `template_name` attribute
         """
+        if self.template_name:
+            return self.template_name
+
         if not name:
             name = self.__class__.__name__
 

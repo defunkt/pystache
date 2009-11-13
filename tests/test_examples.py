@@ -24,4 +24,5 @@ class TestView(unittest.TestCase):
         self.assertEquals(Unescaped().render(), "<h1>Bear > Shark</h1>")
 
     def test_template_partial(self):
-        self.assertEquals(TemplatePartial().render(), 'blah')
+        self.assertEquals(TemplatePartial().render(), """<h1>Welcome</h1>
+Again, Welcome!""")
