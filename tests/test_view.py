@@ -1,5 +1,6 @@
 import unittest
 import pystache
+
 from examples.simple import Simple
 from examples.complex_view import ComplexView
 
