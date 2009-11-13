@@ -7,4 +7,4 @@ class TemplatePartial(pystache.View):
         return "Welcome"
 
     def title_bars(self):
-        return '-' * title.size
+        return '-' * len(self.title())
