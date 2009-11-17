@@ -26,6 +26,13 @@ class TestView(unittest.TestCase):
         view.thing = 'Chris'
         self.assertEquals(view.render(), "Hi Chris!")
 
+    def test_view_instances_as_attributes(self):
+        other = Simple(name='chris')
+        other.template = '{{name}}'
+        view = Simple()
+        view.thing = other
+        self.assertEquals(view.render(), "Hi chris!")
+
     def test_complex(self):
         self.assertEquals(ComplexView().render(), """<h1>Colors</h1>
 <ul>

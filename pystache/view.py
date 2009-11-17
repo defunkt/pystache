@@ -89,3 +89,6 @@ class View(object):
     def render(self):
         template = self.load_template()
         return Template(template, self).render()
+
+    def __str__(self):
+        return self.render()
