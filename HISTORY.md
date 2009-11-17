@@ -1,4 +1,4 @@
-## 0.2.0 (2009-11-16)
+## 0.2.0 (2009-??-??)
 
 * Add support for using non-callables as View attributes. [joshthecoder]
 * Allow using View instances as attributes. [joshthecoder]
