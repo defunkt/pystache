@@ -76,12 +76,15 @@ class View(object):
         return re.sub('[A-Z]', repl, name)[1:]
 
     def get(self, attr, default):
-        attr = self.context.get(attr, getattr(self, attr, default))
-
-        if callable(attr):
-            return attr()
+        if attr in self.context:
+            return self.context[attr]
+        elif hasattr(self, attr):
+            try:
+                return getattr(self, attr)()
+            except TypeError:
+                return getattr(self, attr)
         else:
-            return attr
+            return default
 
     def render(self):
         template = self.load_template()
