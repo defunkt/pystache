@@ -79,7 +79,10 @@ class View(object):
         if attr in self.context:
             return self.context[attr]
         elif hasattr(self, attr):
-            return getattr(self, attr)()
+            try:
+                return getattr(self, attr)()
+            except TypeError:
+                return getattr(self, attr)
         else:
             return default
 

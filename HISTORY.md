@@ -1,3 +1,7 @@
+## 0.2.0 (2009-11-16)
+
+* Add support for using non-callables as View attributes. [joshthecoder]
+
 ## 0.1.1 (2009-11-13)
 
 * Ensure we're dealing with strings, always

@@ -21,6 +21,11 @@ class TestView(unittest.TestCase):
         view = Simple()
         self.assertEquals(view.render(), "Hi pizza!")
 
+    def test_non_callable_attributes(self):
+        view = Simple()
+        view.thing = 'Chris'
+        self.assertEquals(view.render(), "Hi Chris!")
+
     def test_complex(self):
         self.assertEquals(ComplexView().render(), """<h1>Colors</h1>
 <ul>
