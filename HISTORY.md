@@ -1,5 +1,6 @@
 ## 0.2.0 (2009-??-??)
 
+* Bugfix: Methods returning False or None are not rendered
 * Add support for using non-callables as View attributes. [joshthecoder]
 * Allow using View instances as attributes. [joshthecoder]
 

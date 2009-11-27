@@ -20,6 +20,11 @@ class TestPystache(unittest.TestCase):
         ret = pystache.render(template, { 'name': 'Jon', 'thing': 'racecar' })
         self.assertEquals(ret, "I think Jon wants a racecar, right Jon?")
 
+    def test_ignores_misses(self):
+        template = "I think {{name}} wants a {{thing}}, right {{name}}?"
+        ret = pystache.render(template, { 'name': 'Jon' })
+        self.assertEquals(ret, "I think Jon wants a , right Jon?")
+
     def test_comments(self):
         template = "What {{! the }} what?"
         ret = pystache.render(template)

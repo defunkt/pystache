@@ -5,3 +5,6 @@ class Simple(pystache.View):
 
     def thing(self):
         return "pizza"
+
+    def blank(self):
+        pass
