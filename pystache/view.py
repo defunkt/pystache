@@ -55,8 +55,10 @@ class View(object):
             self.template_file = os.path.join(self.template_path, name)
 
         f = open(self.template_file, 'r')
-        template = f.read()
-        f.close()
+        try:
+            template = f.read()
+        finally:
+            f.close()
         return template
 
     def get_template_name(self, name=None):
