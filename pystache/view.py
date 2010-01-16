@@ -19,6 +19,10 @@ class View(object):
 
     # Contents of the template.
     template = None
+    
+    # Character encoding of the template file. If None, Pystache will not
+    # do any decoding of the template.
+    template_encoding = None
 
     def __init__(self, template=None, context=None, **kwargs):
         self.template = template
@@ -57,6 +61,8 @@ class View(object):
         f = open(self.template_file, 'r')
         try:
             template = f.read()
+            if self.template_encoding:
+                template = unicode(template, self.template_encoding)
         finally:
             f.close()
         return template
