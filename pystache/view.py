@@ -83,9 +83,9 @@ class View(object):
         else:
             return attr
 
-    def render(self):
+    def render(self, encoding=None):
         template = self.load_template()
-        return Template(template, self).render()
+        return Template(template, self).render(encoding=encoding)
 
     def __str__(self):
         return self.render()

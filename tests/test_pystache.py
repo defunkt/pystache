@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 import unittest
 import pystache
 
@@ -48,6 +50,12 @@ class TestPystache(unittest.TestCase):
 
         ret = pystache.render(template, { 'stats': stats })
         self.assertEquals(ret, """(123 & ['something'])(chris & 0.9)""")
+
+    def test_unicode(self):
+        template = 'Name: {{name}}; Age: {{age}}'
+        ret = pystache.render(template, { 'name': u'Henri Poincaré',
+            'age': 156 })
+        self.assertEquals(ret, u'Name: Henri Poincaré; Age: 156')
 
     def test_sections(self):
         template = """

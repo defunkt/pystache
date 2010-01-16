@@ -34,13 +34,16 @@ class Template(object):
         self.context = context or {}
         self.compile_regexps()
 
-    def render(self, template=None, context=None):
+    def render(self, template=None, context=None, encoding=None):
         """Turns a Mustache template into something wonderful."""
         template = template or self.template
         context = context or self.context
 
         template = self.render_sections(template, context)
-        return self.render_tags(template, context)
+        result = self.render_tags(template, context)
+        if encoding is not None:
+            result = result.encode(encoding)
+        return result
 
     def compile_regexps(self):
         """Compiles our section and tag regular expressions."""
@@ -94,7 +97,7 @@ class Template(object):
     @modifier(None)
     def render_tag(self, tag_name, context):
         """Given a tag name and context, finds, escapes, and renders the tag."""
-        return cgi.escape(str(context.get(tag_name, '') or ''))
+        return cgi.escape(unicode(context.get(tag_name, '') or ''))
 
     @modifier('!')
     def render_comment(self, tag_name=None, context=None):

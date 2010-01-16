@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 import unittest
 import pystache
 
@@ -7,6 +9,7 @@ from examples.escaped import Escaped
 from examples.unescaped import Unescaped
 from examples.template_partial import TemplatePartial
 from examples.delimiters import Delimiters
+from examples.unicode_output import UnicodeOutput
 
 class TestView(unittest.TestCase):
     def test_comments(self):
@@ -17,6 +20,12 @@ class TestView(unittest.TestCase):
         self.assertEquals(DoubleSection().render(), """* first
 * second
 * third""")
+
+    def test_unicode_output(self):
+        self.assertEquals(UnicodeOutput().render(), u'<p>Name: Henri Poincaré</p>')
+
+    def test_encoded_output(self):
+        self.assertEquals(UnicodeOutput().render('utf8'), '<p>Name: Henri Poincar\xc3\xa9</p>')
 
     def test_escaped(self):
         self.assertEquals(Escaped().render(), "<h1>Bear &gt; Shark</h1>")
