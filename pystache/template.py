@@ -97,7 +97,10 @@ class Template(object):
     @modifier(None)
     def render_tag(self, tag_name, context):
         """Given a tag name and context, finds, escapes, and renders the tag."""
-        return cgi.escape(unicode(context.get(tag_name, '') or ''))
+        raw = context.get(tag_name, '')
+        if not raw and raw is not 0:
+            return ''
+        return cgi.escape(unicode(raw))
 
     @modifier('!')
     def render_comment(self, tag_name=None, context=None):

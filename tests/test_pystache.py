@@ -27,6 +27,11 @@ class TestPystache(unittest.TestCase):
         ret = pystache.render(template, { 'name': 'Jon' })
         self.assertEquals(ret, "I think Jon wants a , right Jon?")
 
+    def test_render_zero(self):
+        template = 'My value is {{value}}.'
+        ret = pystache.render(template, { 'value': 0 })
+        self.assertEquals(ret, 'My value is 0.')
+
     def test_comments(self):
         template = "What {{! the }} what?"
         ret = pystache.render(template)
