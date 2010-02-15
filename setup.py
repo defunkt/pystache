@@ -1,6 +1,19 @@
 #!/usr/bin/env python
 
+import os
+import sys
+
 from distutils.core import setup
+
+def publish():
+    """Publish to Pypi"""
+    os.system("python setup.py sdist upload")
+
+if sys.argv[-1] == "publish":
+    publish()
+    sys.exit()
+
+
 
 setup(name='pystache',
       version='0.2.0',
@@ -11,3 +24,4 @@ setup(name='pystache',
       packages=['pystache'],
       license='MIT'
      )
+
