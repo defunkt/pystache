@@ -13,8 +13,6 @@ if sys.argv[-1] == "publish":
     publish()
     sys.exit()
 
-
-
 setup(name='pystache',
       version='0.2.0',
       description='Mustache for Python',
