@@ -110,7 +110,7 @@ class Template(object):
     @modifier('{')
     def render_unescaped(self, tag_name=None, context=None):
         """Render a tag without escaping it."""
-        return str(context.get(tag_name, ''))
+        return unicode(context.get(tag_name, ''))
 
     @modifier('>')
     def render_partial(self, tag_name=None, context=None):
