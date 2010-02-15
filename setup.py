@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='pystache',
-      version='0.1.1',
+      version='0.2.0',
       description='Mustache for Python',
       author='Chris Wanstrath',
       author_email='chris@ozmm.org',
