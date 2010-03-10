@@ -14,7 +14,7 @@ with Python 2.6.1.
 Documentation
 -------------
 
-For now check out the [ctemplate][3] or [Mustache][4] docs.
+The different Mustache tags are documented at [mustache(5)][m5].
 
 
 Use It
@@ -62,3 +62,4 @@ Author
 [3]: http://google-ctemplate.googlecode.com/svn/trunk/doc/howto.html
 [4]: http://github.com/defunkt/mustache#readme
 [n]: http://somethingaboutorange.com/mrl/projects/nose/0.11.1/testing.html
+[m5]: http://defunkt.github.com/mustache/mustache.5.html
