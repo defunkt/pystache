@@ -16,6 +16,7 @@ if sys.argv[-1] == "publish":
 setup(name='pystache',
       version='0.2.0',
       description='Mustache for Python',
+      long_description=open('README.rst').read() + '\n\n' + open('HISTORY.rst').read(),
       author='Chris Wanstrath',
       author_email='chris@ozmm.org',
       url='http://github.com/defunkt/pystache',
