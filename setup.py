@@ -20,6 +20,13 @@ setup(name='pystache',
       author_email='chris@ozmm.org',
       url='http://github.com/defunkt/pystache',
       packages=['pystache'],
-      license='MIT'
+      license='MIT',
+      classifiers = ( 
+        "Development Status :: 4 - Beta",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2.5",
+        "Programming Language :: Python :: 2.6",
+        )
      )
 
