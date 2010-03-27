@@ -16,6 +16,24 @@ class TestView(unittest.TestCase):
     def test_template_load(self):
         view = Simple(thing='world')
         self.assertEquals(view.render(), "Hi world!")
+    
+    def test_template_load_from_multiple_path(self):
+        path = Simple.template_path
+        Simple.template_path = ('examples/nowhere','examples',)
+        try:
+            view = Simple(thing='world')
+            self.assertEquals(view.render(), "Hi world!")
+        finally:
+            Simple.template_path = path
+
+    def test_template_load_from_multiple_path_fail(self):
+        path = Simple.template_path
+        Simple.template_path = ('examples/nowhere',)
+        try:
+            view = Simple(thing='world')
+            self.assertRaises(IOError, view.render)
+        finally:
+            Simple.template_path = path
 
     def test_basic_method_calls(self):
         view = Simple()

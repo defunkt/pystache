@@ -53,11 +53,25 @@ class View(object):
     def load_template(self):
         if self.template:
             return self.template
-
-        if not self.template_file:
-            name = self.get_template_name() + '.' + self.template_extension
+        
+        if self.template_file:
+            return self._load_template()
+        
+        name = self.get_template_name() + '.' + self.template_extension
+        
+        if isinstance(self.template_path, basestring):
             self.template_file = os.path.join(self.template_path, name)
+            return self._load_template()
+        
+        for path in self.template_path:
+            self.template_file = os.path.join(path, name)
+            if os.path.exists(self.template_file):
+                return self._load_template()
+        
+        raise IOError('"%s" not found in "%s"' % (name, ':'.join(self.template_path),))
 
+    
+    def _load_template(self):
         f = open(self.template_file, 'r')
         try:
             template = f.read()
