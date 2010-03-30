@@ -52,7 +52,7 @@ class Template(object):
         section = r"%(otag)s\#([^\}]*)%(ctag)s\s*(.+?)\s*%(otag)s/\1%(ctag)s"
         self.section_re = re.compile(section % tags, re.M|re.S)
 
-        tag = r"%(otag)s(#|=|!|>|\{)?(.+?)\1?%(ctag)s+"
+        tag = r"%(otag)s(#|=|&|!|>|\{)?(.+?)\1?%(ctag)s+"
         self.tag_re = re.compile(tag % tags)
 
     def render_sections(self, template, context):
@@ -108,6 +108,7 @@ class Template(object):
         return ''
 
     @modifier('{')
+    @modifier('&')
     def render_unescaped(self, tag_name=None, context=None):
         """Render a tag without escaping it."""
         return unicode(context.get(tag_name, ''))
