@@ -3,6 +3,7 @@ import pystache
 
 from examples.simple import Simple
 from examples.complex_view import ComplexView
+from examples.lambdas import Lambdas
 
 class TestView(unittest.TestCase):
     def test_basic(self):
@@ -16,7 +17,7 @@ class TestView(unittest.TestCase):
     def test_template_load(self):
         view = Simple(thing='world')
         self.assertEquals(view.render(), "Hi world!")
-    
+
     def test_template_load_from_multiple_path(self):
         path = Simple.template_path
         Simple.template_path = ('examples/nowhere','examples',)
@@ -58,6 +59,21 @@ class TestView(unittest.TestCase):
     <li><a href="#Blue">blue</a></li>
   </ul>
 """)
+
+    def test_higher_order_replace(self):
+        view = Lambdas()
+        self.assertEquals(view.render(),
+                          'bar != bar. oh, it does!')
+
+    def test_higher_order_rot13(self):
+        view = Lambdas()
+        view.template = '{{#rot13}}abcdefghijklm{{/rot13}}'
+        self.assertEquals(view.render(), 'nopqrstuvwxyz')
+
+    def test_higher_order_lambda(self):
+        view = Lambdas()
+        view.template = '{{#sort}}zyxwvutsrqponmlkjihgfedcba{{/sort}}'
+        self.assertEquals(view.render(), 'abcdefghijklmnopqrstuvwxyz')
 
 
 if __name__ == '__main__':

@@ -67,7 +67,9 @@ class Template(object):
 
             it = context.get(section_name, None)
             replacer = ''
-            if it and not hasattr(it, '__iter__'):
+            if it and hasattr(it, '__call__'):
+                replacer = it(inner)
+            elif it and not hasattr(it, '__iter__'):
                 replacer = inner
             elif it:
                 insides = []
