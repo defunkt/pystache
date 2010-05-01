@@ -49,7 +49,7 @@ class Template(object):
         """Compiles our section and tag regular expressions."""
         tags = { 'otag': re.escape(self.otag), 'ctag': re.escape(self.ctag) }
 
-        section = r"%(otag)s\#([^\}]*)%(ctag)s\s*(.+?)\s*%(otag)s/\1%(ctag)s"
+        section = r"%(otag)s[\#|^]([^\}]*)%(ctag)s\s*(.+?)\s*%(otag)s/\1%(ctag)s"
         self.section_re = re.compile(section % tags, re.M|re.S)
 
         tag = r"%(otag)s(#|=|&|!|>|\{)?(.+?)\1?%(ctag)s+"
@@ -70,12 +70,15 @@ class Template(object):
             if it and hasattr(it, '__call__'):
                 replacer = it(inner)
             elif it and not hasattr(it, '__iter__'):
-                replacer = inner
+                if section[2] != '^':
+                    replacer = inner
             elif it:
                 insides = []
                 for item in it:
                     insides.append(self.render(inner, item))
                 replacer = ''.join(insides)
+            elif not it and section[2] == '^':
+                replacer = inner
 
             template = template.replace(section, replacer)
 

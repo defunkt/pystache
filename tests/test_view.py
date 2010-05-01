@@ -4,6 +4,7 @@ import pystache
 from examples.simple import Simple
 from examples.complex_view import ComplexView
 from examples.lambdas import Lambdas
+from examples.inverted import Inverted
 
 class TestView(unittest.TestCase):
     def test_basic(self):
@@ -74,6 +75,10 @@ class TestView(unittest.TestCase):
         view = Lambdas()
         view.template = '{{#sort}}zyxwvutsrqponmlkjihgfedcba{{/sort}}'
         self.assertEquals(view.render(), 'abcdefghijklmnopqrstuvwxyz')
+
+    def test_inverted(self):
+        view = Inverted()
+        self.assertEquals(view.render(), """one, two, three""")
 
 
 if __name__ == '__main__':
