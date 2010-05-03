@@ -1,6 +1,13 @@
 History
 =======
 
+0.3.0 (2010-05-03)
+------------------
+
+* View.template_path can now hold a list of path
+* Add {{& blah}} as an alias for {{{ blah }}}
+* Higher Order Sections
+* Inverted sections
 
 0.2.0 (2010-02-15)
 ------------------
