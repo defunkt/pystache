@@ -17,6 +17,13 @@ Documentation
 
 The different Mustache tags are documented at `mustache(5)`_.
 
+Install It
+==========
+
+::
+
+    easy_install pystache
+
 
 Use It
 ======
