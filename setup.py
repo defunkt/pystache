@@ -14,7 +14,7 @@ if sys.argv[-1] == "publish":
     sys.exit()
 
 setup(name='pystache',
-      version='0.3.0',
+      version='0.3.1',
       description='Mustache for Python',
       long_description=open('README.rst').read() + '\n\n' + open('HISTORY.rst').read(),
       author='Chris Wanstrath',
