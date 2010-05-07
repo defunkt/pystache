@@ -22,7 +22,7 @@ Install It
 
 ::
 
-    easy_install pystache
+    pip install pystache
 
 
 Use It
@@ -58,7 +58,7 @@ Test It
 
 nose_ works great! ::
 
-    easy_install nose
+    pip nose
     cd pystache
     nosetests
 
