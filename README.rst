@@ -58,7 +58,7 @@ Test It
 
 nose_ works great! ::
 
-    pip nose
+    pip install nose
     cd pystache
     nosetests
 
