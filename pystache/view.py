@@ -44,12 +44,6 @@ class View(object):
         if view.template_name:
             self.template_name = view.template_name
 
-    def __contains__(self, needle):
-        return hasattr(self, needle)
-
-    def __getitem__(self, attr):
-        return getattr(self, attr)()
-
     def load_template(self):
         if self.template:
             return self.template
@@ -96,6 +90,15 @@ class View(object):
             return '_' + match.group(0).lower()
 
         return re.sub('[A-Z]', repl, name)[1:]
+
+    def __contains__(self, needle):
+        return needle in self.context or hasattr(self, needle)
+
+    def __getitem__(self, attr):
+        val = self.get(attr, None)
+        if not val:
+            raise KeyError("No such key.")
+        return val
 
     def get(self, attr, default):
         attr = self.context.get(attr, getattr(self, attr, default))
