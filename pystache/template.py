@@ -16,6 +16,19 @@ def modifier(symbol):
         return func
     return set_modifier
 
+
+def get_or_attr(obj, name, default=None):
+    try:
+        return obj[name]
+    except KeyError:
+        return default
+    except:
+        try:
+            return getattr(obj, name)
+        except AttributeError:
+            return default
+
+
 class Template(object):
     # The regular expression used to find a #section
     section_re = None
@@ -65,7 +78,7 @@ class Template(object):
             section, section_name, inner = match.group(0, 1, 2)
             section_name = section_name.strip()
 
-            it = context.get(section_name, None)
+            it = get_or_attr(context, section_name, None)
             replacer = ''
             if it and hasattr(it, '__call__'):
                 replacer = it(inner)
@@ -102,7 +115,7 @@ class Template(object):
     @modifier(None)
     def render_tag(self, tag_name, context):
         """Given a tag name and context, finds, escapes, and renders the tag."""
-        raw = context.get(tag_name, '')
+        raw = get_or_attr(context, tag_name, '')
         if not raw and raw is not 0:
             return ''
         return cgi.escape(unicode(raw))
@@ -116,7 +129,7 @@ class Template(object):
     @modifier('&')
     def render_unescaped(self, tag_name=None, context=None):
         """Render a tag without escaping it."""
-        return unicode(context.get(tag_name, ''))
+        return unicode(get_or_attr(context, tag_name, ''))
 
     @modifier('>')
     def render_partial(self, tag_name=None, context=None):
