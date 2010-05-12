@@ -11,6 +11,7 @@ from examples.template_partial import TemplatePartial
 from examples.delimiters import Delimiters
 from examples.unicode_output import UnicodeOutput
 from examples.unicode_input import UnicodeInput
+from examples.nested_context import NestedContext
 
 class TestView(unittest.TestCase):
     def test_comments(self):
@@ -66,6 +67,9 @@ Again, Welcome!
 
 * Then, surprisingly, it worked the third time.
 """)
+
+    def test_nested_context(self):
+        self.assertEquals(NestedContext().render(), "one and foo")
 
 if __name__ == '__main__':
     unittest.main()
