@@ -80,7 +80,7 @@ class Template(object):
 
             it = get_or_attr(context, section_name, None)
             replacer = ''
-            if it and hasattr(it, '__call__'):
+            if it and callable(it):
                 replacer = it(inner)
             elif it and not hasattr(it, '__iter__'):
                 if section[2] != '^':
