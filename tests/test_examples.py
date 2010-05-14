@@ -69,7 +69,7 @@ Again, Welcome!
 """)
 
     def test_nested_context(self):
-        self.assertEquals(NestedContext().render(), "one and foo")
+        self.assertEquals(NestedContext().render(), "one and foo and two")
 
 if __name__ == '__main__':
     unittest.main()
