@@ -1,5 +1,6 @@
 import re
 import cgi
+import collections
 
 modifiers = {}
 def modifier(symbol):
@@ -80,7 +81,7 @@ class Template(object):
 
             it = get_or_attr(context, section_name, None)
             replacer = ''
-            if it and callable(it):
+            if it and isinstance(it, collections.Callable):
                 replacer = it(inner)
             elif it and not hasattr(it, '__iter__'):
                 if section[2] != '^':
