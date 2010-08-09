@@ -8,9 +8,8 @@ framework-agnostic way to render logic-free views.
 As ctemplates says, "It emphasizes separating logic from presentation:
 it is impossible to embed application logic in this template language."
 
-Pystache is a Python implementation of Mustache. It has been tested
-with Python 2.6.1.
-
+Pystache is a Python implementation of Mustache. Pystache requires
+Python 2.6.
 
 Documentation
 =============
