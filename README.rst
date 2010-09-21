@@ -74,5 +74,5 @@ Author
 .. _ctemplate: http://code.google.com/p/google-ctemplate/
 .. _et: http://www.ivan.fomichev.name/2008/05/erlang-template-engine-prototype.html
 .. _Mustache: http://defunkt.github.com/mustache/
-.. _mustache(5): http://defunkt.github.com/mustache/mustache.5.html
+.. _mustache(5): http://mustache.github.com/mustache.5.html
 .. _nose: http://somethingaboutorange.com/mrl/projects/nose/0.11.1/testing.html
