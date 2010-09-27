@@ -2,6 +2,15 @@ import re
 import cgi
 import collections
 
+try:
+    import collections.Callable
+    def check_callable(it):
+        return isinstance(it, collections.Callable)
+except ImportError:
+    def check_callable(it):
+        return hasattr(it, '__call__')
+    
+
 modifiers = {}
 def modifier(symbol):
     """Decorator for associating a function with a Mustache tag modifier.
@@ -81,7 +90,7 @@ class Template(object):
 
             it = get_or_attr(context, section_name, None)
             replacer = ''
-            if it and isinstance(it, collections.Callable):
+            if it and check_callable(it):
                 replacer = it(inner)
             elif it and not hasattr(it, '__iter__'):
                 if section[2] != '^':
