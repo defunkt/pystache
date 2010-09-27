@@ -47,8 +47,7 @@ class TestView(unittest.TestCase):
         self.assertEquals(view.render(), "Hi Chris!")
 
     def test_view_instances_as_attributes(self):
-        other = Simple(name='chris')
-        other.template = '{{name}}'
+        other = Simple(name='chris', template='{{name}}')
         view = Simple()
         view.thing = other
         self.assertEquals(view.render(), "Hi chris!")
@@ -67,13 +66,11 @@ class TestView(unittest.TestCase):
                           'bar != bar. oh, it does!')
 
     def test_higher_order_rot13(self):
-        view = Lambdas()
-        view.template = '{{#rot13}}abcdefghijklm{{/rot13}}'
+        view = Lambdas(template='{{#rot13}}abcdefghijklm{{/rot13}}')
         self.assertEquals(view.render(), 'nopqrstuvwxyz')
 
     def test_higher_order_lambda(self):
-        view = Lambdas()
-        view.template = '{{#sort}}zyxwvutsrqponmlkjihgfedcba{{/sort}}'
+        view = Lambdas(template='{{#sort}}zyxwvutsrqponmlkjihgfedcba{{/sort}}')
         self.assertEquals(view.render(), 'abcdefghijklmnopqrstuvwxyz')
 
     def test_inverted(self):
