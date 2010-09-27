@@ -12,6 +12,7 @@ from examples.delimiters import Delimiters
 from examples.unicode_output import UnicodeOutput
 from examples.unicode_input import UnicodeInput
 from examples.nested_context import NestedContext
+from examples.partial_section import PartialSection
 
 class TestView(unittest.TestCase):
     def test_comments(self):
@@ -55,7 +56,8 @@ Again, Welcome!""")
         self.assertEquals(view.render(), """Welcome
 -------
 
-Again, Welcome!
+## Again, Welcome! ##
+
 """)
 
 
@@ -67,6 +69,11 @@ Again, Welcome!
 
 * Then, surprisingly, it worked the third time.
 """)
+
+    def test_partial_sections(self):
+        view = PartialSection()
+        self.assertEquals(view.render(), """Welcome, we're loading partials
+This is item aThis is item b""")
 
     def test_nested_context(self):
         self.assertEquals(NestedContext().render(), "one and foo and two")
