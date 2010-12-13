@@ -75,6 +75,11 @@ class TestView(unittest.TestCase):
         view = Lambdas()
         view.template = '{{#sort}}zyxwvutsrqponmlkjihgfedcba{{/sort}}'
         self.assertEquals(view.render(), 'abcdefghijklmnopqrstuvwxyz')
+        
+    def test_partials_with_lambdas(self):
+        view = Lambdas()
+        view.template = '{{>partial_with_lambda}}'
+        self.assertEquals(view.render(), 'nopqrstuvwxyz')
 
     def test_inverted(self):
         view = Inverted()

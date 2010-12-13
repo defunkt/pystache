@@ -19,6 +19,9 @@ def replace(subject, this='foo', with_this='bar'):
 
 class Lambdas(pystache.View):
     template_path = 'examples'
+    
+    def test(self):
+        return 'laaa'
 
     def replace_foo_with_bar(self, text=None):
         return replace

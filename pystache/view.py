@@ -1,6 +1,7 @@
 from pystache import Template
 import os.path
 import re
+from types import *
 
 class View(object):
     # Path where this view's template(s) live
@@ -103,7 +104,7 @@ class View(object):
     def get(self, attr, default):
         attr = self.context.get(attr, getattr(self, attr, default))
 
-        if hasattr(attr, '__call__'):
+        if hasattr(attr, '__call__') and type(attr) is UnboundMethodType:
             return attr()
         else:
             return attr
