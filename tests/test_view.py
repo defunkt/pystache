@@ -76,10 +76,15 @@ class TestView(unittest.TestCase):
         view.template = '{{#sort}}zyxwvutsrqponmlkjihgfedcba{{/sort}}'
         self.assertEquals(view.render(), 'abcdefghijklmnopqrstuvwxyz')
         
-    def test_partials_with_lambdas(self):
+    def test_partials_with_lambda(self):
         view = Lambdas()
         view.template = '{{>partial_with_lambda}}'
         self.assertEquals(view.render(), 'nopqrstuvwxyz')
+        
+    def test_hierarchical_partials_with_lambdas(self):
+        view = Lambdas()
+        view.template = '{{>partial_with_partial_and_lambda}}'
+        self.assertEquals(view.render(), 'nopqrstuvwxyznopqrstuvwxyz')
 
     def test_inverted(self):
         view = Inverted()
