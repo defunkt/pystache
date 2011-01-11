@@ -61,13 +61,20 @@ class Template(object):
             it = view.get(section_name, None)
             replacer = ''
             
+            # Callable
+            if it and isinstance(it, collections.Callable):
+                replacer = it(inner)
             # Dictionary
-            if it and hasattr(it, 'keys') and hasattr(it, '__getitem__'):
+            elif it and hasattr(it, 'keys') and hasattr(it, '__getitem__'):
                 if section[2] != '^':
                     replacer = self._render_dictionary(inner, it)
+            # Lists
             elif it and hasattr(it, '__iter__'):
                 if section[2] != '^':
-                    replacer = self._render_list(inner, it)
+                    replacer = self._render_list(inner, it)            
+            # Falsey and Negated or Truthy and Not Negated
+            elif (not it and section[2] == '^') or (it and section[2] != '^'):
+                replacer = inner
             
             template = template.replace(section, replacer)
         

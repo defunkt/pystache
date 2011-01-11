@@ -18,3 +18,6 @@ class ComplexView(pystache.View):
 
     def empty(self):
         return len(self.item()) == 0
+        
+    def empty_list(self):
+        return [];
