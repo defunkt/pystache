@@ -8,3 +8,6 @@ class TemplatePartial(pystache.View):
 
     def title_bars(self):
         return '-' * len(self.title())
+
+    def looping(self):
+        return [{'item': 'one'}, {'item': 'two'}, {'item': 'three'}]

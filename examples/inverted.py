@@ -11,3 +11,9 @@ class Inverted(pystache.View):
 
     def two(self):
         return 'two'
+
+    def empty_list(self):
+        return []
+        
+    def populated_list(self):
+        return ['some_value']

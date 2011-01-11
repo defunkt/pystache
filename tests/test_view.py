@@ -88,7 +88,7 @@ class TestView(unittest.TestCase):
 
     def test_inverted(self):
         view = Inverted()
-        self.assertEquals(view.render(), """one, two, three""")
+        self.assertEquals(view.render(), """one, two, three, empty list""")
 
 
 if __name__ == '__main__':
