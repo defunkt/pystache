@@ -43,10 +43,34 @@ class Template(object):
             'ctag': re.escape(self.ctag)
         }
 
+        section = r"%(otag)s[\#|^]([^\}]*)%(ctag)s\s*(.+?\s*)%(otag)s/\1%(ctag)s"
+        self.section_re = re.compile(section % tags, re.M|re.S)
+
         tag = r"%(otag)s(#|=|&|!|>|\{)?(.+?)\1?%(ctag)s+"
         self.tag_re = re.compile(tag % tags)
     
     def _render_sections(self, template, view):
+        while True:
+            match = self.section_re.search(template)
+            if match is None:
+                break
+
+            section, section_name, inner = match.group(0, 1, 2)
+            section_name = section_name.strip()
+            
+            it = view.get(section_name, None)
+            replacer = ''
+            
+            # Dictionary
+            if it and hasattr(it, 'keys') and hasattr(it, '__getitem__'):
+                if section[2] != '^':
+                    replacer = self._render_dictionary(inner, it)
+            elif it and hasattr(it, '__iter__'):
+                if section[2] != '^':
+                    replacer = self._render_list(inner, it)
+            
+            template = template.replace(section, replacer)
+        
         return template
     
     def _render_tags(self, template, view):
@@ -63,7 +87,24 @@ class Template(object):
         
         return template
 
-
+    def _render_dictionary(self, template, context):
+        from view import View
+        
+        view = View(context=context)
+        view.parent = self.view
+        return Template(template, view).render()
+    
+    def _render_list(self, template, listing):
+        from view import View
+        
+        insides = []
+        for item in listing:
+            view = View(context=item)
+            view.parent = self.view
+            insides.append(Template(template, view).render())
+            
+        return ''.join(insides)
+    
     @modifier(None)
     def _render_tag(self, tag_name, view):
         raw = view.get(tag_name, '')

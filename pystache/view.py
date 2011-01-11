@@ -11,4 +11,15 @@ class View(object):
         self.context.update(**kwargs)
         
     def get(self, attr, default=None):
-        return self.context.get(attr, getattr(self, attr, default))
+        attr = self.context.get(attr, getattr(self, attr, self._get_from_parent(attr, default)))
+        
+        if hasattr(attr, '__call__') and type(attr) is UnboundMethodType:
+            return attr()
+        else:
+            return attr
+    
+    def _get_from_parent(self, attr, default=None):
+        if hasattr(self, 'parent'):
+            return self.parent.get(attr, default)
+        else:
+            return default
