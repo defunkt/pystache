@@ -99,19 +99,15 @@ class Template(object):
         from view import View
         
         view = View(context=context)
+        view.template_path = self.view.template_path
+        view.template_encoding = self.view.template_encoding
         view.parent = self.view
         return Template(template, view).render()
     
-    def _render_list(self, template, listing):
-        from view import View
-        
+    def _render_list(self, template, listing):        
         insides = []
         for item in listing:
-            view = View(context=item)
-            view.template_path = self.view.template_path
-            view.template_encoding = self.view.template_encoding
-            view.parent = self.view
-            insides.append(Template(template, view).render())
+            insides.append(self._render_dictionary(template, item))
             
         return ''.join(insides)
     

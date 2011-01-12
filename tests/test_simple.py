@@ -31,7 +31,7 @@ class TestSimple(unittest.TestCase):
         view = TemplatePartial()
         self.assertEquals(pystache.Template('{{>inner_partial}}', view).render(), 'Again, Welcome!')
         
-        self.assertEquals(pystache.Template('{{#looping}}{{>inner_partial}} {{/looping}}', view).render(), '''Again, Welcome! Again, Welcome! Again, Welcome!''')
+        self.assertEquals(pystache.Template('{{#looping}}{{>inner_partial}} {{/looping}}', view).render(), '''Again, Welcome! Again, Welcome! Again, Welcome! ''')
         
     def test_non_existent_value_renders_blank(self):
         view = Simple()

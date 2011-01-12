@@ -20,6 +20,8 @@ class View(object):
         attr = self.context.get(attr, getattr(self, attr, self._get_from_parent(attr, default)))
         if hasattr(attr, '__call__') and type(attr) is UnboundMethodType:
             return attr()
+        if hasattr(attr, 'render'):
+            return attr.render(encoding=self.template_encoding)
         else:
             return attr
     
