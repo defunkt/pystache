@@ -3,13 +3,12 @@ import pystache
 from examples.nested_context import NestedContext
 from examples.complex_view import ComplexView
 from examples.lambdas import Lambdas
+from examples.template_partial import TemplatePartial
 
 class TestSimple(unittest.TestCase):
     
     def test_simple_render(self):
-        tmpl = '{{derp}}'
-        
-        self.assertEqual('herp', pystache.Template(tmpl, {'derp': 'herp'}).render())
+        self.assertEqual('herp', pystache.Template('{{derp}}', {'derp': 'herp'}).render())
         
     def test_nested_context(self):
         view = NestedContext()
@@ -26,3 +25,9 @@ class TestSimple(unittest.TestCase):
     def test_callables(self):
         view = Lambdas()
         self.assertEquals(pystache.Template('{{#replace_foo_with_bar}}foo != bar. oh, it does!{{/replace_foo_with_bar}}', view).render(), 'bar != bar. oh, it does!')
+        
+    def test_rendering_partial(self):
+        view = TemplatePartial()
+        self.assertEquals(pystache.Template('{{>inner_partial}}', view).render(), 'Again, Welcome!')
+        
+        self.assertEquals(pystache.Template('{{#looping}}{{>inner_partial}} {{/looping}}', view).render(), 'Again, Welcome! Again, Welcome! Again, Welcome! ')

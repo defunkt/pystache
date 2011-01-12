@@ -1,6 +1,7 @@
 import re
 import cgi
 import collections
+import os
 
 modifiers = {}
 def modifier(symbol):
@@ -107,6 +108,7 @@ class Template(object):
         insides = []
         for item in listing:
             view = View(context=item)
+            view.template_path = self.view.template_path
             view.parent = self.view
             insides.append(Template(template, view).render())
             
@@ -117,6 +119,12 @@ class Template(object):
         raw = view.get(tag_name, '')
         
         return cgi.escape(unicode(raw))
+    
+    @modifier('>')
+    def _render_partial(self, template_name, view):
+        # mothereffin template loader goes here
+        template = view.get_template(template_name)
+        return Template(template, view).render()
 
     def render(self):
         template = self._render_sections(self.template, self.view)
