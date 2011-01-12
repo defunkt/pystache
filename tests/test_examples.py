@@ -71,5 +71,10 @@ Again, Welcome!
     def test_nested_context(self):
         self.assertEquals(NestedContext().render(), "one and foo and two")
 
+    def test_nested_context_is_available_in_view(self):
+        view = NestedContext()
+        view.template = '{{#herp}}{{#derp}}{{nested_context_in_view}}{{/derp}}{{/herp}}'
+        self.assertEquals(view.render(), 'it works!')
+
 if __name__ == '__main__':
     unittest.main()

@@ -2,6 +2,7 @@ import re
 import cgi
 import collections
 import os
+import copy
 
 modifiers = {}
 def modifier(symbol):
@@ -96,15 +97,14 @@ class Template(object):
         return template
 
     def _render_dictionary(self, template, context):
-        from view import View
-        
-        view = View(context=context)
-        view.template_path = self.view.template_path
-        view.template_encoding = self.view.template_encoding
-        view.parent = self.view
-        return Template(template, view).render()
+        original_context = copy.copy(self.view.context)
+        self.view.context.update(context)
+        out = Template(template, self.view).render()
+        self.view.context = original_context
+                
+        return out
     
-    def _render_list(self, template, listing):        
+    def _render_list(self, template, listing):
         insides = []
         for item in listing:
             insides.append(self._render_dictionary(template, item))

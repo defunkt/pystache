@@ -17,19 +17,13 @@ class View(object):
         self.context.update(**kwargs)
         
     def get(self, attr, default=None):
-        attr = self.context.get(attr, getattr(self, attr, self._get_from_parent(attr, default)))
+        attr = self.context.get(attr, getattr(self, attr, default))
         if hasattr(attr, '__call__') and type(attr) is UnboundMethodType:
             return attr()
         if hasattr(attr, 'render'):
             return attr.render(encoding=self.template_encoding)
         else:
             return attr
-    
-    def _get_from_parent(self, attr, default=None):
-        if hasattr(self, 'parent'):
-            return self.parent.get(attr, default)
-        else:
-            return default
     
     def get_template(self, template_name):
         if not self.template:
@@ -56,3 +50,15 @@ class View(object):
 
     def render(self, encoding=None):        
         return Template(self.get_template(self.template_name), self).render(encoding=encoding)
+
+    def __contains__(self, needle):
+        return needle in self.context or hasattr(self, needle)
+
+    def __getitem__(self, attr):
+        val = self.get(attr, None)
+        if not val:
+            raise KeyError("No such key.")
+        return val
+            
+    def __str__(self):
+        return self.render()
