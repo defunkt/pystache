@@ -6,11 +6,17 @@ class Loader(object):
     template_path = '.'
     template_encoding = None
     
-    def load_template(self, template_name, template_dirs=None):
+    def load_template(self, template_name, template_dirs=None, encoding=None, extension=None):
         '''Returns the template string from a file or throws IOError if it non existent'''
         if None == template_dirs:
             template_dirs = self.template_path
-    
+        
+        if encoding is not None:
+            self.template_encoding = encoding
+        
+        if extension is not None:
+            self.template_extension = extension
+        
         file_name = template_name + '.' + self.template_extension
 
         # Given a single directory we'll load from it

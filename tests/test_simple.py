@@ -4,6 +4,7 @@ from examples.nested_context import NestedContext
 from examples.complex_view import ComplexView
 from examples.lambdas import Lambdas
 from examples.template_partial import TemplatePartial
+from examples.simple import Simple
 
 class TestSimple(unittest.TestCase):
     
@@ -30,4 +31,19 @@ class TestSimple(unittest.TestCase):
         view = TemplatePartial()
         self.assertEquals(pystache.Template('{{>inner_partial}}', view).render(), 'Again, Welcome!')
         
-        self.assertEquals(pystache.Template('{{#looping}}{{>inner_partial}} {{/looping}}', view).render(), 'Again, Welcome! Again, Welcome! Again, Welcome! ')
+        self.assertEquals(pystache.Template('{{#looping}}{{>inner_partial}} {{/looping}}', view).render(), '''Again, Welcome! Again, Welcome! Again, Welcome!''')
+        
+    def test_non_existent_value_renders_blank(self):
+        view = Simple()
+        
+        self.assertEquals(pystache.Template('{{not_set}} {{blank}}', view).render(), ' ')
+        
+        
+    def test_template_partial_extension(self):
+        view = TemplatePartial()
+        view.template_extension = 'txt'
+        self.assertEquals(view.render(), """Welcome
+-------
+
+Again, Welcome!
+""")

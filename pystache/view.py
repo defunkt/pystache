@@ -8,6 +8,8 @@ class View(object):
     template_name = None
     template_path = None
     template = None
+    template_encoding = None
+    template_extension = None
     
     def __init__(self, template=None, context=None, **kwargs):
         self.template = template
@@ -16,7 +18,6 @@ class View(object):
         
     def get(self, attr, default=None):
         attr = self.context.get(attr, getattr(self, attr, self._get_from_parent(attr, default)))
-        
         if hasattr(attr, '__call__') and type(attr) is UnboundMethodType:
             return attr()
         else:
@@ -32,7 +33,7 @@ class View(object):
         if not self.template:
             from pystache import Loader
             template_name = self._get_template_name(template_name)
-            self.template = Loader().load_template(template_name, self.template_path)
+            self.template = Loader().load_template(template_name, self.template_path, encoding=self.template_encoding, extension=self.template_extension)
         
         return self.template
 
@@ -41,16 +42,15 @@ class View(object):
         Takes a string but defaults to using the current class' name or
         the `template_name` attribute
         """
-        if self.template_name:
-            return self.template_name
+        if template_name:
+            return template_name
 
-        if not template_name:
-            template_name = self.__class__.__name__
+        template_name = self.__class__.__name__
 
         def repl(match):
             return '_' + match.group(0).lower()
 
         return re.sub('[A-Z]', repl, template_name)[1:]
 
-    def render(self):        
-        return Template(self.get_template(self.template_name), self).render()
+    def render(self, encoding=None):        
+        return Template(self.get_template(self.template_name), self).render(encoding=encoding)

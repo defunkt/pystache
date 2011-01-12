@@ -109,6 +109,7 @@ class Template(object):
         for item in listing:
             view = View(context=item)
             view.template_path = self.view.template_path
+            view.template_encoding = self.view.template_encoding
             view.parent = self.view
             insides.append(Template(template, view).render())
             
@@ -118,16 +119,41 @@ class Template(object):
     def _render_tag(self, tag_name, view):
         raw = view.get(tag_name, '')
         
+        # For methods with no return value
+        if not raw and raw is not 0:
+            return ''
+        
         return cgi.escape(unicode(raw))
+    
+    @modifier('!')
+    def _render_comment(self, tag_name, view):
+        return ''
     
     @modifier('>')
     def _render_partial(self, template_name, view):
-        # mothereffin template loader goes here
-        template = view.get_template(template_name)
+        from pystache import Loader
+        template = Loader().load_template(template_name, view.template_path, encoding=view.template_encoding)
+
         return Template(template, view).render()
 
-    def render(self):
+    @modifier('=')
+    def _change_delimiter(self, tag_name, view):
+        """Changes the Mustache delimiter."""
+        self.otag, self.ctag = tag_name.split(' ')
+        self._compile_regexps()
+        return ''
+    
+    @modifier('{')
+    @modifier('&')
+    def render_unescaped(self, tag_name, view):
+        """Render a tag without escaping it."""
+        return unicode(view.get(tag_name, ''))
+    
+    def render(self, encoding=None):
         template = self._render_sections(self.template, self.view)
         result = self._render_tags(template, self.view)
+        
+        if encoding is not None:
+            result = result.encode(encoding)
         
         return result
