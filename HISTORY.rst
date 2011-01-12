@@ -1,6 +1,12 @@
 History
 =======
 
+0.4.0 (2011-01-12)
+------------------
+* Add support for nested contexts (within template and view)
+* Add support for inverted lists
+* Decoupled template loading
+
 0.3.1 (2010-05-07)
 ------------------
 
