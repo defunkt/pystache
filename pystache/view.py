@@ -9,7 +9,7 @@ class View(object):
     template_path = None
     template = None
     template_encoding = None
-    template_extension = None
+    template_extension = 'mustache'
     
     def __init__(self, template=None, context=None, **kwargs):
         self.template = template
