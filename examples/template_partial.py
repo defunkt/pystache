@@ -11,3 +11,6 @@ class TemplatePartial(pystache.View):
 
     def looping(self):
         return [{'item': 'one'}, {'item': 'two'}, {'item': 'three'}]
+        
+    def thing(self):
+        return self['prop']

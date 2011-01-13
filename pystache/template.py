@@ -19,16 +19,21 @@ def modifier(symbol):
         return func
     return set_modifier
 
-def get_or_attr(obj, name, default=None):
-    try:
-        return obj[name]
-    except KeyError:
+def get_or_attr(context_list, name, default=None):
+    if not context_list:
         return default
-    except:
+
+    for obj in context_list:
         try:
-            return getattr(obj, name)
-        except AttributeError:
-            return default
+            return obj[name]
+        except KeyError:
+            pass
+        except:
+            try:
+                return getattr(obj, name)
+            except AttributeError:
+                pass
+    return default
 
 class Template(object):
     
@@ -47,7 +52,7 @@ class Template(object):
             context.update(kwargs)
             
         self.view = context if isinstance(context, View) else View(context=context)
-        
+        self.context_list = [self.view]
         self._compile_regexps()
     
     def _compile_regexps(self):
@@ -71,7 +76,7 @@ class Template(object):
             section, section_name, inner = match.group(0, 1, 2)
             section_name = section_name.strip()
             
-            it = get_or_attr(view, section_name, None)
+            it = get_or_attr(self.context_list, section_name, None)
             replacer = ''
             
             # Callable
@@ -84,7 +89,7 @@ class Template(object):
             # Lists
             elif it and hasattr(it, '__iter__'):
                 if section[2] != '^':
-                    replacer = self._render_list(inner, it)            
+                    replacer = self._render_list(inner, it)
             # Falsey and Negated or Truthy and Not Negated
             elif (not it and section[2] == '^') or (it and section[2] != '^'):
                 replacer = inner
@@ -108,11 +113,11 @@ class Template(object):
         return template
 
     def _render_dictionary(self, template, context):
-        original_context = copy.copy(self.view.context)
-        self.view.context.update(context)
-        out = Template(template, self.view).render()
-        self.view.context = original_context
-                
+        template = Template(template, self.view)
+        self.context_list.insert(0, context)
+        template.context_list = self.context_list
+        out = template.render()
+        self.context_list.pop(0)
         return out
     
     def _render_list(self, template, listing):
@@ -124,7 +129,7 @@ class Template(object):
     
     @modifier(None)
     def _render_tag(self, tag_name, view):
-        raw = get_or_attr(view, tag_name, '')
+        raw = get_or_attr(self.context_list, tag_name, '')
         
         # For methods with no return value
         if not raw and raw is not 0:

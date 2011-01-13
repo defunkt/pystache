@@ -76,5 +76,11 @@ Again, Welcome!
         view.template = '{{#herp}}{{#derp}}{{nested_context_in_view}}{{/derp}}{{/herp}}'
         self.assertEquals(view.render(), 'it works!')
 
+    def test_partial_in_partial_has_access_to_grand_parent_context(self):
+        view = TemplatePartial()
+        view.context = {'prop': 'derp'}
+        view.template = '''{{>partial_in_partial}}'''
+        self.assertEquals(view.render(), 'Hi derp!')
+
 if __name__ == '__main__':
     unittest.main()
