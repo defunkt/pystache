@@ -19,6 +19,17 @@ def modifier(symbol):
         return func
     return set_modifier
 
+def get_or_attr(obj, name, default=None):
+    try:
+        return obj[name]
+    except KeyError:
+        return default
+    except:
+        try:
+            return getattr(obj, name)
+        except AttributeError:
+            return default
+
 class Template(object):
     
     tag_re = None
@@ -60,7 +71,7 @@ class Template(object):
             section, section_name, inner = match.group(0, 1, 2)
             section_name = section_name.strip()
             
-            it = view.get(section_name, None)
+            it = get_or_attr(view, section_name, None)
             replacer = ''
             
             # Callable
@@ -113,7 +124,7 @@ class Template(object):
     
     @modifier(None)
     def _render_tag(self, tag_name, view):
-        raw = view.get(tag_name, '')
+        raw = get_or_attr(view, tag_name, '')
         
         # For methods with no return value
         if not raw and raw is not 0:

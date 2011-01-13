@@ -56,7 +56,7 @@ class View(object):
 
     def __getitem__(self, attr):
         val = self.get(attr, None)
-        if not val:
+        if not val and val is not 0:
             raise KeyError("No such key.")
         return val
             
