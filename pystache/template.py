@@ -98,7 +98,7 @@ class Template(object):
         
         return template
     
-    def _render_tags(self, template, view):
+    def _render_tags(self, template):
         while True:
             match = self.tag_re.search(template)
             if match is None:
@@ -107,7 +107,7 @@ class Template(object):
             tag, tag_type, tag_name = match.group(0, 1, 2)
             tag_name = tag_name.strip()
             func = modifiers[tag_type]
-            replacement = func(self, tag_name, view)
+            replacement = func(self, tag_name)
             template = template.replace(tag, replacement)
         
         return template
@@ -128,7 +128,7 @@ class Template(object):
         return ''.join(insides)
     
     @modifier(None)
-    def _render_tag(self, tag_name, view):
+    def _render_tag(self, tag_name):
         raw = get_or_attr(self.context_list, tag_name, '')
         
         # For methods with no return value
@@ -138,18 +138,20 @@ class Template(object):
         return cgi.escape(unicode(raw))
     
     @modifier('!')
-    def _render_comment(self, tag_name, view):
+    def _render_comment(self, tag_name):
         return ''
     
     @modifier('>')
-    def _render_partial(self, template_name, view):
+    def _render_partial(self, template_name):
         from pystache import Loader
-        template = Loader().load_template(template_name, view.template_path, encoding=view.template_encoding)
+        markup = Loader().load_template(template_name, self.view.template_path, encoding=self.view.template_encoding)
 
-        return Template(template, view).render()
+        template = Template(markup, self.view)
+        template.context_list = self.context_list
+        return template.render()
 
     @modifier('=')
-    def _change_delimiter(self, tag_name, view):
+    def _change_delimiter(self, tag_name):
         """Changes the Mustache delimiter."""
         self.otag, self.ctag = tag_name.split(' ')
         self._compile_regexps()
@@ -157,13 +159,13 @@ class Template(object):
     
     @modifier('{')
     @modifier('&')
-    def render_unescaped(self, tag_name, view):
+    def render_unescaped(self, tag_name):
         """Render a tag without escaping it."""
-        return unicode(view.get(tag_name, ''))
+        return unicode(self.view.get(tag_name, ''))
     
     def render(self, encoding=None):
         template = self._render_sections(self.template, self.view)
-        result = self._render_tags(template, self.view)
+        result = self._render_tags(template)
         
         if encoding is not None:
             result = result.encode(encoding)
