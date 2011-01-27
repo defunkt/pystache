@@ -61,6 +61,9 @@ class Template(object):
             it = self.view.get(section_name, None)
             replacer = ''
 
+            # Exception
+            if it and isinstance(it, Exception):
+                raise it
             # Callable
             if it and isinstance(it, collections.Callable):
                 replacer = it(inner)
