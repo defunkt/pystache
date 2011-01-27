@@ -74,8 +74,18 @@ class View(object):
         val = self.get(attr, None)
 
         if not val and val is not 0:
-            raise KeyError("No such key.")
-        return val    
+            raise KeyError("No such key '%s'." % attr)
+        return val
+    
+    def __getattr__(self, attr):
+        if attr == 'context':
+            context = {}
+            for d in self.context_list:
+                context.update(d)
+            return context
+        
+        raise AttributeError("No such attribute '%s'." % attr)
+            
     
     def __str__(self):
         return self.render()
