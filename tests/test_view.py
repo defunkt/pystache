@@ -97,12 +97,6 @@ class TestView(unittest.TestCase):
         view.template = "{{#parent}}{{#children}}{{this}}{{/children}}{{/parent}}"
         
         self.assertEquals(view.render(), 'derp')
-
-    def test_context_returns_a_flattened_dict(self):
-        view = Simple()
-        view.context_list = [{'one':'1'}, {'two':'2'}]
-        
-        self.assertEqual(view.context, {'one': '1', 'two': '2'})
         
 if __name__ == '__main__':
     unittest.main()
