@@ -63,21 +63,11 @@ class TestPystache(unittest.TestCase):
         self.assertEquals(ret, u'Name: Henri Poincaré; Age: 156')
 
     def test_sections(self):
-        template = """
-<ul>
-  {{#users}}
-    <li>{{name}}</li>
-  {{/users}}
-</ul>
-"""
+        template = """<ul>{{#users}}<li>{{name}}</li>{{/users}}</ul>"""
 
         context = { 'users': [ {'name': 'Chris'}, {'name': 'Tom'}, {'name': 'PJ'} ] }
         ret = pystache.render(template, context)
-        self.assertEquals(ret, """
-<ul>
-  <li>Chris</li><li>Tom</li><li>PJ</li>
-</ul>
-""")
+        self.assertEquals(ret, """<ul><li>Chris</li><li>Tom</li><li>PJ</li></ul>""")
 
 if __name__ == '__main__':
     unittest.main()

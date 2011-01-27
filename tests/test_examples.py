@@ -19,9 +19,7 @@ class TestView(unittest.TestCase):
 """)
 
     def test_double_section(self):
-        self.assertEquals(DoubleSection().render(), """* first
-* second
-* third""")
+        self.assertEquals(DoubleSection().render(),"""* first\n* second\n* third""")
 
     def test_unicode_output(self):
         self.assertEquals(UnicodeOutput().render(), u'<p>Name: Henri Poincaré</p>')
@@ -77,8 +75,7 @@ Again, Welcome!
         self.assertEquals(view.render(), 'it works!')
 
     def test_partial_in_partial_has_access_to_grand_parent_context(self):
-        view = TemplatePartial()
-        view.context = {'prop': 'derp'}
+        view = TemplatePartial(context = {'prop': 'derp'})
         view.template = '''{{>partial_in_partial}}'''
         self.assertEquals(view.render(), 'Hi derp!')
 

@@ -3,6 +3,22 @@ import os.path
 import re
 from types import *
 
+def get_or_attr(context_list, name, default=None):
+    if not context_list:
+        return default
+
+    for obj in context_list:
+        try:
+            return obj[name]
+        except KeyError:
+            pass
+        except:
+            try:
+                return getattr(obj, name)
+            except AttributeError:
+                pass
+    return default
+
 class View(object):
     
     template_name = None
@@ -13,15 +29,15 @@ class View(object):
     
     def __init__(self, template=None, context=None, **kwargs):
         self.template = template
-        self.context = context or {}
-        self.context.update(**kwargs)
+        context = context or {}
+        context.update(**kwargs)
+        
+        self.context_list = [context]
         
     def get(self, attr, default=None):
-        attr = self.context.get(attr, getattr(self, attr, default))
+        attr = get_or_attr(self.context_list, attr, getattr(self, attr, default))
         if hasattr(attr, '__call__') and type(attr) is UnboundMethodType:
             return attr()
-        if hasattr(attr, 'render'):
-            return attr.render(encoding=self.template_encoding)
         else:
             return attr
     
@@ -48,7 +64,7 @@ class View(object):
 
         return re.sub('[A-Z]', repl, template_name)[1:]
 
-    def render(self, encoding=None):        
+    def render(self, encoding=None):
         return Template(self.get_template(self.template_name), self).render(encoding=encoding)
 
     def __contains__(self, needle):
@@ -56,9 +72,10 @@ class View(object):
 
     def __getitem__(self, attr):
         val = self.get(attr, None)
+
         if not val and val is not 0:
             raise KeyError("No such key.")
-        return val
-            
+        return val    
+    
     def __str__(self):
         return self.render()

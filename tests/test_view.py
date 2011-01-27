@@ -54,12 +54,8 @@ class TestView(unittest.TestCase):
         self.assertEquals(view.render(), "Hi chris!")
 
     def test_complex(self):
-        self.assertEquals(ComplexView().render(), """<h1>Colors</h1>
-<ul>
-  <li><strong>red</strong></li>\n    \n    <li><a href="#Green">green</a></li>
-    <li><a href="#Blue">blue</a></li>
-  </ul>
-""")
+        self.assertEquals(ComplexView().render(), 
+            """<h1>Colors</h1><ul><li><strong>red</strong></li><li><a href="#Green">green</a></li><li><a href="#Blue">blue</a></li></ul>""")
 
     def test_higher_order_replace(self):
         view = Lambdas()
@@ -90,6 +86,11 @@ class TestView(unittest.TestCase):
         view = Inverted()
         self.assertEquals(view.render(), """one, two, three, empty list""")
 
+    # def test_accessing_properties_on_parent_view(self):
+    #     view = Simple(context={'child':child})
+    #     view.template = '{{#child}}{{#t}}{{thing}}{{/t}}{{/child}}'
+    #     
+    #     self.assertEquals(view.render(), 'pizza1')
 
 if __name__ == '__main__':
     unittest.main()

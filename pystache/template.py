@@ -19,21 +19,21 @@ def modifier(symbol):
         return func
     return set_modifier
 
-def get_or_attr(context_list, name, default=None):
-    if not context_list:
-        return default
-
-    for obj in context_list:
-        try:
-            return obj[name]
-        except KeyError:
-            pass
-        except:
-            try:
-                return getattr(obj, name)
-            except AttributeError:
-                pass
-    return default
+# def get_or_attr(context_list, name, default=None):
+#     if not context_list:
+#         return default
+# 
+#     for obj in context_list:
+#         try:
+#             return obj[name]
+#         except KeyError:
+#             pass
+#         except:
+#             try:
+#                 return getattr(obj, name)
+#             except AttributeError:
+#                 pass
+#     return default
 
 class Template(object):
     
@@ -52,7 +52,6 @@ class Template(object):
             context.update(kwargs)
             
         self.view = context if isinstance(context, View) else View(context=context)
-        self.context_list = [self.view]
         self._compile_regexps()
     
     def _compile_regexps(self):
@@ -76,7 +75,7 @@ class Template(object):
             section, section_name, inner = match.group(0, 1, 2)
             section_name = section_name.strip()
             
-            it = get_or_attr(self.context_list, section_name, None)
+            it = self.view.get(section_name, None)
             replacer = ''
             
             # Callable
@@ -113,11 +112,10 @@ class Template(object):
         return template
 
     def _render_dictionary(self, template, context):
+        self.view.context_list.insert(0, context)
         template = Template(template, self.view)
-        self.context_list.insert(0, context)
-        template.context_list = self.context_list
         out = template.render()
-        self.context_list.pop(0)
+        self.view.context_list.pop(0)
         return out
     
     def _render_list(self, template, listing):
@@ -129,7 +127,7 @@ class Template(object):
     
     @modifier(None)
     def _render_tag(self, tag_name):
-        raw = get_or_attr(self.context_list, tag_name, '')
+        raw = self.view.get(tag_name, '')
         
         # For methods with no return value
         if not raw and raw is not 0:
@@ -147,7 +145,7 @@ class Template(object):
         markup = Loader().load_template(template_name, self.view.template_path, encoding=self.view.template_encoding)
 
         template = Template(markup, self.view)
-        template.context_list = self.context_list
+        # template.context_list = self.context_list
         return template.render()
 
     @modifier('=')
