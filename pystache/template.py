@@ -19,22 +19,6 @@ def modifier(symbol):
         return func
     return set_modifier
 
-# def get_or_attr(context_list, name, default=None):
-#     if not context_list:
-#         return default
-# 
-#     for obj in context_list:
-#         try:
-#             return obj[name]
-#         except KeyError:
-#             pass
-#         except:
-#             try:
-#                 return getattr(obj, name)
-#             except AttributeError:
-#                 pass
-#     return default
-
 class Template(object):
     
     tag_re = None
@@ -143,9 +127,7 @@ class Template(object):
     def _render_partial(self, template_name):
         from pystache import Loader
         markup = Loader().load_template(template_name, self.view.template_path, encoding=self.view.template_encoding)
-
         template = Template(markup, self.view)
-        # template.context_list = self.context_list
         return template.render()
 
     @modifier('=')
