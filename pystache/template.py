@@ -58,10 +58,9 @@ class Template(object):
 
             section, section_name, inner = match.group(0, 1, 2)
             section_name = section_name.strip()
-            
             it = self.view.get(section_name, None)
             replacer = ''
-            
+
             # Callable
             if it and isinstance(it, collections.Callable):
                 replacer = it(inner)
@@ -73,6 +72,10 @@ class Template(object):
             elif it and hasattr(it, '__iter__'):
                 if section[2] != '^':
                     replacer = self._render_list(inner, it)
+            # Other objects
+            elif it and isinstance(it, object):
+                if section[2] != '^':
+                    replacer = self._render_dictionary(inner, it)
             # Falsey and Negated or Truthy and Not Negated
             elif (not it and section[2] == '^') or (it and section[2] != '^'):
                 replacer = inner

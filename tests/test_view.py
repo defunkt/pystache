@@ -6,6 +6,9 @@ from examples.complex_view import ComplexView
 from examples.lambdas import Lambdas
 from examples.inverted import Inverted
 
+class Thing(object):
+    pass
+
 class TestView(unittest.TestCase):
     def test_basic(self):
         view = Simple("Hi {{thing}}!", { 'thing': 'world' })
@@ -86,11 +89,14 @@ class TestView(unittest.TestCase):
         view = Inverted()
         self.assertEquals(view.render(), """one, two, three, empty list""")
 
-    # def test_accessing_properties_on_parent_view(self):
-    #     view = Simple(context={'child':child})
-    #     view.template = '{{#child}}{{#t}}{{thing}}{{/t}}{{/child}}'
-    #     
-    #     self.assertEquals(view.render(), 'pizza1')
+    def test_accessing_properties_on_parent_object_from_child_objects(self):
+        parent = Thing()
+        parent.this = 'derp'
+        parent.children = [Thing()]
+        view = Simple(context={'parent': parent})
+        view.template = "{{#parent}}{{#children}}{{this}}{{/children}}{{/parent}}"
+        
+        self.assertEquals(view.render(), 'derp')
 
 if __name__ == '__main__':
     unittest.main()
