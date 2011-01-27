@@ -29,10 +29,10 @@ class View(object):
     
     def __init__(self, template=None, context=None, **kwargs):
         self.template = template
-        context = context or {}
-        context.update(**kwargs)
-        
-        self.context_list = [context]
+        self.context = context or {}
+        self.context.update(**kwargs)
+
+        self.context_list = [self.context]
         
     def get(self, attr, default=None):
         attr = get_or_attr(self.context_list, attr, getattr(self, attr, default))
@@ -76,16 +76,6 @@ class View(object):
         if not val and val is not 0:
             raise KeyError("No such key '%s'." % attr)
         return val
-    
-    def __getattr__(self, attr):
-        if attr == 'context':
-            context = {}
-            for d in self.context_list:
-                context.update(d)
-            return context
-        
-        raise AttributeError("No such attribute '%s'." % attr)
-            
     
     def __str__(self):
         return self.render()
