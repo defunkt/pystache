@@ -1,156 +1,82 @@
 import re
-import cgi
-import collections
-import os
-import copy
-
-modifiers = {}
-def modifier(symbol):
-    """Decorator for associating a function with a Mustache tag modifier.
-
-    @modifier('P')
-    def render_tongue(self, tag_name=None, context=None):
-        return ":P %s" % tag_name
-
-    {{P yo }} => :P yo
-    """
-    def set_modifier(func):
-        modifiers[symbol] = func
-        return func
-    return set_modifier
 
 class Template(object):
-    
     tag_re = None
-    
-    otag = '{{'
-    
-    ctag = '}}'
-    
-    def __init__(self, template=None, context=None, **kwargs):
+    otag, ctag = '{{', '}}'
+
+    def __init__(self, template=None, context={}, **kwargs):
         from view import View
-        
+
         self.template = template
-        
+
         if kwargs:
             context.update(kwargs)
-            
+
         self.view = context if isinstance(context, View) else View(context=context)
         self._compile_regexps()
-    
+
     def _compile_regexps(self):
-        tags = {
-            'otag': re.escape(self.otag),
-            'ctag': re.escape(self.ctag)
-        }
+        tags = {'otag': re.escape(self.otag), 'ctag': re.escape(self.ctag)}
+        tag = r"""
+            (?P<content>[\s\S]*?)
+            (?P<whitespace>[\ \t]*)
+            %(otag)s \s*
+            (?:
+              (?P<change>=) \s* (?P<delims>.+?)   \s* = |
+              (?P<raw>{)    \s* (?P<raw_name>.+?) \s* } |
+              (?P<tag>\W?)  \s* (?P<name>[\s\S]+?)
+            )
+            \s* %(ctag)s
+        """
+        self.tag_re = re.compile(tag % tags, re.M | re.X)
 
-        section = r"%(otag)s[\#|^]([^\}]*)%(ctag)s\s*(.+?\s*)%(otag)s/\1%(ctag)s"
-        self.section_re = re.compile(section % tags, re.M|re.S)
+    def _parse(self, template, section=None, index=0):
+        """Parse a template into a syntax tree."""
 
-        tag = r"%(otag)s(#|=|&|!|>|\{)?(.+?)\1?%(ctag)s+"
-        self.tag_re = re.compile(tag % tags)
-    
-    def _render_sections(self, template, view):
+        buffer = []
+        pos = index
+
         while True:
-            match = self.section_re.search(template)
+            match = self.tag_re.search(template, pos)
+
             if match is None:
                 break
 
-            section, section_name, inner = match.group(0, 1, 2)
-            section_name = section_name.strip()
-            it = self.view.get(section_name, None)
-            replacer = ''
+            # Normalize the captures dictionary.
+            captures = match.groupdict()
+            if captures['change'] is not None:
+                captures.update(tag='=', name=captures['delims'])
+            elif captures['raw'] is not None:
+                captures.update(tag='{', name=captures['raw_name'])
 
-            # Callable
-            if it and isinstance(it, collections.Callable):
-                replacer = it(inner)
-            # Dictionary
-            elif it and hasattr(it, 'keys') and hasattr(it, '__getitem__'):
-                if section[2] != '^':
-                    replacer = self._render_dictionary(inner, it)
-            # Lists
-            elif it and hasattr(it, '__iter__'):
-                if section[2] != '^':
-                    replacer = self._render_list(inner, it)
-            # Other objects
-            elif it and isinstance(it, object):
-                if section[2] != '^':
-                    replacer = self._render_dictionary(inner, it)
-            # Falsey and Negated or Truthy and Not Negated
-            elif (not it and section[2] == '^') or (it and section[2] != '^'):
-                replacer = inner
-            
-            template = template.replace(section, replacer)
-        
-        return template
-    
-    def _render_tags(self, template):
-        while True:
-            match = self.tag_re.search(template)
-            if match is None:
-                break
-                
-            tag, tag_type, tag_name = match.group(0, 1, 2)
-            tag_name = tag_name.strip()
-            func = modifiers[tag_type]
-            replacement = func(self, tag_name)
-            template = template.replace(tag, replacement)
-        
-        return template
+            # Save the literal text content.
+            buffer.append(captures['content'])
+            pos = match.end()
 
-    def _render_dictionary(self, template, context):
-        self.view.context_list.insert(0, context)
-        template = Template(template, self.view)
-        out = template.render()
-        self.view.context_list.pop(0)
-        return out
-    
-    def _render_list(self, template, listing):
-        insides = []
-        for item in listing:
-            insides.append(self._render_dictionary(template, item))
-            
-        return ''.join(insides)
-    
-    @modifier(None)
-    def _render_tag(self, tag_name):
-        raw = self.view.get(tag_name, '')
-        
-        # For methods with no return value
-        if not raw and raw is not 0:
-            return ''
-        
-        return cgi.escape(unicode(raw))
-    
-    @modifier('!')
-    def _render_comment(self, tag_name):
-        return ''
-    
-    @modifier('>')
-    def _render_partial(self, template_name):
-        from pystache import Loader
-        markup = Loader().load_template(template_name, self.view.template_path, encoding=self.view.template_encoding)
-        template = Template(markup, self.view)
-        return template.render()
+            # Save the whitespace following the text content.
+            # TODO: Standalone tags should consume this.
+            buffer.append(captures['whitespace'])
 
-    @modifier('=')
-    def _change_delimiter(self, tag_name):
-        """Changes the Mustache delimiter."""
-        self.otag, self.ctag = tag_name.split(' ')
-        self._compile_regexps()
-        return ''
-    
-    @modifier('{')
-    @modifier('&')
-    def render_unescaped(self, tag_name):
-        """Render a tag without escaping it."""
-        return unicode(self.view.get(tag_name, ''))
-    
+            # TODO: Process the remaining tag types.
+            if captures['tag'] is '!':
+                pass
+
+        # Save the rest of the template.
+        buffer.append(template[pos:])
+
+        return buffer
+
+    def _generate(self, parsed, view):
+        """Convert a parse tree into a fully evaluated template."""
+
+        # TODO: Handle non-trivial cases.
+        return ''.join(parsed)
+
     def render(self, encoding=None):
-        template = self._render_sections(self.template, self.view)
-        result = self._render_tags(template)
-        
+        parsed = self._parse(self.template)
+        result = self._generate(parsed, self.view)
+
         if encoding is not None:
             result = result.encode(encoding)
-        
+
         return result
