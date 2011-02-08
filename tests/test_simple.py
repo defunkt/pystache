@@ -47,3 +47,14 @@ class TestSimple(unittest.TestCase):
 
 Again, Welcome!
 """)
+
+    def test_whitespace_is_preserved(self):
+        template = '''
+{{#is_true}}
+   tidy me up!
+{{/is_true}}
+'''
+        context = {
+            'is_true': True
+        }
+        self.assertEquals(pystache.Template(template, context).render(), '   tidy me up')

@@ -44,7 +44,7 @@ class Template(object):
             'ctag': re.escape(self.ctag)
         }
 
-        section = r"%(otag)s[\#|^]([^\}]*)%(ctag)s\s*(.+?\s*)%(otag)s/\1%(ctag)s"
+        section = r"([\n][\s\t]*?)?%(otag)s[\#|^]([^\}]*)%(ctag)s\s*(.+?\s*)%(otag)s/\2%(ctag)s([\s\t]*?[\n])?"
         self.section_re = re.compile(section % tags, re.M|re.S)
 
         tag = r"%(otag)s(#|=|&|!|>|\{)?(.+?)\1?%(ctag)s+"
@@ -56,7 +56,7 @@ class Template(object):
             if match is None:
                 break
 
-            section, section_name, inner = match.group(0, 1, 2)
+            section, section_name, inner = match.group(0, 2, 3)
             section_name = section_name.strip()
             it = self.view.get(section_name, None)
             replacer = ''
