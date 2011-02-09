@@ -1,4 +1,5 @@
 import re
+import cgi
 
 class Template(object):
     tag_re = None
@@ -58,12 +59,16 @@ class Template(object):
             buffer.append(captures['whitespace'])
 
             # TODO: Process the remaining tag types.
-            if captures['tag'] is '!':
+            if captures['tag'] == '!':
                 pass
             elif captures['tag'] in ['{', '&']:
                 def unescapedTag(view):
                     return view.get(captures['name'])
                 buffer.append(unescapedTag)
+            elif captures['tag'] == '':
+                def escapedTag(view):
+                    return cgi.escape(view.get(captures['name']))
+                buffer.append(escapedTag)
 
         # Save the rest of the template.
         buffer.append(template[pos:])
