@@ -60,21 +60,23 @@ class Template(object):
             # TODO: Process the remaining tag types.
             if captures['tag'] is '!':
                 pass
+            elif captures['tag'] in ['{', '&']:
+                def unescapedTag(view):
+                    return view.get(captures['name'])
+                buffer.append(unescapedTag)
 
         # Save the rest of the template.
         buffer.append(template[pos:])
 
         return buffer
 
-    def _generate(self, parsed, view):
-        """Convert a parse tree into a fully evaluated template."""
-
-        # TODO: Handle non-trivial cases.
-        return ''.join(parsed)
-
     def render(self, encoding=None):
         parsed = self._parse(self.template)
-        result = self._generate(parsed, self.view)
+
+        def call(x):
+            return callable(x) and x(self.view) or x
+
+        result = ''.join(map(call, parsed))
 
         if encoding is not None:
             result = result.encode(encoding)
