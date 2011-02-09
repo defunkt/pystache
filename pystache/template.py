@@ -54,9 +54,17 @@ class Template(object):
             buffer.append(captures['content'])
             pos = match.end()
 
-            # Save the whitespace following the text content.
-            # TODO: Standalone tags should consume this.
-            buffer.append(captures['whitespace'])
+            # Standalone (non-interpolation) tags consume the entire line,
+            # both leading whitespace and trailing newline.
+            tagBeganLine = (not buffer[-1] or buffer[-1][-1] == '\n')
+            tagEndedLine = (pos == len(template) or template[pos] == '\n')
+            interpolationTag = captures['tag'] in ['', '&', '{']
+
+            if (tagBeganLine and tagEndedLine and not interpolationTag):
+                pos += 1
+            elif captures['whitespace']:
+                buffer.append(captures['whitespace'])
+                captures['whitespace'] = ''
 
             # TODO: Process the remaining tag types.
             if captures['tag'] == '!':
