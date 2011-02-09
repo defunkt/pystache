@@ -74,7 +74,7 @@ class Template(object):
         parsed = self._parse(self.template)
 
         def call(x):
-            return callable(x) and x(self.view) or x
+            return unicode(callable(x) and x(self.view) or x)
 
         result = ''.join(map(call, parsed))
 
