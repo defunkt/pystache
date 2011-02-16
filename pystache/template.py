@@ -43,45 +43,50 @@ class Template(object):
             if match is None:
                 break
 
-            # Normalize the captures dictionary.
-            captures = match.groupdict()
-            if captures['change'] is not None:
-                captures.update(tag='=', name=captures['delims'])
-            elif captures['raw'] is not None:
-                captures.update(tag='{', name=captures['raw_name'])
-
-            # Save the literal text content.
-            buffer.append(captures['content'])
-            pos = match.end()
-
-            # Standalone (non-interpolation) tags consume the entire line,
-            # both leading whitespace and trailing newline.
-            tagBeganLine = (not buffer[-1] or buffer[-1][-1] == '\n')
-            tagEndedLine = (pos == len(template) or template[pos] == '\n')
-            interpolationTag = captures['tag'] in ['', '&', '{']
-
-            if (tagBeganLine and tagEndedLine and not interpolationTag):
-                pos += 1
-            elif captures['whitespace']:
-                buffer.append(captures['whitespace'])
-                captures['whitespace'] = ''
-
-            # TODO: Process the remaining tag types.
-            if captures['tag'] == '!':
-                pass
-            elif captures['tag'] in ['{', '&']:
-                def unescapedTag(view):
-                    return view.get(captures['name'])
-                buffer.append(unescapedTag)
-            elif captures['tag'] == '':
-                def escapedTag(view):
-                    return cgi.escape(view.get(captures['name']))
-                buffer.append(escapedTag)
+            pos = self._handle_match(template, match, buffer)
 
         # Save the rest of the template.
         buffer.append(template[pos:])
 
         return buffer
+
+    def _handle_match(self, template, match, buffer):
+        # Normalize the captures dictionary.
+        captures = match.groupdict()
+        if captures['change'] is not None:
+            captures.update(tag='=', name=captures['delims'])
+        elif captures['raw'] is not None:
+            captures.update(tag='{', name=captures['raw_name'])
+
+        # Save the literal text content.
+        buffer.append(captures['content'])
+        pos = match.end()
+
+        # Standalone (non-interpolation) tags consume the entire line,
+        # both leading whitespace and trailing newline.
+        tagBeganLine = (not buffer[-1] or buffer[-1][-1] == '\n')
+        tagEndedLine = (pos == len(template) or template[pos] == '\n')
+        interpolationTag = captures['tag'] in ['', '&', '{']
+
+        if (tagBeganLine and tagEndedLine and not interpolationTag):
+            pos += 1
+        elif captures['whitespace']:
+            buffer.append(captures['whitespace'])
+            captures['whitespace'] = ''
+
+        # TODO: Process the remaining tag types.
+        print captures['name']
+        fetch = lambda view: unicode(view.get(captures['name']))
+        if captures['tag'] == '!':
+            pass
+        elif captures['tag'] in ['{', '&']:
+            buffer.append(fetch)
+        elif captures['tag'] == '':
+            buffer.append(lambda view: cgi.escape(fetch(view), True))
+        else:
+            print 'Error!'
+
+        return pos
 
     def render(self, encoding=None):
         parsed = self._parse(self.template)
