@@ -79,6 +79,10 @@ class Template(object):
         fetch = lambda view: unicode(view.get(captures['name']))
         if captures['tag'] == '!':
             pass
+        elif captures['tag'] == '=':
+            print '"', captures['name'], '"'
+            self.otag, self.ctag = captures['name'].split()
+            self._compile_regexps()
         elif captures['tag'] in ['{', '&']:
             buffer.append(fetch)
         elif captures['tag'] == '':
