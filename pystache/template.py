@@ -75,20 +75,19 @@ class Template(object):
             captures['whitespace'] = ''
 
         # TODO: Process the remaining tag types.
-        print captures['name']
-        fetch = lambda view: unicode(view.get(captures['name']))
+        fetch = lambda view: view.get(captures['name'])
+
         if captures['tag'] == '!':
             pass
         elif captures['tag'] == '=':
-            print '"', captures['name'], '"'
             self.otag, self.ctag = captures['name'].split()
             self._compile_regexps()
         elif captures['tag'] in ['{', '&']:
-            buffer.append(fetch)
+            buffer.append(lambda view: unicode(fetch(view)))
         elif captures['tag'] == '':
-            buffer.append(lambda view: cgi.escape(fetch(view), True))
+            buffer.append(lambda view: cgi.escape(unicode(fetch(view)), True))
         else:
-            print 'Error!'
+            raise
 
         return pos
 
