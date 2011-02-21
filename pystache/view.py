@@ -49,6 +49,10 @@ class View(object):
         
         return self.template
 
+    def partial(self, name):
+        from pystache import Loader
+        return Loader().load_template(name, self.template_path, encoding=self.template_encoding, extension=self.template_extension)
+
     def _get_template_name(self, template_name=None):
         """TemplatePartial => template_partial
         Takes a string but defaults to using the current class' name or

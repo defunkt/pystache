@@ -1,6 +1,7 @@
 import glob
 import os.path
 import pystache
+from pystache import Loader
 import unittest
 import yaml
 
@@ -19,10 +20,20 @@ class MustacheSpec(unittest.TestCase):
 def buildTest(testData, spec):
     def test(self):
         template = testData['template']
-        partials = testData.has_key('partials') and test['partials'] or {}
+        partials = testData.has_key('partials') and testData['partials'] or {}
         expected = testData['expected']
         data     = testData['data']
-        self.assertEquals(pystache.render(template, data), expected)
+        files    = []
+
+        try:
+            for key in partials.keys():
+                filename = "%s.%s" % (key, Loader.template_extension)
+                files.append(os.path.join(Loader.template_path, filename))
+                p = open(files[-1], 'w')
+                p.write(partials[key])
+            self.assertEquals(pystache.render(template, data), expected)
+        finally:
+            [os.remove(f) for f in files]
 
     test.__doc__  = testData['desc']
     test.__name__ = 'test %s (%s)' % (testData['name'], spec)

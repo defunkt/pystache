@@ -82,12 +82,14 @@ class Template(object):
         elif captures['tag'] == '=':
             self.otag, self.ctag = captures['name'].split()
             self._compile_regexps()
+        elif captures['tag'] == '>':
+            buffer += self._parse(self.view.partial(captures['name']))
         elif captures['tag'] in ['{', '&']:
             buffer.append(lambda view: unicode(fetch(view)))
         elif captures['tag'] == '':
             buffer.append(lambda view: cgi.escape(unicode(fetch(view)), True))
         else:
-            raise
+            raise Exception("'%s' is an unrecognized type!" % (captures['tag']))
 
         return pos
 
