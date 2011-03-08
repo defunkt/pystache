@@ -68,7 +68,7 @@ class Template(object):
 
         tag = r"%(otag)s(#|=|&|!|>|\{)?(.+?)\1?%(ctag)s+"
         self.tag_re = re.compile(tag % tags)
-
+        
     def render_sections(self, template, context):
         """Expands sections."""
         while 1:
@@ -121,7 +121,10 @@ class Template(object):
         """Given a tag name and context, finds, escapes, and renders the tag."""
         raw = get_or_attr(context, tag_name, '')
         if not raw and raw is not 0:
-            return ''
+            if tag_name == '.':
+                raw = context
+            else:
+                return ''
         return cgi.escape(unicode(raw))
 
     @modifier('!')
