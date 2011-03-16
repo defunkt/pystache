@@ -1,32 +1,34 @@
 import re
 import cgi
 
-def call(view):
-    def _(x):
-        return unicode(callable(x) and x(view) or x)
-    return _
+def call(view, x):
+    if callable(x):
+        x = x(view)
+    return unicode(x)
 
-def sectionTag(name, template, delims):
+def sectionTag(name, parsed, template, delims):
     def func(view):
-        if not view.get(name):
+        data = view.get(name)
+        if not data:
             return ''
-        print template
-        tmpl = Template(template)
-        tmpl.view = view
-        (tmpl.otag, tmpl.ctag) = delims
-        view.context_list = [view.get(name)] + view.context_list
-        string = ''.join(map(call(view), tmpl._parse()))
-        return string
+        elif type(data) not in [list, tuple]:
+            data = [ data ]
+
+        parts = []
+        for element in data:
+            view.context_list.insert(0, element)
+            parts.append(''.join(map(call, [view] * len(parsed), parsed)))
+            del view.context_list[0]
+
+        return ''.join(parts)
     return func
 
-def inverseTag(name, template, delims):
+def inverseTag(name, parsed, template, delims):
     def func(view):
-        if view.get(name):
+        data = view.get(name)
+        if data:
             return ''
-        tmpl = Template(template)
-        tmpl.view = view
-        (tmpl.otag, tmpl.ctag) = delims
-        return ''.join(map(call(view), tmpl._parse()))
+        return ''.join(map(call, [view] * len(parsed), parsed))
     return func
 
 def escapedTag(name):
@@ -40,7 +42,8 @@ def unescapedTag(name):
     return func
 
 class EndOfSection(Exception):
-    def __init__(self, template, position):
+    def __init__(self, buffer, template, position):
+        self.buffer   = buffer
         self.template = template
         self.position = position
 
@@ -105,10 +108,11 @@ class Template(object):
         # Save the literal text content.
         buffer.append(captures['content'])
         pos = match.end()
+        tagPos = match.end('content')
 
         # Standalone (non-interpolation) tags consume the entire line,
         # both leading whitespace and trailing newline.
-        tagBeganLine = (not buffer[-1] or buffer[-1][-1] == '\n')
+        tagBeganLine = not tagPos or template[tagPos - 1] == '\n'
         tagEndedLine = (pos == len(template) or template[pos] == '\n')
         interpolationTag = captures['tag'] in ['', '&', '{']
 
@@ -116,6 +120,7 @@ class Template(object):
             pos += 1
         elif captures['whitespace']:
             buffer.append(captures['whitespace'])
+            tagPos += len(captures['whitespace'])
             captures['whitespace'] = ''
 
         name = captures['name']
@@ -130,13 +135,14 @@ class Template(object):
             try:
                 self._parse(template, name, pos)
             except EndOfSection as e:
+                bufr = e.buffer
                 tmpl = e.template
                 pos  = e.position
 
             tag = { '#': sectionTag, '^': inverseTag }[captures['tag']]
-            buffer.append(tag(name, tmpl, (self.otag, self.ctag)))
+            buffer.append(tag(name, bufr, tmpl, (self.otag, self.ctag)))
         elif captures['tag'] == '/':
-            raise EndOfSection(template[index:match.end('whitespace')], pos)
+            raise EndOfSection(buffer, template[index:tagPos], pos)
         elif captures['tag'] in ['{', '&']:
             buffer.append(unescapedTag(name))
         elif captures['tag'] == '':
@@ -148,7 +154,7 @@ class Template(object):
 
     def render(self, encoding=None):
         parsed = self._parse()
-        result = ''.join(map(call(self.view), parsed))
+        result = ''.join(map(call, [self.view] * len(parsed), parsed))
         if encoding is not None:
             result = result.encode(encoding)
 
