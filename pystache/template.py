@@ -1,6 +1,16 @@
 import re
 import cgi
 
+def escapedTag(name):
+    def func(view):
+        return cgi.escape(unicode(view.get(name)), True)
+    return func
+
+def unescapedTag(name):
+    def func(view):
+        return unicode(view.get(name))
+    return func
+
 class Template(object):
     tag_re = None
     otag, ctag = '{{', '}}'
@@ -74,20 +84,18 @@ class Template(object):
             buffer.append(captures['whitespace'])
             captures['whitespace'] = ''
 
-        # TODO: Process the remaining tag types.
-        fetch = lambda view: view.get(captures['name'])
-
+        name = captures['name']
         if captures['tag'] == '!':
             pass
         elif captures['tag'] == '=':
-            self.otag, self.ctag = captures['name'].split()
+            self.otag, self.ctag = name.split()
             self._compile_regexps()
         elif captures['tag'] == '>':
-            buffer += self._parse(self.view.partial(captures['name']))
+            buffer += self._parse(self.view.partial(name))
         elif captures['tag'] in ['{', '&']:
-            buffer.append(lambda view: unicode(fetch(view)))
+            buffer.append(unescapedTag(name))
         elif captures['tag'] == '':
-            buffer.append(lambda view: cgi.escape(unicode(fetch(view)), True))
+            buffer.append(escapedTag(name))
         else:
             raise Exception("'%s' is an unrecognized type!" % (captures['tag']))
 
