@@ -1,14 +1,19 @@
 import re
 import cgi
+import inspect
 
 def call(view, x):
     if callable(x):
-        x = x(view)
+        (args, _, _, _) = inspect.getargspec(x)
+        if len(args) is 0:
+            x = x()
+        elif len(args) is 1 and args[0] == 'self':
+            x = x(view)
     return unicode(x)
 
 def sectionTag(name, parsed, template, delims):
-    def func(view):
-        data = view.get(name)
+    def func(self):
+        data = self.get(name)
         if not data:
             return ''
         elif type(data) not in [list, tuple]:
@@ -16,29 +21,30 @@ def sectionTag(name, parsed, template, delims):
 
         parts = []
         for element in data:
-            view.context_list.insert(0, element)
-            parts.append(''.join(map(call, [view] * len(parsed), parsed)))
-            del view.context_list[0]
+            self.context_list.insert(0, element)
+            parts.append(''.join(map(call, [self] * len(parsed), parsed)))
+            del self.context_list[0]
 
         return ''.join(parts)
     return func
 
 def inverseTag(name, parsed, template, delims):
-    def func(view):
-        data = view.get(name)
+    def func(self):
+        data = self.get(name)
         if data:
             return ''
-        return ''.join(map(call, [view] * len(parsed), parsed))
+        return ''.join(map(call, [self] * len(parsed), parsed))
     return func
 
 def escapedTag(name):
-    def func(view):
-        return cgi.escape(unicode(view.get(name)), True)
+    fetch = unescapedTag(name)
+    def func(self):
+        return cgi.escape(fetch(self), True)
     return func
 
 def unescapedTag(name):
-    def func(view):
-        return unicode(view.get(name))
+    def func(self):
+        return unicode(call(self, self.get(name)))
     return func
 
 class EndOfSection(Exception):
@@ -148,7 +154,7 @@ class Template(object):
         elif captures['tag'] == '':
             buffer.append(escapedTag(name))
         else:
-            raise Exception("'%s' is an unrecognized type!" % (captures['tag']))
+            raise Exception("'%s' is an unrecognized type!" % captures['tag'])
 
         return pos
 
