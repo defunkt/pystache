@@ -31,6 +31,7 @@ def buildTest(testData, spec):
                 files.append(os.path.join(Loader.template_path, filename))
                 p = open(files[-1], 'w')
                 p.write(partials[key])
+                p.close()
             self.assertEquals(pystache.render(template, data), expected)
         finally:
             [os.remove(f) for f in files]

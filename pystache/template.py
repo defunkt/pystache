@@ -5,7 +5,6 @@ import inspect
 def call(view, x, template=None):
     if callable(x):
         (args, _, _, _) = inspect.getargspec(x)
-        print args
         if len(args) is 0:
             x = x()
         elif len(args) is 1 and args[0] == 'self':
@@ -151,7 +150,9 @@ class Template(object):
             self.otag, self.ctag = name.split()
             self._compile_regexps()
         elif captures['tag'] == '>':
-            buffer += self._parse(self.view.partial(name))
+            tmpl = Template(self.view.partial(name))
+            tmpl.view = self.view
+            buffer += tmpl._parse()
         elif captures['tag'] in ['#', '^']:
             try:
                 self._parse(template, name, pos)
