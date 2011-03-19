@@ -2,27 +2,39 @@ import re
 import cgi
 import inspect
 
-def call(view, x):
+def call(view, x, template=None):
     if callable(x):
         (args, _, _, _) = inspect.getargspec(x)
+        print args
         if len(args) is 0:
             x = x()
         elif len(args) is 1 and args[0] == 'self':
             x = x(view)
+        elif len(args) is 1:
+            x = x(template)
+        else:
+            x = x(view, template)
     return unicode(x)
 
 def sectionTag(name, parsed, template, delims):
     def func(self):
         data = self.get(name)
+        ast = parsed
         if not data:
             return ''
+        elif callable(data):
+            tmpl = Template(call(self, data, template))
+            tmpl.otag, tmpl.ctag = delims
+            tmpl._compile_regexps()
+            ast = tmpl._parse()
+            data = [ data ]
         elif type(data) not in [list, tuple]:
             data = [ data ]
 
         parts = []
         for element in data:
             self.context_list.insert(0, element)
-            parts.append(''.join(map(call, [self] * len(parsed), parsed)))
+            parts.append(''.join(map(call, [self] * len(ast), ast)))
             del self.context_list[0]
 
         return ''.join(parts)

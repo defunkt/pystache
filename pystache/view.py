@@ -35,11 +35,7 @@ class View(object):
         self.context_list = [context]
         
     def get(self, attr, default=None):
-        attr = get_or_attr(self.context_list, attr, getattr(self, attr, default))
-        if hasattr(attr, '__call__') and type(attr) is UnboundMethodType:
-            return attr()
-        else:
-            return attr
+        return get_or_attr(self.context_list, attr, getattr(self, attr, default))
     
     def get_template(self, template_name):
         if not self.template:
