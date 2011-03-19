@@ -130,12 +130,15 @@ class Template(object):
 
         # Standalone (non-interpolation) tags consume the entire line,
         # both leading whitespace and trailing newline.
-        tagBeganLine = not tagPos or template[tagPos - 1] == '\n'
-        tagEndedLine = (pos == len(template) or template[pos] == '\n')
+        tagBeganLine = not tagPos or template[tagPos - 1] in ['\r', '\n']
+        tagEndedLine = (pos == len(template) or template[pos] in ['\r', '\n'])
         interpolationTag = captures['tag'] in ['', '&', '{']
 
         if (tagBeganLine and tagEndedLine and not interpolationTag):
-            pos += 1
+            if pos < len(template):
+                pos += template[pos] == '\r' and 1 or 0
+            if pos < len(template):
+                pos += template[pos] == '\n' and 1 or 0
         elif captures['whitespace']:
             buffer.append(captures['whitespace'])
             tagPos += len(captures['whitespace'])
