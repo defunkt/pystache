@@ -3,7 +3,7 @@ import os.path
 import re
 from types import *
 
-def get_or_attr(context_list, name, default=None):
+def get_or_attr(context_list, name, default):
     if not context_list:
         return default
 
@@ -34,7 +34,7 @@ class View(object):
 
         self.context_list = [context]
         
-    def get(self, attr, default=None):
+    def get(self, attr, default=''):
         return get_or_attr(self.context_list, attr, getattr(self, attr, default))
     
     def get_template(self, template_name):
