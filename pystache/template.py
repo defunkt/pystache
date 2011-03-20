@@ -15,14 +15,26 @@ def call(view, x, template=None):
             x = x(view, template)
     return unicode(x)
 
+def parse(template, view, delims=('{{', '}}')):
+    tmpl = Template(template)
+    tmpl.view = view
+    tmpl.otag, tmpl.ctag = delims
+    tmpl._compile_regexps()
+    return tmpl._parse()
+
+def renderParseTree(parsed, view, template):
+    n = len(parsed)
+    return ''.join(map(call, [view] * n, parsed, [template] * n))
+
+def render(template, view, delims=('{{', '}}')):
+    parseTree = parse(template, view, delims)
+    return renderParseTree(parseTree, view, template)
+
 def partialTag(name, indentation=''):
     def func(self):
         nonblank = re.compile(r'^(.)', re.M)
         template = re.sub(nonblank, indentation + r'\1', self.partial(name))
-        template = Template(template)
-        template.view = self
-        parsed = template._parse()
-        return ''.join(map(call, [self] * len(parsed), parsed))
+        return render(template, self)
     return func
 
 def sectionTag(name, parsed, template, delims):
@@ -32,10 +44,7 @@ def sectionTag(name, parsed, template, delims):
         if not data:
             return ''
         elif callable(data):
-            tmpl = Template(call(self, data, template))
-            tmpl.otag, tmpl.ctag = delims
-            tmpl._compile_regexps()
-            ast = tmpl._parse()
+            ast = parse(call(self, data, template), self, delims)
             data = [ data ]
         elif type(data) not in [list, tuple]:
             data = [ data ]
@@ -43,7 +52,7 @@ def sectionTag(name, parsed, template, delims):
         parts = []
         for element in data:
             self.context_list.insert(0, element)
-            parts.append(''.join(map(call, [self] * len(ast), ast)))
+            parts.append(renderParseTree(ast, self, delims))
             del self.context_list[0]
 
         return ''.join(parts)
@@ -54,18 +63,18 @@ def inverseTag(name, parsed, template, delims):
         data = self.get(name)
         if data:
             return ''
-        return ''.join(map(call, [self] * len(parsed), parsed))
+        return renderParseTree(parsed, self, delims)
     return func
 
-def escapedTag(name):
-    fetch = unescapedTag(name)
+def escapedTag(name, delims):
+    fetch = unescapedTag(name, delims)
     def func(self):
         return cgi.escape(fetch(self), True)
     return func
 
-def unescapedTag(name):
+def unescapedTag(name, delims):
     def func(self):
-        return unicode(call(self, self.get(name)))
+        return unicode(render(call(self, self.get(name)), self, delims))
     return func
 
 class EndOfSection(Exception):
@@ -174,17 +183,16 @@ class Template(object):
         elif captures['tag'] == '/':
             raise EndOfSection(buffer, template[index:tagPos], pos)
         elif captures['tag'] in ['{', '&']:
-            buffer.append(unescapedTag(name))
+            buffer.append(unescapedTag(name, (self.otag, self.ctag)))
         elif captures['tag'] == '':
-            buffer.append(escapedTag(name))
+            buffer.append(escapedTag(name, (self.otag, self.ctag)))
         else:
             raise Exception("'%s' is an unrecognized type!" % captures['tag'])
 
         return pos
 
     def render(self, encoding=None):
-        parsed = self._parse()
-        result = ''.join(map(call, [self.view] * len(parsed), parsed))
+        result = render(self.template, self.view)
         if encoding is not None:
             result = result.encode(encoding)
 
