@@ -15,11 +15,13 @@ def call(view, x, template=None):
             x = x(view, template)
     return unicode(x)
 
-def partialTag(name):
+def partialTag(name, indentation=''):
     def func(self):
-        tmpl = Template(self.partial(name))
-        tmpl.view = self
-        parsed = tmpl._parse()
+        nonblank = re.compile(r'^(.)', re.M)
+        template = re.sub(nonblank, indentation + r'\1', self.partial(name))
+        template = Template(template)
+        template.view = self
+        parsed = template._parse()
         return ''.join(map(call, [self] * len(parsed), parsed))
     return func
 
@@ -158,7 +160,7 @@ class Template(object):
             self.otag, self.ctag = name.split()
             self._compile_regexps()
         elif captures['tag'] == '>':
-            buffer.append(partialTag(name))
+            buffer.append(partialTag(name, captures['whitespace']))
         elif captures['tag'] in ['#', '^']:
             try:
                 self._parse(template, name, pos)
