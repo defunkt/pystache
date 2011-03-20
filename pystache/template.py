@@ -74,7 +74,7 @@ def escapedTag(name, delims):
 
 def unescapedTag(name, delims):
     def func(self):
-        return unicode(render(call(self, self.get(name)), self, delims))
+        return unicode(render(call(self, self.get(name)), self))
     return func
 
 class EndOfSection(Exception):
