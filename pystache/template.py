@@ -15,6 +15,14 @@ def call(view, x, template=None):
             x = x(view, template)
     return unicode(x)
 
+def partialTag(name):
+    def func(self):
+        tmpl = Template(self.partial(name))
+        tmpl.view = self
+        parsed = tmpl._parse()
+        return ''.join(map(call, [self] * len(parsed), parsed))
+    return func
+
 def sectionTag(name, parsed, template, delims):
     def func(self):
         data = self.get(name)
@@ -150,9 +158,7 @@ class Template(object):
             self.otag, self.ctag = name.split()
             self._compile_regexps()
         elif captures['tag'] == '>':
-            tmpl = Template(self.view.partial(name))
-            tmpl.view = self.view
-            buffer += tmpl._parse()
+            buffer.append(partialTag(name))
         elif captures['tag'] in ['#', '^']:
             try:
                 self._parse(template, name, pos)
