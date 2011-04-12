@@ -1,6 +1,7 @@
 import re
 import cgi
 import collections
+from types import UnicodeType
 
 modifiers = {}
 def modifier(symbol):
@@ -125,7 +126,9 @@ class Template(object):
                 raw = context
             else:
                 return ''
-        return cgi.escape(unicode(raw))
+        if type(raw) != UnicodeType:
+            raw = unicode(raw, 'utf-8')
+        return cgi.escape(raw)
 
     @modifier('!')
     def render_comment(self, tag_name=None, context=None):
@@ -136,7 +139,10 @@ class Template(object):
     @modifier('&')
     def render_unescaped(self, tag_name=None, context=None):
         """Render a tag without escaping it."""
-        return unicode(get_or_attr(context, tag_name, ''))
+        raw = get_or_attr(context, tag_name, '')
+        if type(raw) != UnicodeType:
+            raw = unicode(raw, 'utf-8')
+        return raw
 
     @modifier('>')
     def render_partial(self, tag_name=None, context=None):
