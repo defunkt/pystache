@@ -123,7 +123,7 @@ class Template(object):
         raw = get_or_attr(context, tag_name, '')
         if not raw and raw is not 0:
             if tag_name == '.':
-                raw = context
+                raw = str(context)
             else:
                 return ''
         if type(raw) != UnicodeType:
