@@ -64,7 +64,7 @@ class Template(object):
         """Compiles our section and tag regular expressions."""
         tags = { 'otag': re.escape(self.otag), 'ctag': re.escape(self.ctag) }
 
-        section = r"%(otag)s[\#|^]([^\}]*)%(ctag)s\s*(.+?)\s*%(otag)s/\1%(ctag)s"
+        section = r"%(otag)s[\#|^|\?]([^\}]*)%(ctag)s\s*(.+?)\s*%(otag)s/\1%(ctag)s"
         self.section_re = re.compile(section % tags, re.M|re.S)
 
         tag = r"%(otag)s(#|=|&|!|>|\{)?(.+?)\1?%(ctag)s+"
@@ -79,12 +79,14 @@ class Template(object):
 
             section, section_name, inner = match.group(0, 1, 2)
             section_name = section_name.strip()
+            if section[2] == '?':
+                section_name = section_name[:-1]
 
             it = get_or_attr(context, section_name, None)
             replacer = ''
             if it and isinstance(it, collections.Callable):
                 replacer = it(inner)
-            elif it and not hasattr(it, '__iter__'):
+            elif it and not hasattr(it, '__iter__') or section[2] == '?':
                 if section[2] != '^':
                     replacer = inner
             elif it and hasattr(it, 'keys') and hasattr(it, '__getitem__'):
