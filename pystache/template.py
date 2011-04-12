@@ -86,7 +86,7 @@ class Template(object):
             replacer = ''
             if it and isinstance(it, collections.Callable):
                 replacer = it(inner)
-            elif it and not hasattr(it, '__iter__') or section[2] == '?':
+            elif it and (not hasattr(it, '__iter__') or section[2] == '?'):
                 if section[2] != '^':
                     replacer = inner
             elif it and hasattr(it, 'keys') and hasattr(it, '__getitem__'):
