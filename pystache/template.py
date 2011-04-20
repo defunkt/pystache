@@ -92,7 +92,7 @@ class Template(object):
             elif it and hasattr(it, 'keys') and hasattr(it, '__getitem__'):
                 if section[2] != '^':
                     replacer = self.render(inner, it)
-            elif it:
+            elif it and section[2] != '^':
                 insides = []
                 for item in it:
                     insides.append(self.render(inner, item))
