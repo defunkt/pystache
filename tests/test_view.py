@@ -4,7 +4,7 @@ import pystache
 from examples.simple import Simple
 from examples.complex_view import ComplexView
 from examples.lambdas import Lambdas
-from examples.inverted import Inverted
+from examples.inverted import Inverted, InvertedLists
 
 class TestView(unittest.TestCase):
     def test_basic(self):
@@ -88,6 +88,10 @@ class TestView(unittest.TestCase):
 
     def test_inverted(self):
         view = Inverted()
+        self.assertEquals(view.render(), """one, two, three""")
+
+    def test_inverted_lists(self):
+        view = InvertedLists()
         self.assertEquals(view.render(), """one, two, three""")
 
 

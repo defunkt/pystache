@@ -11,3 +11,12 @@ class Inverted(pystache.View):
 
     def two(self):
         return 'two'
+
+class InvertedLists(Inverted):
+    template_name = 'inverted'
+
+    def t(self):
+        return [0, 1, 2]
+
+    def f(self):
+        return []
