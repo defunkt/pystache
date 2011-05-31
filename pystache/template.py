@@ -4,6 +4,15 @@ import collections
 import os
 import copy
 
+try:
+    import markupsafe
+    escape = markupsafe.escape
+    literal = markupsafe.Markup
+
+except ImportError:
+    escape = lambda x: cgi.escape(unicode(x))
+    literal = unicode
+
 
 class Modifiers(dict):
     """Dictionary with a decorator for assigning functions to keys."""
@@ -89,7 +98,7 @@ class Template(object):
             elif (not it and section[2] == '^') or (it and section[2] != '^'):
                 replacer = self._render_dictionary(inner, it)
 
-            template = template.replace(section, replacer)
+            template = literal(template.replace(section, replacer))
 
         return template
 
@@ -132,7 +141,7 @@ class Template(object):
             else:
                 return ''
 
-        return cgi.escape(unicode(raw))
+        return escape(raw)
 
     @modifiers.set('!')
     def _render_comment(self, tag_name):
@@ -156,7 +165,7 @@ class Template(object):
     @modifiers.set('&')
     def render_unescaped(self, tag_name):
         """Render a tag without escaping it."""
-        return unicode(self.view.get(tag_name, ''))
+        return literal(self.view.get(tag_name, ''))
 
     def render(self, encoding=None):
         template = self._render_sections(self.template, self.view)
