@@ -4,7 +4,7 @@ import pystache
 from examples.simple import Simple
 from examples.complex_view import ComplexView
 from examples.lambdas import Lambdas
-from examples.inverted import Inverted
+from examples.inverted import Inverted, InvertedLists
 
 class Thing(object):
     pass
@@ -103,6 +103,10 @@ class TestView(unittest.TestCase):
         view.context_list = [{'one':'1'}, {'two':'2'}, object()]
 
         self.assertEqual(view.context, {'one': '1', 'two': '2'})
+
+    def test_inverted_lists(self):
+        view = InvertedLists()
+        self.assertEquals(view.render(), """one, two, three, empty list""")
 
 if __name__ == '__main__':
     unittest.main()

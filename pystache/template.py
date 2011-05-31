@@ -87,7 +87,7 @@ class Template(object):
                     replacer = self._render_dictionary(inner, it)
             # Falsey and Negated or Truthy and Not Negated
             elif (not it and section[2] == '^') or (it and section[2] != '^'):
-                replacer = inner
+                replacer = self._render_dictionary(inner, it)
 
             template = template.replace(section, replacer)
 
@@ -127,7 +127,10 @@ class Template(object):
 
         # For methods with no return value
         if not raw and raw is not 0:
-            return ''
+            if tag_name == '.':
+                raw = self.view.context_list[0]
+            else:
+                return ''
 
         return cgi.escape(unicode(raw))
 

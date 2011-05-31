@@ -68,6 +68,12 @@ class TestPystache(unittest.TestCase):
         context = { 'users': [ {'name': 'Chris'}, {'name': 'Tom'}, {'name': 'PJ'} ] }
         ret = pystache.render(template, context)
         self.assertEquals(ret, """<ul><li>Chris</li><li>Tom</li><li>PJ</li></ul>""")
+    
+    def test_implicit_iterator(self):
+        template = """<ul>{{#users}}<li>{{.}}</li>{{/users}}</ul>"""
+        context = { 'users': [ 'Chris', 'Tom','PJ' ] }
+        ret = pystache.render(template, context)
+        self.assertEquals(ret, """<ul><li>Chris</li><li>Tom</li><li>PJ</li></ul>""")
 
 if __name__ == '__main__':
     unittest.main()
