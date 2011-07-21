@@ -75,5 +75,10 @@ class TestPystache(unittest.TestCase):
         ret = pystache.render(template, context)
         self.assertEquals(ret, """<ul><li>Chris</li><li>Tom</li><li>PJ</li></ul>""")
 
+    def test_spacing(self):
+        template = "first{{#spacing}} second {{/spacing}}third"
+        ret = pystache.render(template, {"spacing": True})
+        self.assertEquals(ret, "first second third")
+
 if __name__ == '__main__':
     unittest.main()
