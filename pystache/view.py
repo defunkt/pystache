@@ -92,3 +92,4 @@ class View(object):
 
     def __str__(self):
         return self.render()
+

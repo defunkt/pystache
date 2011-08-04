@@ -2,14 +2,15 @@ import os
 
 class Loader(object):
     
-    template_extension = 'mustache'
-    template_path = '.'
-    template_encoding = None
+    def __init__(self, paths='.', extension='mustache', encoding=None):
+        self.template_paths = paths
+        self.template_extension = extension
+        self.template_encoding = encoding
     
     def load_template(self, template_name, template_dirs=None, encoding=None, extension=None):
         '''Returns the template string from a file or throws IOError if it non existent'''
         if None == template_dirs:
-            template_dirs = self.template_path
+            template_dirs = self.template_paths
         
         if encoding is not None:
             self.template_encoding = encoding
