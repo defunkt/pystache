@@ -2,6 +2,8 @@
 Pystache
 ========
 
+.. image:: https://s3.amazonaws.com/webdev_bucket/pystache.png
+
 Inspired by ctemplate_ and et_, Mustache_ is a
 framework-agnostic way to render logic-free views.
 
