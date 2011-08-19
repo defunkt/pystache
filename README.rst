@@ -13,6 +13,8 @@ it is impossible to embed application logic in this template language."
 Pystache is a Python implementation of Mustache. Pystache requires
 Python 2.6.
 
+Logo: David Phillips - http://davidphillips.us/ 
+
 Documentation
 =============
 
