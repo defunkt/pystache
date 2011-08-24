@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 
+"""
+pystache.template
+~~~~~~~~~~~~~~~~~
+
+This module provides Pystache's Template class.
+"""
+
 import re
 import cgi
 import collections
@@ -13,6 +20,7 @@ try:
 except ImportError:
     escape = lambda x: cgi.escape(unicode(x))
     literal = unicode
+
 
 
 class Modifiers(dict):
