@@ -11,8 +11,10 @@ except ImportError:
 
 
 def publish():
-    """Publish to Pypi"""
+    """Publishes module to The Cheeseshop."""
+
     os.system('python setup.py sdist upload')
+
 
 if 'publish' in sys.argv:
     publish()
