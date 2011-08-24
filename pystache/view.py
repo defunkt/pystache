@@ -35,6 +35,7 @@ class View(object):
 
 
     def get(self, attr, default=None):
+        """Returns given attribute value from View."""
 
         attr = get_or_attr(self.context_list, attr, getattr(self, attr, default))
 
@@ -45,6 +46,7 @@ class View(object):
 
 
     def get_template(self, template_name):
+        """Returns current Template."""
 
         if not self.template:
 
@@ -85,6 +87,8 @@ class View(object):
 
 
     def render(self, encoding=None):
+        """Returns rendered Template."""
+
         template = Template(self.get_template(self.template_name), self)
         return template.render(encoding=encoding)
 

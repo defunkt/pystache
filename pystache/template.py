@@ -58,6 +58,8 @@ class Template(object):
 
 
     def _compile_regexps(self):
+        """Compiles regular expressions, based on otag/ctag values."""
+
         tags = {
             'otag': re.escape(self.otag),
             'ctag': re.escape(self.ctag)
@@ -196,6 +198,8 @@ class Template(object):
 
 
     def render(self, encoding=None):
+        """Returns rendered Template string."""
+
         template = self._render_sections(self.template, self.view)
         result = self._render_tags(template)
 
