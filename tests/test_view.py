@@ -14,6 +14,10 @@ class TestView(unittest.TestCase):
         view = Simple("Hi {{thing}}!", { 'thing': 'world' })
         self.assertEquals(view.render(), "Hi world!")
 
+    def test_basic_sections(self):
+        view = Simple("{{#x}}{{#x}}x{{/x}}{{/x}}", { 'x': [{'x':[1,2,3]},{'x':[4,5,6]}] })
+        self.assertEquals(view.render(), "xxxxxx")
+
     def test_kwargs(self):
         view = Simple("Hi {{thing}}!", thing='world')
         self.assertEquals(view.render(), "Hi world!")
