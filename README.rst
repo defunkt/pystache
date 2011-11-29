@@ -66,6 +66,15 @@ nose_ works great! ::
     nosetests
 
 
+Mailing List
+==================
+As of Nov 26, 2011, there's a mailing list, pystache@librelist.com.
+
+Archive: http://librelist.com/browser/pystache/
+
+Note: There's a bit of a delay in seeing the latest emails appear
+in the archive.
+
 Author
 ======
 
