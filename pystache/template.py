@@ -45,10 +45,11 @@ class Template(object):
 
     modifiers = Modifiers()
 
-    def __init__(self, template=None, context=None, **kwargs):
+    def __init__(self, template=None, context=None, partials=None, **kwargs):
         from view import View
 
         self.template = template
+        self.partials = partials
 
         if kwargs:
             context.update(kwargs)
@@ -118,7 +119,7 @@ class Template(object):
 
     def _render_dictionary(self, template, context):
         self.view.context_list.insert(0, context)
-        template = Template(template, self.view)
+        template = Template(template, self.view, self.partials)
         out = template.render()
         self.view.context_list.pop(0)
         return out
@@ -149,9 +150,12 @@ class Template(object):
 
     @modifiers.set('>')
     def _render_partial(self, template_name):
-        from pystache import Loader
-        markup = Loader().load_template(template_name, self.view.template_path, encoding=self.view.template_encoding)
-        template = Template(markup, self.view)
+        if self.partials:
+            template = Template(self.partials[template_name], self.view, self.partials)
+        else:
+            from pystache import Loader
+            markup = Loader().load_template(template_name, self.view.template_path, encoding=self.view.template_encoding)
+            template = Template(markup, self.view)
         return template.render()
 
     @modifiers.set('=')

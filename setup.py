@@ -25,6 +25,8 @@ setup(name='pystache',
       url='http://github.com/defunkt/pystache',
       packages=['pystache'],
       license='MIT',
+      entry_points = {
+          'console_scripts': ['pystache=pystache.commands:main']},
       classifiers = ( 
         "Development Status :: 4 - Beta",
         "License :: OSI Approved :: MIT License",
