@@ -135,7 +135,7 @@ class Template(object):
         raw = self.view.get(tag_name, '')
 
         # For methods with no return value
-        if not raw and raw is not 0:
+        if not raw and raw != 0:
             if tag_name == '.':
                 raw = self.view.context_list[0]
             else:

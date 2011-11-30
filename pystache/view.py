@@ -80,7 +80,7 @@ class View(object):
     def __getitem__(self, attr):
         val = self.get(attr, None)
 
-        if not val and val is not 0:
+        if not val and val != 0:
             raise KeyError("Key '%s' does not exist in View" % attr)
         return val
 
