@@ -15,6 +15,7 @@ except ImportError:
 
 
 try:
+    # The collections.Callable class is not available until Python 2.6.
     import collections.Callable
     def check_callable(it):
         return isinstance(it, collections.Callable)
