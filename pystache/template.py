@@ -14,6 +14,15 @@ except ImportError:
     literal = unicode
 
 
+try:
+    import collections.Callable
+    def check_callable(it):
+        return isinstance(it, collections.Callable)
+except ImportError:
+    def check_callable(it):
+        return hasattr(it, '__call__')
+
+
 class Modifiers(dict):
     """Dictionary with a decorator for assigning functions to keys."""
 
@@ -80,7 +89,7 @@ class Template(object):
             replacer = ''
 
             # Callable
-            if it and isinstance(it, collections.Callable):
+            if it and check_callable(it):
                 replacer = it(inner)
             # Dictionary
             elif it and hasattr(it, 'keys') and hasattr(it, '__getitem__'):
