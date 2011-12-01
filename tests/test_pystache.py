@@ -51,16 +51,24 @@ class TestPystache(unittest.TestCase):
         template = "{{#stats}}({{key}} & {{value}}){{/stats}}"
         stats = []
         stats.append({'key': 123, 'value': ['something']})
-        stats.append({'key': u"chris", 'value': 0.900})
+        try:
+            stats.append({'key': unicode("chris"), 'value': 0.900})
+        except NameError:
+            stats.append({'key': "chris", 'value': 0.900})
 
         ret = pystache.render(template, { 'stats': stats })
         self.assertEquals(ret, """(123 & ['something'])(chris & 0.9)""")
 
     def test_unicode(self):
         template = 'Name: {{name}}; Age: {{age}}'
-        ret = pystache.render(template, { 'name': u'Henri Poincaré',
-            'age': 156 })
-        self.assertEquals(ret, u'Name: Henri Poincaré; Age: 156')
+        try:
+            ret = pystache.render(template, { 'name': 'Henri Poincaré'.decode('utf-8'),
+                'age': 156 })
+            self.assertEquals(ret, 'Name: Henri Poincaré; Age: 156'.decode('utf-8'))
+        except AttributeError:
+            ret = pystache.render(template, { 'name': 'Henri Poincaré',
+                'age': 156 })
+            self.assertEquals(ret, 'Name: Henri Poincaré; Age: 156')
 
     def test_sections(self):
         template = """<ul>{{#users}}<li>{{name}}</li>{{/users}}</ul>"""

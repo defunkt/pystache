@@ -20,10 +20,16 @@ class Loader(object):
         file_name = template_name + '.' + self.template_extension
 
         # Given a single directory we'll load from it
-        if isinstance(template_dirs, basestring):
-            file_path = os.path.join(template_dirs, file_name)
+        try:
+            if isinstance(template_dirs, basestring):
+                file_path = os.path.join(template_dirs, file_name)
 
-            return self._load_template_file(file_path)
+                return self._load_template_file(file_path)
+        except NameError:
+            if isinstance(template_dirs, (str, bytes)):
+                file_path = os.path.join(template_dirs, file_name)
+
+                return self._load_template_file(file_path)
             
         # Given a list of directories we'll check each for our file
         for path in template_dirs:
@@ -40,7 +46,11 @@ class Loader(object):
         try:
             template = f.read()
             if self.template_encoding:
-                template = unicode(template, self.template_encoding)
+                try:
+                    template = unicode(template, self.template_encoding)
+                except NameError:
+                    if isinstance(template, bytes):
+                        template = template.decode(self.template_encoding)
         finally:
             f.close()
         
