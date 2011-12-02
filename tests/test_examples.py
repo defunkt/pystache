@@ -53,7 +53,8 @@ Again, Welcome!""")
         self.assertEquals(view.render(), """Welcome
 -------
 
-Again, Welcome!
+## Again, Welcome! ##
+
 """)
 
 
