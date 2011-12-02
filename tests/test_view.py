@@ -22,6 +22,14 @@ class TestView(unittest.TestCase):
         view = Simple(thing='world')
         self.assertEquals(view.render(), "Hi world!")
 
+    def test_load_template(self):
+        """
+        Test View.load_template().
+
+        """
+        template = Simple().load_template("escaped")
+        self.assertEquals(template, "<h1>{{title}}</h1>")
+
     def test_template_load_from_multiple_path(self):
         path = Simple.template_path
         Simple.template_path = ('examples/nowhere','examples',)
@@ -57,7 +65,7 @@ class TestView(unittest.TestCase):
         self.assertEquals(view.render(), "Hi chris!")
 
     def test_complex(self):
-        self.assertEquals(ComplexView().render(), 
+        self.assertEquals(ComplexView().render(),
             """<h1>Colors</h1><ul><li><strong>red</strong></li><li><a href="#Green">green</a></li><li><a href="#Blue">blue</a></li></ul>""")
 
     def test_higher_order_replace(self):
@@ -74,12 +82,12 @@ class TestView(unittest.TestCase):
         view = Lambdas()
         view.template = '{{#sort}}zyxwvutsrqponmlkjihgfedcba{{/sort}}'
         self.assertEquals(view.render(), 'abcdefghijklmnopqrstuvwxyz')
-        
+
     def test_partials_with_lambda(self):
         view = Lambdas()
         view.template = '{{>partial_with_lambda}}'
         self.assertEquals(view.render(), 'nopqrstuvwxyz')
-        
+
     def test_hierarchical_partials_with_lambdas(self):
         view = Lambdas()
         view.template = '{{>partial_with_partial_and_lambda}}'
@@ -95,7 +103,7 @@ class TestView(unittest.TestCase):
         parent.children = [Thing()]
         view = Simple(context={'parent': parent})
         view.template = "{{#parent}}{{#children}}{{this}}{{/children}}{{/parent}}"
-        
+
         self.assertEquals(view.render(), 'derp')
 
     def test_context_returns_a_flattened_dict(self):
