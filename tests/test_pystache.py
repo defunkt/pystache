@@ -75,5 +75,17 @@ class TestPystache(unittest.TestCase):
         ret = pystache.render(template, context)
         self.assertEquals(ret, """<ul><li>Chris</li><li>Tom</li><li>PJ</li></ul>""")
 
+    def test_tag_in_value(self):
+        template = '{{test}}'
+        context = { 'test': '{{hello}}' }
+        ret = pystache.render(template, context)
+        self.assertEquals(ret, '{{hello}}')
+
+    def test_section_in_value(self):
+        template = '{{test}}'
+        context = { 'test': '{{#hello}}' }
+        ret = pystache.render(template, context)
+        self.assertEquals(ret, '{{#hello}}')
+
 if __name__ == '__main__':
     unittest.main()
