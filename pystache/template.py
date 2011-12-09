@@ -68,7 +68,8 @@ class Template(object):
         tag = r"%(otag)s(#|=|&|!|>|\{)?(.+?)\1?%(ctag)s+"
         self.tag_re = re.compile(tag % tags)
 
-    def _render_sections(self, template, view):
+    def _render(self, template, view):
+        output = ''
         while True:
             match = self.section_re.search(template)
             if match is None:
@@ -98,9 +99,15 @@ class Template(object):
             elif (not it and section[2] == '^') or (it and section[2] != '^'):
                 replacer = self._render_dictionary(inner, it)
 
-            template = literal(template.replace(section, replacer))
+            # Render template prior to section too
+            output = output + self._render_tags(template[0:match.start()]) + replacer
 
-        return template
+            template = template[match.end():]
+
+            # Render remainder
+        output = output + self._render_tags(template)
+
+        return output
 
     def _render_tags(self, template):
         output = ''
@@ -172,8 +179,8 @@ class Template(object):
         return literal(self.view.get(tag_name, ''))
 
     def render(self, encoding=None):
-        template = self._render_sections(self.template, self.view)
-        result = self._render_tags(template)
+        result = self._render(self.template, self.view)
+        #result = self._render_tags(template)
 
         if encoding is not None:
             result = result.encode(encoding)
