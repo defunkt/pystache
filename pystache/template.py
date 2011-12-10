@@ -72,6 +72,8 @@ class Template(object):
             'ctag': re.escape(self.ctag)
         }
 
+        # The section contents include white space to comply with the spec's
+        # requirement that sections not alter surrounding whitespace.
         section = r"%(otag)s[\#|^]([^\}]*)%(ctag)s(.+?)%(otag)s/\1%(ctag)s"
         self.section_re = re.compile(section % tags, re.M|re.S)
 

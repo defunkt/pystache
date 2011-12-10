@@ -68,14 +68,15 @@ class TestPystache(unittest.TestCase):
         context = { 'users': [ {'name': 'Chris'}, {'name': 'Tom'}, {'name': 'PJ'} ] }
         ret = pystache.render(template, context)
         self.assertEquals(ret, """<ul><li>Chris</li><li>Tom</li><li>PJ</li></ul>""")
-    
+
     def test_implicit_iterator(self):
         template = """<ul>{{#users}}<li>{{.}}</li>{{/users}}</ul>"""
         context = { 'users': [ 'Chris', 'Tom','PJ' ] }
         ret = pystache.render(template, context)
         self.assertEquals(ret, """<ul><li>Chris</li><li>Tom</li><li>PJ</li></ul>""")
 
-    def test_spacing(self):
+    # The spec says that sections should not alter surrounding whitespace.
+    def test_surrounding_whitepace_not_altered(self):
         template = "first{{#spacing}} second {{/spacing}}third"
         ret = pystache.render(template, {"spacing": True})
         self.assertEquals(ret, "first second third")
