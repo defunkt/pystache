@@ -1,7 +1,9 @@
-from pystache import Template
 import os.path
 import re
 from types import *
+
+from .template import Template
+
 
 def get_or_attr(context_list, name, default=None):
     if not context_list:
