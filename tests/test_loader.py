@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from pystache.loader import Loader
@@ -11,7 +12,7 @@ class LoaderTestCase(unittest.TestCase):
 
         """
         loader = Loader()
-        self.assertTrue(loader.search_dirs is None)
+        self.assertEquals(loader.search_dirs, [os.curdir])
         self.assertTrue(loader.template_encoding is None)
         self.assertEquals(loader.template_extension, 'mustache')
 
