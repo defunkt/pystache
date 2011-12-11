@@ -12,7 +12,10 @@ except ImportError:
 
 
 def publish():
-    """Publish to Pypi"""
+    """
+    Publish this package to PyPI (aka "the Cheeseshop").
+
+    """
     os.system('python setup.py sdist upload')
 
 
