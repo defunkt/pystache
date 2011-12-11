@@ -42,7 +42,15 @@ class View(object):
     template_encoding = None
     template_extension = 'mustache'
 
-    def __init__(self, template=None, context=None, **kwargs):
+    template_loader = None
+
+    def __init__(self, template=None, context=None, loader=None, **kwargs):
+        """
+        Construct a View instance.
+
+        """
+        # TODO: add a unit test for passing a loader.
+        self.template_loader = loader
         self.template = template
 
         context = context or {}
@@ -63,9 +71,14 @@ class View(object):
             return attr
 
     def load_template(self, template_name):
-        loader = Loader(search_dirs=self.template_path, encoding=self.template_encoding,
-                        extension=self.template_extension)
-        return loader.load_template(template_name)
+        if self.template_loader is None:
+            # We delay setting the loader until now to allow users to set
+            # the template_extension attribute, etc. after View.__init__()
+            # has already been called.
+            self.template_loader = Loader(search_dirs=self.template_path, encoding=self.template_encoding,
+                                          extension=self.template_extension)
+
+        return self.template_loader.load_template(template_name)
 
     def get_template(self, template_name):
         """
