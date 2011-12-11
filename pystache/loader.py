@@ -10,7 +10,7 @@ import os
 
 class Loader(object):
 
-    template_path = '.'
+    template_path = os.curdir  # i.e. "."
 
     def __init__(self, search_dirs=None, encoding=None, extension=None):
         """
