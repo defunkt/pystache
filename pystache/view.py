@@ -42,8 +42,19 @@ class View(object):
     template_encoding = None
     template_extension = 'mustache'
 
-    def __init__(self, template=None, context=None, **kwargs):
-        self.template = template
+    # A function that accepts a single template_name parameter.
+    _load_template = None
+
+    def __init__(self, template=None, context=None, load_template=None, **kwargs):
+        """
+        Construct a View instance.
+
+        """
+        if load_template is not None:
+            self._load_template = load_template
+
+        if template is not None:
+            self.template = template
 
         context = context or {}
         context.update(**kwargs)
@@ -63,37 +74,42 @@ class View(object):
             return attr
 
     def load_template(self, template_name):
-        from pystache import Loader
-        return Loader().load_template(template_name, self.template_path,
-                                      encoding=self.template_encoding, extension=self.template_extension)
+        if self._load_template is None:
+            # We delay setting self._load_template until now (in the case
+            # that the user did not supply a load_template to the constructor)
+            # to let users set the template_extension attribute, etc. after
+            # View.__init__() has already been called.
+            loader = Loader(search_dirs=self.template_path, encoding=self.template_encoding,
+                            extension=self.template_extension)
+            self._load_template = loader.load_template
 
-    def get_template(self, template_name):
+        return self._load_template(template_name)
+
+    def get_template(self):
         """
         Return the current template after setting it, if necessary.
 
         """
         if not self.template:
-            template_name = self._get_template_name(template_name)
+            template_name = self._get_template_name()
             self.template = self.load_template(template_name)
 
         return self.template
 
-    # TODO: consider removing the template_name parameter and using
-    # self.template_name instead.
-    def _get_template_name(self, template_name=None):
+    def _get_template_name(self):
         """
         Return the name of this Template instance.
 
-        If no template_name parameter is provided, this method returns the
-        class name modified as follows, for example:
+        If the template_name attribute is not set, then this method constructs
+        the template name from the class name as follows, for example:
 
-        TemplatePartial => template_partial
+            TemplatePartial => template_partial
 
-        Otherwise, it returns the given template_name.
+        Otherwise, this method returns the template_name.
 
         """
-        if template_name:
-            return template_name
+        if self.template_name:
+            return self.template_name
 
         template_name = self.__class__.__name__
 
@@ -114,7 +130,7 @@ class View(object):
         Return the view rendered using the current context.
 
         """
-        template = Template(self.get_template(self.template_name), self)
+        template = Template(self.get_template(), self)
         return template.render(encoding=encoding)
 
     def __contains__(self, needle):

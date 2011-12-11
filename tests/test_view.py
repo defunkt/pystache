@@ -5,11 +5,26 @@ from examples.simple import Simple
 from examples.complex_view import ComplexView
 from examples.lambdas import Lambdas
 from examples.inverted import Inverted, InvertedLists
+from pystache.view import View
+
 
 class Thing(object):
     pass
 
-class TestView(unittest.TestCase):
+
+class ViewTestCase(unittest.TestCase):
+
+    def test_init(self):
+        """
+        Test the constructor.
+
+        """
+        class TestView(View):
+            template = "foo"
+
+        view = TestView()
+        self.assertEquals(view.template, "foo")
+
     def test_basic(self):
         view = Simple("Hi {{thing}}!", { 'thing': 'world' })
         self.assertEquals(view.render(), "Hi world!")
@@ -29,6 +44,19 @@ class TestView(unittest.TestCase):
         """
         template = Simple().load_template("escaped")
         self.assertEquals(template, "<h1>{{title}}</h1>")
+
+    def test_custom_load_template(self):
+        """
+        Test passing a custom load_template to View.__init__().
+
+        """
+        partials_dict = {"partial": "Loaded from dictionary"}
+        load_template = lambda template_name: partials_dict[template_name]
+
+        view = Simple(load_template=load_template)
+
+        actual = view.load_template("partial")
+        self.assertEquals(actual, "Loaded from dictionary")
 
     def test_template_load_from_multiple_path(self):
         path = Simple.template_path
