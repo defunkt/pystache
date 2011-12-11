@@ -1,5 +1,10 @@
 # coding: utf-8
 
+"""
+This module provides a Template class.
+
+"""
+
 import re
 import cgi
 import collections
