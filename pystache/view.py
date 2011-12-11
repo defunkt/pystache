@@ -63,9 +63,9 @@ class View(object):
             return attr
 
     def load_template(self, template_name):
-        from pystache import Loader
-        return Loader().load_template(template_name, self.template_path,
-                                      encoding=self.template_encoding, extension=self.template_extension)
+        loader = Loader(search_dirs=self.template_path, encoding=self.template_encoding,
+                        extension=self.template_extension)
+        return loader.load_template(template_name)
 
     def get_template(self, template_name):
         """
