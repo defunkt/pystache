@@ -64,7 +64,6 @@ class View(object):
                                       encoding=self.template_encoding, extension=self.template_extension)
 
     def get_template(self, template_name):
-
         if not self.template:
             template_name = self._get_template_name(template_name)
             self.template = self.load_template(template_name)
