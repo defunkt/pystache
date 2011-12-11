@@ -58,6 +58,36 @@ class ViewTestCase(unittest.TestCase):
         actual = view.load_template("partial")
         self.assertEquals(actual, "Loaded from dictionary")
 
+    def test_template_path(self):
+        """
+        Test that View.template_path is respected.
+
+        """
+        class Tagless(View):
+            pass
+
+        view = Tagless()
+        self.assertRaises(IOError, view.render)
+
+        view = Tagless()
+        view.template_path = "examples"
+        self.assertEquals(view.render(), "No tags...")
+
+    def test_template_path_for_partials(self):
+        """
+        Test that View.template_path is respected for partials.
+
+        """
+        class TestView(View):
+            template = "Partial: {{>tagless}}"
+
+        view = TestView()
+        self.assertRaises(IOError, view.render)
+
+        view = TestView()
+        view.template_path = "examples"
+        self.assertEquals(view.render(), "Partial: No tags...")
+
     def test_template_load_from_multiple_path(self):
         path = Simple.template_path
         Simple.template_path = ('examples/nowhere','examples',)
