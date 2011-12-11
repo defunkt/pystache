@@ -68,6 +68,12 @@ class Template(object):
         self._compile_regexps()
 
     def _compile_regexps(self):
+        """
+        Compile and set the regular expression attributes.
+
+        This method uses the current values for the otag and ctag attributes.
+
+        """
         tags = {
             'otag': re.escape(self.otag),
             'ctag': re.escape(self.ctag)
@@ -194,6 +200,10 @@ class Template(object):
         return literal(self.view.get(tag_name, ''))
 
     def render(self, encoding=None):
+        """
+        Return the template rendered using the current view context.
+
+        """
         template = self._render_sections(self.template, self.view)
         result = self._render_tags(template)
 

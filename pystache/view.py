@@ -51,6 +51,10 @@ class View(object):
         self.context_list = [context]
 
     def get(self, attr, default=None):
+        """
+        Return the value for the given attribute.
+
+        """
         attr = get_or_attr(self.context_list, attr, getattr(self, attr, default))
 
         if hasattr(attr, '__call__') and type(attr) is UnboundMethodType:
@@ -64,6 +68,10 @@ class View(object):
                                       encoding=self.template_encoding, extension=self.template_extension)
 
     def get_template(self, template_name):
+        """
+        Return the current template after setting it, if necessary.
+
+        """
         if not self.template:
             template_name = self._get_template_name(template_name)
             self.template = self.load_template(template_name)
@@ -102,6 +110,10 @@ class View(object):
         return context
 
     def render(self, encoding=None):
+        """
+        Return the view rendered using the current context.
+
+        """
         template = Template(self.get_template(self.template_name), self)
         return template.render(encoding=encoding)
 
