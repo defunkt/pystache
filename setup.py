@@ -1,18 +1,25 @@
 #!/usr/bin/env python
+# coding: utf-8
 
 import os
 import sys
+
 
 try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
 
-def publish():
-    """Publish to Pypi"""
-    os.system("python setup.py sdist upload")
 
-if sys.argv[-1] == "publish":
+def publish():
+    """
+    Publish this package to PyPI (aka "the Cheeseshop").
+
+    """
+    os.system('python setup.py sdist upload')
+
+
+if sys.argv[-1] == 'publish':
     publish()
     sys.exit()
 
@@ -25,12 +32,12 @@ setup(name='pystache',
       url='http://github.com/defunkt/pystache',
       packages=['pystache'],
       license='MIT',
-      classifiers = ( 
-        "Development Status :: 4 - Beta",
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 2.5",
-        "Programming Language :: Python :: 2.6",
-        )
-     )
+      classifiers = (
+        'Development Status :: 4 - Beta',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2.5',
+        'Programming Language :: Python :: 2.6',
+      )
+)
 

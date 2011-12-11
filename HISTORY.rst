@@ -1,6 +1,10 @@
 History
 =======
 
+Next Release (version TBD)
+--------------------------
+* Added some docstrings [kennethreitz].
+
 0.4.0 (2011-01-12)
 ------------------
 * Add support for nested contexts (within template and view)
