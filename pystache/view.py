@@ -42,15 +42,17 @@ class View(object):
     template_encoding = None
     template_extension = 'mustache'
 
-    template_loader = None
+    # A function that accepts a single template_name parameter.
+    _load_template = None
 
-    def __init__(self, template=None, context=None, loader=None, **kwargs):
+    def __init__(self, template=None, context=None, load_template=None, **kwargs):
         """
         Construct a View instance.
 
         """
-        # TODO: add a unit test for passing a loader.
-        self.template_loader = loader
+        if load_template is not None:
+            self._load_template = load_template
+
         self.template = template
 
         context = context or {}
@@ -71,14 +73,16 @@ class View(object):
             return attr
 
     def load_template(self, template_name):
-        if self.template_loader is None:
-            # We delay setting the loader until now to allow users to set
-            # the template_extension attribute, etc. after View.__init__()
-            # has already been called.
-            self.template_loader = Loader(search_dirs=self.template_path, encoding=self.template_encoding,
-                                          extension=self.template_extension)
+        if self._load_template is None:
+            # We delay setting self._load_template until now (in the case
+            # that the user did not supply a load_template to the constructor)
+            # to let users set the template_extension attribute, etc. after
+            # View.__init__() has already been called.
+            loader = Loader(search_dirs=self.template_path, encoding=self.template_encoding,
+                            extension=self.template_extension)
+            self._load_template = loader.load_template
 
-        return self.template_loader.load_template(template_name)
+        return self._load_template(template_name)
 
     def get_template(self):
         """

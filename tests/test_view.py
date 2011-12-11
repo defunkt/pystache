@@ -30,6 +30,19 @@ class TestView(unittest.TestCase):
         template = Simple().load_template("escaped")
         self.assertEquals(template, "<h1>{{title}}</h1>")
 
+    def test_custom_load_template(self):
+        """
+        Test passing a custom load_template to View.__init__().
+
+        """
+        partials_dict = {"partial": "Loaded from dictionary"}
+        load_template = lambda template_name: partials_dict[template_name]
+
+        view = Simple(load_template=load_template)
+
+        actual = view.load_template("partial")
+        self.assertEquals(actual, "Loaded from dictionary")
+
     def test_template_load_from_multiple_path(self):
         path = Simple.template_path
         Simple.template_path = ('examples/nowhere','examples',)
