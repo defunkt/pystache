@@ -80,33 +80,31 @@ class View(object):
 
         return self.template_loader.load_template(template_name)
 
-    def get_template(self, template_name):
+    def get_template(self):
         """
         Return the current template after setting it, if necessary.
 
         """
         if not self.template:
-            template_name = self._get_template_name(template_name)
+            template_name = self._get_template_name()
             self.template = self.load_template(template_name)
 
         return self.template
 
-    # TODO: consider removing the template_name parameter and using
-    # self.template_name instead.
-    def _get_template_name(self, template_name=None):
+    def _get_template_name(self):
         """
         Return the name of this Template instance.
 
-        If no template_name parameter is provided, this method returns the
-        class name modified as follows, for example:
+        If the template_name attribute is not set, then this method constructs
+        the template name from the class name as follows, for example:
 
-        TemplatePartial => template_partial
+            TemplatePartial => template_partial
 
-        Otherwise, it returns the given template_name.
+        Otherwise, this method returns the template_name.
 
         """
-        if template_name:
-            return template_name
+        if self.template_name:
+            return self.template_name
 
         template_name = self.__class__.__name__
 
@@ -127,7 +125,7 @@ class View(object):
         Return the view rendered using the current context.
 
         """
-        template = Template(self.get_template(self.template_name), self)
+        template = Template(self.get_template(), self)
         return template.render(encoding=encoding)
 
     def __contains__(self, needle):
