@@ -5,11 +5,26 @@ from examples.simple import Simple
 from examples.complex_view import ComplexView
 from examples.lambdas import Lambdas
 from examples.inverted import Inverted, InvertedLists
+from pystache.view import View
+
 
 class Thing(object):
     pass
 
-class TestView(unittest.TestCase):
+
+class ViewTestCase(unittest.TestCase):
+
+    def test_init(self):
+        """
+        Test the constructor.
+
+        """
+        class TestView(View):
+            template = "foo"
+
+        view = TestView()
+        self.assertEquals(view.template, "foo")
+
     def test_basic(self):
         view = Simple("Hi {{thing}}!", { 'thing': 'world' })
         self.assertEquals(view.render(), "Hi world!")

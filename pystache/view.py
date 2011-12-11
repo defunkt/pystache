@@ -53,7 +53,8 @@ class View(object):
         if load_template is not None:
             self._load_template = load_template
 
-        self.template = template
+        if template is not None:
+            self.template = template
 
         context = context or {}
         context.update(**kwargs)
