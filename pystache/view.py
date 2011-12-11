@@ -1,11 +1,22 @@
-import os.path
-import re
-from types import *
+# coding: utf-8
 
+"""
+This module provides a View class.
+
+"""
+
+import re
+from types import UnboundMethodType
+
+from .loader import Loader
 from .template import Template
 
 
 def get_or_attr(context_list, name, default=None):
+    """
+    Find and return an attribute from the given context.
+
+    """
     if not context_list:
         return default
 
@@ -19,7 +30,9 @@ def get_or_attr(context_list, name, default=None):
                 return getattr(obj, name)
             except AttributeError:
                 pass
+
     return default
+
 
 class View(object):
 
@@ -31,6 +44,7 @@ class View(object):
 
     def __init__(self, template=None, context=None, **kwargs):
         self.template = template
+
         context = context or {}
         context.update(**kwargs)
 
@@ -38,6 +52,7 @@ class View(object):
 
     def get(self, attr, default=None):
         attr = get_or_attr(self.context_list, attr, getattr(self, attr, default))
+
         if hasattr(attr, '__call__') and type(attr) is UnboundMethodType:
             return attr()
         else:
@@ -49,16 +64,26 @@ class View(object):
                                       encoding=self.template_encoding, extension=self.template_extension)
 
     def get_template(self, template_name):
+
         if not self.template:
             template_name = self._get_template_name(template_name)
             self.template = self.load_template(template_name)
 
         return self.template
 
+    # TODO: consider removing the template_name parameter and using
+    # self.template_name instead.
     def _get_template_name(self, template_name=None):
-        """TemplatePartial => template_partial
-        Takes a string but defaults to using the current class' name or
-        the `template_name` attribute
+        """
+        Return the name of this Template instance.
+
+        If no template_name parameter is provided, this method returns the
+        class name modified as follows, for example:
+
+        TemplatePartial => template_partial
+
+        Otherwise, it returns the given template_name.
+
         """
         if template_name:
             return template_name
@@ -78,7 +103,8 @@ class View(object):
         return context
 
     def render(self, encoding=None):
-        return Template(self.get_template(self.template_name), self).render(encoding=encoding)
+        template = Template(self.get_template(self.template_name), self)
+        return template.render(encoding=encoding)
 
     def __contains__(self, needle):
         return needle in self.context or hasattr(self, needle)

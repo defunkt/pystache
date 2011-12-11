@@ -1,14 +1,16 @@
+# coding: utf-8
+
 import re
 import cgi
 import collections
-import os
-import copy
+
+from .loader import Loader
+
 
 try:
     import markupsafe
     escape = markupsafe.escape
     literal = markupsafe.Markup
-
 except ImportError:
     escape = lambda x: cgi.escape(unicode(x))
     literal = unicode
@@ -25,38 +27,37 @@ except ImportError:
 
 
 class Modifiers(dict):
+
     """Dictionary with a decorator for assigning functions to keys."""
 
     def set(self, key):
         """
-        Decorator function to set the given key to the decorated function.
+        Return a decorator that assigns the given function to the given key.
 
-            >>> modifiers = {}
-            >>> @modifiers.set('P')
-            ... def render_tongue(self, tag_name=None, context=None):
-            ...     return ":P %s" % tag_name
-            >>> modifiers
-            {'P': <function render_tongue at 0x...>}
+        >>> modifiers = {}
+        >>> @modifiers.set('P')
+        ... def render_tongue(self, tag_name=None, context=None):
+        ...     return ":P %s" % tag_name
+        >>> modifiers
+        {'P': <function render_tongue at 0x...>}
+
         """
-
-        def setter(func):
+        def decorate(func):
             self[key] = func
             return func
-        return setter
+        return decorate
 
 
 class Template(object):
 
     tag_re = None
-
     otag = '{{'
-
     ctag = '}}'
 
     modifiers = Modifiers()
 
     def __init__(self, template=None, context=None, **kwargs):
-        from view import View
+        from .view import View
 
         self.template = template
 
@@ -94,18 +95,22 @@ class Template(object):
             # Callable
             if it and check_callable(it):
                 replacer = it(inner)
+
             # Dictionary
             elif it and hasattr(it, 'keys') and hasattr(it, '__getitem__'):
                 if section[2] != '^':
                     replacer = self._render_dictionary(inner, it)
+
             # Lists
             elif it and hasattr(it, '__iter__'):
                 if section[2] != '^':
                     replacer = self._render_list(inner, it)
+
             # Other objects
             elif it and isinstance(it, object):
                 if section[2] != '^':
                     replacer = self._render_dictionary(inner, it)
+
             # Falsey and Negated or Truthy and Not Negated
             elif (not it and section[2] == '^') or (it and section[2] != '^'):
                 replacer = self._render_dictionary(inner, it)
@@ -130,9 +135,12 @@ class Template(object):
 
     def _render_dictionary(self, template, context):
         self.view.context_list.insert(0, context)
+
         template = Template(template, self.view)
         out = template.render()
+
         self.view.context_list.pop(0)
+
         return out
 
     def _render_list(self, template, listing):
@@ -167,15 +175,22 @@ class Template(object):
 
     @modifiers.set('=')
     def _change_delimiter(self, tag_name):
-        """Changes the Mustache delimiter."""
+        """
+        Change the current delimiter.
+
+        """
         self.otag, self.ctag = tag_name.split(' ')
         self._compile_regexps()
+
         return ''
 
     @modifiers.set('{')
     @modifiers.set('&')
     def render_unescaped(self, tag_name):
-        """Render a tag without escaping it."""
+        """
+        Render a tag without escaping it.
+
+        """
         return literal(self.view.get(tag_name, ''))
 
     def render(self, encoding=None):
