@@ -10,9 +10,19 @@ import os
 
 class Loader(object):
 
-    template_extension = 'mustache'
     template_path = '.'
-    template_encoding = None
+
+    def __init__(self, search_dirs=None, template_encoding=None, template_extension=None):
+        """
+        Construct a template loader.
+
+        """
+        if template_extension is None:
+            template_extension = 'mustache'
+
+        self.search_dirs = search_dirs
+        self.template_encoding = template_encoding
+        self.template_extension = template_extension
 
     def load_template(self, template_name, template_dirs=None, encoding=None, extension=None):
         """
@@ -21,8 +31,8 @@ class Loader(object):
         Raises an IOError if the template cannot be found.
 
         """
-        if None == template_dirs:
-            template_dirs = self.template_path
+        if template_dirs is None:
+            template_dirs = self.search_dirs or self.template_path
 
         if encoding is not None:
             self.template_encoding = encoding
