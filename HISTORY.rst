@@ -3,7 +3,9 @@ History
 
 Next Release (version TBD)
 --------------------------
-* Added some docstrings [kennethreitz].
+* Bugfix: Whitespace surrounding sections is no longer altered, in
+  accordance with the mustache spec. [heliodor]
+* Added some docstrings. [kennethreitz]
 
 0.4.0 (2011-01-12)
 ------------------
