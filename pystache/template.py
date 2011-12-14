@@ -166,7 +166,12 @@ class Template(object):
         raw = self.view.get(tag_name, '')
 
         # For methods with no return value
-        if not raw and raw is not 0:
+        #
+        # We use "==" rather than "is" to compare integers, as using "is" relies
+        # on an implementation detail of CPython.  The test about rendering
+        # zeroes failed while using PyPy when using "is".
+        # See issue #34: https://github.com/defunkt/pystache/issues/34
+        if not raw and raw != 0:
             if tag_name == '.':
                 raw = self.view.context_list[0]
             else:
