@@ -12,6 +12,7 @@ Run this script using the -h option for command-line help.
 # isn't available until Python 2.7.
 import argparse
 import json
+import sys
 
 # We use absolute imports here to allow use of this script from its
 # location in source control (e.g. for development purposes).
@@ -23,11 +24,13 @@ from pystache.loader import Loader
 from pystache.template import Template
 
 
-def main():
+def main(sys_argv):
+    args = sys_argv[1:]
+
     parser = argparse.ArgumentParser(description='Render a mustache template with the given context.')
     parser.add_argument('template',  help='A filename or a template code.')
     parser.add_argument('context', help='A filename or a JSON string')
-    args = parser.parse_args()
+    args = parser.parse_args(args=args)
 
     if args.template.endswith('.mustache'):
         args.template = args.template[:-9]
@@ -46,5 +49,5 @@ def main():
 
 
 if __name__=='__main__':
-    main()
+    main(sys.argv)
 
