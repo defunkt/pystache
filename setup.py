@@ -33,7 +33,8 @@ setup(name='pystache',
       packages=['pystache'],
       license='MIT',
       entry_points = {
-          'console_scripts': ['pystache=pystache.commands:main']},
+        'console_scripts': ['pystache=pystache.commands:main'],
+      },
       classifiers = (
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: MIT License',
