@@ -19,14 +19,26 @@ def publish():
     os.system('python setup.py sdist upload')
 
 
+def make_long_description():
+    """
+    Return the long description for the package.
+
+    """
+    long_description = open('README.rst').read() + '\n\n' + open('HISTORY.rst').read()
+
+    return long_description
+
+
 if sys.argv[-1] == 'publish':
     publish()
     sys.exit()
 
+long_description = make_long_description()
+
 setup(name='pystache',
       version='0.3.1',
       description='Mustache for Python',
-      long_description=open('README.rst').read() + '\n\n' + open('HISTORY.rst').read(),
+      long_description=long_description,
       author='Chris Wanstrath',
       author_email='chris@ozmm.org',
       url='http://github.com/defunkt/pystache',
