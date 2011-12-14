@@ -7,6 +7,8 @@ Next Release (version TBD)
   accordance with the mustache spec. [heliodor]
 * A custom template loader can now be passed to a View. [cjerdonek]
 * Added a command-line interface. [vrde, cjerdonek]
+* Bugfix: Fixed an issue that affected the rendering of zeroes when using
+  certain implementations of Python (i.e. PyPy). [alex]
 * Added some docstrings. [kennethreitz]
 
 0.4.0 (2011-01-12)
