@@ -169,7 +169,7 @@ class Template(object):
         #
         # We use "==" rather than "is" to compare integers, as using "is" relies
         # on an implementation detail of CPython.  The test about rendering
-        # zeroes fails on PyPy when using "is".
+        # zeroes failed while using PyPy when using "is".
         # See issue #34: https://github.com/defunkt/pystache/issues/34
         if not raw and raw != 0:
             if tag_name == '.':
