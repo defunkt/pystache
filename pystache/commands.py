@@ -1,7 +1,27 @@
-from pystache import Template
+# coding: utf-8
+
+"""
+This module provides command-line access to pystache.
+
+Run this script using the -h option for command-line help.
+
+"""
+
+# TODO: allow option parsing to work in Python versions earlier than
+# Python 2.7 (e.g. by using the optparse module).  The argparse module
+# isn't available until Python 2.7.
 import argparse
 import json
-from loader import Loader
+
+# We use absolute imports here to allow use of this script from its
+# location in source control (e.g. for development purposes).
+# Otherwise, the following error occurs:
+#
+#   ValueError: Attempted relative import in non-package
+#
+from pystache.loader import Loader
+from pystache.template import Template
+
 
 def main():
     parser = argparse.ArgumentParser(description='Render a mustache template with the given context.')
