@@ -6,6 +6,7 @@ Next Release (version TBD)
 * Bugfix: Whitespace surrounding sections is no longer altered, in
   accordance with the mustache spec. [heliodor]
 * A custom template loader can now be passed to a View. [cjerdonek]
+* Added a command-line interface. [vrde, cjerdonek]
 * Added some docstrings. [kennethreitz]
 
 0.4.0 (2011-01-12)
