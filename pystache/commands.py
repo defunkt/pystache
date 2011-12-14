@@ -7,11 +7,10 @@ Run this script using the -h option for command-line help.
 
 """
 
-# TODO: allow option parsing to work in Python versions earlier than
-# Python 2.7 (e.g. by using the optparse module).  The argparse module
-# isn't available until Python 2.7.
-import argparse
 import json
+# The optparse module is deprecated in Python 2.7 in favor of argparse.
+# However, argparse is not available in Python 2.6 and earlier.
+from optparse import OptionParser
 import sys
 
 # We use absolute imports here to allow use of this script from its
@@ -24,26 +23,46 @@ from pystache.loader import Loader
 from pystache.template import Template
 
 
-def main(sys_argv):
+USAGE = """\
+%prog [-h] template context
+
+Render a mustache template with the given context.
+
+positional arguments:
+  template    A filename or template string.
+  context     A filename or JSON string."""
+
+
+def parse_args(sys_argv, usage):
+    """
+    Return an OptionParser for the script.
+
+    """
     args = sys_argv[1:]
 
-    parser = argparse.ArgumentParser(description='Render a mustache template with the given context.')
-    parser.add_argument('template',  help='A filename or a template code.')
-    parser.add_argument('context', help='A filename or a JSON string')
-    args = parser.parse_args(args=args)
+    parser = OptionParser(usage=usage)
+    options, args = parser.parse_args(args)
 
-    if args.template.endswith('.mustache'):
-        args.template = args.template[:-9]
+    template, context = args
+
+    return template, context
+
+
+def main(sys_argv):
+    template, context = parse_args(sys_argv, USAGE)
+
+    if template.endswith('.mustache'):
+        template = template[:-9]
 
     try:
-        template = Loader().load_template(args.template)
+        template = Loader().load_template(template)
     except IOError:
-        template = args.template
+        pass
 
     try:
-        context = json.load(open(args.context))
+        context = json.load(open(context))
     except IOError:
-        context = json.loads(args.context)
+        context = json.loads(context)
 
     print(Template(template, context).render())
 
