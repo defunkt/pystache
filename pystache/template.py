@@ -62,15 +62,22 @@ class Template(object):
     modifiers = Modifiers()
 
     def __init__(self, template=None, context=None, **kwargs):
+        """
+        The **kwargs arguments are only supported if the context is
+        a dictionary (i.e. not a View).
+
+        """
         from .view import View
 
         self.template = template
 
         if context is None:
             context = {}
-
-        if kwargs:
-            context.update(kwargs)
+        elif not isinstance(context, View):
+            # Views do not support copy() or update().
+            context = context.copy()
+            if kwargs:
+                context.update(kwargs)
 
         self.view = context if isinstance(context, View) else View(context=context)
         self._compile_regexps()
