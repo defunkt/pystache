@@ -229,3 +229,16 @@ class ContextTestCase(TestCase):
         context.push({key: "buzz"})
         self.assertEquals(context.get(key), "buzz")
 
+    def test_pop(self):
+        """
+        Test pop().
+
+        """
+        key = "foo"
+        context = Context({key: "bar"}, {key: "buzz"})
+        self.assertEquals(context.get(key), "buzz")
+
+        item = context.pop()
+        self.assertEquals(item, {"foo": "buzz"})
+        self.assertEquals(context.get(key), "bar")
+

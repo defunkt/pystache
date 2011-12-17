@@ -139,4 +139,6 @@ class Context(object):
     def push(self, item):
         self._stack.append(item)
 
+    def pop(self):
+        return self._stack.pop()
 
