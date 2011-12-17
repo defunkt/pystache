@@ -116,7 +116,7 @@ class Template(object):
         tag = r"%(otag)s(#|=|&|!|>|\{)?(.+?)\1?%(ctag)s+"
         self.tag_re = re.compile(tag % tags)
 
-    def _render_sections(self, template, view):
+    def _render_sections(self, template):
         while True:
             match = self.section_re.search(template)
             if match is None:
@@ -240,7 +240,7 @@ class Template(object):
         Return the template rendered using the current view context.
 
         """
-        template = self._render_sections(self.template, self.view)
+        template = self._render_sections(self.template)
         result = self._render_tags(template)
 
         if encoding is not None:
