@@ -19,7 +19,7 @@ class View(object):
     template_path = None
     template = None
     template_encoding = None
-    template_extension = 'mustache'
+    template_extension = None
 
     # A function that accepts a single template_name parameter.
     _load_template = None
@@ -93,7 +93,7 @@ class View(object):
         Return the view rendered using the current context.
 
         """
-        template = Template(self.get_template(), self)
+        template = Template(self.get_template(), self.context, self.load_template)
         return template.render(encoding=encoding)
 
     def get(self, key, default=None):

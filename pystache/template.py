@@ -62,37 +62,38 @@ class Template(object):
 
     modifiers = Modifiers()
 
-    def __init__(self, template=None, context=None, **kwargs):
+    def __init__(self, template=None, context=None, load_template=None, **kwargs):
         """
-        The context argument can be a dictionary, View, or Context instance.
+        Construct a Template instance.
+
+        Arguments:
+
+          context: a dictionary, Context, or View instance.
+
+          load_template: the function for loading partials.  The function should
+            accept a single template_name parameter and return a template as
+            a string.  Defaults to the default Loader's load_template() method.
 
         """
-        from .view import View
-
         if context is None:
             context = {}
 
-        view = None
+        if load_template is None:
+            loader = Loader()
+            load_template = loader.load_template
+            load_template = getattr(context, 'load_template', load_template)
 
-        if isinstance(context, View):
-            view = context
-            context = view.context.copy()
-        elif isinstance(context, Context):
+        if isinstance(context, Context):
             context = context.copy()
         else:
-            # Otherwise, the context is a dictionary.
             context = Context(context)
 
         if kwargs:
             context.push(kwargs)
 
-        if view is None:
-            view = View()
-
         self.context = context
+        self.load_template = load_template
         self.template = template
-        # The view attribute is used only for its load_template() method.
-        self.view = view
 
         self._compile_regexps()
 
@@ -171,8 +172,7 @@ class Template(object):
     def _render_dictionary(self, template, context):
         self.context.push(context)
 
-        template = Template(template, self.context)
-        template.view = self.view
+        template = Template(template, self.context, self.load_template)
         out = template.render()
 
         self.context.pop()
@@ -210,9 +210,8 @@ class Template(object):
 
     @modifiers.set('>')
     def _render_partial(self, template_name):
-        markup = self.view.load_template(template_name)
-        template = Template(markup, self.context)
-        template.view = self.view
+        markup = self.load_template(template_name)
+        template = Template(markup, self.context, self.load_template)
         return template.render()
 
     @modifiers.set('=')
@@ -237,7 +236,7 @@ class Template(object):
 
     def render(self, encoding=None):
         """
-        Return the template rendered using the current view context.
+        Return the template rendered using the current context.
 
         """
         template = self._render_sections(self.template)
