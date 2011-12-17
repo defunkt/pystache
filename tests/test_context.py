@@ -177,21 +177,21 @@ class ContextTestCase(TestCase):
         """
         context = Context({}, {}, {})
 
-    def test_get__missing_key(self):
+    def test_get__key_present(self):
+        """
+        Test getting a key.
+
+        """
+        context = Context({"foo": "bar"})
+        self.assertEquals(context.get("foo"), "bar")
+
+    def test_get__key_missing(self):
         """
         Test getting a missing key.
 
         """
         context = Context()
         self.assertTrue(context.get("foo") is None)
-
-    def test_get__dictionary_methods_not_queried(self):
-        """
-        Test getting a missing key.
-
-        """
-        context = Context()
-        #self.assertEquals(context.get("keys"), 2)
 
     def test_get__default(self):
         """
@@ -200,14 +200,6 @@ class ContextTestCase(TestCase):
         """
         context = Context()
         self.assertEquals(context.get("foo", "bar"), "bar")
-
-    def test_get__key_present(self):
-        """
-        Test get() with a key that is present.
-
-        """
-        context = Context({"foo": "bar"})
-        self.assertEquals(context.get("foo"), "bar")
 
     def test_get__precedence(self):
         """
@@ -224,20 +216,4 @@ class ContextTestCase(TestCase):
         """
         context = Context({"fuzz": "buzz"}, {"foo": "bar"})
         self.assertEquals(context.get("fuzz"), "buzz")
-
-    def test_get__object_attribute(self):
-        """
-        Test that object attributes are queried.
-
-        """
-        context = Context(SimpleObject())
-        self.assertEquals(context.get("foo"), "bar")
-
-    def test_get__object_callable(self):
-        """
-        Test that object callables are queried.
-
-        """
-        context = Context(SimpleObject())
-        #self.assertEquals(context.get("foo_callable"), "called...")
 
