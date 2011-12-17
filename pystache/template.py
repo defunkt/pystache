@@ -73,7 +73,8 @@ class Template(object):
 
         if context is None:
             context = {}
-        elif not isinstance(context, View):
+
+        if not isinstance(context, View):
             # Views do not support copy() or update().
             context = context.copy()
             if kwargs:
