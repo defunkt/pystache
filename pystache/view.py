@@ -50,6 +50,9 @@ class View(object):
         Construct a View instance.
 
         """
+        if context is None:
+            context = {}
+
         if load_template is not None:
             self._load_template = load_template
 

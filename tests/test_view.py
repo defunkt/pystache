@@ -25,6 +25,15 @@ class ViewTestCase(unittest.TestCase):
         view = TestView()
         self.assertEquals(view.template, "foo")
 
+    def test_init__kwargs_does_not_modify_context(self):
+        """
+        Test that passing **kwargs does not modify the passed context.
+
+        """
+        context = {"foo": "bar"}
+        view = View(context=context, fuzz="buzz")
+        self.assertEquals(context, {"foo": "bar"})
+
     def test_basic(self):
         view = Simple("Hi {{thing}}!", { 'thing': 'world' })
         self.assertEquals(view.render(), "Hi world!")
