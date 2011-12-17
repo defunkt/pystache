@@ -105,6 +105,14 @@ class GetItemTestCase(TestCase):
         obj = SimpleObject()
         self.assertNotFound(obj, "missing")
 
+    def test_object__attribute_is_callable(self):
+        """
+        Test getting a callable attribute from an object.
+
+        """
+        obj = SimpleObject()
+        self.assertEquals(_get_item(obj, "foo_callable"), "called...")
+
     ### Case: obj implements __getitem__() (i.e. a "mapping object").
 
     def test_mapping__key_present(self):

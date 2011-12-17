@@ -106,14 +106,24 @@ class Context(object):
         """
         Query the stack for the given key, and return the resulting value.
 
-        Querying for a key queries objects in the stack in order from
-        last-added objects to first (last in, first out).
+        Querying for a key queries items in the stack in order from last-
+        added objects to first (last in, first out).  The value returned
+        is the value of the key for the first item for which the item
+        contains the key.  If the key is not found in any item in the
+        stack, then this method returns the default value.  The default
+        value defaults to None.
 
-        Querying an item in the stack is done as follows:
+        Querying an item in the stack is done in the following way:
 
-        (1) The __getitem__ method is attempted first, if it exists.
-
-        This method returns None if no item in the stack contains the key.
+        (1) If the item defines __getitem__() and the item contains the
+            key (i.e. __contains__() returns True), then the corresponding
+            value is returned.
+        (2) Otherwise, the method looks for an attribute with the same
+            name as the key.  If such an attribute exists, the value of
+            this attribute is returned.  If the attribute is callable,
+            however, the attribute is first called with no arguments.
+        (3) If there is no attribute with the same name as the key, then
+            the key is considered not found in the item.
 
         """
         for obj in reversed(self._stack):
