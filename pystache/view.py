@@ -8,30 +8,9 @@ This module provides a View class.
 import re
 from types import UnboundMethodType
 
+from .context import Context
 from .loader import Loader
 from .template import Template
-
-
-def get_or_attr(context_list, name, default=None):
-    """
-    Find and return an attribute from the given context.
-
-    """
-    if not context_list:
-        return default
-
-    for obj in context_list:
-        try:
-            return obj[name]
-        except KeyError:
-            pass
-        except:
-            try:
-                return getattr(obj, name)
-            except AttributeError:
-                pass
-
-    return default
 
 
 class View(object):
@@ -50,31 +29,19 @@ class View(object):
         Construct a View instance.
 
         """
-        if context is None:
-            context = {}
-
         if load_template is not None:
             self._load_template = load_template
 
         if template is not None:
             self.template = template
 
-        context = context or {}
-        context.update(**kwargs)
+        _context = Context(self)
+        if context:
+            _context.push(context)
+        if kwargs:
+            _context.push(kwargs)
 
-        self.context_list = [context]
-
-    def get(self, attr, default=None):
-        """
-        Return the value for the given attribute.
-
-        """
-        attr = get_or_attr(self.context_list, attr, getattr(self, attr, default))
-
-        if hasattr(attr, '__call__') and type(attr) is UnboundMethodType:
-            return attr()
-        else:
-            return attr
+        self.context = _context
 
     def load_template(self, template_name):
         if self._load_template is None:
@@ -121,13 +88,6 @@ class View(object):
 
         return re.sub('[A-Z]', repl, template_name)[1:]
 
-    def _get_context(self):
-        context = {}
-        for item in self.context_list:
-            if hasattr(item, 'keys') and hasattr(item, '__getitem__'):
-                context.update(item)
-        return context
-
     def render(self, encoding=None):
         """
         Return the view rendered using the current context.
@@ -136,14 +96,8 @@ class View(object):
         template = Template(self.get_template(), self)
         return template.render(encoding=encoding)
 
-    def __contains__(self, needle):
-        return needle in self.context or hasattr(self, needle)
-
-    def __getattr__(self, attr):
-        if attr == 'context':
-            return self._get_context()
-
-        raise AttributeError("Attribute '%s' does not exist in View" % attr)
+    def get(self, key, default=None):
+        return self.context.get(key, default)
 
     def __str__(self):
         return self.render()

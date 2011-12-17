@@ -173,12 +173,6 @@ class ViewTestCase(unittest.TestCase):
 
         self.assertEquals(view.render(), 'derp')
 
-    def test_context_returns_a_flattened_dict(self):
-        view = Simple()
-        view.context_list = [{'one':'1'}, {'two':'2'}, object()]
-
-        self.assertEqual(view.context, {'one': '1', 'two': '2'})
-
     def test_inverted_lists(self):
         view = InvertedLists()
         self.assertEquals(view.render(), """one, two, three, empty list""")

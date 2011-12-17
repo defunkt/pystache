@@ -158,12 +158,12 @@ class Template(object):
         return template
 
     def _render_dictionary(self, template, context):
-        self.view.context_list.insert(0, context)
+        self.view.context.push(context)
 
         template = Template(template, self.view)
         out = template.render()
 
-        self.view.context_list.pop(0)
+        self.view.context.pop()
 
         return out
 
@@ -186,7 +186,7 @@ class Template(object):
         # See issue #34: https://github.com/defunkt/pystache/issues/34
         if not raw and raw != 0:
             if tag_name == '.':
-                raw = self.view.context_list[0]
+                raw = self.view.context.top()
             else:
                 return ''
 
