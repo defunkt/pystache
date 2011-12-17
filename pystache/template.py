@@ -66,6 +66,9 @@ class Template(object):
 
         self.template = template
 
+        if context is None:
+            context = {}
+
         if kwargs:
             context.update(kwargs)
 
