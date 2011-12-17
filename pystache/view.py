@@ -136,17 +136,6 @@ class View(object):
     def __contains__(self, needle):
         return needle in self.context or hasattr(self, needle)
 
-    def __getitem__(self, attr):
-        val = self.get(attr, None)
-
-        # We use "==" rather than "is" to compare integers, as using "is" relies
-        # on an implementation detail of CPython.  The test about rendering
-        # zeroes failed while using PyPy when using "is".
-        # See issue #34: https://github.com/defunkt/pystache/issues/34
-        if not val and val != 0:
-            raise KeyError("Key '%s' does not exist in View" % attr)
-        return val
-
     def __getattr__(self, attr):
         if attr == 'context':
             return self._get_context()
