@@ -57,12 +57,13 @@ def _get_item(obj, key):
 class Context(object):
 
     """
-    Provides dictionary-like access to a stack of zero or more objects.
+    Provides dictionary-like access to a stack of zero or more items.
 
     Instances of this class are meant to represent the rendering context
     when rendering mustache templates in accordance with mustache(5).
 
-    Querying the stack for the value of a key queries the objects in the
+    Instances encapsulate a private stack of objects and dictionaries.
+    Querying the stack for the value of a key queries the items in the
     stack in order from last-added objects to first (last in, first out).
 
     See the docstrings of the methods of this class for more information.
@@ -71,16 +72,16 @@ class Context(object):
 
     # We reserve keyword arguments for future options (e.g. a "strict=True"
     # option for enabling a strict mode).
-    def __init__(self, *obj):
+    def __init__(self, *items):
         """
-        Construct an instance, and initialize the stack.
+        Construct an instance, and initialize the internal stack.
 
-        The variable argument list *obj are the objects with which to
-        populate the initial stack.  Objects in the argument list are added
-        to the stack in order so that, in particular, items at the end of
+        The *items arguments are the items with which to populate the
+        initial stack.  Items in the argument list are added to the
+        stack in order so that, in particular, items at the end of
         the argument list are queried first when querying the stack.
 
-        The objects should be dictionary-like in the following sense:
+        The items should satisfy the following:
 
         (1) They can be dictionaries or objects.
         (2) If they implement __getitem__, a KeyError should be raised
@@ -100,7 +101,7 @@ class Context(object):
         also need to take __iter__() into account]....
 
         """
-        self.stack = list(obj)
+        self._stack = list(items)
 
     def get(self, key, default=None):
         """
@@ -116,7 +117,7 @@ class Context(object):
         This method returns None if no item in the stack contains the key.
 
         """
-        for obj in reversed(self.stack):
+        for obj in reversed(self._stack):
             val = _get_item(obj, key)
             if val is _NOT_FOUND:
                 continue

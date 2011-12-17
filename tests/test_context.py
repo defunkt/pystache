@@ -77,6 +77,16 @@ class GetItemTestCase(TestCase):
         obj = {}
         self.assertNotFound(obj, "missing")
 
+    def test_dictionary__attributes_not_checked(self):
+        """
+        Test that dictionary attributes are not checked.
+
+        """
+        obj = {}
+        attr_name = "keys"
+        self.assertEquals(getattr(obj, attr_name)(), [])
+        self.assertNotFound(obj, attr_name)
+
     ### Case: obj does not implement __getitem__().
 
     def test_object__attribute_present(self):
@@ -119,10 +129,10 @@ class GetItemTestCase(TestCase):
 
         """
         obj = MappingObject()
-        self.assertEquals(obj.fuzz, "buzz")
-        # The presence of __getitem__ causes obj.fuzz not to be checked,
-        # as desired.
-        self.assertNotFound(obj, "fuzz")
+        key = "fuzz"
+        self.assertEquals(getattr(obj, key), "buzz")
+        # As desired, __getitem__()'s presence causes obj.fuzz not to be checked.
+        self.assertNotFound(obj, key)
 
     def test_mapping_object__not_implementing_contains(self):
         """
