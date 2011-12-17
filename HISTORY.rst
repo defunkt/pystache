@@ -3,8 +3,9 @@ History
 
 Next Release (version TBD)
 --------------------------
-* Bugfix: Passing **kwargs to Template.__init__() with no context
-  raised an exception. [cjerdonek]
+* Bugfix: Passing **kwargs to Template() modified the context. [cjerdonek]
+* Bugfix: Passing **kwargs to Template() with no context raised an
+  exception. [cjerdonek]
 * Bugfix: Whitespace surrounding sections is no longer altered, in
   accordance with the mustache spec. [heliodor]
 * A custom template loader can now be passed to a View. [cjerdonek]
