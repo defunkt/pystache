@@ -136,4 +136,7 @@ class Context(object):
 
         return default
 
+    def push(self, item):
+        self._stack.append(item)
+
 
