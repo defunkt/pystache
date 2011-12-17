@@ -22,7 +22,8 @@ def _get_item(obj, key):
     Return a key's value, or _NOT_FOUND if the key does not exist.
 
     The obj argument should satisfy the same conditions as those
-    described for the obj arguments in Context.__init__'s() docstring.
+    described for the arguments passed to Context.__init__().  These
+    conditions are described in Context.__init__()'s docstring.
 
     The rules for looking up the value of a key are the same as the rules
     described in Context.get()'s docstring for querying a single item.
@@ -59,7 +60,7 @@ class Context(object):
     """
     Provides dictionary-like access to a stack of zero or more items.
 
-    Instances of this class are meant to represent the rendering context
+    Instances of this class are meant to act as the rendering context
     when rendering mustache templates in accordance with mustache(5).
 
     Instances encapsulate a private stack of objects and dictionaries.
@@ -74,31 +75,29 @@ class Context(object):
     # option for enabling a strict mode).
     def __init__(self, *items):
         """
-        Construct an instance, and initialize the internal stack.
+        Construct an instance, and initialize the private stack.
 
         The *items arguments are the items with which to populate the
         initial stack.  Items in the argument list are added to the
         stack in order so that, in particular, items at the end of
         the argument list are queried first when querying the stack.
 
-        The items should satisfy the following:
+        Each item should satisfy the following condition:
 
-        (1) They can be dictionaries or objects.
-        (2) If they implement __getitem__, a KeyError should be raised
-            if __getitem__ is called on a missing key.
+        * If the item implements __getitem__(), it should also implement
+          __contains__().  Failure to implement __contains__() will cause
+          an AttributeError to be raised when the item is queried during
+          calls to self.get().
 
-        For efficiency, objects should implement __contains__() for more
-        efficient membership testing.  From the Python documentation--
+          Python dictionaries, in particular, satisfy this condition.
+          An item satisfying this condition we informally call a "mapping
+          object" because it shares some characteristics of the Mapping
+          abstract base class (ABC) in Python's collections package:
+          http://docs.python.org/library/collections.html#collections-abstract-base-classes
 
-            For objects that don’t define __contains__(), the membership test
-            first tries iteration via __iter__(), then the old sequence
-            iteration protocol via __getitem__()....
-
-        (from http://docs.python.org/reference/datamodel.html#object.__contains__ )
-
-        Failing to implement __contains__() will cause undefined behavior.
-        on any key for which __getitem__() raises an exception [TODO:
-        also need to take __iter__() into account]....
+          It is not necessary for an item to implement __getitem__().
+          In particular, an item can be an ordinary object with no
+          mapping-like characteristics.
 
         """
         self._stack = list(items)
