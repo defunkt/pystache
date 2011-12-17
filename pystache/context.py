@@ -137,8 +137,29 @@ class Context(object):
         return default
 
     def push(self, item):
+        """
+        Push an item onto the stack.
+
+        """
         self._stack.append(item)
 
     def pop(self):
+        """
+        Pop an item off of the stack, and return it.
+
+        """
         return self._stack.pop()
 
+    def top(self):
+        """
+        Return the item last added to the stack.
+
+        """
+        return self._stack[-1]
+
+    def copy(self):
+        """
+        Return a copy of this instance.
+
+        """
+        return Context(*self._stack)

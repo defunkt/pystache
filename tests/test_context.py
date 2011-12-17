@@ -242,3 +242,27 @@ class ContextTestCase(TestCase):
         self.assertEquals(item, {"foo": "buzz"})
         self.assertEquals(context.get(key), "bar")
 
+    def test_top(self):
+        key = "foo"
+        context = Context({key: "bar"}, {key: "buzz"})
+        self.assertEquals(context.get(key), "buzz")
+
+        top = context.top()
+        self.assertEquals(top, {"foo": "buzz"})
+        # Make sure calling top() didn't remove the item from the stack.
+        self.assertEquals(context.get(key), "buzz")
+
+    def test_copy(self):
+        key = "foo"
+        original = Context({key: "bar"}, {key: "buzz"})
+        self.assertEquals(original.get(key), "buzz")
+
+        new = original.copy()
+        # Confirm that the copy behaves the same.
+        self.assertEquals(new.get(key), "buzz")
+        # Change the copy, and confirm it is changed.
+        new.pop()
+        self.assertEquals(new.get(key), "bar")
+        # Confirm the original is unchanged.
+        self.assertEquals(original.get(key), "buzz")
+
