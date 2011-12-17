@@ -64,39 +64,32 @@ class Template(object):
 
     def __init__(self, template=None, context=None, load_template=None, **kwargs):
         """
+        Construct a Template instance.
 
         Arguments:
 
-          context: a dictionary, View, or Context instance.
+          context: a dictionary, Context, or View instance.
 
-          load_template: a function that accepts a single template_name
-            parameter and returns a template as a string.  Defaults to the
-            default Loader's load_template() method.
+          load_template: the function for loading partials.  The function should
+            accept a single template_name parameter and return a template as
+            a string.  Defaults to the default Loader's load_template() method.
 
         """
-        from .view import View
-
         if context is None:
             context = {}
-
-        view = None
-
-        if isinstance(context, View):
-            view = context
-            context = view.context.copy()
-            load_template = view.load_template
-        elif isinstance(context, Context):
-            context = context.copy()
-        else:
-            # Otherwise, the context is a dictionary.
-            context = Context(context)
-
-        if kwargs:
-            context.push(kwargs)
 
         if load_template is None:
             loader = Loader()
             load_template = loader.load_template
+            load_template = getattr(context, 'load_template', load_template)
+
+        if isinstance(context, Context):
+            context = context.copy()
+        else:
+            context = Context(context)
+
+        if kwargs:
+            context.push(kwargs)
 
         self.context = context
         self.load_template = load_template
@@ -243,7 +236,7 @@ class Template(object):
 
     def render(self, encoding=None):
         """
-        Return the template rendered using the current view context.
+        Return the template rendered using the current context.
 
         """
         template = self._render_sections(self.template)
