@@ -9,6 +9,7 @@ import re
 import cgi
 import collections
 
+from .context import Context
 from .loader import Loader
 
 
@@ -63,24 +64,36 @@ class Template(object):
 
     def __init__(self, template=None, context=None, **kwargs):
         """
-        The **kwargs arguments are only supported if the context is
-        a dictionary (i.e. not a View).
+        The context argument can be a dictionary, View, or Context instance.
 
         """
         from .view import View
 
-        self.template = template
-
         if context is None:
             context = {}
 
-        if not isinstance(context, View):
-            # Views do not support copy() or update().
-            context = context.copy()
-            if kwargs:
-                context.update(kwargs)
+        view = None
 
-        self.view = context if isinstance(context, View) else View(context=context)
+        if isinstance(context, View):
+            view = context
+            context = view.context.copy()
+        elif isinstance(context, Context):
+            context = context.copy()
+        else:
+            # Otherwise, the context is a dictionary.
+            context = Context(context)
+
+        if kwargs:
+            context.push(kwargs)
+
+        if view is None:
+            view = View()
+
+        self.context = context
+        self.template = template
+        # The view attribute is used only for its load_template() method.
+        self.view = view
+
         self._compile_regexps()
 
     def _compile_regexps(self):
@@ -103,7 +116,7 @@ class Template(object):
         tag = r"%(otag)s(#|=|&|!|>|\{)?(.+?)\1?%(ctag)s+"
         self.tag_re = re.compile(tag % tags)
 
-    def _render_sections(self, template, view):
+    def _render_sections(self, template):
         while True:
             match = self.section_re.search(template)
             if match is None:
@@ -111,7 +124,7 @@ class Template(object):
 
             section, section_name, inner = match.group(0, 1, 2)
             section_name = section_name.strip()
-            it = self.view.get(section_name, None)
+            it = self.context.get(section_name, None)
             replacer = ''
 
             # Callable
@@ -156,12 +169,13 @@ class Template(object):
         return template
 
     def _render_dictionary(self, template, context):
-        self.view.context_list.insert(0, context)
+        self.context.push(context)
 
-        template = Template(template, self.view)
+        template = Template(template, self.context)
+        template.view = self.view
         out = template.render()
 
-        self.view.context_list.pop(0)
+        self.context.pop()
 
         return out
 
@@ -174,7 +188,7 @@ class Template(object):
 
     @modifiers.set(None)
     def _render_tag(self, tag_name):
-        raw = self.view.get(tag_name, '')
+        raw = self.context.get(tag_name, '')
 
         # For methods with no return value
         #
@@ -184,7 +198,7 @@ class Template(object):
         # See issue #34: https://github.com/defunkt/pystache/issues/34
         if not raw and raw != 0:
             if tag_name == '.':
-                raw = self.view.context_list[0]
+                raw = self.context.top()
             else:
                 return ''
 
@@ -197,7 +211,8 @@ class Template(object):
     @modifiers.set('>')
     def _render_partial(self, template_name):
         markup = self.view.load_template(template_name)
-        template = Template(markup, self.view)
+        template = Template(markup, self.context)
+        template.view = self.view
         return template.render()
 
     @modifiers.set('=')
@@ -218,14 +233,14 @@ class Template(object):
         Render a tag without escaping it.
 
         """
-        return literal(self.view.get(tag_name, ''))
+        return literal(self.context.get(tag_name, ''))
 
     def render(self, encoding=None):
         """
         Return the template rendered using the current view context.
 
         """
-        template = self._render_sections(self.template, self.view)
+        template = self._render_sections(self.template)
         result = self._render_tags(template)
 
         if encoding is not None:

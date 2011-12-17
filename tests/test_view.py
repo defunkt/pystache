@@ -25,6 +25,15 @@ class ViewTestCase(unittest.TestCase):
         view = TestView()
         self.assertEquals(view.template, "foo")
 
+    def test_init__kwargs_does_not_modify_context(self):
+        """
+        Test that passing **kwargs does not modify the passed context.
+
+        """
+        context = {"foo": "bar"}
+        view = View(context=context, fuzz="buzz")
+        self.assertEquals(context, {"foo": "bar"})
+
     def test_basic(self):
         view = Simple("Hi {{thing}}!", { 'thing': 'world' })
         self.assertEquals(view.render(), "Hi world!")
@@ -163,12 +172,6 @@ class ViewTestCase(unittest.TestCase):
         view.template = "{{#parent}}{{#children}}{{this}}{{/children}}{{/parent}}"
 
         self.assertEquals(view.render(), 'derp')
-
-    def test_context_returns_a_flattened_dict(self):
-        view = Simple()
-        view.context_list = [{'one':'1'}, {'two':'2'}, object()]
-
-        self.assertEqual(view.context, {'one': '1', 'two': '2'})
 
     def test_inverted_lists(self):
         view = InvertedLists()
