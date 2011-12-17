@@ -21,6 +21,7 @@ class TestCase(unittest.TestCase):
     def assertIs(self, first, second):
         self.assertTrue(first is second, msg="%s is not %s" % (repr(first), repr(second)))
 
+
 class SimpleObject(object):
 
     """A sample class that does not define __getitem__()."""
@@ -52,6 +53,10 @@ class GetItemTestCase(TestCase):
     """Test context._get_item()."""
 
     def assertNotFound(self, obj, key):
+        """
+        Assert that a call to _get_item() returns _NOT_FOUND.
+
+        """
         self.assertIs(_get_item(obj, key), _NOT_FOUND)
 
     ### Case: obj is a dictionary.
@@ -115,6 +120,8 @@ class GetItemTestCase(TestCase):
         """
         obj = MappingObject()
         self.assertEquals(obj.fuzz, "buzz")
+        # The presence of __getitem__ causes obj.fuzz not to be checked,
+        # as desired.
         self.assertNotFound(obj, "fuzz")
 
     def test_mapping_object__not_implementing_contains(self):

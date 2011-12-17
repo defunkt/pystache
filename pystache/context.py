@@ -6,9 +6,9 @@ Defines a Context class to represent mustache(5)'s notion of context.
 """
 
 # We use this private global variable as a return value to represent a key
-# not being found on lookup.  This lets us distinguish the case of a key's
-# value being None with the case of a key not being found -- without having
-# to rely on exceptions (e.g. KeyError) for flow control.
+# not being found on lookup.  This lets us distinguish between the case
+# of a key's value being None with the case of a key not being found --
+# without having to rely on exceptions (e.g. KeyError) for flow control.
 _NOT_FOUND = object()
 
 
@@ -19,27 +19,26 @@ def _is_callable(obj):
 
 def _get_item(obj, key):
     """
-    Look up the given key in the given object, and return the value.
+    Return a key's value, or _NOT_FOUND if the key does not exist.
 
-    The obj argument should satisfy the same conditions as those described
-    in Context.__init__'s() docstring.  The behavior of this method is
-    undefined if obj is None.
+    The obj argument should satisfy the same conditions as those
+    described for the obj arguments in Context.__init__'s() docstring.
 
-    The rules for querying are the same as the rules described in
-    Context.get()'s docstring for a single item.
+    The rules for looking up the value of a key are the same as the rules
+    described in Context.get()'s docstring for querying a single item.
 
-    Returns _NOT_FOUND if the key is not found.
+    The behavior of this function is undefined if obj is None.
 
     """
     if hasattr(obj, '__getitem__'):
-        # We do a membership test to avoid using exceptions for flow
-        # control.  In addition, we call __contains__() explicitly as
-        # opposed to using the membership operator "in" to avoid
-        # triggering the following Python fallback behavior:
+        # We do a membership test to avoid using exceptions for flow control
+        # (e.g. catching KeyError).  In addition, we call __contains__()
+        # explicitly as opposed to using the membership operator "in" to
+        # avoid triggering the following Python fallback behavior:
         #
-        #    For objects that don’t define __contains__(), the membership test
+        #    "For objects that don’t define __contains__(), the membership test
         #    first tries iteration via __iter__(), then the old sequence
-        #    iteration protocol via __getitem__()....
+        #    iteration protocol via __getitem__()...."
         #
         # (from http://docs.python.org/reference/datamodel.html#object.__contains__ )
         if obj.__contains__(key):
@@ -58,10 +57,15 @@ def _get_item(obj, key):
 class Context(object):
 
     """
-    Encapsulates a queryable stack of zero or more dictionary-like objects.
+    Provides dictionary-like access to a stack of zero or more objects.
 
-    Instances of this class are intended to act as the context when
-    rendering mustache templates in accordance with mustache(5).
+    Instances of this class are meant to represent the rendering context
+    when rendering mustache templates in accordance with mustache(5).
+
+    Querying the stack for the value of a key queries the objects in the
+    stack in order from last-added objects to first (last in, first out).
+
+    See the docstrings of the methods of this class for more information.
 
     """
 
@@ -69,7 +73,7 @@ class Context(object):
     # option for enabling a strict mode).
     def __init__(self, *obj):
         """
-        Construct an instance and initialize the stack.
+        Construct an instance, and initialize the stack.
 
         The variable argument list *obj are the objects with which to
         populate the initial stack.  Objects in the argument list are added
