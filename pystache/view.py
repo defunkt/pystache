@@ -19,7 +19,7 @@ class View(object):
     template_path = None
     template = None
     template_encoding = None
-    template_extension = 'mustache'
+    template_extension = None
 
     # A function that accepts a single template_name parameter.
     _load_template = None

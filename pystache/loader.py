@@ -8,6 +8,9 @@ This module provides a Loader class.
 import os
 
 
+DEFAULT_EXTENSION = 'mustache'
+
+
 class Loader(object):
 
     def __init__(self, search_dirs=None, encoding=None, extension=None):
@@ -21,7 +24,7 @@ class Loader(object):
 
         """
         if extension is None:
-            extension = 'mustache'
+            extension = DEFAULT_EXTENSION
         if search_dirs is None:
             search_dirs = os.curdir  # i.e. "."
 
