@@ -62,9 +62,16 @@ class Template(object):
 
     modifiers = Modifiers()
 
-    def __init__(self, template=None, context=None, **kwargs):
+    def __init__(self, template=None, context=None, load_template=None, **kwargs):
         """
-        The context argument can be a dictionary, View, or Context instance.
+
+        Arguments:
+
+          context: a dictionary, View, or Context instance.
+
+          load_template: a function that accepts a single template_name
+            parameter and returns a template as a string.  Defaults to the
+            default Loader's load_template() method.
 
         """
         from .view import View
@@ -77,6 +84,7 @@ class Template(object):
         if isinstance(context, View):
             view = context
             context = view.context.copy()
+            load_template = view.load_template
         elif isinstance(context, Context):
             context = context.copy()
         else:
@@ -86,13 +94,13 @@ class Template(object):
         if kwargs:
             context.push(kwargs)
 
-        if view is None:
-            view = View()
+        if load_template is None:
+            loader = Loader()
+            load_template = loader.load_template
 
         self.context = context
+        self.load_template = load_template
         self.template = template
-        # The view attribute is used only for its load_template() method.
-        self.view = view
 
         self._compile_regexps()
 
@@ -171,8 +179,7 @@ class Template(object):
     def _render_dictionary(self, template, context):
         self.context.push(context)
 
-        template = Template(template, self.context)
-        template.view = self.view
+        template = Template(template, self.context, self.load_template)
         out = template.render()
 
         self.context.pop()
@@ -210,9 +217,8 @@ class Template(object):
 
     @modifiers.set('>')
     def _render_partial(self, template_name):
-        markup = self.view.load_template(template_name)
-        template = Template(markup, self.context)
-        template.view = self.view
+        markup = self.load_template(template_name)
+        template = Template(markup, self.context, self.load_template)
         return template.render()
 
     @modifiers.set('=')
