@@ -77,10 +77,12 @@ class Template(object):
         if not isinstance(context, View):
             # Views do not support copy() or update().
             context = context.copy()
-            if kwargs:
-                context.update(kwargs)
+            view = View(context=context, **kwargs)
+        else:
+            view = context
 
-        self.view = context if isinstance(context, View) else View(context=context)
+        self.view = view
+
         self._compile_regexps()
 
     def _compile_regexps(self):
