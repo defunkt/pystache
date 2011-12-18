@@ -18,4 +18,5 @@ def render(template, context=None, **kwargs):
     Return the given template string rendered using the given context.
 
     """
-    return Template(template, context, **kwargs).render()
+    template = Template(template)
+    return template.render(context, **kwargs)

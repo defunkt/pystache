@@ -62,7 +62,7 @@ class Template(object):
 
     modifiers = Modifiers()
 
-    def __init__(self, template=None, context=None, load_template=None, output_encoding=None, **kwargs):
+    def __init__(self, template=None, load_template=None, output_encoding=None):
         """
         Construct a Template instance.
 
@@ -83,13 +83,23 @@ class Template(object):
             information.
 
         """
-        if context is None:
-            context = {}
-
         if load_template is None:
             loader = Loader()
             load_template = loader.load_template
-            load_template = getattr(context, 'load_template', load_template)
+
+        self.load_template = load_template
+        self.output_encoding = output_encoding
+        self.template = template
+
+        self._compile_regexps()
+
+    def _initialize_context(self, context, **kwargs):
+        """
+        Initialize the context attribute.
+
+        """
+        if context is None:
+            context = {}
 
         if isinstance(context, Context):
             context = context.copy()
@@ -100,11 +110,7 @@ class Template(object):
             context.push(kwargs)
 
         self.context = context
-        self.load_template = load_template
-        self.output_encoding = output_encoding
-        self.template = template
 
-        self._compile_regexps()
 
     def _compile_regexps(self):
         """
@@ -181,8 +187,8 @@ class Template(object):
     def _render_dictionary(self, template, context):
         self.context.push(context)
 
-        template = Template(template, self.context, self.load_template)
-        out = template.render()
+        template = Template(template, load_template=self.load_template)
+        out = template.render(self.context)
 
         self.context.pop()
 
@@ -220,8 +226,8 @@ class Template(object):
     @modifiers.set('>')
     def _render_partial(self, template_name):
         markup = self.load_template(template_name)
-        template = Template(markup, self.context, self.load_template)
-        return template.render()
+        template = Template(markup, load_template=self.load_template)
+        return template.render(self.context)
 
     @modifiers.set('=')
     def _change_delimiter(self, tag_name):
@@ -243,7 +249,7 @@ class Template(object):
         """
         return literal(self.context.get(tag_name, ''))
 
-    def render(self):
+    def render(self, context=None, **kwargs):
         """
         Return the template rendered using the current context.
 
@@ -252,6 +258,8 @@ class Template(object):
         and is encoded using that encoding.
 
         """
+        self._initialize_context(context, **kwargs)
+
         template = self._render_sections(self.template)
         result = self._render_tags(template)
 
