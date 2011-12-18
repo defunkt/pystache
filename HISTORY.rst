@@ -3,6 +3,7 @@ History
 
 Next Release (version TBD)
 --------------------------
+* Bugfix: context values no longer processed as template strings. [jakearchibald]
 * API change: pass the context to render to Template.render() instead of
   Template.__init__(). [cjerdonek]
 * Bugfix: Passing **kwargs to Template() modified the context. [cjerdonek]

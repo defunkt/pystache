@@ -169,18 +169,28 @@ class Template(object):
         return template
 
     def _render_tags(self, template):
+        output = []
+
         while True:
-            match = self.tag_re.search(template)
-            if match is None:
+            parts = self.tag_re.split(template, maxsplit=1)
+            output.append(parts[0])
+
+            if len(parts) < 2:
+                # Then there was no match.
                 break
 
-            tag, tag_type, tag_name = match.group(0, 1, 2)
+            start, tag_type, tag_name, template = parts
+
             tag_name = tag_name.strip()
             func = self.modifiers[tag_type]
-            replacement = func(self, tag_name)
-            template = template.replace(tag, replacement)
+            tag_value = func(self, tag_name)
 
-        return template
+            # Appending the tag value to the output prevents treating the
+            # value as a template string (bug: issue #44).
+            output.append(tag_value)
+
+        output = "".join(output)
+        return output
 
     def _render_dictionary(self, template, context):
         self.context.push(context)
