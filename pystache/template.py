@@ -71,8 +71,6 @@ class Template(object):
           template: a template string as a unicode string.  Behavior is
             undefined if the string has type str.
 
-          context: a dictionary, Context, or View instance.
-
           load_template: the function for loading partials.  The function should
             accept a single template_name parameter and return a template as
             a string.  Defaults to the default Loader's load_template() method.
@@ -256,6 +254,13 @@ class Template(object):
         The return value is a unicode string, unless the output_encoding
         attribute is not None, in which case the return value has type str
         and is encoded using that encoding.
+
+        Arguments:
+
+          context: a dictionary, Context, or object (e.g. a View instance).
+
+          **kwargs: additional key values to add to the context when rendering.
+            These values take precedence over the context on any key conflicts.
 
         """
         self._initialize_context(context, **kwargs)
