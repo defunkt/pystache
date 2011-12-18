@@ -44,6 +44,12 @@ class TemplateTestCase(unittest.TestCase):
         self.assertTrue(isinstance(actual, str))
         self.assertEquals(actual, 'foo')
 
+    def test_render__non_ascii_character(self):
+        template = Template(u'Poincaré')
+        actual = template.render()
+        self.assertTrue(isinstance(actual, unicode))
+        self.assertEquals(actual, u'Poincaré')
+
     def test_render__context(self):
         template = Template('Hi {{person}}', {'person': 'Mom'})
         self.assertEquals(template.render(), 'Hi Mom')

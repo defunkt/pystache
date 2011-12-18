@@ -68,6 +68,9 @@ class Template(object):
 
         Arguments:
 
+          template: a template string as a unicode string.  Behavior is
+            undefined if the string has type str.
+
           context: a dictionary, Context, or View instance.
 
           load_template: the function for loading partials.  The function should
@@ -237,6 +240,14 @@ class Template(object):
     def render(self, encoding=None):
         """
         Return the template rendered using the current context.
+
+        The return value is a unicode string, unless the encoding argument
+        is not None, in which case the return value has type str (encoded
+        using that encoding).
+
+        Arguments:
+
+          encoding: the name of the encoding as a string, for example "utf-8".
 
         """
         template = self._render_sections(self.template)
