@@ -12,6 +12,7 @@ from examples.delimiters import Delimiters
 from examples.unicode_output import UnicodeOutput
 from examples.unicode_input import UnicodeInput
 from examples.nested_context import NestedContext
+from examples.repeating_sections import RepeatingSections
 
 class TestView(unittest.TestCase):
     def test_comments(self):
@@ -78,6 +79,10 @@ Again, Welcome!
         view = TemplatePartial(context = {'prop': 'derp'})
         view.template = '''{{>partial_in_partial}}'''
         self.assertEquals(view.render(), 'Hi derp!')
+
+    def test_repeating_sections(self):
+        self.assertEquals(RepeatingSections().render(), 2 * "<div class='twopeat'></div>\n" +
+          3 * "<div class='threepeat'></div>\n" + "\n")
 
 if __name__ == '__main__':
     unittest.main()
