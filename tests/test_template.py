@@ -82,3 +82,22 @@ class TemplateTestCase(unittest.TestCase):
         self.assertTrue(isinstance(actual, str))
         self.assertEquals(actual, 'Poincaré')
 
+    def test_render__tag_in_value(self):
+        """
+        Context values should not be treated as templates (issue #44).
+
+        """
+        template = Template('{{test}}')
+        context = {'test': '{{hello}}'}
+        actual = template.render(context)
+        self.assertEquals(actual, '{{hello}}')
+
+    def test_render__section_in_value(self):
+        """
+        Context values should not be treated as templates (issue #44).
+
+        """
+        template = Template('{{test}}')
+        context = {'test': '{{#hello}}'}
+        actual = template.render(context)
+        self.assertEquals(actual, '{{#hello}}')
