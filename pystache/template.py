@@ -169,6 +169,8 @@ class Template(object):
         return template
 
     def _render_tags(self, template):
+        output = ''
+
         while True:
             match = self.tag_re.search(template)
             if match is None:
@@ -178,9 +180,11 @@ class Template(object):
             tag_name = tag_name.strip()
             func = self.modifiers[tag_type]
             replacement = func(self, tag_name)
-            template = template.replace(tag, replacement)
+            output = output + template[0:match.start()] + replacement
+            template = template[match.end():]
 
-        return template
+        output = output + template
+        return output
 
     def _render_dictionary(self, template, context):
         self.context.push(context)
