@@ -56,7 +56,8 @@ class TemplateTestCase(unittest.TestCase):
 
     def test_render__output_encoding(self):
         template = Template(u'Poincaré')
-        actual = template.render('utf-8')
+        template.output_encoding = 'utf-8'
+        actual = template.render()
         self.assertTrue(isinstance(actual, str))
         self.assertEquals(actual, 'Poincaré')
 
