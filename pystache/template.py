@@ -62,11 +62,14 @@ class Template(object):
 
     modifiers = Modifiers()
 
-    def __init__(self, template=None, context=None, load_template=None, **kwargs):
+    def __init__(self, template=None, load_template=None, output_encoding=None):
         """
         Construct a Template instance.
 
         Arguments:
+
+          template: a template string as a unicode string.  Behavior is
+            undefined if the string has type str.
 
           context: a dictionary, Context, or View instance.
 
@@ -74,14 +77,29 @@ class Template(object):
             accept a single template_name parameter and return a template as
             a string.  Defaults to the default Loader's load_template() method.
 
-        """
-        if context is None:
-            context = {}
+          output_encoding: the encoding to use when rendering to a string.
+            The argument should be the name of an encoding as a string, for
+            example "utf-8".  See the render() method's documentation for more
+            information.
 
+        """
         if load_template is None:
             loader = Loader()
             load_template = loader.load_template
-            load_template = getattr(context, 'load_template', load_template)
+
+        self.load_template = load_template
+        self.output_encoding = output_encoding
+        self.template = template
+
+        self._compile_regexps()
+
+    def _initialize_context(self, context, **kwargs):
+        """
+        Initialize the context attribute.
+
+        """
+        if context is None:
+            context = {}
 
         if isinstance(context, Context):
             context = context.copy()
@@ -92,10 +110,7 @@ class Template(object):
             context.push(kwargs)
 
         self.context = context
-        self.load_template = load_template
-        self.template = template
 
-        self._compile_regexps()
 
     def _compile_regexps(self):
         """
@@ -172,8 +187,8 @@ class Template(object):
     def _render_dictionary(self, template, context):
         self.context.push(context)
 
-        template = Template(template, self.context, self.load_template)
-        out = template.render()
+        template = Template(template, load_template=self.load_template)
+        out = template.render(self.context)
 
         self.context.pop()
 
@@ -211,8 +226,8 @@ class Template(object):
     @modifiers.set('>')
     def _render_partial(self, template_name):
         markup = self.load_template(template_name)
-        template = Template(markup, self.context, self.load_template)
-        return template.render()
+        template = Template(markup, load_template=self.load_template)
+        return template.render(self.context)
 
     @modifiers.set('=')
     def _change_delimiter(self, tag_name):
@@ -234,15 +249,21 @@ class Template(object):
         """
         return literal(self.context.get(tag_name, ''))
 
-    def render(self, encoding=None):
+    def render(self, context=None, **kwargs):
         """
         Return the template rendered using the current context.
 
+        The return value is a unicode string, unless the output_encoding
+        attribute is not None, in which case the return value has type str
+        and is encoded using that encoding.
+
         """
+        self._initialize_context(context, **kwargs)
+
         template = self._render_sections(self.template)
         result = self._render_tags(template)
 
-        if encoding is not None:
-            result = result.encode(encoding)
+        if self.output_encoding is not None:
+            result = result.encode(self.output_encoding)
 
         return result

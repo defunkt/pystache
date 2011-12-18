@@ -3,6 +3,8 @@ History
 
 Next Release (version TBD)
 --------------------------
+* API change: pass the context to render to Template.render() instead of
+  Template.__init__(). [cjerdonek]
 * Bugfix: Passing **kwargs to Template() modified the context. [cjerdonek]
 * Bugfix: Passing **kwargs to Template() with no context raised an
   exception. [cjerdonek]
