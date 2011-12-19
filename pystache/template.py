@@ -274,7 +274,7 @@ class Template(object):
         Render a tag without escaping it.
 
         """
-        return literal(self.context.get(tag_name, ''))
+        return self.literal(self.context.get(tag_name, ''))
 
     def render(self, context=None, **kwargs):
         """
