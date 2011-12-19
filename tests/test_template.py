@@ -159,3 +159,20 @@ class TemplateTestCase(unittest.TestCase):
 
         template.disable_escape = True
         self.assertEquals(template.render(context), '1 < 2')
+
+    def test_render__list_referencing_outer_context(self):
+        """
+        Check that list items can access the parent context.
+
+        For sections whose value is a list, check that items in the list
+        have access to the values inherited from the parent context
+        when rendering.
+
+        """
+        context = {
+            "list": [{"name": "Al"}, {"name": "Bo"}],
+            "greeting": "Hi",
+        }
+        template = Template("{{#list}}{{name}}: {{greeting}}; {{/list}}")
+
+        self.assertEquals(template.render(context), "Al: Hi; Bo: Hi; ")
