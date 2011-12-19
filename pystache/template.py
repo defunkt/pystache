@@ -138,9 +138,9 @@ class Template(object):
             if match is None:
                 break
 
-            section, section_name, inner = match.group(0, 1, 2)
-            section_name = section_name.strip()
-            it = self.context.get(section_name, None)
+            section, section_key, inner = match.group(0, 1, 2)
+            section_key = section_key.strip()
+            it = self.context.get(section_key, None)
             replacer = ''
 
             # Callable
