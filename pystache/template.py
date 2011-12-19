@@ -62,7 +62,8 @@ class Template(object):
 
     modifiers = Modifiers()
 
-    def __init__(self, template=None, load_template=None, output_encoding=None):
+    def __init__(self, template=None, load_template=None, output_encoding=None,
+                 disable_escape=False):
         """
         Construct a Template instance.
 
@@ -85,11 +86,18 @@ class Template(object):
             loader = Loader()
             load_template = loader.load_template
 
+        self.disable_escape = disable_escape
         self.load_template = load_template
         self.output_encoding = output_encoding
         self.template = template
 
         self._compile_regexps()
+
+    def escape(self, text):
+        return escape(text)
+
+    def literal(self, text):
+        return literal(text)
 
     def _initialize_context(self, context, **kwargs):
         """
@@ -206,7 +214,7 @@ class Template(object):
     def _render_dictionary(self, template, context):
         self.context.push(context)
 
-        template = Template(template, load_template=self.load_template)
+        template = Template(template, load_template=self.load_template, disable_escape=self.disable_escape)
         out = template.render(self.context)
 
         self.context.pop()
@@ -236,7 +244,7 @@ class Template(object):
             else:
                 return ''
 
-        return escape(raw)
+        return self._render_value(raw)
 
     @modifiers.set('!')
     def _render_comment(self, tag_name):
@@ -245,7 +253,7 @@ class Template(object):
     @modifiers.set('>')
     def _render_partial(self, template_name):
         markup = self.load_template(template_name)
-        template = Template(markup, load_template=self.load_template)
+        template = Template(markup, load_template=self.load_template, disable_escape=self.disable_escape)
         return template.render(self.context)
 
     @modifiers.set('=')
@@ -285,6 +293,8 @@ class Template(object):
 
         """
         self._initialize_context(context, **kwargs)
+
+        self._render_value = self.literal if self.disable_escape else self.escape
 
         result = self._render(self.template)
 
