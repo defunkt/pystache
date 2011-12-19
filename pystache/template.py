@@ -124,49 +124,60 @@ class Template(object):
 
         # The section contents include white space to comply with the spec's
         # requirement that sections not alter surrounding whitespace.
-        section = r"%(otag)s[\#|^]([^\}]*)%(ctag)s(.+?)%(otag)s/\1%(ctag)s"
-        self.section_re = re.compile(section % tags, re.M|re.S)
+        section = r"%(otag)s([#|^])([^\}]*)%(ctag)s(.+?)%(otag)s/\2%(ctag)s" % tags
+        self.section_re = re.compile(section, re.M|re.S)
 
-        tag = r"%(otag)s(#|=|&|!|>|\{)?(.+?)\1?%(ctag)s+"
-        self.tag_re = re.compile(tag % tags)
+        tag = r"%(otag)s(#|=|&|!|>|\{)?(.+?)\1?%(ctag)s+" % tags
+        self.tag_re = re.compile(tag)
 
-    def _render_sections(self, template):
+    def _render(self, template):
+        output = []
+
         while True:
-            match = self.section_re.search(template)
-            if match is None:
+            parts = self.section_re.split(template, maxsplit=1)
+
+            start = self._render_tags(parts[0])
+            output.append(start)
+
+            if len(parts) < 2:
+                # Then there was no match.
                 break
 
-            section, section_name, inner = match.group(0, 1, 2)
-            section_name = section_name.strip()
-            it = self.context.get(section_name, None)
-            replacer = ''
+            section_type, section_key, section_contents, template = parts[1:]
+
+            section_key = section_key.strip()
+            section_value = self.context.get(section_key, None)
+
+            rendered = ''
 
             # Callable
-            if it and check_callable(it):
-                replacer = it(inner)
+            if section_value and check_callable(section_value):
+                rendered = section_value(section_contents)
 
             # Dictionary
-            elif it and hasattr(it, 'keys') and hasattr(it, '__getitem__'):
-                if section[2] != '^':
-                    replacer = self._render_dictionary(inner, it)
+            elif section_value and hasattr(section_value, 'keys') and hasattr(section_value, '__getitem__'):
+                if section_type != '^':
+                    rendered = self._render_dictionary(section_contents, section_value)
 
             # Lists
-            elif it and hasattr(it, '__iter__'):
-                if section[2] != '^':
-                    replacer = self._render_list(inner, it)
+            elif section_value and hasattr(section_value, '__iter__'):
+                if section_type != '^':
+                    rendered = self._render_list(section_contents, section_value)
 
             # Other objects
-            elif it and isinstance(it, object):
-                if section[2] != '^':
-                    replacer = self._render_dictionary(inner, it)
+            elif section_value and isinstance(section_value, object):
+                if section_type != '^':
+                    rendered = self._render_dictionary(section_contents, section_value)
 
             # Falsey and Negated or Truthy and Not Negated
-            elif (not it and section[2] == '^') or (it and section[2] != '^'):
-                replacer = self._render_dictionary(inner, it)
+            elif (not section_value and section_type == '^') or (section_value and section_type != '^'):
+                rendered = self._render_dictionary(section_contents, section_value)
 
-            template = literal(template.replace(section, replacer))
+            # Render template prior to section too
+            output.append(rendered)
 
-        return template
+        output = "".join(output)
+        return output
 
     def _render_tags(self, template):
         output = []
@@ -275,8 +286,7 @@ class Template(object):
         """
         self._initialize_context(context, **kwargs)
 
-        template = self._render_sections(self.template)
-        result = self._render_tags(template)
+        result = self._render(self.template)
 
         if self.output_encoding is not None:
             result = result.encode(self.output_encoding)

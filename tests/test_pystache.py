@@ -80,6 +80,3 @@ class TestPystache(unittest.TestCase):
         template = "first{{#spacing}} second {{/spacing}}third"
         ret = pystache.render(template, {"spacing": True})
         self.assertEquals(ret, "first second third")
-
-if __name__ == '__main__':
-    unittest.main()
