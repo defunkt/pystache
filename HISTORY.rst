@@ -3,19 +3,25 @@ History
 
 Next Release (version TBD)
 --------------------------
-* Feature: Template and View support disabling HTML escape. [cjerdonek]
-* Bugfix: context values no longer processed as template strings. [jakearchibald]
-* API change: pass the context to render to Template.render() instead of
-  Template.__init__(). [cjerdonek]
-* Bugfix: Passing **kwargs to Template() modified the context. [cjerdonek]
-* Bugfix: Passing **kwargs to Template() with no context raised an
-  exception. [cjerdonek]
-* Bugfix: Whitespace surrounding sections is no longer altered, in
-  accordance with the mustache spec. [heliodor]
+
+Features:
+* Support for disabling HTML escape in Template and View classes. [cjerdonek]
 * A custom template loader can now be passed to a View. [cjerdonek]
 * Added a command-line interface. [vrde, cjerdonek]
-* Bugfix: Fixed an issue that affected the rendering of zeroes when using
-  certain implementations of Python (i.e. PyPy). [alex]
+
+API changes:
+* Template.render() now accepts the context instead of Template.__init__(). [cjerdonek]
+
+Bug fixes:
+* Context values no longer processed as template strings. [jakearchibald]
+* Passing **kwargs to Template() modified the context. [cjerdonek]
+* Passing **kwargs to Template() with no context raised an exception. [cjerdonek]
+* Whitespace surrounding sections is no longer altered, in accordance with
+  the mustache spec. [heliodor]
+* Fixed an issue that affected the rendering of zeroes when using certain
+  implementations of Python (i.e. PyPy). [alex]
+
+Misc:
 * Added some docstrings. [kennethreitz]
 
 0.4.0 (2011-01-12)
