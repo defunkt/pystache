@@ -9,6 +9,7 @@ Features:
 * Support for disabling HTML escape in Template and View classes. [cjerdonek]
 * A custom template loader can now be passed to a View. [cjerdonek]
 * Added a command-line interface. [vrde, cjerdonek]
+* Markupsafe can now be disabled after import. [cjerdonek]
 
 API changes:
 
