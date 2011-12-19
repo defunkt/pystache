@@ -88,12 +88,13 @@ class View(object):
 
         return re.sub('[A-Z]', repl, template_name)[1:]
 
-    def render(self, encoding=None):
+    def render(self, encoding=None, disable_escape=False):
         """
         Return the view rendered using the current context.
 
         """
-        template = Template(self.get_template(), self.load_template, output_encoding=encoding)
+        template = Template(self.get_template(), self.load_template, output_encoding=encoding,
+                            disable_escape=disable_escape)
         return template.render(self.context)
 
     def get(self, key, default=None):

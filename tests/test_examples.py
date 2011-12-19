@@ -34,6 +34,9 @@ class TestView(unittest.TestCase):
     def test_escaped(self):
         self.assertEquals(Escaped().render(), "<h1>Bear &gt; Shark</h1>")
 
+    def test_escaped_disabling(self):
+        self.assertEquals(Escaped().render(disable_escape=True), "<h1>Bear > Shark</h1>")
+
     def test_unescaped(self):
         self.assertEquals(Unescaped().render(), "<h1>Bear > Shark</h1>")
 
