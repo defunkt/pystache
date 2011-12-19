@@ -101,3 +101,19 @@ class TemplateTestCase(unittest.TestCase):
         context = {'test': '{{#hello}}'}
         actual = template.render(context)
         self.assertEquals(actual, '{{#hello}}')
+
+    def test_render__section__lambda(self):
+        template = Template('{{#test}}Mom{{/test}}')
+        context = {'test': (lambda text: 'Hi %s' % text)}
+        actual = template.render(context)
+        self.assertEquals(actual, 'Hi Mom')
+
+    def test_render__section__lambda__tag_in_output(self):
+        """
+        Check that callable output isn't treated as a template string (issue #46).
+
+        """
+        template = Template('{{#test}}Mom{{/test}}')
+        context = {'test': (lambda text: '{{hi}} %s' % text)}
+        actual = template.render(context)
+        self.assertEquals(actual, '{{hi}} Mom')
