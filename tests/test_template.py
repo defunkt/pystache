@@ -15,6 +15,14 @@ class TemplateTestCase(unittest.TestCase):
 
     """Test the Template class."""
 
+    def test_init__disable_escape(self):
+        # Test default value.
+        template = Template()
+        self.assertEquals(template.disable_escape, False)
+
+        template = Template(disable_escape=True)
+        self.assertEquals(template.disable_escape, True)
+
     def test_render__unicode(self):
         template = Template(u'foo')
         actual = template.render()
@@ -117,3 +125,37 @@ class TemplateTestCase(unittest.TestCase):
         context = {'test': (lambda text: '{{hi}} %s' % text)}
         actual = template.render(context)
         self.assertEquals(actual, '{{hi}} Mom')
+
+    def test_render__html_escape(self):
+        context = {'test': '1 < 2'}
+        template = Template('{{test}}')
+
+        self.assertEquals(template.render(context), '1 &lt; 2')
+
+    def test_render__html_escape_disabled(self):
+        context = {'test': '1 < 2'}
+        template = Template('{{test}}')
+
+        self.assertEquals(template.render(context), '1 &lt; 2')
+
+        template.disable_escape = True
+        self.assertEquals(template.render(context), '1 < 2')
+
+    def test_render__html_escape_disabled_with_partial(self):
+        context = {'test': '1 < 2'}
+        load_template = lambda name: '{{test}}'
+        template = Template('{{>partial}}', load_template=load_template)
+
+        self.assertEquals(template.render(context), '1 &lt; 2')
+
+        template.disable_escape = True
+        self.assertEquals(template.render(context), '1 < 2')
+
+    def test_render__html_escape_disabled_with_non_false_value(self):
+        context = {'section': {'test': '1 < 2'}}
+        template = Template('{{#section}}{{test}}{{/section}}')
+
+        self.assertEquals(template.render(context), '1 &lt; 2')
+
+        template.disable_escape = True
+        self.assertEquals(template.render(context), '1 < 2')
