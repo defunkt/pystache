@@ -138,41 +138,41 @@ class Template(object):
             if match is None:
                 break
 
-            section, section_key, inner = match.group(0, 1, 2)
+            section, section_key, section_contents = match.group(0, 1, 2)
             section_key = section_key.strip()
             section_value = self.context.get(section_key, None)
             replacer = ''
 
             # Callable
             if section_value and check_callable(section_value):
-                replacer = section_value(inner)
+                replacer = section_value(section_contents)
 
             # Dictionary
             elif section_value and hasattr(section_value, 'keys') and hasattr(section_value, '__getitem__'):
                 if section[2] != '^':
-                    replacer = self._render_dictionary(inner, section_value)
+                    replacer = self._render_dictionary(section_contents, section_value)
 
             # Lists
             elif section_value and hasattr(section_value, '__iter__'):
                 if section[2] != '^':
-                    replacer = self._render_list(inner, section_value)
+                    replacer = self._render_list(section_contents, section_value)
 
             # Other objects
             elif section_value and isinstance(section_value, object):
                 if section[2] != '^':
-                    replacer = self._render_dictionary(inner, section_value)
+                    replacer = self._render_dictionary(section_contents, section_value)
 
             # Falsey and Negated or Truthy and Not Negated
             elif (not section_value and section[2] == '^') or (section_value and section[2] != '^'):
-                replacer = self._render_dictionary(inner, section_value)
+                replacer = self._render_dictionary(section_contents, section_value)
 
             # Render template prior to section too
-            output = output + self._render_tags(template[0:match.start()]) + replacer
+            output += self._render_tags(template[0:match.start()]) + replacer
 
             template = template[match.end():]
 
             # Render remainder
-        output = output + self._render_tags(template)
+        output += self._render_tags(template)
 
         return output
 
