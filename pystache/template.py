@@ -148,33 +148,33 @@ class Template(object):
             section_key = section_key.strip()
             section_value = self.context.get(section_key, None)
 
-            replacer = ''
+            rendered = ''
 
             # Callable
             if section_value and check_callable(section_value):
-                replacer = section_value(section_contents)
+                rendered = section_value(section_contents)
 
             # Dictionary
             elif section_value and hasattr(section_value, 'keys') and hasattr(section_value, '__getitem__'):
                 if section_type != '^':
-                    replacer = self._render_dictionary(section_contents, section_value)
+                    rendered = self._render_dictionary(section_contents, section_value)
 
             # Lists
             elif section_value and hasattr(section_value, '__iter__'):
                 if section_type != '^':
-                    replacer = self._render_list(section_contents, section_value)
+                    rendered = self._render_list(section_contents, section_value)
 
             # Other objects
             elif section_value and isinstance(section_value, object):
                 if section_type != '^':
-                    replacer = self._render_dictionary(section_contents, section_value)
+                    rendered = self._render_dictionary(section_contents, section_value)
 
             # Falsey and Negated or Truthy and Not Negated
             elif (not section_value and section_type == '^') or (section_value and section_type != '^'):
-                replacer = self._render_dictionary(section_contents, section_value)
+                rendered = self._render_dictionary(section_contents, section_value)
 
             # Render template prior to section too
-            output.append(replacer)
+            output.append(rendered)
 
         output = "".join(output)
         return output
