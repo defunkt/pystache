@@ -2,8 +2,19 @@
 
 import unittest
 import pystache
+from pystache import template
 
-class TestPystache(unittest.TestCase):
+
+class PystacheTests(object):
+
+    """
+    Contains tests to run with markupsafe both enabled and disabled.
+
+    To run the tests in this class, this class should be subclassed by
+    a class that implements unittest.TestCase.
+
+    """
+
     def test_basic(self):
         ret = pystache.render("Hi {{thing}}!", { 'thing': 'world' })
         self.assertEquals(ret, "Hi world!")
@@ -47,6 +58,8 @@ class TestPystache(unittest.TestCase):
         ret = pystache.render(template, { 'set': True })
         self.assertEquals(ret, "Ready set go!")
 
+    non_strings_expected = """(123 & ['something'])(chris & 0.9)"""
+
     def test_non_strings(self):
         template = "{{#stats}}({{key}} & {{value}}){{/stats}}"
         stats = []
@@ -54,7 +67,7 @@ class TestPystache(unittest.TestCase):
         stats.append({'key': u"chris", 'value': 0.900})
 
         ret = pystache.render(template, { 'stats': stats })
-        self.assertEquals(ret, """(123 & ['something'])(chris & 0.9)""")
+        self.assertEquals(ret, self.non_strings_expected)
 
     def test_unicode(self):
         template = 'Name: {{name}}; Age: {{age}}'
@@ -80,3 +93,30 @@ class TestPystache(unittest.TestCase):
         template = "first{{#spacing}} second {{/spacing}}third"
         ret = pystache.render(template, {"spacing": True})
         self.assertEquals(ret, "first second third")
+
+
+class PystacheWithoutMarkupsafeTests(PystacheTests, unittest.TestCase):
+
+    """Test pystache without markupsafe enabled."""
+
+    def setUp(self):
+        self.original_markupsafe = template.markupsafe
+        template.markupsafe = None
+
+    def tearDown(self):
+        template.markupsafe = self.original_markupsafe
+
+
+# If markupsafe is available, then run the same tests again but without
+# disabling markupsafe.
+_BaseClass = unittest.TestCase if template.markupsafe else object
+class PystacheWithMarkupsafeTests(PystacheTests, _BaseClass):
+
+    """Test pystache with markupsafe enabled."""
+
+    # markupsafe.escape() escapes single quotes: "'" becomes "&#39;".
+    non_strings_expected = """(123 & [&#39;something&#39;])(chris & 0.9)"""
+
+    def test_markupsafe_available(self):
+        self.assertTrue(template.markupsafe, "markupsafe isn't available.  "
+            "The with-markupsafe tests shouldn't be running.")

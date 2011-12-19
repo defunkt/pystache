@@ -13,13 +13,11 @@ from .context import Context
 from .loader import Loader
 
 
+markupsafe = None
 try:
     import markupsafe
-    escape = markupsafe.escape
-    literal = markupsafe.Markup
 except ImportError:
-    escape = lambda x: cgi.escape(unicode(x))
-    literal = unicode
+    pass
 
 
 try:
@@ -86,18 +84,21 @@ class Template(object):
             loader = Loader()
             load_template = loader.load_template
 
+        if markupsafe:
+            escape = markupsafe.escape
+            literal = markupsafe.Markup
+        else:
+            escape = lambda x: cgi.escape(unicode(x))
+            literal = unicode
+
         self.disable_escape = disable_escape
+        self.escape = escape
+        self.literal = literal
         self.load_template = load_template
         self.output_encoding = output_encoding
         self.template = template
 
         self._compile_regexps()
-
-    def escape(self, text):
-        return escape(text)
-
-    def literal(self, text):
-        return literal(text)
 
     def _initialize_context(self, context, **kwargs):
         """
