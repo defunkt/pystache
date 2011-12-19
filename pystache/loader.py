@@ -22,6 +22,9 @@ class Loader(object):
           search_dirs: the directories in which to search for templates.
             Defaults to the current working directory.
 
+          extension: the template file extension.  Defaults to "mustache".
+            Pass False for no extension.
+
         """
         if extension is None:
             extension = DEFAULT_EXTENSION
@@ -35,6 +38,13 @@ class Loader(object):
         self.template_encoding = encoding
         self.template_extension = extension
 
+    def make_file_name(self, template_name):
+        file_name = template_name
+        if self.template_extension is not False:
+            file_name += os.path.extsep + self.template_extension
+
+        return file_name
+
     def load_template(self, template_name):
         """
         Find and load the given template, and return it as a string.
@@ -43,7 +53,8 @@ class Loader(object):
 
         """
         search_dirs = self.search_dirs
-        file_name = template_name + '.' + self.template_extension
+
+        file_name = self.make_file_name(template_name)
 
         for dir_path in search_dirs:
             file_path = os.path.join(dir_path, file_name)

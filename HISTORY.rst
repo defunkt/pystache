@@ -24,6 +24,7 @@ Bug fixes:
   the mustache spec. [heliodor]
 * Fixed an issue that affected the rendering of zeroes when using certain
   implementations of Python (i.e. PyPy). [alex]
+* Extensionless template files could not be loaded. [cjerdonek]
 
 Misc:
 

@@ -54,6 +54,12 @@ class ViewTestCase(unittest.TestCase):
         template = Simple().load_template("escaped")
         self.assertEquals(template, "<h1>{{title}}</h1>")
 
+    def test_load_template__extensionless_file(self):
+        view = Simple()
+        view.template_extension = False
+        template = view.load_template('extensionless')
+        self.assertEquals(template, "No file extension: {{foo}}")
+
     def test_custom_load_template(self):
         """
         Test passing a custom load_template to View.__init__().
