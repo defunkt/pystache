@@ -68,12 +68,27 @@ class TestPystache(unittest.TestCase):
         context = { 'users': [ {'name': 'Chris'}, {'name': 'Tom'}, {'name': 'PJ'} ] }
         ret = pystache.render(template, context)
         self.assertEquals(ret, """<ul><li>Chris</li><li>Tom</li><li>PJ</li></ul>""")
-    
+
     def test_implicit_iterator(self):
         template = """<ul>{{#users}}<li>{{.}}</li>{{/users}}</ul>"""
         context = { 'users': [ 'Chris', 'Tom','PJ' ] }
         ret = pystache.render(template, context)
         self.assertEquals(ret, """<ul><li>Chris</li><li>Tom</li><li>PJ</li></ul>""")
+
+    def test_later_list_section_with_escapable_character(self):
+        """
+        This is a simple test case intended to cover issue #53.
+
+        The incorrect result was the following, when markupsafe is available
+        (unnecessary escaping of the second section's contents)--
+
+        AssertionError: Markup(u'foo &lt;') != 'foo <'
+
+        """
+        template = """{{#s1}}foo{{/s1}} {{#s2}}<{{/s2}}"""
+        context = {'s1': True, 's2': [True]}
+        actual = pystache.render(template, context)
+        self.assertEquals(actual, """foo <""")
 
 if __name__ == '__main__':
     unittest.main()
