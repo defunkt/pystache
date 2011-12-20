@@ -94,6 +94,20 @@ class PystacheTests(object):
         ret = pystache.render(template, {"spacing": True})
         self.assertEquals(ret, "first second third")
 
+    def test_later_list_section_with_escapable_character(self):
+        """
+        This is a simple test case intended to cover issue #53.
+
+        The test case failed with markupsafe enabled, as follows:
+
+        AssertionError: Markup(u'foo &lt;') != 'foo <'
+
+        """
+        template = """{{#s1}}foo{{/s1}} {{#s2}}<{{/s2}}"""
+        context = {'s1': True, 's2': [True]}
+        actual = pystache.render(template, context)
+        self.assertEquals(actual, """foo <""")
+
 
 class PystacheWithoutMarkupsafeTests(PystacheTests, unittest.TestCase):
 
