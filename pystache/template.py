@@ -128,8 +128,11 @@ class Template(object):
 
     def _unicode_and_escape(self, s):
         if not isinstance(s, unicode):
-            s = unicode(s)
+            s = self.unicode(s)
         return self.escape(s)
+
+    def unicode(self, s):
+        return unicode(s, self.default_encoding, self.decode_errors)
 
     def escape(self, u):
         """
@@ -142,7 +145,6 @@ class Template(object):
         """
         pass
 
-
     def literal(self, s):
         """
         Convert the given string to a unicode string, without escaping it.
@@ -154,7 +156,7 @@ class Template(object):
         markupsafe.Markup (which subclasses unicode).
 
         """
-        return self._literal(s, self.default_encoding, self.decode_errors)
+        return self._literal(self.unicode(s))
 
     def _initialize_context(self, context, **kwargs):
         """
@@ -173,7 +175,6 @@ class Template(object):
             context.push(kwargs)
 
         self.context = context
-
 
     def _compile_regexps(self):
         """
@@ -271,7 +272,8 @@ class Template(object):
     def _render_dictionary(self, template, context):
         self.context.push(context)
 
-        template = Template(template, load_template=self.load_template, escape=self.escape)
+        template = Template(template, load_template=self.load_template, escape=self.escape,
+                            default_encoding=self.default_encoding, decode_errors=self.decode_errors)
         out = template.render(self.context)
 
         self.context.pop()
@@ -287,6 +289,10 @@ class Template(object):
 
     @modifiers.set(None)
     def _render_tag(self, tag_name):
+        """
+        Return the value of a variable as an escaped unicode string.
+
+        """
         raw = self.context.get(tag_name, '')
 
         # For methods with no return value
@@ -301,6 +307,14 @@ class Template(object):
             else:
                 return ''
 
+        # If we don't first convert to a string type, the call to self._unicode_and_escape()
+        # will yield an error like the following:
+        #
+        #   TypeError: coercing to Unicode: need string or buffer, ... found
+        #
+        if not isinstance(raw, basestring):
+            raw = str(raw)
+
         return self._unicode_and_escape(raw)
 
     @modifiers.set('!')
@@ -310,7 +324,8 @@ class Template(object):
     @modifiers.set('>')
     def _render_partial(self, template_name):
         markup = self.load_template(template_name)
-        template = Template(markup, load_template=self.load_template, escape=self.escape)
+        template = Template(markup, load_template=self.load_template, escape=self.escape,
+                            default_encoding=self.default_encoding, decode_errors=self.decode_errors)
         return template.render(self.context)
 
     @modifiers.set('=')

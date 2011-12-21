@@ -88,35 +88,33 @@ class TemplateTestCase(unittest.TestCase):
         template = Template(decode_errors="foo")
         self.assertEquals(template.decode_errors, "foo")
 
-    def test_literal(self):
+    def test_unicode(self):
         template = Template()
         actual = template.literal("abc")
         self.assertEquals(actual, "abc")
         self.assertEquals(type(actual), unicode)
 
-    def test_literal__default_encoding(self):
+    def test_unicode__default_encoding(self):
         template = Template()
-        template.default_encoding = "utf-8"
-        actual = template.literal("é")
-        self.assertEquals(actual, u"é")
-
-    def test_literal__default_encoding__error(self):
-        template = Template()
-        template.default_encoding = "ascii"
-        self.assertRaises(UnicodeDecodeError, template.literal, "é")
-
-    def test_literal__decode_errors(self):
-        template = Template()
-        template.default_encoding = "ascii"
         s = "é"
 
+        template.default_encoding = "ascii"
+        self.assertRaises(UnicodeDecodeError, template.unicode, s)
+
+        template.default_encoding = "utf-8"
+        self.assertEquals(template.unicode(s), u"é")
+
+    def test_unicode__decode_errors(self):
+        template = Template()
+        s = "é"
+
+        template.default_encoding = "ascii"
         template.decode_errors = "strict"
-        self.assertRaises(UnicodeDecodeError, template.literal, s)
+        self.assertRaises(UnicodeDecodeError, template.unicode, s)
 
         template.decode_errors = "replace"
-        actual = template.literal(s)
         # U+FFFD is the official Unicode replacement character.
-        self.assertEquals(actual, u'\ufffd\ufffd')
+        self.assertEquals(template.unicode(s), u'\ufffd\ufffd')
 
     def test_literal__with_markupsafe(self):
         if not self._was_markupsafe_imported():
@@ -295,3 +293,37 @@ class TemplateTestCase(unittest.TestCase):
         template = Template("{{#list}}{{name}}: {{greeting}}; {{/list}}")
 
         self.assertEquals(template.render(context), "Al: Hi; Bo: Hi; ")
+
+    def test_render__encoding_in_context_value(self):
+        template = Template('{{test}}')
+        context = {'test': "déf"}
+
+        template.decode_errors = 'ignore'
+        template.default_encoding = 'ascii'
+        self.assertEquals(template.render(context), "df")
+
+        template.default_encoding = 'utf_8'
+        self.assertEquals(template.render(context), u"déf")
+
+    def test_render__encoding_in_section_context_value(self):
+        template = Template('{{#test}}{{foo}}{{/test}}')
+        context = {'test': {'foo': "déf"}}
+
+        template.decode_errors = 'ignore'
+        template.default_encoding = 'ascii'
+        self.assertEquals(template.render(context), "df")
+
+        template.default_encoding = 'utf_8'
+        self.assertEquals(template.render(context), u"déf")
+
+    def test_render__encoding_in_partial_context_value(self):
+        load_template = lambda x: "{{foo}}"
+        template = Template('{{>partial}}', load_template=load_template)
+        context = {'foo': "déf"}
+
+        template.decode_errors = 'ignore'
+        template.default_encoding = 'ascii'
+        self.assertEquals(template.render(context), "df")
+
+        template.default_encoding = 'utf_8'
+        self.assertEquals(template.render(context), u"déf")
