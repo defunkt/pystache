@@ -6,10 +6,10 @@ Next Release (version TBD)
 
 Features:
 
-* Support for disabling HTML escape in Template and View classes. [cjerdonek]
 * A custom template loader can now be passed to a View. [cjerdonek]
 * Added a command-line interface. [vrde, cjerdonek]
 * Markupsafe can now be disabled after import. [cjerdonek]
+* Custom escape function can now be passed to Template constructor. [cjerdonek]
 * Template class can now handle non-ascii characters in non-unicode strings.
   Added default_encoding and decode_errors to Template constructor arguments.
   [cjerdonek]
