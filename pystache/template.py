@@ -68,8 +68,9 @@ class Template(object):
 
         Arguments:
 
-          template: a template string as a unicode string.  Behavior is
-            undefined if the string has type str.
+          template: a template string that is either unicode, or of type
+            str and encoded using the encoding named by the default_encoding
+            keyword argument.
 
           load_template: the function for loading partials.  The function should
             accept a single template_name parameter and return a template as
@@ -361,6 +362,10 @@ class Template(object):
         The return value is a unicode string, unless the output_encoding
         attribute has been set to a non-None value, in which case the
         return value has type str and is encoded using that encoding.
+
+        If the template string is not unicode, it is first converted to
+        unicode using the default_encoding and decode_errors attributes.
+        See the Template constructor's docstring for more information.
 
         Arguments:
 
