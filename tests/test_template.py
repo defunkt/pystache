@@ -8,6 +8,7 @@ Unit tests of template.py.
 import codecs
 import unittest
 
+from pystache import template
 from pystache.template import Template
 
 
@@ -15,13 +16,44 @@ class TemplateTestCase(unittest.TestCase):
 
     """Test the Template class."""
 
-    def test_init__disable_escape(self):
-        # Test default value.
-        template = Template()
-        self.assertEquals(template.disable_escape, False)
+    def setUp(self):
+        """
+        Disable markupsafe.
 
-        template = Template(disable_escape=True)
-        self.assertEquals(template.disable_escape, True)
+        """
+        self.original_markupsafe = template.markupsafe
+        template.markupsafe = None
+
+    def tearDown(self):
+        self._restore_markupsafe()
+
+    def _was_markupsafe_imported(self):
+        return bool(self.original_markupsafe)
+
+    def _restore_markupsafe(self):
+        """
+        Restore markupsafe to its original state.
+
+        """
+        template.markupsafe = self.original_markupsafe
+
+    def test_init__escape__default_without_markupsafe(self):
+        template = Template()
+        self.assertEquals(template.escape(">'"), "&gt;'")
+
+    def test_init__escape__default_with_markupsafe(self):
+        if not self._was_markupsafe_imported():
+            # Then we cannot test this case.
+            return
+        self._restore_markupsafe()
+
+        template = Template()
+        self.assertEquals(template.escape(">'"), "&gt;&#39;")
+
+    def test_init__escape(self):
+        escape = lambda s: "foo" + s
+        template = Template(escape=escape)
+        self.assertEquals(template.escape("bar"), "foobar")
 
     def test_render__unicode(self):
         template = Template(u'foo')
@@ -138,7 +170,7 @@ class TemplateTestCase(unittest.TestCase):
 
         self.assertEquals(template.render(context), '1 &lt; 2')
 
-        template.disable_escape = True
+        template.escape = lambda s: s
         self.assertEquals(template.render(context), '1 < 2')
 
     def test_render__html_escape_disabled_with_partial(self):
@@ -148,7 +180,7 @@ class TemplateTestCase(unittest.TestCase):
 
         self.assertEquals(template.render(context), '1 &lt; 2')
 
-        template.disable_escape = True
+        template.escape = lambda s: s
         self.assertEquals(template.render(context), '1 < 2')
 
     def test_render__html_escape_disabled_with_non_false_value(self):
@@ -157,7 +189,7 @@ class TemplateTestCase(unittest.TestCase):
 
         self.assertEquals(template.render(context), '1 &lt; 2')
 
-        template.disable_escape = True
+        template.escape = lambda s: s
         self.assertEquals(template.render(context), '1 < 2')
 
     def test_render__list_referencing_outer_context(self):

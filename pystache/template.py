@@ -60,8 +60,7 @@ class Template(object):
 
     modifiers = Modifiers()
 
-    def __init__(self, template=None, load_template=None, output_encoding=None,
-                 disable_escape=False):
+    def __init__(self, template=None, load_template=None, output_encoding=None, escape=None):
         """
         Construct a Template instance.
 
@@ -79,19 +78,27 @@ class Template(object):
             example "utf-8".  See the render() method's documentation for more
             information.
 
+          escape: the function used to escape mustache variable values
+            when rendering a template.  The function should accept a unicode
+            string and return an escaped string of the same type.  It need
+            not handle strings of type `str` because this class will only
+            pass it unicode strings.  The constructor assigns this escape
+            function to the constructed instance's Template.escape() method.
+
+            The argument defaults to markupsafe.escape when markupsafe is
+            importable and cgi.escape otherwise.  To disable escaping entirely,
+            one can pass `lambda s: s` as the escape function, for example.
+
         """
         if load_template is None:
             loader = Loader()
             load_template = loader.load_template
 
-        if markupsafe:
-            escape = markupsafe.escape
-            literal = markupsafe.Markup
-        else:
-            escape = lambda x: cgi.escape(unicode(x))
-            literal = unicode
+        if escape is None:
+            escape = markupsafe.escape if markupsafe else cgi.escape
 
-        self.disable_escape = disable_escape
+        literal = markupsafe.Markup if markupsafe else unicode
+
         self.escape = escape
         self.literal = literal
         self.load_template = load_template
@@ -99,6 +106,11 @@ class Template(object):
         self.template = template
 
         self._compile_regexps()
+
+    def _unicode_and_escape(self, s):
+        if not isinstance(s, unicode):
+            s = unicode(s)
+        return self.escape(s)
 
     def _initialize_context(self, context, **kwargs):
         """
@@ -215,7 +227,7 @@ class Template(object):
     def _render_dictionary(self, template, context):
         self.context.push(context)
 
-        template = Template(template, load_template=self.load_template, disable_escape=self.disable_escape)
+        template = Template(template, load_template=self.load_template, escape=self.escape)
         out = template.render(self.context)
 
         self.context.pop()
@@ -245,7 +257,7 @@ class Template(object):
             else:
                 return ''
 
-        return self._render_value(raw)
+        return self._unicode_and_escape(raw)
 
     @modifiers.set('!')
     def _render_comment(self, tag_name):
@@ -254,7 +266,7 @@ class Template(object):
     @modifiers.set('>')
     def _render_partial(self, template_name):
         markup = self.load_template(template_name)
-        template = Template(markup, load_template=self.load_template, disable_escape=self.disable_escape)
+        template = Template(markup, load_template=self.load_template, escape=self.escape)
         return template.render(self.context)
 
     @modifiers.set('=')
@@ -294,8 +306,6 @@ class Template(object):
 
         """
         self._initialize_context(context, **kwargs)
-
-        self._render_value = self.literal if self.disable_escape else self.escape
 
         result = self._render(self.template)
 

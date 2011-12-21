@@ -31,16 +31,17 @@ class TestView(unittest.TestCase):
         self.assertEquals(UnicodeInput().render(),
             u'<p>If alive today, Henri Poincaré would be 156 years old.</p>')
 
-    def test_escaped(self):
+    def test_escaping(self):
         self.assertEquals(Escaped().render(), "<h1>Bear &gt; Shark</h1>")
 
-    def test_escaped_disabling(self):
-        self.assertEquals(Escaped().render(disable_escape=True), "<h1>Bear > Shark</h1>")
+    def test_escaping__custom(self):
+        escape = lambda s: s.upper()
+        self.assertEquals(Escaped().render(escape=escape), "<h1>BEAR > SHARK</h1>")
 
-    def test_unescaped(self):
+    def test_literal(self):
         self.assertEquals(Unescaped().render(), "<h1>Bear > Shark</h1>")
 
-    def test_unescaped_sigil(self):
+    def test_literal_sigil(self):
         view = Escaped(template="<h1>{{& thing}}</h1>", context={
                 'thing': 'Bear > Giraffe'
                 })
