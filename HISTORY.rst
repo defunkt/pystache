@@ -10,6 +10,9 @@ Features:
 * A custom template loader can now be passed to a View. [cjerdonek]
 * Added a command-line interface. [vrde, cjerdonek]
 * Markupsafe can now be disabled after import. [cjerdonek]
+* Template class can now handle non-ascii characters in non-unicode strings.
+  Added default_encoding and decode_errors to Template constructor arguments.
+  [cjerdonek]
 
 API changes:
 
