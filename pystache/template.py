@@ -5,9 +5,10 @@ This module provides a Template class.
 
 """
 
-import re
 import cgi
 import collections
+import re
+import sys
 
 from .context import Context
 from .loader import Loader
@@ -60,14 +61,16 @@ class Template(object):
 
     modifiers = Modifiers()
 
-    def __init__(self, template=None, load_template=None, output_encoding=None, escape=None):
+    def __init__(self, template=None, load_template=None, output_encoding=None, escape=None,
+                 default_encoding=None, decode_errors='strict'):
         """
         Construct a Template instance.
 
         Arguments:
 
-          template: a template string as a unicode string.  Behavior is
-            undefined if the string has type str.
+          template: a template string that is either unicode, or of type
+            str and encoded using the encoding named by the default_encoding
+            keyword argument.
 
           load_template: the function for loading partials.  The function should
             accept a single template_name parameter and return a template as
@@ -89,18 +92,35 @@ class Template(object):
             importable and cgi.escape otherwise.  To disable escaping entirely,
             one can pass `lambda s: s` as the escape function, for example.
 
+          default_encoding: the name of the encoding to use when converting
+            to unicode any strings of type `str` encountered during the
+            rendering process.  The name will be passed as the "encoding"
+            argument to the built-in function unicode().  Defaults to the
+            encoding name returned by sys.getdefaultencoding().
+
+          decode_errors: the string to pass as the "errors" argument to the
+            built-in function unicode() when converting to unicode any
+            strings of type `str` encountered during the rendering process.
+            Defaults to "strict".
+
         """
         if load_template is None:
             loader = Loader()
             load_template = loader.load_template
+
+        if default_encoding is None:
+            default_encoding = sys.getdefaultencoding()
 
         if escape is None:
             escape = markupsafe.escape if markupsafe else cgi.escape
 
         literal = markupsafe.Markup if markupsafe else unicode
 
+        self._literal = literal
+
+        self.decode_errors = decode_errors
+        self.default_encoding = default_encoding
         self.escape = escape
-        self.literal = literal
         self.load_template = load_template
         self.output_encoding = output_encoding
         self.template = template
@@ -109,8 +129,35 @@ class Template(object):
 
     def _unicode_and_escape(self, s):
         if not isinstance(s, unicode):
-            s = unicode(s)
+            s = self.unicode(s)
         return self.escape(s)
+
+    def unicode(self, s):
+        return unicode(s, self.default_encoding, self.decode_errors)
+
+    def escape(self, u):
+        """
+        Escape a unicode string, and return it.
+
+        This function is initialized as the escape function that was passed
+        to the Template class's constructor when this instance was
+        constructed.  See the constructor docstring for more information.
+
+        """
+        pass
+
+    def literal(self, s):
+        """
+        Convert the given string to a unicode string, without escaping it.
+
+        This function internally calls the built-in function unicode() and
+        passes it the default_encoding and decode_errors attributes for this
+        Template instance.  If markupsafe was importable when loading this
+        module, this function returns an instance of the class
+        markupsafe.Markup (which subclasses unicode).
+
+        """
+        return self._literal(self.unicode(s))
 
     def _initialize_context(self, context, **kwargs):
         """
@@ -129,7 +176,6 @@ class Template(object):
             context.push(kwargs)
 
         self.context = context
-
 
     def _compile_regexps(self):
         """
@@ -152,6 +198,12 @@ class Template(object):
         self.tag_re = re.compile(tag)
 
     def _render(self, template):
+        """
+        Arguments:
+
+          template: a unicode template string.
+
+        """
         output = []
 
         while True:
@@ -227,7 +279,8 @@ class Template(object):
     def _render_dictionary(self, template, context):
         self.context.push(context)
 
-        template = Template(template, load_template=self.load_template, escape=self.escape)
+        template = Template(template, load_template=self.load_template, escape=self.escape,
+                            default_encoding=self.default_encoding, decode_errors=self.decode_errors)
         out = template.render(self.context)
 
         self.context.pop()
@@ -243,6 +296,10 @@ class Template(object):
 
     @modifiers.set(None)
     def _render_tag(self, tag_name):
+        """
+        Return the value of a variable as an escaped unicode string.
+
+        """
         raw = self.context.get(tag_name, '')
 
         # For methods with no return value
@@ -257,6 +314,14 @@ class Template(object):
             else:
                 return ''
 
+        # If we don't first convert to a string type, the call to self._unicode_and_escape()
+        # will yield an error like the following:
+        #
+        #   TypeError: coercing to Unicode: need string or buffer, ... found
+        #
+        if not isinstance(raw, basestring):
+            raw = str(raw)
+
         return self._unicode_and_escape(raw)
 
     @modifiers.set('!')
@@ -266,7 +331,8 @@ class Template(object):
     @modifiers.set('>')
     def _render_partial(self, template_name):
         markup = self.load_template(template_name)
-        template = Template(markup, load_template=self.load_template, escape=self.escape)
+        template = Template(markup, load_template=self.load_template, escape=self.escape,
+                            default_encoding=self.default_encoding, decode_errors=self.decode_errors)
         return template.render(self.context)
 
     @modifiers.set('=')
@@ -291,11 +357,15 @@ class Template(object):
 
     def render(self, context=None, **kwargs):
         """
-        Return the template rendered using the current context.
+        Return the template rendered using the given context.
 
         The return value is a unicode string, unless the output_encoding
-        attribute is not None, in which case the return value has type str
-        and is encoded using that encoding.
+        attribute has been set to a non-None value, in which case the
+        return value has type str and is encoded using that encoding.
+
+        If the template string is not unicode, it is first converted to
+        unicode using the default_encoding and decode_errors attributes.
+        See the Template constructor's docstring for more information.
 
         Arguments:
 
@@ -307,7 +377,11 @@ class Template(object):
         """
         self._initialize_context(context, **kwargs)
 
-        result = self._render(self.template)
+        template = self.template
+        if not isinstance(template, unicode):
+            template = self.unicode(template)
+
+        result = self._render(template)
 
         if self.output_encoding is not None:
             result = result.encode(self.output_encoding)

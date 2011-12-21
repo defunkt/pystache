@@ -6,6 +6,7 @@ Unit tests of template.py.
 """
 
 import codecs
+import sys
 import unittest
 
 from pystache import template
@@ -55,6 +56,90 @@ class TemplateTestCase(unittest.TestCase):
         template = Template(escape=escape)
         self.assertEquals(template.escape("bar"), "foobar")
 
+    def test_init__default_encoding__default(self):
+        """
+        Check the default value.
+
+        """
+        template = Template()
+        self.assertEquals(template.default_encoding, sys.getdefaultencoding())
+
+    def test_init__default_encoding(self):
+        """
+        Check that the constructor sets the attribute correctly.
+
+        """
+        template = Template(default_encoding="foo")
+        self.assertEquals(template.default_encoding, "foo")
+
+    def test_init__decode_errors__default(self):
+        """
+        Check the default value.
+
+        """
+        template = Template()
+        self.assertEquals(template.decode_errors, 'strict')
+
+    def test_init__decode_errors(self):
+        """
+        Check that the constructor sets the attribute correctly.
+
+        """
+        template = Template(decode_errors="foo")
+        self.assertEquals(template.decode_errors, "foo")
+
+    def test_unicode(self):
+        template = Template()
+        actual = template.literal("abc")
+        self.assertEquals(actual, "abc")
+        self.assertEquals(type(actual), unicode)
+
+    def test_unicode__default_encoding(self):
+        template = Template()
+        s = "é"
+
+        template.default_encoding = "ascii"
+        self.assertRaises(UnicodeDecodeError, template.unicode, s)
+
+        template.default_encoding = "utf-8"
+        self.assertEquals(template.unicode(s), u"é")
+
+    def test_unicode__decode_errors(self):
+        template = Template()
+        s = "é"
+
+        template.default_encoding = "ascii"
+        template.decode_errors = "strict"
+        self.assertRaises(UnicodeDecodeError, template.unicode, s)
+
+        template.decode_errors = "replace"
+        # U+FFFD is the official Unicode replacement character.
+        self.assertEquals(template.unicode(s), u'\ufffd\ufffd')
+
+    def test_literal__with_markupsafe(self):
+        if not self._was_markupsafe_imported():
+            # Then we cannot test this case.
+            return
+        self._restore_markupsafe()
+
+        _template = Template()
+        _template.default_encoding = "utf_8"
+
+        # Check the standard case.
+        actual = _template.literal("abc")
+        self.assertEquals(actual, "abc")
+        self.assertEquals(type(actual), template.markupsafe.Markup)
+
+        s = "é"
+        # Check that markupsafe respects default_encoding.
+        self.assertEquals(_template.literal(s), u"é")
+        _template.default_encoding = "ascii"
+        self.assertRaises(UnicodeDecodeError, _template.literal, s)
+
+        # Check that markupsafe respects decode_errors.
+        _template.decode_errors = "replace"
+        self.assertEquals(_template.literal(s), u'\ufffd\ufffd')
+
     def test_render__unicode(self):
         template = Template(u'foo')
         actual = template.render()
@@ -64,7 +149,7 @@ class TemplateTestCase(unittest.TestCase):
     def test_render__str(self):
         template = Template('foo')
         actual = template.render()
-        self.assertTrue(isinstance(actual, str))
+        self.assertTrue(isinstance(actual, unicode))
         self.assertEquals(actual, 'foo')
 
     def test_render__non_ascii_character(self):
@@ -208,3 +293,52 @@ class TemplateTestCase(unittest.TestCase):
         template = Template("{{#list}}{{name}}: {{greeting}}; {{/list}}")
 
         self.assertEquals(template.render(context), "Al: Hi; Bo: Hi; ")
+
+    def test_render__encoding_in_context_value(self):
+        template = Template('{{test}}')
+        context = {'test': "déf"}
+
+        template.decode_errors = 'ignore'
+        template.default_encoding = 'ascii'
+        self.assertEquals(template.render(context), "df")
+
+        template.default_encoding = 'utf_8'
+        self.assertEquals(template.render(context), u"déf")
+
+    def test_render__encoding_in_section_context_value(self):
+        template = Template('{{#test}}{{foo}}{{/test}}')
+        context = {'test': {'foo': "déf"}}
+
+        template.decode_errors = 'ignore'
+        template.default_encoding = 'ascii'
+        self.assertEquals(template.render(context), "df")
+
+        template.default_encoding = 'utf_8'
+        self.assertEquals(template.render(context), u"déf")
+
+    def test_render__encoding_in_partial_context_value(self):
+        load_template = lambda x: "{{foo}}"
+        template = Template('{{>partial}}', load_template=load_template)
+        context = {'foo': "déf"}
+
+        template.decode_errors = 'ignore'
+        template.default_encoding = 'ascii'
+        self.assertEquals(template.render(context), "df")
+
+        template.default_encoding = 'utf_8'
+        self.assertEquals(template.render(context), u"déf")
+
+    def test_render__nonascii_template(self):
+        """
+        Test passing a non-unicode template with non-ascii characters.
+
+        """
+        template = Template("déf", output_encoding="utf-8")
+
+        # Check that decode_errors and default_encoding are both respected.
+        template.decode_errors = 'ignore'
+        template.default_encoding = 'ascii'
+        self.assertEquals(template.render(), "df")
+
+        template.default_encoding = 'utf_8'
+        self.assertEquals(template.render(), "déf")
