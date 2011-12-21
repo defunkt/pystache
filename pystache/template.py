@@ -197,6 +197,12 @@ class Template(object):
         self.tag_re = re.compile(tag)
 
     def _render(self, template):
+        """
+        Arguments:
+
+          template: a unicode template string.
+
+        """
         output = []
 
         while True:
@@ -350,11 +356,11 @@ class Template(object):
 
     def render(self, context=None, **kwargs):
         """
-        Return the template rendered using the current context.
+        Return the template rendered using the given context.
 
         The return value is a unicode string, unless the output_encoding
-        attribute is not None, in which case the return value has type str
-        and is encoded using that encoding.
+        attribute has been set to a non-None value, in which case the
+        return value has type str and is encoded using that encoding.
 
         Arguments:
 
@@ -366,7 +372,11 @@ class Template(object):
         """
         self._initialize_context(context, **kwargs)
 
-        result = self._render(self.template)
+        template = self.template
+        if not isinstance(template, unicode):
+            template = self.unicode(template)
+
+        result = self._render(template)
 
         if self.output_encoding is not None:
             result = result.encode(self.output_encoding)

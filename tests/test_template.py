@@ -149,7 +149,7 @@ class TemplateTestCase(unittest.TestCase):
     def test_render__str(self):
         template = Template('foo')
         actual = template.render()
-        self.assertTrue(isinstance(actual, str))
+        self.assertTrue(isinstance(actual, unicode))
         self.assertEquals(actual, 'foo')
 
     def test_render__non_ascii_character(self):
@@ -327,3 +327,18 @@ class TemplateTestCase(unittest.TestCase):
 
         template.default_encoding = 'utf_8'
         self.assertEquals(template.render(context), u"déf")
+
+    def test_render__nonascii_template(self):
+        """
+        Test passing a non-unicode template with non-ascii characters.
+
+        """
+        template = Template("déf", output_encoding="utf-8")
+
+        # Check that decode_errors and default_encoding are both respected.
+        template.decode_errors = 'ignore'
+        template.default_encoding = 'ascii'
+        self.assertEquals(template.render(), "df")
+
+        template.default_encoding = 'utf_8'
+        self.assertEquals(template.render(), "déf")
