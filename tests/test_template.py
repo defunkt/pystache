@@ -6,6 +6,7 @@ Unit tests of template.py.
 """
 
 import codecs
+import sys
 import unittest
 
 from pystache import template
@@ -54,6 +55,92 @@ class TemplateTestCase(unittest.TestCase):
         escape = lambda s: "foo" + s
         template = Template(escape=escape)
         self.assertEquals(template.escape("bar"), "foobar")
+
+    def test_init__default_encoding__default(self):
+        """
+        Check the default value.
+
+        """
+        template = Template()
+        self.assertEquals(template.default_encoding, sys.getdefaultencoding())
+
+    def test_init__default_encoding(self):
+        """
+        Check that the constructor sets the attribute correctly.
+
+        """
+        template = Template(default_encoding="foo")
+        self.assertEquals(template.default_encoding, "foo")
+
+    def test_init__decode_errors__default(self):
+        """
+        Check the default value.
+
+        """
+        template = Template()
+        self.assertEquals(template.decode_errors, 'strict')
+
+    def test_init__decode_errors(self):
+        """
+        Check that the constructor sets the attribute correctly.
+
+        """
+        template = Template(decode_errors="foo")
+        self.assertEquals(template.decode_errors, "foo")
+
+    def test_literal(self):
+        template = Template()
+        actual = template.literal("abc")
+        self.assertEquals(actual, "abc")
+        self.assertEquals(type(actual), unicode)
+
+    def test_literal__default_encoding(self):
+        template = Template()
+        template.default_encoding = "utf-8"
+        actual = template.literal("é")
+        self.assertEquals(actual, u"é")
+
+    def test_literal__default_encoding__error(self):
+        template = Template()
+        template.default_encoding = "ascii"
+        self.assertRaises(UnicodeDecodeError, template.literal, "é")
+
+    def test_literal__decode_errors(self):
+        template = Template()
+        template.default_encoding = "ascii"
+        s = "é"
+
+        template.decode_errors = "strict"
+        self.assertRaises(UnicodeDecodeError, template.literal, s)
+
+        template.decode_errors = "replace"
+        actual = template.literal(s)
+        # U+FFFD is the official Unicode replacement character.
+        self.assertEquals(actual, u'\ufffd\ufffd')
+
+    def test_literal__with_markupsafe(self):
+        if not self._was_markupsafe_imported():
+            # Then we cannot test this case.
+            return
+        self._restore_markupsafe()
+
+        _template = Template()
+        _template.default_encoding = "utf_8"
+
+        # Check the standard case.
+        actual = _template.literal("abc")
+        self.assertEquals(actual, "abc")
+        self.assertEquals(type(actual), template.markupsafe.Markup)
+
+        s = "é"
+        # Check that markupsafe respects default_encoding.
+        self.assertEquals(_template.literal(s), u"é")
+        _template.default_encoding = "ascii"
+        self.assertRaises(UnicodeDecodeError, _template.literal, s)
+
+        # Check that markupsafe respects decode_errors.
+        _template.decode_errors = "replace"
+        self.assertEquals(_template.literal(s), u'\ufffd\ufffd')
 
     def test_render__unicode(self):
         template = Template(u'foo')
