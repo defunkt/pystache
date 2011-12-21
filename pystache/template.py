@@ -278,11 +278,7 @@ class Template(object):
 
     def _render_dictionary(self, template, context):
         self.context.push(context)
-
-        template = Template(template, load_template=self.load_template, escape=self.escape,
-                            default_encoding=self.default_encoding, decode_errors=self.decode_errors)
-        out = template.render(self.context)
-
+        out = self._render(template)
         self.context.pop()
 
         return out
@@ -331,9 +327,7 @@ class Template(object):
     @modifiers.set('>')
     def _render_partial(self, template_name):
         markup = self.load_template(template_name)
-        template = Template(markup, load_template=self.load_template, escape=self.escape,
-                            default_encoding=self.default_encoding, decode_errors=self.decode_errors)
-        return template.render(self.context)
+        return self._render(markup)
 
     @modifiers.set('=')
     def _change_delimiter(self, tag_name):
