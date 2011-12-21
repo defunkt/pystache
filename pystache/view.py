@@ -88,13 +88,18 @@ class View(object):
 
         return re.sub('[A-Z]', repl, template_name)[1:]
 
-    def render(self, encoding=None, disable_escape=False):
+    # TODO: the View class should probably have some sort of template renderer
+    # associated with it to encapsulate all of the render-specific behavior
+    # and options like encoding, escape, etc.  This would probably be better
+    # than passing all of these options to render(), especially as the list
+    # of possible options grows.
+    def render(self, encoding=None, escape=None):
         """
         Return the view rendered using the current context.
 
         """
         template = Template(self.get_template(), self.load_template, output_encoding=encoding,
-                            disable_escape=disable_escape)
+                            escape=escape)
         return template.render(self.context)
 
     def get(self, key, default=None):
