@@ -244,16 +244,19 @@ class RendererTestCase(unittest.TestCase):
     # correctly, we no longer need to test the rendering code paths through
     # the Renderer.  We can test rendering paths through only the RenderEngine
     # for the same amount of code coverage.
-    def test_make_render_engine__load_template(self):
+    def test_make_render_engine__load_partial(self):
         """
-        Test that _make_render_engine() passes the right load_template.
+        Test that _make_render_engine() constructs and passes load_partial correctly.
 
         """
         renderer = Renderer()
-        renderer.load_template = "foo"  # in real life, this would be a function.
+        renderer.unicode = lambda s: s.upper()  # a test version.
+        # In real-life, the partial would be different with each name.
+        renderer.load_template = lambda name: "partial"
 
         engine = renderer._make_render_engine()
-        self.assertEquals(engine.load_template, "foo")
+        # Make sure it calls unicode.
+        self.assertEquals(engine.load_partial('name'), "PARTIAL")
 
     def test_make_render_engine__literal(self):
         """
