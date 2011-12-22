@@ -38,6 +38,19 @@ class TemplateTestCase(unittest.TestCase):
         """
         template.markupsafe = self.original_markupsafe
 
+    def test__was_markupsafe_imported(self):
+        """
+        Test that our helper function works.
+
+        """
+        markupsafe = None
+        try:
+            import markupsafe
+        except:
+            pass
+
+        self.assertEquals(bool(markupsafe), self._was_markupsafe_imported())
+
     def test_init__escape__default_without_markupsafe(self):
         template = Template()
         self.assertEquals(template.escape(">'"), "&gt;'")
