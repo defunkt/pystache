@@ -240,6 +240,20 @@ class RendererTestCase(unittest.TestCase):
         renderer.default_encoding = 'utf_8'
         self.assertEquals(renderer.render(template), "déf")
 
+    def test_make_load_partial__unicode(self):
+        """
+        Test that the generated load_partial does not "double-decode" Unicode.
+
+        """
+        renderer = Renderer()
+        # In real-life, the partial would be different with each name.
+        renderer.load_template = lambda name: u"partial"
+
+        load_partial = renderer._make_load_partial()
+
+        # This would raise a TypeError exception if we tried to double-decode.
+        self.assertEquals(load_partial("test"), "partial")
+
     # By testing that Renderer.render() constructs the RenderEngine instance
     # correctly, we no longer need to test the rendering code paths through
     # the Renderer.  We can test rendering paths through only the RenderEngine

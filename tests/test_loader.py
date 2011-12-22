@@ -1,4 +1,5 @@
 import os
+import sys
 import unittest
 
 from pystache.loader import Loader
@@ -8,18 +9,13 @@ class LoaderTestCase(unittest.TestCase):
 
     search_dirs = 'examples'
 
-    def test_init(self):
-        """
-        Test the __init__() constructor.
-
-        """
+    def test_init__search_dirs(self):
+        # Test the default value.
         loader = Loader()
         self.assertEquals(loader.search_dirs, [os.curdir])
-        self.assertTrue(loader.template_encoding is None)
 
-        loader = Loader(search_dirs=['foo'], encoding='utf-8')
+        loader = Loader(search_dirs=['foo'])
         self.assertEquals(loader.search_dirs, ['foo'])
-        self.assertEquals(loader.template_encoding, 'utf-8')
 
     def test_init__extension(self):
         # Test the default value.
@@ -31,6 +27,14 @@ class LoaderTestCase(unittest.TestCase):
 
         loader = Loader(extension=False)
         self.assertTrue(loader.template_extension is False)
+
+    def test_init__loader(self):
+        # Test the default value.
+        loader = Loader()
+        self.assertEquals(loader.template_encoding, sys.getdefaultencoding())
+
+        loader = Loader(encoding='foo')
+        self.assertEquals(loader.template_encoding, 'foo')
 
     def test_make_file_name(self):
         loader = Loader()
@@ -67,3 +71,13 @@ class LoaderTestCase(unittest.TestCase):
 
         loader.template_extension = False
         self.assertEquals(loader.load_template('extensionless'), "No file extension: {{foo}}")
+
+    def test_load_template__unicode_return_value(self):
+        """
+        Check that load_template() returns unicode strings.
+
+        """
+        loader = Loader(search_dirs=self.search_dirs)
+        template = loader.load_template('simple')
+
+        self.assertEqual(type(template), unicode)

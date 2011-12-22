@@ -6,7 +6,7 @@ This module provides a Loader class.
 """
 
 import os
-
+import sys
 
 DEFAULT_EXTENSION = 'mustache'
 
@@ -19,6 +19,11 @@ class Loader(object):
 
         Arguments:
 
+          encoding: the name of the encoding to use when converting file
+            contents to unicode.  This name will be passed as the encoding
+            argument to the built-in function unicode().  Defaults to the
+            encoding name returned by sys.getdefaultencoding().
+
           search_dirs: the directories in which to search for templates.
             Defaults to the current working directory.
 
@@ -26,6 +31,8 @@ class Loader(object):
             Pass False for no extension.
 
         """
+        if encoding is None:
+            encoding = sys.getdefaultencoding()
         if extension is None:
             extension = DEFAULT_EXTENSION
         if search_dirs is None:
@@ -73,9 +80,9 @@ class Loader(object):
 
         try:
             template = f.read()
-            if self.template_encoding:
-                template = unicode(template, self.template_encoding)
         finally:
             f.close()
+
+        template = unicode(template, self.template_encoding)
 
         return template
