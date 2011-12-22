@@ -2,7 +2,7 @@
 
 import unittest
 import pystache
-from pystache import template
+from pystache import renderer
 
 
 class PystacheTests(object):
@@ -114,16 +114,16 @@ class PystacheWithoutMarkupsafeTests(PystacheTests, unittest.TestCase):
     """Test pystache without markupsafe enabled."""
 
     def setUp(self):
-        self.original_markupsafe = template.markupsafe
-        template.markupsafe = None
+        self.original_markupsafe = renderer.markupsafe
+        renderer.markupsafe = None
 
     def tearDown(self):
-        template.markupsafe = self.original_markupsafe
+        renderer.markupsafe = self.original_markupsafe
 
 
 # If markupsafe is available, then run the same tests again but without
 # disabling markupsafe.
-_BaseClass = unittest.TestCase if template.markupsafe else object
+_BaseClass = unittest.TestCase if renderer.markupsafe else object
 class PystacheWithMarkupsafeTests(PystacheTests, _BaseClass):
 
     """Test pystache with markupsafe enabled."""
@@ -132,5 +132,5 @@ class PystacheWithMarkupsafeTests(PystacheTests, _BaseClass):
     non_strings_expected = """(123 & [&#39;something&#39;])(chris & 0.9)"""
 
     def test_markupsafe_available(self):
-        self.assertTrue(template.markupsafe, "markupsafe isn't available.  "
+        self.assertTrue(renderer.markupsafe, "markupsafe isn't available.  "
             "The with-markupsafe tests shouldn't be running.")

@@ -10,7 +10,7 @@ from types import UnboundMethodType
 
 from .context import Context
 from .loader import Loader
-from .template import Template
+from .renderer import Template
 
 
 class View(object):

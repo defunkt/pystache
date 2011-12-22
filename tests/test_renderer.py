@@ -9,8 +9,8 @@ import codecs
 import sys
 import unittest
 
-from pystache import template
-from pystache.template import Template
+from pystache import renderer
+from pystache.renderer import Template
 
 
 class TemplateTestCase(unittest.TestCase):
@@ -22,8 +22,8 @@ class TemplateTestCase(unittest.TestCase):
         Disable markupsafe.
 
         """
-        self.original_markupsafe = template.markupsafe
-        template.markupsafe = None
+        self.original_markupsafe = renderer.markupsafe
+        renderer.markupsafe = None
 
     def tearDown(self):
         self._restore_markupsafe()
@@ -36,7 +36,7 @@ class TemplateTestCase(unittest.TestCase):
         Restore markupsafe to its original state.
 
         """
-        template.markupsafe = self.original_markupsafe
+        renderer.markupsafe = self.original_markupsafe
 
     def test__was_markupsafe_imported(self):
         """
@@ -141,7 +141,7 @@ class TemplateTestCase(unittest.TestCase):
         # Check the standard case.
         actual = _template.literal("abc")
         self.assertEquals(actual, "abc")
-        self.assertEquals(type(actual), template.markupsafe.Markup)
+        self.assertEquals(type(actual), renderer.markupsafe.Markup)
 
         s = "é"
         # Check that markupsafe respects default_encoding.

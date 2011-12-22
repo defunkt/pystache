@@ -20,7 +20,7 @@ import sys
 #   ValueError: Attempted relative import in non-package
 #
 from pystache.loader import Loader
-from pystache.template import Template
+from pystache.renderer import Template
 
 
 USAGE = """\
