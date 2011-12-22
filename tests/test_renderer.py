@@ -244,10 +244,10 @@ class RendererTestCase(unittest.TestCase):
         Test that _make_render_engine() passes the right load_template.
 
         """
-        template = Renderer()
-        template.load_template = "foo"  # in real life, this would be a function.
+        renderer = Renderer()
+        renderer.load_template = "foo"  # in real life, this would be a function.
 
-        engine = template._make_render_engine()
+        engine = renderer._make_render_engine()
         self.assertEquals(engine.load_template, "foo")
 
     def test_make_render_engine__literal(self):
@@ -255,10 +255,10 @@ class RendererTestCase(unittest.TestCase):
         Test that _make_render_engine() passes the right literal.
 
         """
-        template = Renderer()
-        template.literal = "foo"  # in real life, this would be a function.
+        renderer = Renderer()
+        renderer.literal = "foo"  # in real life, this would be a function.
 
-        engine = template._make_render_engine()
+        engine = renderer._make_render_engine()
         self.assertEquals(engine.literal, "foo")
 
     def test_make_render_engine__escape(self):
@@ -266,11 +266,11 @@ class RendererTestCase(unittest.TestCase):
         Test that _make_render_engine() passes the right escape.
 
         """
-        template = Renderer()
-        template.unicode = lambda s: s.upper()  # a test version.
-        template.escape = lambda s: "**" + s  # a test version.
+        renderer = Renderer()
+        renderer.unicode = lambda s: s.upper()  # a test version.
+        renderer.escape = lambda s: "**" + s  # a test version.
 
-        engine = template._make_render_engine()
+        engine = renderer._make_render_engine()
         escape = engine.escape
 
         self.assertEquals(escape(u"foo"), "**foo")
