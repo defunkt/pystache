@@ -10,7 +10,7 @@ from types import UnboundMethodType
 
 from .context import Context
 from .loader import Loader
-from .renderer import Template
+from .renderer import Renderer
 
 
 class View(object):
@@ -68,7 +68,7 @@ class View(object):
 
     def _get_template_name(self):
         """
-        Return the name of this Template instance.
+        Return the name of the template to load.
 
         If the template_name attribute is not set, then this method constructs
         the template name from the class name as follows, for example:
@@ -98,7 +98,7 @@ class View(object):
         Return the view rendered using the current context.
 
         """
-        template = Template(self.get_template(), self.load_template, output_encoding=encoding,
+        template = Renderer(self.get_template(), self.load_template, output_encoding=encoding,
                             escape=escape)
         return template.render(self.context)
 

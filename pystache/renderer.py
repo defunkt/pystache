@@ -20,7 +20,7 @@ except ImportError:
     pass
 
 
-class Template(object):
+class Renderer(object):
 
     def __init__(self, template=None, load_template=None, output_encoding=None, escape=None,
                  default_encoding=None, decode_errors='strict'):

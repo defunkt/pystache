@@ -5,12 +5,12 @@ This module contains the initialization logic called by __init__.py.
 
 """
 
-from .renderer import Template
+from .renderer import Renderer
 from .view import View
 from .loader import Loader
 
 
-__all__ = ['Template', 'View', 'Loader', 'render']
+__all__ = ['render', 'Loader', 'Renderer', 'View']
 
 
 def render(template, context=None, **kwargs):
@@ -18,5 +18,5 @@ def render(template, context=None, **kwargs):
     Return the given template string rendered using the given context.
 
     """
-    template = Template(template)
+    template = Renderer(template)
     return template.render(context, **kwargs)

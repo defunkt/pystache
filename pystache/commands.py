@@ -20,7 +20,7 @@ import sys
 #   ValueError: Attempted relative import in non-package
 #
 from pystache.loader import Loader
-from pystache.renderer import Template
+from pystache.renderer import Renderer
 
 
 USAGE = """\
@@ -64,7 +64,7 @@ def main(sys_argv):
     except IOError:
         context = json.loads(context)
 
-    template = Template(template)
+    template = Renderer(template)
     print(template.render(context))
 
 

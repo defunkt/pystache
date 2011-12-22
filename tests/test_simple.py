@@ -1,6 +1,6 @@
 import unittest
 import pystache
-from pystache import Template
+from pystache import Renderer
 from examples.nested_context import NestedContext
 from examples.complex_view import ComplexView
 from examples.lambdas import Lambdas
@@ -21,7 +21,7 @@ class TestSimple(unittest.TestCase):
 
     def test_empty_context(self):
         view = ComplexView()
-        self.assertEquals(pystache.Template('{{#empty_list}}Shouldnt see me {{/empty_list}}{{^empty_list}}Should see me{{/empty_list}}', view).render(), "Should see me")
+        self.assertEquals(pystache.Renderer('{{#empty_list}}Shouldnt see me {{/empty_list}}{{^empty_list}}Should see me{{/empty_list}}', view).render(), "Should see me")
 
     def test_callables(self):
         view = Lambdas()
@@ -39,7 +39,7 @@ class TestSimple(unittest.TestCase):
     def test_non_existent_value_renders_blank(self):
         view = Simple()
 
-        self.assertEquals(pystache.Template('{{not_set}} {{blank}}', view).render(), ' ')
+        self.assertEquals(pystache.Renderer('{{not_set}} {{blank}}', view).render(), ' ')
 
 
     def test_template_partial_extension(self):
