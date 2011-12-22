@@ -135,3 +135,35 @@ class RenderEngineTestCase(unittest.TestCase):
 
         self._assert_render("Al: Hi; Bo: Hi; ", template, context)
 
+    def test_render__tag_in_value(self):
+        """
+        Context values should not be treated as templates (issue #44).
+
+        """
+        template = '{{test}}'
+        context = {'test': '{{hello}}'}
+        self._assert_render('{{hello}}', template, context)
+
+    def test_render__section_in_value(self):
+        """
+        Context values should not be treated as templates (issue #44).
+
+        """
+        template = '{{test}}'
+        context = {'test': '{{#hello}}'}
+        self._assert_render('{{#hello}}', template, context)
+
+    def test_render__section__lambda(self):
+        template = '{{#test}}Mom{{/test}}'
+        context = {'test': (lambda text: 'Hi %s' % text)}
+        self._assert_render('Hi Mom', template, context)
+
+    def test_render__section__lambda__tag_in_output(self):
+        """
+        Check that callable output isn't treated as a template string (issue #46).
+
+        """
+        template = '{{#test}}Mom{{/test}}'
+        context = {'test': (lambda text: '{{hi}} %s' % text)}
+        self._assert_render('{{hi}} Mom', template, context)
+

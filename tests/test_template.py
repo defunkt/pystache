@@ -220,42 +220,6 @@ class TemplateTestCase(unittest.TestCase):
         self.assertTrue(isinstance(actual, str))
         self.assertEquals(actual, 'Poincaré')
 
-    def test_render__tag_in_value(self):
-        """
-        Context values should not be treated as templates (issue #44).
-
-        """
-        template = Template('{{test}}')
-        context = {'test': '{{hello}}'}
-        actual = template.render(context)
-        self.assertEquals(actual, '{{hello}}')
-
-    def test_render__section_in_value(self):
-        """
-        Context values should not be treated as templates (issue #44).
-
-        """
-        template = Template('{{test}}')
-        context = {'test': '{{#hello}}'}
-        actual = template.render(context)
-        self.assertEquals(actual, '{{#hello}}')
-
-    def test_render__section__lambda(self):
-        template = Template('{{#test}}Mom{{/test}}')
-        context = {'test': (lambda text: 'Hi %s' % text)}
-        actual = template.render(context)
-        self.assertEquals(actual, 'Hi Mom')
-
-    def test_render__section__lambda__tag_in_output(self):
-        """
-        Check that callable output isn't treated as a template string (issue #46).
-
-        """
-        template = Template('{{#test}}Mom{{/test}}')
-        context = {'test': (lambda text: '{{hi}} %s' % text)}
-        actual = template.render(context)
-        self.assertEquals(actual, '{{hi}} Mom')
-
     def test_render__nonascii_template(self):
         """
         Test passing a non-unicode template with non-ascii characters.
