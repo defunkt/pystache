@@ -29,6 +29,7 @@ Bug fixes:
 * Fixed an issue that affected the rendering of zeroes when using certain
   implementations of Python (i.e. PyPy). [alex]
 * Extensionless template files could not be loaded. [cjerdonek]
+* Multline comments now permitted. [fczuardi]
 
 Misc:
 
