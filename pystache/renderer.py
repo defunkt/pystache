@@ -133,15 +133,31 @@ class Renderer(object):
 
         return context
 
+    def _make_load_partial(self):
+        """
+        Return the load_partial function for use by RenderEngine.
+
+        """
+        def load_partial(name):
+            template = self.load_template(name)
+            # Make sure the return value of load_template is unicode since
+            # RenderEngine requires it.  Also, check that the string is not
+            # already unicode to avoid "double-decoding".  Otherwise, we
+            # would get the following error:
+            #   TypeError: decoding Unicode is not supported
+            if not isinstance(template, unicode):
+                template = self.unicode(template)
+
+            return template
+
+        return load_partial
+
     def _make_render_engine(self):
         """
         Return a RenderEngine instance for rendering.
 
         """
-        # Make sure the return value of load_template is unicode.
-        def load_partial(name):
-            template = self.load_template(name)
-            return self.unicode(template)
+        load_partial = self._make_load_partial()
 
         engine = RenderEngine(load_partial=load_partial,
                               literal=self.literal,
