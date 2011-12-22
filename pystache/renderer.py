@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-This module provides a Template class.
+This module provides a Renderer class to render templates.
 
 """
 
