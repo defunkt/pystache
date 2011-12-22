@@ -98,9 +98,9 @@ class View(object):
         Return the view rendered using the current context.
 
         """
-        template = Renderer(self.get_template(), self.load_template, output_encoding=encoding,
+        renderer = Renderer(self.get_template(), self.load_template, output_encoding=encoding,
                             escape=escape)
-        return template.render(self.context)
+        return renderer.render(self.context)
 
     def get(self, key, default=None):
         return self.context.get(key, default)
