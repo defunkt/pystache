@@ -30,9 +30,10 @@ class Renderer(object):
 
         Arguments:
 
-          load_template: the function for loading partials.  The function should
-            accept a single template_name parameter and return a template as
-            a string.  Defaults to the default Loader's load_template() method.
+          load_template: a function for loading templates by name, for
+            example when loading partials.  The function should accept a
+            single template_name parameter and return a template as a string.
+            Defaults to the default Loader's load_template() method.
 
           output_encoding: the encoding to use when rendering to a string.
             The argument should be the name of an encoding as a string, for
