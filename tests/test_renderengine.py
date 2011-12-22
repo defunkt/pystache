@@ -16,7 +16,7 @@ class RenderEngineTestCase(unittest.TestCase):
 
     """Test the RenderEngine class."""
 
-    def _engine(self, partials=None):
+    def _engine(self):
         """
         Create and return a default RenderEngine for testing.
 
@@ -27,14 +27,16 @@ class RenderEngineTestCase(unittest.TestCase):
         escape = lambda s: cgi.escape(to_unicode(s))
         literal = to_unicode
 
-        if partials is not None:
-            load_template = lambda key: partials[key]
-
-        engine = RenderEngine(literal=literal, escape=escape, load_template=load_template)
+        engine = RenderEngine(literal=literal, escape=escape, load_template=None)
         return engine
 
     def _assert_render(self, expected, template, *context, **kwargs):
-        engine = kwargs['engine'] if kwargs else self._engine()
+        partials = kwargs.get('partials')
+        engine = kwargs.get('engine', self._engine())
+
+        if partials is not None:
+            engine.load_template = lambda key: partials[key]
+
         context = Context(*context)
 
         actual = engine.render(template, context)
@@ -62,10 +64,8 @@ class RenderEngineTestCase(unittest.TestCase):
 
         """
         engine = self._engine()
-
         partials = {'partial': "{{person}}"}
         engine.load_template = lambda key: partials[key]
-
         self._assert_render('Hi Mom', 'Hi {{>partial}}', {'person': 'Mom'}, engine=engine)
 
     def test_render__literal(self):
@@ -74,9 +74,7 @@ class RenderEngineTestCase(unittest.TestCase):
 
         """
         engine = self._engine()
-
         engine.literal = lambda s: s.upper()
-
         self._assert_render('bar BAR', '{{foo}} {{{foo}}}', {'foo': 'bar'}, engine=engine)
 
     def test_render__escape(self):
@@ -85,12 +83,9 @@ class RenderEngineTestCase(unittest.TestCase):
 
         """
         engine = self._engine()
-
         engine.escape = lambda s: "**" + s
-
         self._assert_render('**bar bar', '{{foo}} {{{foo}}}', {'foo': 'bar'}, engine=engine)
 
     def test_render_with_partial(self):
         partials = {'partial': "{{person}}"}
-        engine = self._engine(partials)
-        self._assert_render('Hi Mom', 'Hi {{>partial}}', {'person': 'Mom'}, engine=engine)
+        self._assert_render('Hi Mom', 'Hi {{>partial}}', {'person': 'Mom'}, partials=partials)
