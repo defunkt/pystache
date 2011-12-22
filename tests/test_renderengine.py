@@ -41,6 +41,18 @@ class RenderEngineTestCase(unittest.TestCase):
 
         self.assertEquals(actual, expected)
 
+    def test_init(self):
+        """
+        Test that __init__() stores all of the arguments correctly.
+
+        """
+        # In real-life, these arguments would be functions
+        engine = RenderEngine(load_template="load_template", literal="literal", escape="escape")
+
+        self.assertEquals(engine.escape, "escape")
+        self.assertEquals(engine.literal, "literal")
+        self.assertEquals(engine.load_template, "load_template")
+
     def test_render(self):
         self._assert_render('Hi Mom', 'Hi {{person}}', {'person': 'Mom'})
 
