@@ -56,6 +56,40 @@ class RenderEngineTestCase(unittest.TestCase):
     def test_render(self):
         self._assert_render('Hi Mom', 'Hi {{person}}', {'person': 'Mom'})
 
+    def test_render__load_template(self):
+        """
+        Test that render() uses the load_template attribute.
+
+        """
+        engine = self._engine()
+
+        partials = {'partial': "{{person}}"}
+        engine.load_template = lambda key: partials[key]
+
+        self._assert_render('Hi Mom', 'Hi {{>partial}}', {'person': 'Mom'}, engine=engine)
+
+    def test_render__literal(self):
+        """
+        Test that render() uses the literal attribute.
+
+        """
+        engine = self._engine()
+
+        engine.literal = lambda s: s.upper()
+
+        self._assert_render('bar BAR', '{{foo}} {{{foo}}}', {'foo': 'bar'}, engine=engine)
+
+    def test_render__escape(self):
+        """
+        Test that render() uses the escape attribute.
+
+        """
+        engine = self._engine()
+
+        engine.escape = lambda s: "**" + s
+
+        self._assert_render('**bar bar', '{{foo}} {{{foo}}}', {'foo': 'bar'}, engine=engine)
+
     def test_render_with_partial(self):
         partials = {'partial': "{{person}}"}
         engine = self._engine(partials)
