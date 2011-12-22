@@ -136,6 +136,16 @@ class Template(object):
 
         return context
 
+    def _make_render_engine(self):
+        """
+        Return a RenderEngine instance for rendering.
+
+        """
+        engine = RenderEngine(load_template=self.load_template,
+                              literal=self.literal,
+                              escape=self._unicode_and_escape)
+        return engine
+
     def render(self, context=None, **kwargs):
         """
         Return the template rendered using the given context.
@@ -156,15 +166,12 @@ class Template(object):
             These values take precedence over the context on any key conflicts.
 
         """
+        engine = self._make_render_engine()
         context = self._make_context(context, **kwargs)
 
         template = self.template
         if not isinstance(template, unicode):
             template = self.unicode(template)
-
-        engine = RenderEngine(load_template=self.load_template,
-                              literal=self.literal,
-                              escape=self._unicode_and_escape)
 
         result = engine.render(template, context)
 

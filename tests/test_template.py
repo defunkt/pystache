@@ -355,3 +355,46 @@ class TemplateTestCase(unittest.TestCase):
 
         template.default_encoding = 'utf_8'
         self.assertEquals(template.render(), "déf")
+
+    # By testing that Template.render() constructs the RenderEngine instance
+    # correctly, we no longer need to test the rendering code paths through
+    # the Template.  We can test rendering paths through only the RenderEngine
+    # for the same amount of code coverage.
+    def test_make_render_engine__load_template(self):
+        """
+        Test that _make_render_engine() passes the right load_template.
+
+        """
+        template = Template()
+        template.load_template = "foo"  # in real life, this would be a function.
+
+        engine = template._make_render_engine()
+        self.assertEquals(engine.load_template, "foo")
+
+    def test_make_render_engine__literal(self):
+        """
+        Test that _make_render_engine() passes the right literal.
+
+        """
+        template = Template()
+        template.literal = "foo"  # in real life, this would be a function.
+
+        engine = template._make_render_engine()
+        self.assertEquals(engine.literal, "foo")
+
+    def test_make_render_engine__escape(self):
+        """
+        Test that _make_render_engine() passes the right escape.
+
+        """
+        template = Template()
+        template.unicode = lambda s: s.upper()  # a test version.
+        template.escape = lambda s: "**" + s  # a test version.
+
+        engine = template._make_render_engine()
+        escape = engine.escape
+
+        self.assertEquals(escape(u"foo"), "**foo")
+
+        # Test that escape converts str strings to unicode first.
+        self.assertEquals(escape("foo"), "**FOO")
