@@ -256,57 +256,6 @@ class TemplateTestCase(unittest.TestCase):
         actual = template.render(context)
         self.assertEquals(actual, '{{hi}} Mom')
 
-    def test_render__html_escape(self):
-        context = {'test': '1 < 2'}
-        template = Template('{{test}}')
-
-        self.assertEquals(template.render(context), '1 &lt; 2')
-
-    def test_render__html_escape_disabled(self):
-        context = {'test': '1 < 2'}
-        template = Template('{{test}}')
-
-        self.assertEquals(template.render(context), '1 &lt; 2')
-
-        template.escape = lambda s: s
-        self.assertEquals(template.render(context), '1 < 2')
-
-    def test_render__html_escape_disabled_with_partial(self):
-        context = {'test': '1 < 2'}
-        load_template = lambda name: '{{test}}'
-        template = Template('{{>partial}}', load_template=load_template)
-
-        self.assertEquals(template.render(context), '1 &lt; 2')
-
-        template.escape = lambda s: s
-        self.assertEquals(template.render(context), '1 < 2')
-
-    def test_render__html_escape_disabled_with_non_false_value(self):
-        context = {'section': {'test': '1 < 2'}}
-        template = Template('{{#section}}{{test}}{{/section}}')
-
-        self.assertEquals(template.render(context), '1 &lt; 2')
-
-        template.escape = lambda s: s
-        self.assertEquals(template.render(context), '1 < 2')
-
-    def test_render__list_referencing_outer_context(self):
-        """
-        Check that list items can access the parent context.
-
-        For sections whose value is a list, check that items in the list
-        have access to the values inherited from the parent context
-        when rendering.
-
-        """
-        context = {
-            "list": [{"name": "Al"}, {"name": "Bo"}],
-            "greeting": "Hi",
-        }
-        template = Template("{{#list}}{{name}}: {{greeting}}; {{/list}}")
-
-        self.assertEquals(template.render(context), "Al: Hi; Bo: Hi; ")
-
     def test_render__nonascii_template(self):
         """
         Test passing a non-unicode template with non-ascii characters.

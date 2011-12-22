@@ -117,3 +117,21 @@ class RenderEngineTestCase(unittest.TestCase):
 
         self._assert_render('**bar BAR', '{{>partial}}', {'foo': 'bar'}, engine=engine, partials=partials)
 
+    def test_render__list_referencing_outer_context(self):
+        """
+        Check that list items can access the parent context.
+
+        For sections whose value is a list, check that items in the list
+        have access to the values inherited from the parent context
+        when rendering.
+
+        """
+        context = {
+            "list": [{"name": "Al"}, {"name": "Bo"}],
+            "greeting": "Hi",
+        }
+
+        template = "{{#list}}{{name}}: {{greeting}}; {{/list}}"
+
+        self._assert_render("Al: Hi; Bo: Hi; ", template, context)
+
