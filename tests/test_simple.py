@@ -21,7 +21,8 @@ class TestSimple(unittest.TestCase):
 
     def test_empty_context(self):
         view = ComplexView()
-        self.assertEquals(pystache.Renderer('{{#empty_list}}Shouldnt see me {{/empty_list}}{{^empty_list}}Should see me{{/empty_list}}', view).render(), "Should see me")
+        template = '{{#empty_list}}Shouldnt see me {{/empty_list}}{{^empty_list}}Should see me{{/empty_list}}'
+        self.assertEquals(pystache.Renderer().render(template), "Should see me")
 
     def test_callables(self):
         view = Lambdas()
@@ -38,8 +39,8 @@ class TestSimple(unittest.TestCase):
 
     def test_non_existent_value_renders_blank(self):
         view = Simple()
-
-        self.assertEquals(pystache.Renderer('{{not_set}} {{blank}}', view).render(), ' ')
+        template = '{{not_set}} {{blank}}'
+        self.assertEquals(pystache.Renderer().render(template), ' ')
 
 
     def test_template_partial_extension(self):

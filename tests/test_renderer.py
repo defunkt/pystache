@@ -28,6 +28,9 @@ class RendererTestCase(unittest.TestCase):
     def tearDown(self):
         self._restore_markupsafe()
 
+    def _renderer(self):
+        return Renderer()
+
     def _was_markupsafe_imported(self):
         return bool(self.original_markupsafe)
 
@@ -52,8 +55,8 @@ class RendererTestCase(unittest.TestCase):
         self.assertEquals(bool(markupsafe), self._was_markupsafe_imported())
 
     def test_init__escape__default_without_markupsafe(self):
-        template = Renderer()
-        self.assertEquals(template.escape(">'"), "&gt;'")
+        renderer = Renderer()
+        self.assertEquals(renderer.escape(">'"), "&gt;'")
 
     def test_init__escape__default_with_markupsafe(self):
         if not self._was_markupsafe_imported():
@@ -61,73 +64,73 @@ class RendererTestCase(unittest.TestCase):
             return
         self._restore_markupsafe()
 
-        template = Renderer()
-        self.assertEquals(template.escape(">'"), "&gt;&#39;")
+        renderer = Renderer()
+        self.assertEquals(renderer.escape(">'"), "&gt;&#39;")
 
     def test_init__escape(self):
         escape = lambda s: "foo" + s
-        template = Renderer(escape=escape)
-        self.assertEquals(template.escape("bar"), "foobar")
+        renderer = Renderer(escape=escape)
+        self.assertEquals(renderer.escape("bar"), "foobar")
 
     def test_init__default_encoding__default(self):
         """
         Check the default value.
 
         """
-        template = Renderer()
-        self.assertEquals(template.default_encoding, sys.getdefaultencoding())
+        renderer = Renderer()
+        self.assertEquals(renderer.default_encoding, sys.getdefaultencoding())
 
     def test_init__default_encoding(self):
         """
         Check that the constructor sets the attribute correctly.
 
         """
-        template = Renderer(default_encoding="foo")
-        self.assertEquals(template.default_encoding, "foo")
+        renderer = Renderer(default_encoding="foo")
+        self.assertEquals(renderer.default_encoding, "foo")
 
     def test_init__decode_errors__default(self):
         """
         Check the default value.
 
         """
-        template = Renderer()
-        self.assertEquals(template.decode_errors, 'strict')
+        renderer = Renderer()
+        self.assertEquals(renderer.decode_errors, 'strict')
 
     def test_init__decode_errors(self):
         """
         Check that the constructor sets the attribute correctly.
 
         """
-        template = Renderer(decode_errors="foo")
-        self.assertEquals(template.decode_errors, "foo")
+        renderer = Renderer(decode_errors="foo")
+        self.assertEquals(renderer.decode_errors, "foo")
 
     def test_unicode(self):
-        template = Renderer()
-        actual = template.literal("abc")
+        renderer = Renderer()
+        actual = renderer.literal("abc")
         self.assertEquals(actual, "abc")
         self.assertEquals(type(actual), unicode)
 
     def test_unicode__default_encoding(self):
-        template = Renderer()
+        renderer = Renderer()
         s = "é"
 
-        template.default_encoding = "ascii"
-        self.assertRaises(UnicodeDecodeError, template.unicode, s)
+        renderer.default_encoding = "ascii"
+        self.assertRaises(UnicodeDecodeError, renderer.unicode, s)
 
-        template.default_encoding = "utf-8"
-        self.assertEquals(template.unicode(s), u"é")
+        renderer.default_encoding = "utf-8"
+        self.assertEquals(renderer.unicode(s), u"é")
 
     def test_unicode__decode_errors(self):
-        template = Renderer()
+        renderer = Renderer()
         s = "é"
 
-        template.default_encoding = "ascii"
-        template.decode_errors = "strict"
-        self.assertRaises(UnicodeDecodeError, template.unicode, s)
+        renderer.default_encoding = "ascii"
+        renderer.decode_errors = "strict"
+        self.assertRaises(UnicodeDecodeError, renderer.unicode, s)
 
-        template.decode_errors = "replace"
+        renderer.decode_errors = "replace"
         # U+FFFD is the official Unicode replacement character.
-        self.assertEquals(template.unicode(s), u'\ufffd\ufffd')
+        self.assertEquals(renderer.unicode(s), u'\ufffd\ufffd')
 
     def test_literal__with_markupsafe(self):
         if not self._was_markupsafe_imported():
@@ -135,39 +138,39 @@ class RendererTestCase(unittest.TestCase):
             return
         self._restore_markupsafe()
 
-        template = Renderer()
-        template.default_encoding = "utf_8"
+        _renderer = Renderer()
+        _renderer.default_encoding = "utf_8"
 
         # Check the standard case.
-        actual = template.literal("abc")
+        actual = _renderer.literal("abc")
         self.assertEquals(actual, "abc")
         self.assertEquals(type(actual), renderer.markupsafe.Markup)
 
         s = "é"
         # Check that markupsafe respects default_encoding.
-        self.assertEquals(template.literal(s), u"é")
-        template.default_encoding = "ascii"
-        self.assertRaises(UnicodeDecodeError, template.literal, s)
+        self.assertEquals(_renderer.literal(s), u"é")
+        _renderer.default_encoding = "ascii"
+        self.assertRaises(UnicodeDecodeError, _renderer.literal, s)
 
         # Check that markupsafe respects decode_errors.
-        template.decode_errors = "replace"
-        self.assertEquals(template.literal(s), u'\ufffd\ufffd')
+        _renderer.decode_errors = "replace"
+        self.assertEquals(_renderer.literal(s), u'\ufffd\ufffd')
 
     def test_render__unicode(self):
-        template = Renderer(u'foo')
-        actual = template.render()
+        renderer = Renderer()
+        actual = renderer.render(u'foo')
         self.assertTrue(isinstance(actual, unicode))
         self.assertEquals(actual, u'foo')
 
     def test_render__str(self):
-        template = Renderer('foo')
-        actual = template.render()
+        renderer = Renderer()
+        actual = renderer.render('foo')
         self.assertTrue(isinstance(actual, unicode))
         self.assertEquals(actual, 'foo')
 
     def test_render__non_ascii_character(self):
-        template = Renderer(u'Poincaré')
-        actual = template.render()
+        renderer = Renderer()
+        actual = renderer.render(u'Poincaré')
         self.assertTrue(isinstance(actual, unicode))
         self.assertEquals(actual, u'Poincaré')
 
@@ -176,32 +179,33 @@ class RendererTestCase(unittest.TestCase):
         Test render(): passing a context.
 
         """
-        template = Renderer('Hi {{person}}')
-        self.assertEquals(template.render({'person': 'Mom'}), 'Hi Mom')
+        renderer = Renderer()
+        self.assertEquals(renderer.render('Hi {{person}}', {'person': 'Mom'}), 'Hi Mom')
 
     def test_render__context_and_kwargs(self):
         """
         Test render(): passing a context and **kwargs.
 
         """
-        template = Renderer('Hi {{person1}} and {{person2}}')
-        self.assertEquals(template.render({'person1': 'Mom'}, person2='Dad'), 'Hi Mom and Dad')
+        renderer = Renderer()
+        template = 'Hi {{person1}} and {{person2}}'
+        self.assertEquals(renderer.render(template, {'person1': 'Mom'}, person2='Dad'), 'Hi Mom and Dad')
 
     def test_render__kwargs_and_no_context(self):
         """
         Test render(): passing **kwargs and no context.
 
         """
-        template = Renderer('Hi {{person}}')
-        self.assertEquals(template.render(person='Mom'), 'Hi Mom')
+        renderer = Renderer()
+        self.assertEquals(renderer.render('Hi {{person}}', person='Mom'), 'Hi Mom')
 
     def test_render__context_and_kwargs__precedence(self):
         """
         Test render(): **kwargs takes precedence over context.
 
         """
-        template = Renderer('Hi {{person}}')
-        self.assertEquals(template.render({'person': 'Mom'}, person='Dad'), 'Hi Dad')
+        renderer = Renderer()
+        self.assertEquals(renderer.render('Hi {{person}}', {'person': 'Mom'}, person='Dad'), 'Hi Dad')
 
     def test_render__kwargs_does_not_modify_context(self):
         """
@@ -209,14 +213,14 @@ class RendererTestCase(unittest.TestCase):
 
         """
         context = {}
-        template = Renderer('Hi {{person}}')
-        template.render(context=context, foo="bar")
+        renderer = Renderer()
+        renderer.render('Hi {{person}}', context=context, foo="bar")
         self.assertEquals(context, {})
 
     def test_render__output_encoding(self):
-        template = Renderer(u'Poincaré')
-        template.output_encoding = 'utf-8'
-        actual = template.render()
+        renderer = Renderer()
+        renderer.output_encoding = 'utf-8'
+        actual = renderer.render(u'Poincaré')
         self.assertTrue(isinstance(actual, str))
         self.assertEquals(actual, 'Poincaré')
 
@@ -225,15 +229,16 @@ class RendererTestCase(unittest.TestCase):
         Test passing a non-unicode template with non-ascii characters.
 
         """
-        template = Renderer("déf", output_encoding="utf-8")
+        renderer = Renderer(output_encoding="utf-8")
+        template = "déf"
 
         # Check that decode_errors and default_encoding are both respected.
-        template.decode_errors = 'ignore'
-        template.default_encoding = 'ascii'
-        self.assertEquals(template.render(), "df")
+        renderer.decode_errors = 'ignore'
+        renderer.default_encoding = 'ascii'
+        self.assertEquals(renderer.render(template), "df")
 
-        template.default_encoding = 'utf_8'
-        self.assertEquals(template.render(), "déf")
+        renderer.default_encoding = 'utf_8'
+        self.assertEquals(renderer.render(template), "déf")
 
     # By testing that Renderer.render() constructs the RenderEngine instance
     # correctly, we no longer need to test the rendering code paths through

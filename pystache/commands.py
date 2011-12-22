@@ -64,8 +64,10 @@ def main(sys_argv):
     except IOError:
         context = json.loads(context)
 
-    renderer = Renderer(template)
-    print(renderer.render(context))
+    renderer = Renderer()
+
+    rendered = renderer.render(template, context)
+    print rendered
 
 
 if __name__=='__main__':
