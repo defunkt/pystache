@@ -138,7 +138,12 @@ class Renderer(object):
         Return a RenderEngine instance for rendering.
 
         """
-        engine = RenderEngine(load_template=self.load_template,
+        # Make sure the return value of load_template is unicode.
+        def load_partial(name):
+            template = self.load_template(name)
+            return self.unicode(template)
+
+        engine = RenderEngine(load_partial=load_partial,
                               literal=self.literal,
                               escape=self._unicode_and_escape)
         return engine

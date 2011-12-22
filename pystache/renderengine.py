@@ -55,9 +55,13 @@ class RenderEngine(object):
 
     modifiers = Modifiers()
 
-    def __init__(self, load_template=None, literal=None, escape=None):
+    def __init__(self, load_partial=None, literal=None, escape=None):
         """
         Arguments:
+
+          load_partial: a function for loading templates by name when
+            loading partials.  The function should accept a template name
+            and return a unicode template string.
 
           escape: a function that takes a unicode or str string,
             converts it to unicode, and escapes and returns it.
@@ -68,7 +72,7 @@ class RenderEngine(object):
         """
         self.escape = escape
         self.literal = literal
-        self.load_template = load_template
+        self.load_partial = load_partial
 
     def render(self, template, context):
         """
@@ -178,7 +182,7 @@ class RenderEngine(object):
 
     @modifiers.set('>')
     def _render_partial(self, template_name):
-        markup = self.load_template(template_name)
+        markup = self.load_partial(template_name)
         return self._render(markup)
 
     @modifiers.set('=')
@@ -194,7 +198,7 @@ class RenderEngine(object):
 
     @modifiers.set('{')
     @modifiers.set('&')
-    def render_unescaped(self, tag_name):
+    def _render_unescaped(self, tag_name):
         """
         Render a tag without escaping it.
 

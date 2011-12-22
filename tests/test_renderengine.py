@@ -21,13 +21,12 @@ class RenderEngineTestCase(unittest.TestCase):
         Create and return a default RenderEngine for testing.
 
         """
-        load_template = None
         to_unicode = unicode
 
         escape = lambda s: cgi.escape(to_unicode(s))
         literal = to_unicode
 
-        engine = RenderEngine(literal=literal, escape=escape, load_template=None)
+        engine = RenderEngine(literal=literal, escape=escape, load_partial=None)
         return engine
 
     def _assert_render(self, expected, template, *context, **kwargs):
@@ -35,7 +34,7 @@ class RenderEngineTestCase(unittest.TestCase):
         engine = kwargs.get('engine', self._engine())
 
         if partials is not None:
-            engine.load_template = lambda key: partials[key]
+            engine.load_partial = lambda key: partials[key]
 
         context = Context(*context)
 
@@ -49,23 +48,23 @@ class RenderEngineTestCase(unittest.TestCase):
 
         """
         # In real-life, these arguments would be functions
-        engine = RenderEngine(load_template="load_template", literal="literal", escape="escape")
+        engine = RenderEngine(load_partial="foo", literal="literal", escape="escape")
 
+        self.assertEquals(engine.load_partial, "foo")
         self.assertEquals(engine.escape, "escape")
         self.assertEquals(engine.literal, "literal")
-        self.assertEquals(engine.load_template, "load_template")
 
     def test_render(self):
         self._assert_render('Hi Mom', 'Hi {{person}}', {'person': 'Mom'})
 
-    def test_render__load_template(self):
+    def test_render__load_partial(self):
         """
         Test that render() uses the load_template attribute.
 
         """
         engine = self._engine()
         partials = {'partial': "{{person}}"}
-        engine.load_template = lambda key: partials[key]
+        engine.load_partial = lambda key: partials[key]
         self._assert_render('Hi Mom', 'Hi {{>partial}}', {'person': 'Mom'}, engine=engine)
 
     def test_render__literal(self):
