@@ -307,40 +307,6 @@ class TemplateTestCase(unittest.TestCase):
 
         self.assertEquals(template.render(context), "Al: Hi; Bo: Hi; ")
 
-    def test_render__encoding_in_context_value(self):
-        template = Template('{{test}}')
-        context = {'test': "déf"}
-
-        template.decode_errors = 'ignore'
-        template.default_encoding = 'ascii'
-        self.assertEquals(template.render(context), "df")
-
-        template.default_encoding = 'utf_8'
-        self.assertEquals(template.render(context), u"déf")
-
-    def test_render__encoding_in_section_context_value(self):
-        template = Template('{{#test}}{{foo}}{{/test}}')
-        context = {'test': {'foo': "déf"}}
-
-        template.decode_errors = 'ignore'
-        template.default_encoding = 'ascii'
-        self.assertEquals(template.render(context), "df")
-
-        template.default_encoding = 'utf_8'
-        self.assertEquals(template.render(context), u"déf")
-
-    def test_render__encoding_in_partial_context_value(self):
-        load_template = lambda x: "{{foo}}"
-        template = Template('{{>partial}}', load_template=load_template)
-        context = {'foo': "déf"}
-
-        template.decode_errors = 'ignore'
-        template.default_encoding = 'ascii'
-        self.assertEquals(template.render(context), "df")
-
-        template.default_encoding = 'utf_8'
-        self.assertEquals(template.render(context), u"déf")
-
     def test_render__nonascii_template(self):
         """
         Test passing a non-unicode template with non-ascii characters.

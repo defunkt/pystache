@@ -89,3 +89,31 @@ class RenderEngineTestCase(unittest.TestCase):
     def test_render_with_partial(self):
         partials = {'partial': "{{person}}"}
         self._assert_render('Hi Mom', 'Hi {{>partial}}', {'person': 'Mom'}, partials=partials)
+
+    def test_render__section_context_values(self):
+        """
+        Test that escape and literal work on context values in sections.
+
+        """
+        engine = self._engine()
+        engine.escape = lambda s: "**" + s
+        engine.literal = lambda s: s.upper()
+
+        template = '{{#test}}{{foo}} {{{foo}}}{{/test}}'
+        context = {'test': {'foo': 'bar'}}
+
+        self._assert_render('**bar BAR', template, context, engine=engine)
+
+    def test_render__partial_context_values(self):
+        """
+        Test that escape and literal work on context values in partials.
+
+        """
+        engine = self._engine()
+        engine.escape = lambda s: "**" + s
+        engine.literal = lambda s: s.upper()
+
+        partials = {'partial': '{{foo}} {{{foo}}}'}
+
+        self._assert_render('**bar BAR', '{{>partial}}', {'foo': 'bar'}, engine=engine, partials=partials)
+
