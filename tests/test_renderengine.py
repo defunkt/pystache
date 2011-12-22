@@ -166,3 +166,11 @@ class RenderEngineTestCase(unittest.TestCase):
         context = {'test': (lambda text: '{{hi}} %s' % text)}
         self._assert_render('{{hi}} Mom', template, context)
 
+    def test_render__section__comment__multiline(self):
+        """
+        Check that multiline comments are permitted.
+
+        """
+        self._assert_render('foobar', 'foo{{! baz }}bar')
+        self._assert_render('foobar', 'foo{{! \nbaz }}bar')
+

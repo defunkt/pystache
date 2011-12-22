@@ -106,7 +106,8 @@ class RenderEngine(object):
         self.section_re = re.compile(section, re.M|re.S)
 
         tag = r"%(otag)s(#|=|&|!|>|\{)?(.+?)\1?%(ctag)s+" % tags
-        self.tag_re = re.compile(tag)
+        # We use re.DOTALL to permit multiline comments, in accordance with the spec.
+        self.tag_re = re.compile(tag, re.DOTALL)
 
     def _render_tags(self, template):
         output = []
