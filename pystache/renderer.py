@@ -20,22 +20,20 @@ except ImportError:
     pass
 
 
-class Template(object):
+class Renderer(object):
 
-    def __init__(self, template=None, load_template=None, output_encoding=None, escape=None,
+    # TODO: change load_template to load_partial.
+    def __init__(self, load_template=None, output_encoding=None, escape=None,
                  default_encoding=None, decode_errors='strict'):
         """
-        Construct a Template instance.
+        Construct an instance.
 
         Arguments:
 
-          template: a template string that is either unicode, or of type
-            str and encoded using the encoding named by the default_encoding
-            keyword argument.
-
-          load_template: the function for loading partials.  The function should
-            accept a single template_name parameter and return a template as
-            a string.  Defaults to the default Loader's load_template() method.
+          load_template: a function for loading templates by name, for
+            example when loading partials.  The function should accept a
+            single template_name parameter and return a template as a string.
+            Defaults to the default Loader's load_template() method.
 
           output_encoding: the encoding to use when rendering to a string.
             The argument should be the name of an encoding as a string, for
@@ -84,7 +82,6 @@ class Template(object):
         self.escape = escape
         self.load_template = load_template
         self.output_encoding = output_encoding
-        self.template = template
 
     def _unicode_and_escape(self, s):
         if not isinstance(s, unicode):
@@ -146,9 +143,9 @@ class Template(object):
                               escape=self._unicode_and_escape)
         return engine
 
-    def render(self, context=None, **kwargs):
+    def render(self, template, context=None, **kwargs):
         """
-        Return the template rendered using the given context.
+        Render the given template using the given context.
 
         The return value is a unicode string, unless the output_encoding
         attribute has been set to a non-None value, in which case the
@@ -160,6 +157,10 @@ class Template(object):
 
         Arguments:
 
+          template: a template string that is either unicode, or of type
+            str and encoded using the encoding named by the default_encoding
+            keyword argument.
+
           context: a dictionary, Context, or object (e.g. a View instance).
 
           **kwargs: additional key values to add to the context when rendering.
@@ -169,13 +170,12 @@ class Template(object):
         engine = self._make_render_engine()
         context = self._make_context(context, **kwargs)
 
-        template = self.template
         if not isinstance(template, unicode):
             template = self.unicode(template)
 
-        result = engine.render(template, context)
+        rendered = engine.render(template, context)
 
         if self.output_encoding is not None:
-            result = result.encode(self.output_encoding)
+            rendered = rendered.encode(self.output_encoding)
 
-        return result
+        return rendered
