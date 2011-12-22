@@ -6,8 +6,6 @@ This module provides a Template class.
 """
 
 import cgi
-import collections
-import re
 import sys
 
 from .context import Context

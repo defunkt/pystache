@@ -5,6 +5,7 @@ Defines a class responsible for rendering logic.
 
 """
 
+import collections
 import re
 
 
