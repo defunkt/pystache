@@ -33,19 +33,18 @@ class RenderEngineTestCase(unittest.TestCase):
         engine = RenderEngine(literal=literal, escape=escape, load_template=load_template)
         return engine
 
-    def _assert_render(self, engine, expected, template, *context):
-        if engine is None:
-            engine = self._engine()
-
+    def _assert_render(self, expected, template, *context, **kwargs):
+        engine = kwargs['engine'] if kwargs else self._engine()
         context = Context(*context)
 
         actual = engine.render(template, context)
+
         self.assertEquals(actual, expected)
 
     def test_render(self):
-        self._assert_render(None, 'Hi Mom', 'Hi {{person}}', {'person': 'Mom'})
+        self._assert_render('Hi Mom', 'Hi {{person}}', {'person': 'Mom'})
 
     def test_render_with_partial(self):
         partials = {'partial': "{{person}}"}
         engine = self._engine(partials)
-        self._assert_render(engine, 'Hi Mom', 'Hi {{>partial}}', {'person': 'Mom'})
+        self._assert_render('Hi Mom', 'Hi {{>partial}}', {'person': 'Mom'}, engine=engine)
