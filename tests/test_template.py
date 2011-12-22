@@ -38,6 +38,19 @@ class TemplateTestCase(unittest.TestCase):
         """
         template.markupsafe = self.original_markupsafe
 
+    def test__was_markupsafe_imported(self):
+        """
+        Test that our helper function works.
+
+        """
+        markupsafe = None
+        try:
+            import markupsafe
+        except:
+            pass
+
+        self.assertEquals(bool(markupsafe), self._was_markupsafe_imported())
+
     def test_init__escape__default_without_markupsafe(self):
         template = Template()
         self.assertEquals(template.escape(">'"), "&gt;'")
@@ -207,127 +220,6 @@ class TemplateTestCase(unittest.TestCase):
         self.assertTrue(isinstance(actual, str))
         self.assertEquals(actual, 'Poincaré')
 
-    def test_render__tag_in_value(self):
-        """
-        Context values should not be treated as templates (issue #44).
-
-        """
-        template = Template('{{test}}')
-        context = {'test': '{{hello}}'}
-        actual = template.render(context)
-        self.assertEquals(actual, '{{hello}}')
-
-    def test_render__section_in_value(self):
-        """
-        Context values should not be treated as templates (issue #44).
-
-        """
-        template = Template('{{test}}')
-        context = {'test': '{{#hello}}'}
-        actual = template.render(context)
-        self.assertEquals(actual, '{{#hello}}')
-
-    def test_render__section__lambda(self):
-        template = Template('{{#test}}Mom{{/test}}')
-        context = {'test': (lambda text: 'Hi %s' % text)}
-        actual = template.render(context)
-        self.assertEquals(actual, 'Hi Mom')
-
-    def test_render__section__lambda__tag_in_output(self):
-        """
-        Check that callable output isn't treated as a template string (issue #46).
-
-        """
-        template = Template('{{#test}}Mom{{/test}}')
-        context = {'test': (lambda text: '{{hi}} %s' % text)}
-        actual = template.render(context)
-        self.assertEquals(actual, '{{hi}} Mom')
-
-    def test_render__html_escape(self):
-        context = {'test': '1 < 2'}
-        template = Template('{{test}}')
-
-        self.assertEquals(template.render(context), '1 &lt; 2')
-
-    def test_render__html_escape_disabled(self):
-        context = {'test': '1 < 2'}
-        template = Template('{{test}}')
-
-        self.assertEquals(template.render(context), '1 &lt; 2')
-
-        template.escape = lambda s: s
-        self.assertEquals(template.render(context), '1 < 2')
-
-    def test_render__html_escape_disabled_with_partial(self):
-        context = {'test': '1 < 2'}
-        load_template = lambda name: '{{test}}'
-        template = Template('{{>partial}}', load_template=load_template)
-
-        self.assertEquals(template.render(context), '1 &lt; 2')
-
-        template.escape = lambda s: s
-        self.assertEquals(template.render(context), '1 < 2')
-
-    def test_render__html_escape_disabled_with_non_false_value(self):
-        context = {'section': {'test': '1 < 2'}}
-        template = Template('{{#section}}{{test}}{{/section}}')
-
-        self.assertEquals(template.render(context), '1 &lt; 2')
-
-        template.escape = lambda s: s
-        self.assertEquals(template.render(context), '1 < 2')
-
-    def test_render__list_referencing_outer_context(self):
-        """
-        Check that list items can access the parent context.
-
-        For sections whose value is a list, check that items in the list
-        have access to the values inherited from the parent context
-        when rendering.
-
-        """
-        context = {
-            "list": [{"name": "Al"}, {"name": "Bo"}],
-            "greeting": "Hi",
-        }
-        template = Template("{{#list}}{{name}}: {{greeting}}; {{/list}}")
-
-        self.assertEquals(template.render(context), "Al: Hi; Bo: Hi; ")
-
-    def test_render__encoding_in_context_value(self):
-        template = Template('{{test}}')
-        context = {'test': "déf"}
-
-        template.decode_errors = 'ignore'
-        template.default_encoding = 'ascii'
-        self.assertEquals(template.render(context), "df")
-
-        template.default_encoding = 'utf_8'
-        self.assertEquals(template.render(context), u"déf")
-
-    def test_render__encoding_in_section_context_value(self):
-        template = Template('{{#test}}{{foo}}{{/test}}')
-        context = {'test': {'foo': "déf"}}
-
-        template.decode_errors = 'ignore'
-        template.default_encoding = 'ascii'
-        self.assertEquals(template.render(context), "df")
-
-        template.default_encoding = 'utf_8'
-        self.assertEquals(template.render(context), u"déf")
-
-    def test_render__encoding_in_partial_context_value(self):
-        load_template = lambda x: "{{foo}}"
-        template = Template('{{>partial}}', load_template=load_template)
-        context = {'foo': "déf"}
-
-        template.decode_errors = 'ignore'
-        template.default_encoding = 'ascii'
-        self.assertEquals(template.render(context), "df")
-
-        template.default_encoding = 'utf_8'
-        self.assertEquals(template.render(context), u"déf")
-
     def test_render__nonascii_template(self):
         """
         Test passing a non-unicode template with non-ascii characters.
@@ -342,3 +234,46 @@ class TemplateTestCase(unittest.TestCase):
 
         template.default_encoding = 'utf_8'
         self.assertEquals(template.render(), "déf")
+
+    # By testing that Template.render() constructs the RenderEngine instance
+    # correctly, we no longer need to test the rendering code paths through
+    # the Template.  We can test rendering paths through only the RenderEngine
+    # for the same amount of code coverage.
+    def test_make_render_engine__load_template(self):
+        """
+        Test that _make_render_engine() passes the right load_template.
+
+        """
+        template = Template()
+        template.load_template = "foo"  # in real life, this would be a function.
+
+        engine = template._make_render_engine()
+        self.assertEquals(engine.load_template, "foo")
+
+    def test_make_render_engine__literal(self):
+        """
+        Test that _make_render_engine() passes the right literal.
+
+        """
+        template = Template()
+        template.literal = "foo"  # in real life, this would be a function.
+
+        engine = template._make_render_engine()
+        self.assertEquals(engine.literal, "foo")
+
+    def test_make_render_engine__escape(self):
+        """
+        Test that _make_render_engine() passes the right escape.
+
+        """
+        template = Template()
+        template.unicode = lambda s: s.upper()  # a test version.
+        template.escape = lambda s: "**" + s  # a test version.
+
+        engine = template._make_render_engine()
+        escape = engine.escape
+
+        self.assertEquals(escape(u"foo"), "**foo")
+
+        # Test that escape converts str strings to unicode first.
+        self.assertEquals(escape("foo"), "**FOO")
