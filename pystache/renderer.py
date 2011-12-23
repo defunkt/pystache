@@ -31,19 +31,20 @@ class Renderer(object):
 
           output_encoding: the encoding to use when rendering to a string.
             The argument should be the name of an encoding as a string, for
-            example "utf-8".  See the render() method's documentation for more
-            information.
+            example "utf-8".  See the render() method's documentation for
+            more information.
 
           escape: the function used to escape mustache variable values
-            when rendering a template.  The function should accept a unicode
-            string and return an escaped string of the same type.  It need
-            not handle strings of type `str` because this class will only
-            pass it unicode strings.  The constructor assigns this escape
-            function to the constructed instance's Template.escape() method.
-
-            The argument defaults to markupsafe.escape when markupsafe is
-            importable and cgi.escape otherwise.  To disable escaping entirely,
-            one can pass `lambda s: s` as the escape function, for example.
+            when rendering a template.  The function should accept a
+            unicode string and return an escaped string of the same type.
+                This function need not handle strings of type `str` because
+            this class will only pass it unicode strings.  The constructor
+            assigns this function to the constructed instance's escape()
+            method.
+                The argument defaults to markupsafe.escape when markupsafe
+            is importable and cgi.escape otherwise.  To disable escaping
+            entirely, one can pass `lambda u: u` as the escape function,
+            for example.
 
           default_encoding: the name of the encoding to use when converting
             to unicode any strings of type `str` encountered during the
