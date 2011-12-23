@@ -19,22 +19,27 @@ class Loader(object):
 
         Arguments:
 
+          search_dirs: the list of directories in which to search for templates,
+            for example when looking for partials.  Defaults to the current
+            working directory.  If given a string, the string is interpreted
+            as a single directory.
+
+          extension: the template file extension.  Defaults to "mustache".
+            Pass False for no extension (i.e. extensionless template files).
+
           encoding: the name of the encoding to use when converting file
             contents to unicode.  This name will be passed as the encoding
             argument to the built-in function unicode().  Defaults to the
             encoding name returned by sys.getdefaultencoding().
 
-          search_dirs: the directories in which to search for templates.
-            Defaults to the current working directory.
-
-          extension: the template file extension.  Defaults to "mustache".
-            Pass False for no extension.
 
         """
         if encoding is None:
             encoding = sys.getdefaultencoding()
+
         if extension is None:
             extension = DEFAULT_EXTENSION
+
         if search_dirs is None:
             search_dirs = os.curdir  # i.e. "."
 
