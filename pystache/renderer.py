@@ -167,19 +167,19 @@ class Renderer(object):
         """
         Render the given template using the given context.
 
-        The return value is a unicode string, unless the output_encoding
-        attribute has been set to a non-None value, in which case the
-        return value has type str and is encoded using that encoding.
+        Returns:
 
-        If the template string is not unicode, it is first converted to
-        unicode using the default_encoding and decode_errors attributes.
-        See the Template constructor's docstring for more information.
+          If the output_encoding attribute is None, the return value is
+          a unicode string.  Otherwise, the return value is encoded to a
+          string of type str using the output encoding named by the
+          output_encoding attribute.
 
         Arguments:
 
-          template: a template string that is either unicode, or of type
-            str and encoded using the encoding named by the default_encoding
-            keyword argument.
+          template: a template string that is either unicode or of type str.
+            If the string has type str, it is first converted to unicode
+            using the default_encoding and decode_errors attributes of this
+            instance.  See the constructor docstring for more information.
 
           context: a dictionary, Context, or object (e.g. a View instance).
 
