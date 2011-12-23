@@ -51,7 +51,7 @@ class View(object):
             # View.__init__() has already been called.
             loader = Loader(search_dirs=self.template_path, encoding=self.template_encoding,
                             extension=self.template_extension)
-            self._load_template = loader.load_template
+            self._load_template = loader.get
 
         return self._load_template(template_name)
 

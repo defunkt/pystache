@@ -48,36 +48,36 @@ class LoaderTestCase(unittest.TestCase):
         loader.template_extension = ''
         self.assertEquals(loader.make_file_name('foo'), 'foo.')
 
-    def test_template_is_loaded(self):
+    def test_get__template_is_loaded(self):
         loader = Loader(search_dirs='examples')
-        template = loader.load_template('simple')
+        template = loader.get('simple')
 
         self.assertEqual(template, 'Hi {{thing}}!{{blank}}')
 
-    def test_using_list_of_paths(self):
+    def test_get__using_list_of_paths(self):
         loader = Loader(search_dirs=['doesnt_exist', 'examples'])
-        template = loader.load_template('simple')
+        template = loader.get('simple')
 
         self.assertEqual(template, 'Hi {{thing}}!{{blank}}')
 
-    def test_non_existent_template_fails(self):
+    def test_get__non_existent_template_fails(self):
         loader = Loader()
 
-        self.assertRaises(IOError, loader.load_template, 'doesnt_exist')
+        self.assertRaises(IOError, loader.get, 'doesnt_exist')
 
-    def test_load_template__extensionless_file(self):
+    def test_get__extensionless_file(self):
         loader = Loader(search_dirs=self.search_dirs)
-        self.assertRaises(IOError, loader.load_template, 'extensionless')
+        self.assertRaises(IOError, loader.get, 'extensionless')
 
         loader.template_extension = False
-        self.assertEquals(loader.load_template('extensionless'), "No file extension: {{foo}}")
+        self.assertEquals(loader.get('extensionless'), "No file extension: {{foo}}")
 
-    def test_load_template__unicode_return_value(self):
+    def test_get__load_template__unicode_return_value(self):
         """
         Check that load_template() returns unicode strings.
 
         """
         loader = Loader(search_dirs=self.search_dirs)
-        template = loader.load_template('simple')
+        template = loader.get('simple')
 
         self.assertEqual(type(template), unicode)

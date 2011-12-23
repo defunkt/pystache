@@ -52,7 +52,7 @@ class Loader(object):
 
         return file_name
 
-    def load_template(self, template_name):
+    def get(self, template_name):
         """
         Find and load the given template, and return it as a string.
 

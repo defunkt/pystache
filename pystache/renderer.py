@@ -22,7 +22,6 @@ except ImportError:
 
 class Renderer(object):
 
-    # TODO: change load_template to load_partial.
     def __init__(self, load_template=None, output_encoding=None, escape=None,
                  default_encoding=None, decode_errors='strict'):
         """
@@ -33,7 +32,7 @@ class Renderer(object):
           load_template: a function for loading templates by name, for
             example when loading partials.  The function should accept a
             single template_name parameter and return a template as a string.
-            Defaults to the default Loader's load_template() method.
+            Defaults to the default Loader's get() method.
 
           output_encoding: the encoding to use when rendering to a string.
             The argument should be the name of an encoding as a string, for
@@ -65,7 +64,7 @@ class Renderer(object):
         """
         if load_template is None:
             loader = Loader()
-            load_template = loader.load_template
+            load_template = loader.get
 
         if default_encoding is None:
             default_encoding = sys.getdefaultencoding()
