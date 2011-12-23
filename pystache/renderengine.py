@@ -28,11 +28,13 @@ class Modifiers(dict):
         Return a decorator that assigns the given function to the given key.
 
         >>> modifiers = Modifiers()
+        >>>
         >>> @modifiers.set('P')
-        ... def render_tongue(self, tag_name=None, context=None):
-        ...     return ":P %s" % tag_name
-        >>> modifiers
-        {'P': <function render_tongue at 0x...>}
+        ... def render_tongue(tag_name, context):
+        ...     return "%s :P" % context.get(tag_name)
+        >>>
+        >>> modifiers['P']('text', {'text': 'hello!'})
+        'hello! :P'
 
         """
         def decorate(func):
