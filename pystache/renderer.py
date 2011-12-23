@@ -22,17 +22,12 @@ except ImportError:
 
 class Renderer(object):
 
-    def __init__(self, load_template=None, output_encoding=None, escape=None,
-                 default_encoding=None, decode_errors='strict'):
+    def __init__(self, output_encoding=None, escape=None,
+                 default_encoding=None, decode_errors='strict', load_template=None):
         """
         Construct an instance.
 
         Arguments:
-
-          load_template: a function for loading templates by name, for
-            example when loading partials.  The function should accept a
-            single template_name parameter and return a template as a string.
-            Defaults to the default Loader's get() method.
 
           output_encoding: the encoding to use when rendering to a string.
             The argument should be the name of an encoding as a string, for
@@ -61,16 +56,21 @@ class Renderer(object):
             strings of type `str` encountered during the rendering process.
             Defaults to "strict".
 
-        """
-        if load_template is None:
-            loader = Loader()
-            load_template = loader.get
+          load_template: a function for loading templates by name, for
+            example when loading partials.  The function should accept a
+            single template_name parameter and return a template as a string.
+            Defaults to the default Loader's get() method.
 
+        """
         if default_encoding is None:
             default_encoding = sys.getdefaultencoding()
 
         if escape is None:
             escape = markupsafe.escape if markupsafe else cgi.escape
+
+        if load_template is None:
+            loader = Loader()
+            load_template = loader.get
 
         literal = markupsafe.Markup if markupsafe else unicode
 

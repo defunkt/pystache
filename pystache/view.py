@@ -99,7 +99,8 @@ class View(object):
 
         """
         template = self.get_template()
-        renderer = Renderer(self.load_template, output_encoding=encoding, escape=escape)
+        renderer = Renderer(output_encoding=encoding, escape=escape,
+                            load_template=self.load_template)
         return renderer.render(template, self.context)
 
     def get(self, key, default=None):
