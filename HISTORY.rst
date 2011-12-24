@@ -6,7 +6,8 @@ Next Release (version TBD)
 
 Features:
 
-* A custom template loader can now be passed to a View. [cjerdonek]
+* Views and Renderers accept a custom template loader.  Also, this loader
+  can be a dictionary of partials. [cjerdonek]
 * Added a command-line interface. [vrde, cjerdonek]
 * Markupsafe can now be disabled after import. [cjerdonek]
 * Custom escape function can now be passed to Template constructor. [cjerdonek]
@@ -16,8 +17,7 @@ Features:
 
 API changes:
 
-* ``Template.render()`` now accepts the context to render instead of
-  ``Template()``. [cjerdonek]
+* Template class replaced by a Renderer class. [cjerdonek]
 * ``Loader.load_template()`` changed to ``Loader.get()``. [cjerdonek]
 
 Bug fixes:
