@@ -15,6 +15,10 @@ class PystacheTests(object):
 
     """
 
+    def _assert_rendered(self, expected, template, context):
+        actual = pystache.render(template, context)
+        self.assertEquals(actual, expected)
+
     def test_basic(self):
         ret = pystache.render("Hi {{thing}}!", { 'thing': 'world' })
         self.assertEquals(ret, "Hi world!")
@@ -93,6 +97,20 @@ class PystacheTests(object):
         template = "first{{#spacing}} second {{/spacing}}third"
         ret = pystache.render(template, {"spacing": True})
         self.assertEquals(ret, "first second third")
+
+    def test__section__non_false_value(self):
+        """
+        Test when a section value is a (non-list) "non-false value".
+
+        From mustache(5):
+
+            When the value [of a section key] is non-false but not a list, it
+            will be used as the context for a single rendering of the block.
+
+        """
+        template = """{{#person}}Hi {{name}}{{/person}}"""
+        context = {"person": {"name": "Jon"}}
+        self._assert_rendered("Hi Jon", template, context)
 
     def test_later_list_section_with_escapable_character(self):
         """
