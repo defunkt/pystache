@@ -14,6 +14,7 @@ Features:
 * Template class can now handle non-ascii characters in non-unicode strings.
   Added default_encoding and decode_errors to Template constructor arguments.
   [cjerdonek]
+* Loader supports a decode_errors argument. [cjerdonek]
 
 API changes:
 
