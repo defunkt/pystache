@@ -69,6 +69,18 @@ class GetItemTestCase(TestCase):
         obj = {"foo": "bar"}
         self.assertEquals(_get_item(obj, "foo"), "bar")
 
+    def test_dictionary__callable_not_called(self):
+        """
+        Test that callable values are returned as-is (and in particular not called).
+
+        """
+        def foo_callable(self):
+            return "bar"
+
+        obj = {"foo": foo_callable}
+        self.assertNotEquals(_get_item(obj, "foo"), "bar")
+        self.assertTrue(_get_item(obj, "foo") is foo_callable)
+
     def test_dictionary__key_missing(self):
         """
         Test getting a missing key from a dictionary.
