@@ -55,7 +55,8 @@ class Renderer(object):
             the method should either return None (as dict.get() does) or
             raise an exception.
                 Defaults to constructing a Loader instance with
-            default_encoding passed as the encoding argument.
+            default_encoding and decode_errors passed as the encoding and
+            decode_errors arguments, respectively.
 
           output_encoding: the encoding to use when rendering to a string.
             The argument should be the name of an encoding as a string, for
@@ -93,7 +94,7 @@ class Renderer(object):
             escape = markupsafe.escape if markupsafe else cgi.escape
 
         if loader is None:
-            loader = Loader(encoding=default_encoding)
+            loader = Loader(encoding=default_encoding, decode_errors=decode_errors)
 
         literal = markupsafe.Markup if markupsafe else unicode
 

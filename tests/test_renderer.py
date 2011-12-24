@@ -43,6 +43,17 @@ class RendererInitTestCase(unittest.TestCase):
         # Check all attributes for good measure.
         self.assertEquals(actual.__dict__, expected.__dict__)
 
+    def test_loader__default__decode_errors(self):
+        """Test that the default loader inherits the decode_errors."""
+        r = Renderer(decode_errors='foo')
+        actual = r.loader
+
+        expected = Loader(decode_errors='foo')
+        self.assertEquals(actual.decode_errors, expected.decode_errors)
+        # Check all attributes for good measure.
+        self.assertEquals(actual.__dict__, expected.__dict__)
+
+
 
 class RendererTestCase(unittest.TestCase):
 
