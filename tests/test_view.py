@@ -60,15 +60,13 @@ class ViewTestCase(unittest.TestCase):
         template = view.load_template('extensionless')
         self.assertEquals(template, "No file extension: {{foo}}")
 
-    def test_custom_load_template(self):
+    def test_load_template__custom_loader(self):
         """
-        Test passing a custom load_template to View.__init__().
+        Test passing a custom loader to View.__init__().
 
         """
-        partials_dict = {"partial": "Loaded from dictionary"}
-        load_template = lambda template_name: partials_dict[template_name]
-
-        view = Simple(load_template=load_template)
+        partials = {"partial": "Loaded from dictionary"}
+        view = Simple(loader=partials)
 
         actual = view.load_template("partial")
         self.assertEquals(actual, "Loaded from dictionary")

@@ -22,12 +22,40 @@ except ImportError:
 
 class Renderer(object):
 
-    def __init__(self, output_encoding=None, escape=None,
-                 default_encoding=None, decode_errors='strict', load_template=None):
+    """
+    A class for rendering mustache templates.
+
+    This class supports several rendering options which are described in
+    the constructor's docstring.  Among these, the constructor supports
+    passing a custom template loader.
+
+    Here is an example of passing a custom template loader to render a
+    template using partials loaded from a string-string dictionary.
+
+    >>> partials = {'partial': 'Hello, {{thing}}!'}
+    >>> renderer = Renderer(loader=partials)
+    >>> renderer.render('{{>partial}}', {'thing': 'world'})
+    u'Hello, world!'
+
+    """
+
+    def __init__(self, loader=None, default_encoding=None, decode_errors='strict',
+                 output_encoding=None, escape=None):
         """
         Construct an instance.
 
         Arguments:
+
+          loader: the object (e.g. pystache.Loader or dictionary) that will
+            load templates during the rendering process, for example when
+            loading a partial.
+                The loader should have a get() method that accepts a string
+            and returns the corresponding template as a string, preferably
+            as a unicode string.  If there is no template with that name,
+            the method should either return None (as dict.get() does) or
+            raise an exception.
+                Defaults to constructing a Loader instance with
+            default_encoding passed as the encoding argument.
 
           output_encoding: the encoding to use when rendering to a string.
             The argument should be the name of an encoding as a string, for
@@ -57,11 +85,6 @@ class Renderer(object):
             strings of type `str` encountered during the rendering process.
             Defaults to "strict".
 
-          load_template: a function for loading templates by name, for
-            example when loading partials.  The function should accept a
-            single template_name parameter and return a template as a string.
-            Defaults to the default Loader's get() method.
-
         """
         if default_encoding is None:
             default_encoding = sys.getdefaultencoding()
@@ -69,9 +92,8 @@ class Renderer(object):
         if escape is None:
             escape = markupsafe.escape if markupsafe else cgi.escape
 
-        if load_template is None:
-            loader = Loader()
-            load_template = loader.get
+        if loader is None:
+            loader = Loader(encoding=default_encoding)
 
         literal = markupsafe.Markup if markupsafe else unicode
 
@@ -80,7 +102,7 @@ class Renderer(object):
         self.decode_errors = decode_errors
         self.default_encoding = default_encoding
         self.escape = escape
-        self.load_template = load_template
+        self.loader = loader
         self.output_encoding = output_encoding
 
     def _unicode_and_escape(self, s):
@@ -139,11 +161,11 @@ class Renderer(object):
 
         """
         def load_partial(name):
-            template = self.load_template(name)
-            # Make sure the return value of load_template is unicode since
-            # RenderEngine requires it.  Also, check that the string is not
-            # already unicode to avoid "double-decoding".  Otherwise, we
-            # would get the following error:
+            template = self.loader.get(name)
+            # Make sure the return value is unicode since RenderEngine requires
+            # it.  Also, check that the string is not already unicode to
+            # avoid "double-decoding".  Otherwise, we would get the following
+            # error:
             #   TypeError: decoding Unicode is not supported
             if not isinstance(template, unicode):
                 template = self.unicode(template)
