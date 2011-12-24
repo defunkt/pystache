@@ -8,12 +8,13 @@ This module provides a Loader class.
 import os
 import sys
 
+DEFAULT_DECODE_ERRORS = 'strict'
 DEFAULT_EXTENSION = 'mustache'
 
 
 class Loader(object):
 
-    def __init__(self, search_dirs=None, encoding=None, extension=None):
+    def __init__(self, search_dirs=None, extension=None, encoding=None, decode_errors=None):
         """
         Construct a template loader.
 
@@ -32,8 +33,14 @@ class Loader(object):
             argument to the built-in function unicode().  Defaults to the
             encoding name returned by sys.getdefaultencoding().
 
+          decode_errors: the string to pass as the "errors" argument to the
+            built-in function unicode() when converting file contents to
+            unicode.  Defaults to "strict".
 
         """
+        if decode_errors is None:
+            decode_errors = DEFAULT_DECODE_ERRORS
+
         if encoding is None:
             encoding = sys.getdefaultencoding()
 
@@ -46,6 +53,7 @@ class Loader(object):
         if isinstance(search_dirs, basestring):
             search_dirs = [search_dirs]
 
+        self.decode_errors = decode_errors
         self.search_dirs = search_dirs
         self.template_encoding = encoding
         self.template_extension = extension
@@ -88,6 +96,6 @@ class Loader(object):
         finally:
             f.close()
 
-        template = unicode(template, self.template_encoding)
+        template = unicode(template, self.template_encoding, self.decode_errors)
 
         return template
