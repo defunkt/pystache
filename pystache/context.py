@@ -125,6 +125,34 @@ class Context(object):
         (3) If there is no attribute with the same name as the key, then
             the key is considered not found in the item.
 
+        *Caution*:
+
+            Callables resulting from a call to __getitem__ (as in (1)
+            above) are handled differently from callables that are merely
+            attributes (as in (2) above).
+
+            The former are returned as-is, while the latter are first called
+            and that value returned.  Here is an example:
+
+            >>> def greet():
+            ...     return "Hi Bob!"
+            >>>
+            >>> class Greeter(object):
+            ...     greet = None
+            >>>
+            >>> obj = Greeter()
+            >>> obj.greet = greet
+            >>> dct = {'greet': greet}
+            >>>
+            >>> obj.greet is dct['greet']
+            True
+            >>> Context(obj).get('greet')
+            'Hi Bob!'
+            >>> Context(dct).get('greet')  #doctest: +ELLIPSIS
+            <function greet at 0x...>
+
+            TODO: explain the rationale for this difference in treatment.
+
         """
         for obj in reversed(self._stack):
             val = _get_item(obj, key)
