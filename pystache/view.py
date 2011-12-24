@@ -21,16 +21,24 @@ class View(object):
     template_encoding = None
     template_extension = None
 
-    # A function that accepts a single template_name parameter.
-    _load_template = None
+    _loader = None
 
-    def __init__(self, template=None, context=None, load_template=None, **kwargs):
+    def __init__(self, template=None, context=None, loader=None, **kwargs):
         """
         Construct a View instance.
 
+        Arguments:
+
+          loader: the object (e.g. pystache.Loader or dictionary) responsible
+            for loading templates during the rendering process, for example
+            when loading partials.  The object should have a get() method
+            that accepts a string and returns the corresponding template
+            as a string, preferably as a unicode string.  The method should
+            return None if there is no template with that name.
+
         """
-        if load_template is not None:
-            self._load_template = load_template
+        if loader is not None:
+            self._loader = loader
 
         if template is not None:
             self.template = template
@@ -43,17 +51,21 @@ class View(object):
 
         self.context = _context
 
-    def load_template(self, template_name):
-        if self._load_template is None:
-            # We delay setting self._load_template until now (in the case
-            # that the user did not supply a load_template to the constructor)
+    def get_loader(self):
+        if self._loader is None:
+            # We delay setting self._loader until now (in the case that the
+            # user did not supply a load_template to the constructor)
             # to let users set the template_extension attribute, etc. after
             # View.__init__() has already been called.
             loader = Loader(search_dirs=self.template_path, encoding=self.template_encoding,
                             extension=self.template_extension)
-            self._load_template = loader.load_template
+            self._loader = loader
 
-        return self._load_template(template_name)
+        return self._loader
+
+    def load_template(self, template_name):
+        loader = self.get_loader()
+        return loader.get(template_name)
 
     def get_template(self):
         """
@@ -98,8 +110,9 @@ class View(object):
         Return the view rendered using the current context.
 
         """
+        loader = self.get_loader()
         template = self.get_template()
-        renderer = Renderer(self.load_template, output_encoding=encoding, escape=escape)
+        renderer = Renderer(output_encoding=encoding, escape=escape, loader=loader)
         return renderer.render(template, self.context)
 
     def get(self, key, default=None):

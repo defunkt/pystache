@@ -18,6 +18,7 @@ API changes:
 
 * ``Template.render()`` now accepts the context to render instead of
   ``Template()``. [cjerdonek]
+* ``Loader.load_template()`` changed to ``Loader.get()``. [cjerdonek]
 
 Bug fixes:
 

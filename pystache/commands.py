@@ -55,7 +55,7 @@ def main(sys_argv):
         template = template[:-9]
 
     try:
-        template = Loader().load_template(template)
+        template = Loader().get(template)
     except IOError:
         pass
 

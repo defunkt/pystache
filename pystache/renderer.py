@@ -22,34 +22,57 @@ except ImportError:
 
 class Renderer(object):
 
-    # TODO: change load_template to load_partial.
-    def __init__(self, load_template=None, output_encoding=None, escape=None,
-                 default_encoding=None, decode_errors='strict'):
+    """
+    A class for rendering mustache templates.
+
+    This class supports several rendering options which are described in
+    the constructor's docstring.  Among these, the constructor supports
+    passing a custom template loader.
+
+    Here is an example of passing a custom template loader to render a
+    template using partials loaded from a string-string dictionary.
+
+    >>> partials = {'partial': 'Hello, {{thing}}!'}
+    >>> renderer = Renderer(loader=partials)
+    >>> renderer.render('{{>partial}}', {'thing': 'world'})
+    u'Hello, world!'
+
+    """
+
+    def __init__(self, loader=None, default_encoding=None, decode_errors='strict',
+                 output_encoding=None, escape=None):
         """
         Construct an instance.
 
         Arguments:
 
-          load_template: a function for loading templates by name, for
-            example when loading partials.  The function should accept a
-            single template_name parameter and return a template as a string.
-            Defaults to the default Loader's load_template() method.
+          loader: the object (e.g. pystache.Loader or dictionary) that will
+            load templates during the rendering process, for example when
+            loading a partial.
+                The loader should have a get() method that accepts a string
+            and returns the corresponding template as a string, preferably
+            as a unicode string.  If there is no template with that name,
+            the method should either return None (as dict.get() does) or
+            raise an exception.
+                Defaults to constructing a Loader instance with
+            default_encoding passed as the encoding argument.
 
           output_encoding: the encoding to use when rendering to a string.
             The argument should be the name of an encoding as a string, for
-            example "utf-8".  See the render() method's documentation for more
-            information.
+            example "utf-8".  See the render() method's documentation for
+            more information.
 
           escape: the function used to escape mustache variable values
-            when rendering a template.  The function should accept a unicode
-            string and return an escaped string of the same type.  It need
-            not handle strings of type `str` because this class will only
-            pass it unicode strings.  The constructor assigns this escape
-            function to the constructed instance's Template.escape() method.
-
-            The argument defaults to markupsafe.escape when markupsafe is
-            importable and cgi.escape otherwise.  To disable escaping entirely,
-            one can pass `lambda s: s` as the escape function, for example.
+            when rendering a template.  The function should accept a
+            unicode string and return an escaped string of the same type.
+                This function need not handle strings of type `str` because
+            this class will only pass it unicode strings.  The constructor
+            assigns this function to the constructed instance's escape()
+            method.
+                The argument defaults to markupsafe.escape when markupsafe
+            is importable and cgi.escape otherwise.  To disable escaping
+            entirely, one can pass `lambda u: u` as the escape function,
+            for example.
 
           default_encoding: the name of the encoding to use when converting
             to unicode any strings of type `str` encountered during the
@@ -63,15 +86,14 @@ class Renderer(object):
             Defaults to "strict".
 
         """
-        if load_template is None:
-            loader = Loader()
-            load_template = loader.load_template
-
         if default_encoding is None:
             default_encoding = sys.getdefaultencoding()
 
         if escape is None:
             escape = markupsafe.escape if markupsafe else cgi.escape
+
+        if loader is None:
+            loader = Loader(encoding=default_encoding)
 
         literal = markupsafe.Markup if markupsafe else unicode
 
@@ -80,7 +102,7 @@ class Renderer(object):
         self.decode_errors = decode_errors
         self.default_encoding = default_encoding
         self.escape = escape
-        self.load_template = load_template
+        self.loader = loader
         self.output_encoding = output_encoding
 
     def _unicode_and_escape(self, s):
@@ -139,11 +161,11 @@ class Renderer(object):
 
         """
         def load_partial(name):
-            template = self.load_template(name)
-            # Make sure the return value of load_template is unicode since
-            # RenderEngine requires it.  Also, check that the string is not
-            # already unicode to avoid "double-decoding".  Otherwise, we
-            # would get the following error:
+            template = self.loader.get(name)
+            # Make sure the return value is unicode since RenderEngine requires
+            # it.  Also, check that the string is not already unicode to
+            # avoid "double-decoding".  Otherwise, we would get the following
+            # error:
             #   TypeError: decoding Unicode is not supported
             if not isinstance(template, unicode):
                 template = self.unicode(template)
@@ -168,19 +190,19 @@ class Renderer(object):
         """
         Render the given template using the given context.
 
-        The return value is a unicode string, unless the output_encoding
-        attribute has been set to a non-None value, in which case the
-        return value has type str and is encoded using that encoding.
+        Returns:
 
-        If the template string is not unicode, it is first converted to
-        unicode using the default_encoding and decode_errors attributes.
-        See the Template constructor's docstring for more information.
+          If the output_encoding attribute is None, the return value is
+          a unicode string.  Otherwise, the return value is encoded to a
+          string of type str using the output encoding named by the
+          output_encoding attribute.
 
         Arguments:
 
-          template: a template string that is either unicode, or of type
-            str and encoded using the encoding named by the default_encoding
-            keyword argument.
+          template: a template string that is either unicode or of type str.
+            If the string has type str, it is first converted to unicode
+            using the default_encoding and decode_errors attributes of this
+            instance.  See the constructor docstring for more information.
 
           context: a dictionary, Context, or object (e.g. a View instance).
 

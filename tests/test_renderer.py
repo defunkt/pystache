@@ -11,6 +11,37 @@ import unittest
 
 from pystache import renderer
 from pystache.renderer import Renderer
+from pystache.loader import Loader
+
+class RendererInitTestCase(unittest.TestCase):
+
+    """A class to test the Renderer.__init__() method."""
+
+    def test_loader(self):
+        """Test that the loader attribute is set correctly."""
+        loader = {'foo': 'bar'}
+        r = Renderer(loader=loader)
+        self.assertEquals(r.loader, {'foo': 'bar'})
+
+    def test_loader__default(self):
+        """Test that the default loader is constructed correctly."""
+        r = Renderer()
+        actual = r.loader
+
+        expected = Loader()
+
+        self.assertEquals(type(actual), type(expected))
+        self.assertEquals(actual.__dict__, expected.__dict__)
+
+    def test_loader__default__default_encoding(self):
+        """Test that the default loader inherits the default_encoding."""
+        r = Renderer(default_encoding='foo')
+        actual = r.loader
+
+        expected = Loader(encoding='foo')
+        self.assertEquals(actual.template_encoding, expected.template_encoding)
+        # Check all attributes for good measure.
+        self.assertEquals(actual.__dict__, expected.__dict__)
 
 
 class RendererTestCase(unittest.TestCase):
@@ -240,19 +271,37 @@ class RendererTestCase(unittest.TestCase):
         renderer.default_encoding = 'utf_8'
         self.assertEquals(renderer.render(template), "déf")
 
+    def test_make_load_partial(self):
+        """
+        Test the _make_load_partial() method.
+
+        """
+        partials = {'foo': 'bar'}
+        renderer = Renderer(loader=partials)
+        load_partial = renderer._make_load_partial()
+
+        actual = load_partial('foo')
+        self.assertEquals(actual, 'bar')
+        self.assertEquals(type(actual), unicode, "RenderEngine requires that "
+            "load_partial return unicode strings.")
+
     def test_make_load_partial__unicode(self):
         """
-        Test that the generated load_partial does not "double-decode" Unicode.
+        Test _make_load_partial(): that load_partial doesn't "double-decode" Unicode.
 
         """
         renderer = Renderer()
-        # In real-life, the partial would be different with each name.
-        renderer.load_template = lambda name: u"partial"
 
+        renderer.loader = {'partial': 'foo'}
         load_partial = renderer._make_load_partial()
+        self.assertEquals(load_partial("partial"), "foo")
 
-        # This would raise a TypeError exception if we tried to double-decode.
-        self.assertEquals(load_partial("test"), "partial")
+        # Now with a value that is already unicode.
+        renderer.loader = {'partial': u'foo'}
+        load_partial = renderer._make_load_partial()
+        # If the next line failed, we would get the following error:
+        #   TypeError: decoding Unicode is not supported
+        self.assertEquals(load_partial("partial"), "foo")
 
     # By testing that Renderer.render() constructs the RenderEngine instance
     # correctly, we no longer need to test the rendering code paths through
@@ -263,14 +312,13 @@ class RendererTestCase(unittest.TestCase):
         Test that _make_render_engine() constructs and passes load_partial correctly.
 
         """
-        renderer = Renderer()
+        partials = {'partial': 'foo'}
+        renderer = Renderer(loader=partials)
         renderer.unicode = lambda s: s.upper()  # a test version.
-        # In real-life, the partial would be different with each name.
-        renderer.load_template = lambda name: "partial"
 
         engine = renderer._make_render_engine()
         # Make sure it calls unicode.
-        self.assertEquals(engine.load_partial('name'), "PARTIAL")
+        self.assertEquals(engine.load_partial('partial'), "FOO")
 
     def test_make_render_engine__literal(self):
         """
