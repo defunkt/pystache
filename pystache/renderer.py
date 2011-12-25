@@ -63,9 +63,10 @@ class Renderer(object):
             example "utf-8".  See the render() method's documentation for
             more information.
 
-          escape: the function used to escape mustache variable values
-            when rendering a template.  The function should accept a
-            unicode string and return an escaped string of the same type.
+          escape: the function used to escape variable tag values when
+            rendering a template.  The function should accept a unicode
+            string (or subclass of unicode) and return an escaped string
+            that is again unicode (or a subclass of unicode).
                 This function need not handle strings of type `str` because
             this class will only pass it unicode strings.  The constructor
             assigns this function to the constructed instance's escape()
@@ -91,14 +92,13 @@ class Renderer(object):
             default_encoding = sys.getdefaultencoding()
 
         if escape is None:
+            # TODO: use 'quote=True' with cgi.escape and add tests.
             escape = markupsafe.escape if markupsafe else cgi.escape
 
         if loader is None:
             loader = Loader(encoding=default_encoding, decode_errors=decode_errors)
 
-        literal = markupsafe.Markup if markupsafe else unicode
-
-        self._literal = literal
+        self._literal = markupsafe.Markup if markupsafe else unicode
 
         self.decode_errors = decode_errors
         self.default_encoding = default_encoding
@@ -106,37 +106,46 @@ class Renderer(object):
         self.loader = loader
         self.output_encoding = output_encoding
 
-    def _unicode_and_escape(self, s):
-        if not isinstance(s, unicode):
-            s = self.unicode(s)
-        return self.escape(s)
+    def _to_unicode_soft(self, s):
+        """
+        Convert an str or unicode string to a unicode string (or subclass).
+
+        """
+        # Avoid the "double-decoding" TypeError.
+        return s if isinstance(s, unicode) else self.unicode(s)
+
+    def _to_unicode_hard(self, s):
+        """
+        Convert an str or unicode string to a unicode string (not subclass).
+
+        """
+        return unicode(self._to_unicode_soft(s))
+
+    def _escape_to_unicode(self, s):
+        """
+        Convert an str or unicode string to unicode, and escape it.
+
+        Returns a unicode string (not subclass).
+
+        """
+        return unicode(self.escape(self._to_unicode_soft(s)))
 
     def unicode(self, s):
+        """
+        Convert a string to unicode, using default_encoding and decode_errors.
+
+        Raises:
+
+          TypeError: Because this method calls Python's built-in unicode()
+            function, this method raises the following exception if the
+            given string is already unicode:
+
+              TypeError: decoding Unicode is not supported
+
+        """
+        # TODO: Wrap UnicodeDecodeErrors with a message about setting
+        # the default_encoding and decode_errors attributes.
         return unicode(s, self.default_encoding, self.decode_errors)
-
-    def escape(self, u):
-        """
-        Escape a unicode string, and return it.
-
-        This function is initialized as the escape function that was passed
-        to the Template class's constructor when this instance was
-        constructed.  See the constructor docstring for more information.
-
-        """
-        pass
-
-    def literal(self, s):
-        """
-        Convert the given string to a unicode string, without escaping it.
-
-        This function internally calls the built-in function unicode() and
-        passes it the default_encoding and decode_errors attributes for this
-        Template instance.  If markupsafe was importable when loading this
-        module, this function returns an instance of the class
-        markupsafe.Markup (which subclasses unicode).
-
-        """
-        return self._literal(self.unicode(s))
 
     def _make_context(self, context, **kwargs):
         """
@@ -157,21 +166,16 @@ class Renderer(object):
         return context
 
     def _make_load_partial(self):
-        """
-        Return the load_partial function for use by RenderEngine.
-
-        """
         def load_partial(name):
             template = self.loader.get(name)
-            # Make sure the return value is unicode since RenderEngine requires
-            # it.  Also, check that the string is not already unicode to
-            # avoid "double-decoding".  Otherwise, we would get the following
-            # error:
-            #   TypeError: decoding Unicode is not supported
-            if not isinstance(template, unicode):
-                template = self.unicode(template)
 
-            return template
+            if template is None:
+                # TODO: make a TemplateNotFoundException type that provides
+                # the original loader as an attribute.
+                raise Exception("Partial not found with name: %s" % repr(name))
+
+            # RenderEngine requires that the return value be unicode.
+            return self._to_unicode_hard(template)
 
         return load_partial
 
@@ -183,8 +187,8 @@ class Renderer(object):
         load_partial = self._make_load_partial()
 
         engine = RenderEngine(load_partial=load_partial,
-                              literal=self.literal,
-                              escape=self._unicode_and_escape)
+                              literal=self._to_unicode_hard,
+                              escape=self._escape_to_unicode)
         return engine
 
     def render(self, template, context=None, **kwargs):
@@ -194,30 +198,32 @@ class Renderer(object):
         Returns:
 
           If the output_encoding attribute is None, the return value is
-          a unicode string.  Otherwise, the return value is encoded to a
-          string of type str using the output encoding named by the
-          output_encoding attribute.
+          markupsafe.Markup if markup was importable and unicode if not.
+          Otherwise, the return value is encoded to a string of type str
+          using the output encoding named by the output_encoding attribute.
 
         Arguments:
 
           template: a template string that is either unicode or of type str.
             If the string has type str, it is first converted to unicode
-            using the default_encoding and decode_errors attributes of this
-            instance.  See the constructor docstring for more information.
+            using this instance's default_encoding and decode_errors
+            attributes.  See the constructor docstring for more information.
 
           context: a dictionary, Context, or object (e.g. a View instance).
 
-          **kwargs: additional key values to add to the context when rendering.
-            These values take precedence over the context on any key conflicts.
+          **kwargs: additional key values to add to the context when
+            rendering.  These values take precedence over the context on
+            any key conflicts.
 
         """
         engine = self._make_render_engine()
         context = self._make_context(context, **kwargs)
 
-        if not isinstance(template, unicode):
-            template = self.unicode(template)
+        # RenderEngine.render() requires that the template string be unicode.
+        template = self._to_unicode_hard(template)
 
         rendered = engine.render(template, context)
+        rendered = self._literal(rendered)
 
         if self.output_encoding is not None:
             rendered = rendered.encode(self.output_encoding)
