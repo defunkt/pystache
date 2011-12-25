@@ -40,7 +40,7 @@ class Renderer(object):
     """
 
     def __init__(self, loader=None, default_encoding=None, decode_errors='strict',
-                 output_encoding=None, escape=None):
+                 escape=None):
         """
         Construct an instance.
 
@@ -57,11 +57,6 @@ class Renderer(object):
                 Defaults to constructing a Loader instance with
             default_encoding and decode_errors passed as the encoding and
             decode_errors arguments, respectively.
-
-          output_encoding: the encoding to use when rendering to a string.
-            The argument should be the name of an encoding as a string, for
-            example "utf-8".  See the render() method's documentation for
-            more information.
 
           escape: the function used to escape variable tag values when
             rendering a template.  The function should accept a unicode
@@ -109,7 +104,6 @@ class Renderer(object):
         self.default_encoding = default_encoding
         self.escape = escape
         self.loader = loader
-        self.output_encoding = output_encoding
 
     def _to_unicode_soft(self, s):
         """
@@ -200,12 +194,8 @@ class Renderer(object):
         """
         Render the given template using the given context.
 
-        Returns:
-
-          If the output_encoding attribute is None, the return value is
-          markupsafe.Markup if markup was importable and unicode if not.
-          Otherwise, the return value is encoded to a string of type str
-          using the output encoding named by the output_encoding attribute.
+        The return value is markupsafe.Markup if markup was importable
+        and unicode otherwise.
 
         Arguments:
 
@@ -229,8 +219,5 @@ class Renderer(object):
 
         rendered = engine.render(template, context)
         rendered = self._literal(rendered)
-
-        if self.output_encoding is not None:
-            rendered = rendered.encode(self.output_encoding)
 
         return rendered

@@ -243,19 +243,12 @@ class RendererTestCase(unittest.TestCase):
         renderer.render('Hi {{person}}', context=context, foo="bar")
         self.assertEquals(context, {})
 
-    def test_render__output_encoding(self):
-        renderer = Renderer()
-        renderer.output_encoding = 'utf-8'
-        actual = renderer.render(u'Poincaré')
-        self.assertTrue(isinstance(actual, str))
-        self.assertEquals(actual, 'Poincaré')
-
     def test_render__nonascii_template(self):
         """
         Test passing a non-unicode template with non-ascii characters.
 
         """
-        renderer = Renderer(output_encoding="utf-8")
+        renderer = Renderer()
         template = "déf"
 
         # Check that decode_errors and default_encoding are both respected.
@@ -264,7 +257,7 @@ class RendererTestCase(unittest.TestCase):
         self.assertEquals(renderer.render(template), "df")
 
         renderer.default_encoding = 'utf_8'
-        self.assertEquals(renderer.render(template), "déf")
+        self.assertEquals(renderer.render(template), u"déf")
 
     def test_make_load_partial(self):
         """

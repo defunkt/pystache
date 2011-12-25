@@ -20,6 +20,7 @@ API changes:
 
 * Template class replaced by a Renderer class. [cjerdonek]
 * ``Loader.load_template()`` changed to ``Loader.get()``. [cjerdonek]
+* Removed output_encoding options. [cjerdonek]
 
 Bug fixes:
 

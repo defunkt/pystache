@@ -105,14 +105,14 @@ class View(object):
     # and options like encoding, escape, etc.  This would probably be better
     # than passing all of these options to render(), especially as the list
     # of possible options grows.
-    def render(self, encoding=None, escape=None):
+    def render(self, escape=None):
         """
         Return the view rendered using the current context.
 
         """
         loader = self.get_loader()
         template = self.get_template()
-        renderer = Renderer(output_encoding=encoding, escape=escape, loader=loader)
+        renderer = Renderer(escape=escape, loader=loader)
         return renderer.render(template, self.context)
 
     def get(self, key, default=None):
