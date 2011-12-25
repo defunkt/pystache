@@ -5,15 +5,7 @@ import pystache
 from pystache import renderer
 
 
-class PystacheTests(object):
-
-    """
-    Contains tests to run with markupsafe both enabled and disabled.
-
-    To run the tests in this class, this class should be subclassed by
-    a class that implements unittest.TestCase.
-
-    """
+class PystacheTests(unittest.TestCase):
 
     def _assert_rendered(self, expected, template, context):
         actual = pystache.render(template, context)
@@ -122,30 +114,3 @@ class PystacheTests(object):
         template = """{{#s1}}foo{{/s1}} {{#s2}}<{{/s2}}"""
         context = {'s1': True, 's2': [True]}
         self._assert_rendered("foo <", template, context)
-
-
-class PystacheWithoutMarkupsafeTests(PystacheTests, unittest.TestCase):
-
-    """Test pystache without markupsafe enabled."""
-
-    def setUp(self):
-        self.original_markupsafe = renderer.markupsafe
-        renderer.markupsafe = None
-
-    def tearDown(self):
-        renderer.markupsafe = self.original_markupsafe
-
-
-# If markupsafe is available, then run the same tests again but without
-# disabling markupsafe.
-_BaseClass = unittest.TestCase if renderer.markupsafe else object
-class PystacheWithMarkupsafeTests(PystacheTests, _BaseClass):
-
-    """Test pystache with markupsafe enabled."""
-
-    # markupsafe.escape() escapes single quotes: "'" becomes "&#39;".
-    non_strings_expected = """(123 & [&#39;something&#39;])(chris & 0.9)"""
-
-    def test_markupsafe_available(self):
-        self.assertTrue(renderer.markupsafe, "markupsafe isn't available.  "
-            "The with-markupsafe tests shouldn't be running.")

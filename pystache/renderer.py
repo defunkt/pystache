@@ -13,13 +13,6 @@ from .loader import Loader
 from .renderengine import RenderEngine
 
 
-markupsafe = None
-try:
-    import markupsafe
-except ImportError:
-    pass
-
-
 class Renderer(object):
 
     """
@@ -66,10 +59,10 @@ class Renderer(object):
             this class will only pass it unicode strings.  The constructor
             assigns this function to the constructed instance's escape()
             method.
-                The argument defaults to markupsafe.escape when markupsafe
-            is importable and cgi.escape otherwise.  To disable escaping
-            entirely, one can pass `lambda u: u` as the escape function,
-            for example.
+                The argument defaults to `cgi.escape(s, quote=True)`.  To
+            disable escaping entirely, one can pass `lambda u: u` as the
+            escape function, for example.  One may also wish to consider
+            using markupsafe's escape function: markupsafe.escape().
 
           default_encoding: the name of the encoding to use when converting
             to unicode any strings of type `str` encountered during the
@@ -87,18 +80,13 @@ class Renderer(object):
             default_encoding = sys.getdefaultencoding()
 
         if escape is None:
-            if markupsafe:
-                escape = markupsafe.escape
-            else:
-                # The quote=True argument causes double quotes to be escaped,
-                # but not single quotes:
-                #   http://docs.python.org/library/cgi.html#cgi.escape
-                escape = lambda s: cgi.escape(s, quote=True)
+            # The quote=True argument causes double quotes to be escaped,
+            # but not single quotes:
+            #   http://docs.python.org/library/cgi.html#cgi.escape
+            escape = lambda s: cgi.escape(s, quote=True)
 
         if loader is None:
             loader = Loader(encoding=default_encoding, decode_errors=decode_errors)
-
-        self._literal = markupsafe.Markup if markupsafe else unicode
 
         self.decode_errors = decode_errors
         self.default_encoding = default_encoding
@@ -194,8 +182,7 @@ class Renderer(object):
         """
         Render the given template using the given context.
 
-        The return value is markupsafe.Markup if markup was importable
-        and unicode otherwise.
+        Returns a unicode string.
 
         Arguments:
 
@@ -218,6 +205,5 @@ class Renderer(object):
         template = self._to_unicode_hard(template)
 
         rendered = engine.render(template, context)
-        rendered = self._literal(rendered)
 
-        return rendered
+        return unicode(rendered)
