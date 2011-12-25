@@ -61,6 +61,8 @@ for spec in specs:
     for test in yaml.load(open(spec))['tests']:
         test = buildTest(test, file_name)
         setattr(MustacheSpec, test.__name__, test)
+        # Prevent this variable from being interpreted as another test.
+        del(test)
 
 if __name__ == '__main__':
     unittest.main()
