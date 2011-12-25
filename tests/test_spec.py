@@ -1,8 +1,17 @@
+# coding: utf-8
+
+"""
+Tests the mustache spec test cases.
+
+"""
+
 import glob
 import os.path
-import pystache
 import unittest
 import yaml
+
+from pystache.renderer import Renderer
+
 
 def code_constructor(loader, node):
     value = loader.construct_mapping(node)
@@ -16,23 +25,41 @@ specs = glob.glob(os.path.join(specs, '*.yml'))
 class MustacheSpec(unittest.TestCase):
     pass
 
-def buildTest(testData, spec):
+def buildTest(testData, spec_filename):
+
+    name = testData['name']
+    description  = testData['desc']
+
+    test_name = "%s (%s)" % (name, spec_filename)
+
     def test(self):
         template = testData['template']
-        partials = testData.has_key('partials') and test['partials'] or {}
+        partials = testData.has_key('partials') and testData['partials'] or {}
         expected = testData['expected']
         data     = testData['data']
-        self.assertEquals(pystache.render(template, data), expected)
 
-    test.__doc__  = testData['desc']
-    test.__name__ = 'test %s (%s)' % (testData['name'], spec)
+        renderer = Renderer(loader=partials)
+        actual = renderer.render(template, data).encode('utf-8')
+
+        message = """%s
+
+  Template: \"""%s\"""
+
+  Expected: %s
+  Actual:   %s""" % (description, template, repr(expected), repr(actual))
+
+        self.assertEquals(actual, expected, message)
+
+    # The name must begin with "test" for nosetests test discovery to work.
+    test.__name__ = 'test: "%s"' % test_name
+
     return test
 
 for spec in specs:
-    name  = os.path.basename(spec).replace('.yml', '')
+    file_name  = os.path.basename(spec)
 
     for test in yaml.load(open(spec))['tests']:
-        test = buildTest(test, name)
+        test = buildTest(test, file_name)
         setattr(MustacheSpec, test.__name__, test)
 
 if __name__ == '__main__':
