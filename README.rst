@@ -67,6 +67,11 @@ nose_ works great! ::
     cd pystache
     nosetests --with-doctest
 
+To include tests from the mustache spec_ in your test runs: ::
+
+    git submodule init
+    git submodule update
+
 
 Mailing List
 ==================
@@ -91,3 +96,4 @@ Author
 .. _Mustache: http://defunkt.github.com/mustache/
 .. _mustache(5): http://mustache.github.com/mustache.5.html
 .. _nose: http://somethingaboutorange.com/mrl/projects/nose/0.11.1/testing.html
+.. _spec: https://github.com/mustache/spec
