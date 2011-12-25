@@ -50,6 +50,16 @@ class RenderEngine(object):
 
     This class is meant only for internal use by the Template class.
 
+    As a rule, the code in this class operates on unicode strings where
+    possible rather than, say, strings of type str or markupsafe.Markup.
+    This means that strings obtained from "external" sources like partials
+    and variable tag values are immediately converted to unicode (or
+    escaped and converted to unicode) before being operated on further.
+    This makes maintaining, reasoning about, and testing the correctness
+    of the code much simpler.  In particular, it keeps the implementation
+    of this class independent of the API details of one (or possibly more)
+    unicode subclasses (e.g. markupsafe.Markup).
+
     """
     tag_re = None
     otag = '{{'
@@ -61,15 +71,30 @@ class RenderEngine(object):
         """
         Arguments:
 
-          load_partial: a function for loading templates by name when
-            loading partials.  The function should accept a template name
-            and return a unicode template string.
+          load_partial: the function to call when loading a partial.  The
+            function should accept a string template name and return a
+            template string of type unicode (not a subclass).
 
-          escape: a function that takes a unicode or str string,
-            converts it to unicode, and escapes and returns it.
+          literal: the function used to convert unescaped variable tag
+            values to unicode, e.g. the value corresponding to a tag
+            "{{{name}}}".  The function should accept a string of type
+            str or unicode (or a subclass) and return a string of type
+            unicode (but not a proper subclass of unicode).
+                This class will only pass basestring instances to this
+            function.  For example, it will call str() on integer variable
+            values prior to passing them to this function.
 
-          literal: a function that converts a unicode or str string
-            to unicode without escaping, and returns it.
+          escape: the function used to escape and convert variable tag
+            values to unicode, e.g. the value corresponding to a tag
+            "{{name}}".  The function should obey the same properties
+            described above for the "literal" function argument.
+                This function should take care to convert any str
+            arguments to unicode just as the literal function should, as
+            this class will not pass tag values to literal prior to passing
+            them to this function.  This allows for more flexibility,
+            for example using a custom escape function that handles
+            incoming strings of type markupssafe.Markup differently
+            from plain unicode strings.
 
         """
         self.escape = escape
@@ -78,9 +103,13 @@ class RenderEngine(object):
 
     def render(self, template, context):
         """
+        Return a template rendered as a string with type unicode.
+
         Arguments:
 
-          template: a unicode template string.
+          template: a template string of type unicode (but not a proper
+            subclass of unicode).
+
           context: a Context instance.
 
         """
@@ -122,7 +151,7 @@ class RenderEngine(object):
                 # Then there was no match.
                 break
 
-            start, tag_type, tag_name, template = parts
+            tag_type, tag_name, template = parts[1:]
 
             tag_name = tag_name.strip()
             func = self.modifiers[tag_type]
@@ -133,6 +162,7 @@ class RenderEngine(object):
             output.append(tag_value)
 
         output = "".join(output)
+
         return output
 
     def _render_dictionary(self, template, context):
@@ -149,35 +179,45 @@ class RenderEngine(object):
 
         return ''.join(insides)
 
-    @modifiers.set(None)
-    def _render_tag(self, tag_name):
+    def _get_string_context(self, tag_name):
         """
-        Return the value of a variable as an escaped unicode string.
+        Get a value from the current context as a basestring instance.
 
         """
-        raw = self.context.get(tag_name, '')
+        val = self.context.get(tag_name)
 
-        # For methods with no return value
-        #
-        # We use "==" rather than "is" to compare integers, as using "is" relies
-        # on an implementation detail of CPython.  The test about rendering
-        # zeroes failed while using PyPy when using "is".
+        # We use "==" rather than "is" to compare integers, as using "is"
+        # relies on an implementation detail of CPython.  The test about
+        # rendering zeroes failed while using PyPy when using "is".
         # See issue #34: https://github.com/defunkt/pystache/issues/34
-        if not raw and raw != 0:
-            if tag_name == '.':
-                raw = self.context.top()
-            else:
+        if not val and val != 0:
+            if tag_name != '.':
                 return ''
+            val = self.context.top()
 
-        # If we don't first convert to a string type, the call to self._unicode_and_escape()
-        # will yield an error like the following:
-        #
-        #   TypeError: coercing to Unicode: need string or buffer, ... found
-        #
-        if not isinstance(raw, basestring):
-            raw = str(raw)
+        if not isinstance(val, basestring):
+            val = str(val)
 
-        return self.escape(raw)
+        return val
+
+    @modifiers.set(None)
+    def _render_escaped(self, tag_name):
+        """
+        Return a variable value as an escaped unicode string.
+
+        """
+        s = self._get_string_context(tag_name)
+        return self.escape(s)
+
+    @modifiers.set('{')
+    @modifiers.set('&')
+    def _render_literal(self, tag_name):
+        """
+        Return a variable value as a unicode string (unescaped).
+
+        """
+        s = self._get_string_context(tag_name)
+        return self.literal(s)
 
     @modifiers.set('!')
     def _render_comment(self, tag_name):
@@ -185,8 +225,8 @@ class RenderEngine(object):
 
     @modifiers.set('>')
     def _render_partial(self, template_name):
-        markup = self.load_partial(template_name)
-        return self._render(markup)
+        template = self.load_partial(template_name)
+        return self._render(template)
 
     @modifiers.set('=')
     def _change_delimiter(self, tag_name):
@@ -199,20 +239,11 @@ class RenderEngine(object):
 
         return ''
 
-    @modifiers.set('{')
-    @modifiers.set('&')
-    def _render_unescaped(self, tag_name):
-        """
-        Render a tag without escaping it.
-
-        """
-        return self.literal(self.context.get(tag_name, ''))
-
     def _render(self, template):
         """
         Arguments:
 
-          template: a unicode template string.
+          template: a template string with type unicode.
 
         """
         output = []
