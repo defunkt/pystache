@@ -97,8 +97,12 @@ class RendererTestCase(unittest.TestCase):
         self.assertEquals(bool(markupsafe), self._was_markupsafe_imported())
 
     def test_init__escape__default_without_markupsafe(self):
-        renderer = Renderer()
-        self.assertEquals(renderer.escape(">'"), "&gt;'")
+        escape = Renderer().escape
+
+        self.assertEquals(escape(">"), "&gt;")
+        self.assertEquals(escape('"'), "&quot;")
+        # Single quotes are not escaped.
+        self.assertEquals(escape("'"), "'")
 
     def test_init__escape__default_with_markupsafe(self):
         if not self._was_markupsafe_imported():
