@@ -92,8 +92,13 @@ class Renderer(object):
             default_encoding = sys.getdefaultencoding()
 
         if escape is None:
-            # TODO: use 'quote=True' with cgi.escape and add tests.
-            escape = markupsafe.escape if markupsafe else cgi.escape
+            if markupsafe:
+                escape = markupsafe.escape
+            else:
+                # The quote=True argument causes double quotes to be escaped,
+                # but not single quotes:
+                #   http://docs.python.org/library/cgi.html#cgi.escape
+                escape = lambda s: cgi.escape(s, quote=True)
 
         if loader is None:
             loader = Loader(encoding=default_encoding, decode_errors=decode_errors)
@@ -108,7 +113,7 @@ class Renderer(object):
 
     def _to_unicode_soft(self, s):
         """
-        Convert an str or unicode string to a unicode string (or subclass).
+        Convert a basestring to unicode, preserving any unicode subclass.
 
         """
         # Avoid the "double-decoding" TypeError.
@@ -116,14 +121,14 @@ class Renderer(object):
 
     def _to_unicode_hard(self, s):
         """
-        Convert an str or unicode string to a unicode string (not subclass).
+        Convert a basestring to a string with type unicode (not subclass).
 
         """
         return unicode(self._to_unicode_soft(s))
 
     def _escape_to_unicode(self, s):
         """
-        Convert an str or unicode string to unicode, and escape it.
+        Convert a basestring to unicode (preserving any unicode subclass), and escape it.
 
         Returns a unicode string (not subclass).
 
