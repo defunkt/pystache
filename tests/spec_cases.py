@@ -15,7 +15,6 @@ for example--
 
 import glob
 import os.path
-import sys
 import unittest
 import yaml
 
