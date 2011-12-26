@@ -8,13 +8,15 @@ This module provides a Loader class.
 import os
 import sys
 
-DEFAULT_DECODE_ERRORS = 'strict'
+from .reader import Reader
+
+
 DEFAULT_EXTENSION = 'mustache'
 
 
 class Loader(object):
 
-    def __init__(self, search_dirs=None, extension=None, encoding=None, decode_errors=None):
+    def __init__(self, search_dirs=None, extension=None, reader=None):
         """
         Construct a template loader.
 
@@ -28,21 +30,13 @@ class Loader(object):
           extension: the template file extension.  Defaults to "mustache".
             Pass False for no extension (i.e. extensionless template files).
 
-          encoding: the name of the encoding to use when converting file
-            contents to unicode.  This name will be passed as the encoding
-            argument to the built-in function unicode().  Defaults to the
-            encoding name returned by sys.getdefaultencoding().
-
-          decode_errors: the string to pass as the "errors" argument to the
-            built-in function unicode() when converting file contents to
-            unicode.  Defaults to "strict".
+          reader: the Reader instance to use to read file contents and
+            return them as unicode strings.  Defaults to constructing
+            the default Reader with no constructor arguments.
 
         """
-        if decode_errors is None:
-            decode_errors = DEFAULT_DECODE_ERRORS
-
-        if encoding is None:
-            encoding = sys.getdefaultencoding()
+        if reader is None:
+            reader = Reader()
 
         if extension is None:
             extension = DEFAULT_EXTENSION
@@ -53,10 +47,16 @@ class Loader(object):
         if isinstance(search_dirs, basestring):
             search_dirs = [search_dirs]
 
-        self.decode_errors = decode_errors
+        self.reader = reader
         self.search_dirs = search_dirs
-        self.template_encoding = encoding
         self.template_extension = extension
+
+    def _read(self, path):
+        """
+        Read and return a template as a unicode string.
+
+        """
+        return self.reader.read(path)
 
     def make_file_name(self, template_name):
         file_name = template_name
@@ -79,23 +79,8 @@ class Loader(object):
         for dir_path in search_dirs:
             file_path = os.path.join(dir_path, file_name)
             if os.path.exists(file_path):
-                return self._load_template_file(file_path)
+                return self._read(file_path)
 
         # TODO: we should probably raise an exception of our own type.
         raise IOError('"%s" not found in "%s"' % (template_name, ':'.join(search_dirs),))
 
-    def _load_template_file(self, file_path):
-        """
-        Read a template file, and return it as a string.
-
-        """
-        f = open(file_path, 'r')
-
-        try:
-            template = f.read()
-        finally:
-            f.close()
-
-        template = unicode(template, self.template_encoding, self.decode_errors)
-
-        return template

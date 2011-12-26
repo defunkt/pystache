@@ -10,6 +10,7 @@ import sys
 
 from .context import Context
 from .loader import Loader
+from .reader import Reader
 from .renderengine import RenderEngine
 
 
@@ -86,7 +87,8 @@ class Renderer(object):
             escape = lambda s: cgi.escape(s, quote=True)
 
         if loader is None:
-            loader = Loader(encoding=default_encoding, decode_errors=decode_errors)
+            reader = Reader(encoding=default_encoding, decode_errors=decode_errors)
+            loader = Loader(reader=reader)
 
         self.decode_errors = decode_errors
         self.default_encoding = default_encoding

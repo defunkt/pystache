@@ -10,6 +10,7 @@ from types import UnboundMethodType
 
 from .context import Context
 from .loader import Loader
+from .reader import Reader
 from .renderer import Renderer
 
 
@@ -57,7 +58,8 @@ class View(object):
             # user did not supply a load_template to the constructor)
             # to let users set the template_extension attribute, etc. after
             # View.__init__() has already been called.
-            loader = Loader(search_dirs=self.template_path, encoding=self.template_encoding,
+            reader = Reader(encoding=self.template_encoding)
+            loader = Loader(search_dirs=self.template_path, reader=reader,
                             extension=self.template_extension)
             self._loader = loader
 
