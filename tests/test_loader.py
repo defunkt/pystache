@@ -5,6 +5,7 @@ import sys
 import unittest
 
 from pystache.loader import Loader
+from pystache.reader import Reader
 
 DATA_DIR = 'tests/data'
 
@@ -23,22 +24,6 @@ class LoaderTestCase(unittest.TestCase):
         loader = Loader(search_dirs=['foo'])
         self.assertEquals(loader.search_dirs, ['foo'])
 
-    def test_init__decode_errors(self):
-        # Test the default value.
-        loader = Loader()
-        self.assertEquals(loader.decode_errors, 'strict')
-
-        loader = Loader(decode_errors='replace')
-        self.assertEquals(loader.decode_errors, 'replace')
-
-    def test_init__encoding(self):
-        # Test the default value.
-        loader = Loader()
-        self.assertEquals(loader.template_encoding, sys.getdefaultencoding())
-
-        loader = Loader(encoding='foo')
-        self.assertEquals(loader.template_encoding, 'foo')
-
     def test_init__extension(self):
         # Test the default value.
         loader = Loader()
@@ -49,6 +34,17 @@ class LoaderTestCase(unittest.TestCase):
 
         loader = Loader(extension=False)
         self.assertTrue(loader.template_extension is False)
+
+    def test_init__reader(self):
+        # Test the default value.
+        loader = Loader()
+        reader = loader.reader
+        self.assertEquals(reader.encoding, sys.getdefaultencoding())
+        self.assertEquals(reader.decode_errors, 'strict')
+
+        reader = Reader()
+        loader = Loader(reader=reader)
+        self.assertTrue(loader.reader is reader)
 
     def test_make_file_name(self):
         loader = Loader()
@@ -102,26 +98,4 @@ class LoaderTestCase(unittest.TestCase):
         loader = self._loader()
         actual = loader.get('ascii')
         self.assertEqual(type(actual), unicode)
-
-    def test_get__encoding(self):
-        """
-        Test get(): encoding attribute respected.
-
-        """
-        loader = self._loader()
-
-        self.assertRaises(UnicodeDecodeError, loader.get, 'nonascii')
-        loader.template_encoding = 'utf-8'
-        self.assertEquals(loader.get('nonascii'), u'non-ascii: é')
-
-    def test_get__decode_errors(self):
-        """
-        Test get(): decode_errors attribute.
-
-        """
-        loader = self._loader()
-
-        self.assertRaises(UnicodeDecodeError, loader.get, 'nonascii')
-        loader.decode_errors = 'replace'
-        self.assertEquals(loader.get('nonascii'), u'non-ascii: \ufffd\ufffd')
 

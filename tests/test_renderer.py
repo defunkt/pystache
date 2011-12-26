@@ -35,39 +35,35 @@ class RendererInitTestCase(unittest.TestCase):
         Test that the default loader is constructed correctly.
 
         """
-        r = Renderer()
-        actual = r.loader
+        renderer = Renderer()
+        actual = renderer.loader
 
         expected = Loader()
 
         self.assertEquals(type(actual), type(expected))
-        self.assertEquals(actual.__dict__, expected.__dict__)
+        self.assertEquals(actual.template_extension, expected.template_extension)
+        self.assertEquals(actual.search_dirs, expected.search_dirs)
+        self.assertEquals(actual.reader.__dict__, expected.reader.__dict__)
 
     def test_loader__default__default_encoding(self):
         """
-        Test that the default loader inherits the default_encoding.
+        Test that the default loader inherits default_encoding.
 
         """
-        r = Renderer(default_encoding='foo')
-        actual = r.loader
+        renderer = Renderer(default_encoding='foo')
+        reader = renderer.loader.reader
 
-        expected = Loader(encoding='foo')
-        self.assertEquals(actual.template_encoding, expected.template_encoding)
-        # Check all attributes for good measure.
-        self.assertEquals(actual.__dict__, expected.__dict__)
+        self.assertEquals(reader.encoding, 'foo')
 
     def test_loader__default__decode_errors(self):
         """
-        Test that the default loader inherits the decode_errors.
+        Test that the default loader inherits decode_errors.
 
         """
-        r = Renderer(decode_errors='foo')
-        actual = r.loader
+        renderer = Renderer(decode_errors='foo')
+        reader = renderer.loader.reader
 
-        expected = Loader(decode_errors='foo')
-        self.assertEquals(actual.decode_errors, expected.decode_errors)
-        # Check all attributes for good measure.
-        self.assertEquals(actual.__dict__, expected.__dict__)
+        self.assertEquals(reader.decode_errors, 'foo')
 
     def test_escape__default(self):
         escape = Renderer().escape

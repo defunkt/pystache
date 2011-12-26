@@ -10,6 +10,7 @@ import sys
 
 from .context import Context
 from .loader import Loader
+from .reader import Reader
 from .renderengine import RenderEngine
 
 
@@ -47,9 +48,8 @@ class Renderer(object):
             as a unicode string.  If there is no template with that name,
             the method should either return None (as dict.get() does) or
             raise an exception.
-                Defaults to constructing a Loader instance with
-            default_encoding and decode_errors passed as the encoding and
-            decode_errors arguments, respectively.
+                Defaults to constructing a default Loader, but using the
+            default_encoding and decode_errors arguments.
 
           escape: the function used to escape variable tag values when
             rendering a template.  The function should accept a unicode
@@ -86,7 +86,8 @@ class Renderer(object):
             escape = lambda s: cgi.escape(s, quote=True)
 
         if loader is None:
-            loader = Loader(encoding=default_encoding, decode_errors=decode_errors)
+            reader = Reader(encoding=default_encoding, decode_errors=decode_errors)
+            loader = Loader(reader=reader)
 
         self.decode_errors = decode_errors
         self.default_encoding = default_encoding
