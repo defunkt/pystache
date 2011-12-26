@@ -1,12 +1,21 @@
 # coding: utf-8
 
 """
-Tests the mustache spec test cases.
+Creates a unittest.TestCase for the tests defined in the mustache spec.
+
+We did not call this file something like "test_spec.py" to avoid matching
+nosetests's default regular expression "(?:^|[\b_\./-])[Tt]est".
+This allows us to exclude the spec test cases by default when running
+nosetests.  To include the spec tests, one can use the following option,
+for example--
+
+    nosetests -i spec
 
 """
 
 import glob
 import os.path
+import sys
 import unittest
 import yaml
 

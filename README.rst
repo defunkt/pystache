@@ -71,6 +71,7 @@ To include tests from the mustache spec_ in your test runs: ::
 
     git submodule init
     git submodule update
+    nosetests -i spec
 
 
 Mailing List
