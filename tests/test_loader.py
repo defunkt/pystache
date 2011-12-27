@@ -7,7 +7,7 @@ import unittest
 from pystache.loader import Loader
 from pystache.reader import Reader
 
-DATA_DIR = 'tests/data'
+from .common import DATA_DIR
 
 class LoaderTestCase(unittest.TestCase):
 
