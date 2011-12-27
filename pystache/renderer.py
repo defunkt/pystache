@@ -33,8 +33,8 @@ class Renderer(object):
 
     """
 
-    def __init__(self, loader=None, default_encoding=None, decode_errors='strict',
-                 escape=None):
+    def __init__(self, loader=None, file_encoding=None, default_encoding=None,
+                 decode_errors='strict', escape=None):
         """
         Construct an instance.
 
@@ -64,20 +64,28 @@ class Renderer(object):
             escape function, for example.  One may also wish to consider
             using markupsafe's escape function: markupsafe.escape().
 
+          file_encoding: the name of the encoding of all template files.
+            This encoding is used when reading and converting any template
+            files to unicode.  All templates are converted to unicode prior
+            to parsing.  Defaults to the default_encoding argument.
+
           default_encoding: the name of the encoding to use when converting
-            to unicode any strings of type `str` encountered during the
-            rendering process.  The name will be passed as the "encoding"
+            to unicode any strings of type str encountered during the
+            rendering process.  The name will be passed as the encoding
             argument to the built-in function unicode().  Defaults to the
             encoding name returned by sys.getdefaultencoding().
 
-          decode_errors: the string to pass as the "errors" argument to the
+          decode_errors: the string to pass as the errors argument to the
             built-in function unicode() when converting to unicode any
-            strings of type `str` encountered during the rendering process.
+            strings of type str encountered during the rendering process.
             Defaults to "strict".
 
         """
         if default_encoding is None:
             default_encoding = sys.getdefaultencoding()
+
+        if file_encoding is None:
+            file_encoding = default_encoding
 
         if escape is None:
             # The quote=True argument causes double quotes to be escaped,
@@ -92,6 +100,7 @@ class Renderer(object):
         self.decode_errors = decode_errors
         self.default_encoding = default_encoding
         self.escape = escape
+        self.file_encoding = file_encoding
         self.loader = loader
 
     def _to_unicode_soft(self, s):
@@ -178,6 +187,28 @@ class Renderer(object):
                               literal=self._to_unicode_hard,
                               escape=self._escape_to_unicode)
         return engine
+
+    def read(self, path):
+        """
+        Read and return as a unicode string the file contents at path.
+
+        This class uses this method whenever it needs to read a template
+        file.  This method uses the file_encoding and decode_errors
+        attributes.
+
+        """
+        reader = Reader(encoding=self.file_encoding, decode_errors=self.decode_errors)
+        return reader.read(path)
+
+    def render_path(self, template_path, context=None, **kwargs):
+        """
+        Render the template at the given path using the given context.
+
+        Read the render() docstring for more information.
+
+        """
+        template = self.read(template_path)
+        return self.render(template, context, **kwargs)
 
     def render(self, template, context=None, **kwargs):
         """

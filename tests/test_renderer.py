@@ -13,6 +13,7 @@ from pystache import renderer
 from pystache.renderer import Renderer
 from pystache.loader import Loader
 
+from .common import get_data_path
 
 class RendererInitTestCase(unittest.TestCase):
 
@@ -110,6 +111,22 @@ class RendererInitTestCase(unittest.TestCase):
         renderer = Renderer(decode_errors="foo")
         self.assertEquals(renderer.decode_errors, "foo")
 
+    def test_file_encoding__default(self):
+        """
+        Check that file_encoding defaults to default_encoding.
+
+        """
+        renderer = Renderer()
+        self.assertEquals(renderer.file_encoding, renderer.default_encoding)
+
+    def test_file_encoding(self):
+        """
+        Check that the file_encoding attribute is set correctly.
+
+        """
+        renderer = Renderer(file_encoding='foo')
+        self.assertEquals(renderer.file_encoding, 'foo')
+
 
 class RendererTestCase(unittest.TestCase):
 
@@ -149,6 +166,42 @@ class RendererTestCase(unittest.TestCase):
         renderer.decode_errors = "replace"
         # U+FFFD is the official Unicode replacement character.
         self.assertEquals(renderer.unicode(s), u'd\ufffd\ufffdf')
+
+    ## Test the read() method.
+
+    def _read(self, renderer, filename):
+        path = get_data_path(filename)
+        return renderer.read(path)
+
+    def test_read(self):
+        renderer = Renderer()
+        actual = self._read(renderer, 'ascii.mustache')
+        self.assertEquals(actual, 'ascii: abc')
+
+    def test_read__returns_unicode(self):
+        renderer = Renderer()
+        actual = self._read(renderer, 'ascii.mustache')
+        self.assertEquals(type(actual), unicode)
+
+    def test_read__file_encoding(self):
+        filename = 'nonascii.mustache'
+
+        renderer = Renderer()
+        renderer.file_encoding = 'ascii'
+
+        self.assertRaises(UnicodeDecodeError, self._read, renderer, filename)
+        renderer.file_encoding = 'utf-8'
+        actual = self._read(renderer, filename)
+        self.assertEquals(actual, u'non-ascii: é')
+
+    def test_read__decode_errors(self):
+        filename = 'nonascii.mustache'
+        renderer = Renderer()
+
+        self.assertRaises(UnicodeDecodeError, self._read, renderer, filename)
+        renderer.decode_errors = 'ignore'
+        actual = self._read(renderer, filename)
+        self.assertEquals(actual, 'non-ascii: ')
 
     ## Test the render() method.
 
@@ -266,6 +319,16 @@ class RendererTestCase(unittest.TestCase):
         # If the next line failed, we would get the following error:
         #   TypeError: decoding Unicode is not supported
         self.assertEquals(load_partial("partial"), "foo")
+
+    def test_render_path(self):
+        """
+        Test the render_path() method.
+
+        """
+        renderer = Renderer()
+        path = get_data_path('say_hello.mustache')
+        actual = renderer.render_path(path, to='world')
+        self.assertEquals(actual, "Hello world")
 
 
 # By testing that Renderer.render() constructs the right RenderEngine,
