@@ -23,24 +23,21 @@ class RendererInitTestCase(unittest.TestCase):
 
     """
 
-    def test_loader(self):
-        """
-        Test that the loader attribute is set correctly.
-
-        """
-        loader = {'foo': 'bar'}
-        renderer = Renderer(loader=loader)
-        self.assertEquals(renderer.loader, {'foo': 'bar'})
-
-    def test_loader__default(self):
+    def test_partials__default(self):
         """
         Test that the default loader is constructed correctly.
 
         """
         renderer = Renderer()
-        actual = renderer.loader
+        self.assertTrue(renderer.partials is None)
 
-        self.assertTrue(renderer.loader is None)
+    def test_partials(self):
+        """
+        Test that the loader attribute is set correctly.
+
+        """
+        renderer = Renderer(partials={'foo': 'bar'})
+        self.assertEquals(renderer.partials, {'foo': 'bar'})
 
     def test_escape__default(self):
         escape = Renderer().escape
@@ -382,8 +379,8 @@ class RendererTestCase(unittest.TestCase):
         Test the _make_load_partial() method.
 
         """
-        partials = {'foo': 'bar'}
-        renderer = Renderer(loader=partials)
+        renderer = Renderer()
+        renderer.partials = {'foo': 'bar'}
         load_partial = renderer._make_load_partial()
 
         actual = load_partial('foo')
@@ -398,12 +395,12 @@ class RendererTestCase(unittest.TestCase):
         """
         renderer = Renderer()
 
-        renderer.loader = {'partial': 'foo'}
+        renderer.partials = {'partial': 'foo'}
         load_partial = renderer._make_load_partial()
         self.assertEquals(load_partial("partial"), "foo")
 
         # Now with a value that is already unicode.
-        renderer.loader = {'partial': u'foo'}
+        renderer.partials = {'partial': u'foo'}
         load_partial = renderer._make_load_partial()
         # If the next line failed, we would get the following error:
         #   TypeError: decoding Unicode is not supported
@@ -443,7 +440,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
 
         renderer = Renderer()
         renderer.default_encoding = 'ascii'
-        renderer.loader = {'str': 'foo', 'subclass': MyUnicode('abc')}
+        renderer.partials = {'str': 'foo', 'subclass': MyUnicode('abc')}
 
         engine = renderer._make_render_engine()
 
@@ -462,7 +459,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
 
         """
         renderer = Renderer()
-        renderer.loader = {}
+        renderer.partials = {}
 
         engine = renderer._make_render_engine()
         load_partial = engine.load_partial

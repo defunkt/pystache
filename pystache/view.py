@@ -60,7 +60,7 @@ class View(object):
             # instantiation some of the attributes on which the Renderer
             # depends.  This lets users set the template_extension attribute,
             # etc. after View.__init__() has already been called.
-            renderer = Renderer(loader=self._loader,
+            renderer = Renderer(partials=self._loader,
                                 file_encoding=self.template_encoding,
                                 search_dirs=self.template_path,
                                 file_extension=self.template_extension)
