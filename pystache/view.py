@@ -23,6 +23,7 @@ class View(object):
     template_extension = None
 
     _loader = None
+    _renderer = None
 
     def __init__(self, template=None, context=None, loader=None, **kwargs):
         """
@@ -52,22 +53,20 @@ class View(object):
 
         self.context = _context
 
-    def get_loader(self):
-        if self._loader is None:
-            # We delay setting self._loader until now (in the case that the
-            # user did not supply a load_template to the constructor)
-            # to let users set the template_extension attribute, etc. after
-            # View.__init__() has already been called.
-            reader = Reader(encoding=self.template_encoding)
-            loader = Loader(search_dirs=self.template_path, reader=reader,
-                            extension=self.template_extension)
-            self._loader = loader
+    def _get_renderer(self):
+        if self._renderer is None:
+            # We delay setting self._renderer until now (instead of, say,
+            # setting it in the constructor) in case the user changes after
+            # instantiation some of the attributes on which the Renderer
+            # depends.  This lets users set the template_extension attribute,
+            # etc. after View.__init__() has already been called.
+            renderer = Renderer(loader=self._loader,
+                                file_encoding=self.template_encoding,
+                                search_dirs=self.template_path,
+                                file_extension=self.template_extension)
+            self._renderer = renderer
 
-        return self._loader
-
-    def load_template(self, template_name):
-        loader = self.get_loader()
-        return loader.get(template_name)
+        return self._renderer
 
     def get_template(self):
         """
@@ -76,7 +75,8 @@ class View(object):
         """
         if not self.template:
             template_name = self._get_template_name()
-            self.template = self.load_template(template_name)
+            renderer = self._get_renderer()
+            self.template = renderer.loader.get(template_name)
 
         return self.template
 
@@ -102,19 +102,13 @@ class View(object):
 
         return re.sub('[A-Z]', repl, template_name)[1:]
 
-    # TODO: the View class should probably have some sort of template renderer
-    # associated with it to encapsulate all of the render-specific behavior
-    # and options like encoding, escape, etc.  This would probably be better
-    # than passing all of these options to render(), especially as the list
-    # of possible options grows.
-    def render(self, escape=None):
+    def render(self):
         """
         Return the view rendered using the current context.
 
         """
-        loader = self.get_loader()
         template = self.get_template()
-        renderer = Renderer(escape=escape, loader=loader)
+        renderer = self._get_renderer()
         return renderer.render(template, self.context)
 
     def get(self, key, default=None):

@@ -31,10 +31,6 @@ class TestView(unittest.TestCase):
     def test_escaping(self):
         self.assertEquals(Escaped().render(), "<h1>Bear &gt; Shark</h1>")
 
-    def test_escaping__custom(self):
-        escape = lambda s: s.upper()
-        self.assertEquals(Escaped().render(escape=escape), "<h1>BEAR > SHARK</h1>")
-
     def test_literal(self):
         self.assertEquals(Unescaped().render(), "<h1>Bear > Shark</h1>")
 

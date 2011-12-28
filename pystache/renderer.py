@@ -6,9 +6,11 @@ This module provides a Renderer class to render templates.
 """
 
 import cgi
+import os
 import sys
 
 from .context import Context
+from .loader import DEFAULT_EXTENSION
 from .loader import Loader
 from .reader import Reader
 from .renderengine import RenderEngine
@@ -34,7 +36,8 @@ class Renderer(object):
     """
 
     def __init__(self, loader=None, file_encoding=None, default_encoding=None,
-                 decode_errors='strict', escape=None):
+                 decode_errors='strict', search_dirs=None, file_extension=None,
+                 escape=None):
         """
         Construct an instance.
 
@@ -49,7 +52,7 @@ class Renderer(object):
             the method should either return None (as dict.get() does) or
             raise an exception.
                 Defaults to constructing a default Loader, but using the
-            default_encoding and decode_errors arguments.
+            file_encoding and decode_errors arguments.
 
           escape: the function used to escape variable tag values when
             rendering a template.  The function should accept a unicode
@@ -80,12 +83,17 @@ class Renderer(object):
             strings of type str encountered during the rendering process.
             Defaults to "strict".
 
+          search_dirs: the list of directories in which to search for
+            templates when loading a template by name.  Defaults to the
+            current working directory.  If given a string, the string is
+            interpreted as a single directory.
+
+          file_extension: the template file extension.  Defaults to "mustache".
+            Pass False for no extension (i.e. for extensionless files).
+
         """
         if default_encoding is None:
             default_encoding = sys.getdefaultencoding()
-
-        if file_encoding is None:
-            file_encoding = default_encoding
 
         if escape is None:
             # The quote=True argument causes double quotes to be escaped,
@@ -93,15 +101,36 @@ class Renderer(object):
             #   http://docs.python.org/library/cgi.html#cgi.escape
             escape = lambda s: cgi.escape(s, quote=True)
 
+        # This needs to be after we set the default default_encoding.
+        if file_encoding is None:
+            file_encoding = default_encoding
+
+        if file_extension is None:
+            file_extension = DEFAULT_EXTENSION
+
+        if search_dirs is None:
+            search_dirs = os.curdir  # i.e. "."
+
+        if isinstance(search_dirs, basestring):
+            search_dirs = [search_dirs]
+
+        # This needs to be after we set some of the defaults above.
         if loader is None:
-            reader = Reader(encoding=default_encoding, decode_errors=decode_errors)
-            loader = Loader(reader=reader)
+            reader = Reader(encoding=file_encoding, decode_errors=decode_errors)
+            loader = Loader(reader=reader, search_dirs=search_dirs, extension=file_extension)
 
         self.decode_errors = decode_errors
         self.default_encoding = default_encoding
         self.escape = escape
         self.file_encoding = file_encoding
+        self.file_extension = file_extension
+        # TODO: we should not store a loader attribute because the loader
+        # would no longer reflect the current attributes if, say, someone
+        # changed the search_dirs attribute after instantiation.  Instead,
+        # we should construct the Loader instance each time on the fly,
+        # as we do with the Reader in the read() method.
         self.loader = loader
+        self.search_dirs = search_dirs
 
     def _to_unicode_soft(self, s):
         """
