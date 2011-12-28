@@ -6,6 +6,7 @@ Unit tests of template.py.
 """
 
 import codecs
+import os
 import sys
 import unittest
 
@@ -66,6 +67,26 @@ class RendererInitTestCase(unittest.TestCase):
 
         self.assertEquals(reader.decode_errors, 'foo')
 
+    def test_loader__default__file_extension(self):
+        """
+        Test that the default loader inherits file_extension.
+
+        """
+        renderer = Renderer(file_extension='foo')
+        loader = renderer.loader
+
+        self.assertEquals(loader.template_extension, 'foo')
+
+    def test_loader__default__search_dirs(self):
+        """
+        Test that the default loader inherits search_dirs.
+
+        """
+        renderer = Renderer(search_dirs='foo')
+        loader = renderer.loader
+
+        self.assertEquals(loader.search_dirs, ['foo'])
+
     def test_escape__default(self):
         escape = Renderer().escape
 
@@ -113,7 +134,7 @@ class RendererInitTestCase(unittest.TestCase):
 
     def test_file_encoding__default(self):
         """
-        Check that file_encoding defaults to default_encoding.
+        Check the file_encoding default.
 
         """
         renderer = Renderer()
@@ -126,6 +147,46 @@ class RendererInitTestCase(unittest.TestCase):
         """
         renderer = Renderer(file_encoding='foo')
         self.assertEquals(renderer.file_encoding, 'foo')
+
+    def test_file_extension__default(self):
+        """
+        Check the file_extension default.
+
+        """
+        renderer = Renderer()
+        self.assertEquals(renderer.file_extension, 'mustache')
+
+    def test_file_extension(self):
+        """
+        Check that the file_encoding attribute is set correctly.
+
+        """
+        renderer = Renderer(file_extension='foo')
+        self.assertEquals(renderer.file_extension, 'foo')
+
+    def test_search_dirs__default(self):
+        """
+        Check the search_dirs default.
+
+        """
+        renderer = Renderer()
+        self.assertEquals(renderer.search_dirs, [os.curdir])
+
+    def test_search_dirs__string(self):
+        """
+        Check that the search_dirs attribute is set correctly when a string.
+
+        """
+        renderer = Renderer(search_dirs='foo')
+        self.assertEquals(renderer.search_dirs, ['foo'])
+
+    def test_search_dirs__list(self):
+        """
+        Check that the search_dirs attribute is set correctly when a list.
+
+        """
+        renderer = Renderer(search_dirs=['foo'])
+        self.assertEquals(renderer.search_dirs, ['foo'])
 
 
 class RendererTestCase(unittest.TestCase):

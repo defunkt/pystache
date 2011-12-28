@@ -46,29 +46,16 @@ class ViewTestCase(unittest.TestCase):
         view = Simple(thing='world')
         self.assertEquals(view.render(), "Hi world!")
 
-    def test_load_template(self):
-        """
-        Test View.load_template().
-
-        """
-        template = Simple().load_template("escaped")
-        self.assertEquals(template, "<h1>{{title}}</h1>")
-
-    def test_load_template__extensionless_file(self):
-        view = Simple()
-        view.template_extension = False
-        template = view.load_template('extensionless')
-        self.assertEquals(template, "No file extension: {{foo}}")
-
     def test_load_template__custom_loader(self):
         """
         Test passing a custom loader to View.__init__().
 
         """
+        template = "{{>partial}}"
         partials = {"partial": "Loaded from dictionary"}
-        view = Simple(loader=partials)
+        view = Simple(template=template, loader=partials)
+        actual = view.render()
 
-        actual = view.load_template("partial")
         self.assertEquals(actual, "Loaded from dictionary")
 
     def test_template_path(self):
