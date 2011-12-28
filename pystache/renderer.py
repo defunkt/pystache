@@ -16,6 +16,12 @@ from .reader import Reader
 from .renderengine import RenderEngine
 
 
+# The quote=True argument causes double quotes to be escaped,
+# but not single quotes:
+#   http://docs.python.org/library/cgi.html#cgi.escape
+DEFAULT_ESCAPE = lambda s: cgi.escape(s, quote=True)
+
+
 class Renderer(object):
 
     """
@@ -23,36 +29,37 @@ class Renderer(object):
 
     This class supports several rendering options which are described in
     the constructor's docstring.  Among these, the constructor supports
-    passing a custom template loader.
+    passing a custom partial loader.
 
-    Here is an example of passing a custom template loader to render a
-    template using partials loaded from a string-string dictionary.
+    Here is an example of rendering a template using a custom partial loader
+    that loads partials loaded from a string-string dictionary.
 
     >>> partials = {'partial': 'Hello, {{thing}}!'}
-    >>> renderer = Renderer(loader=partials)
+    >>> renderer = Renderer(partials=partials)
     >>> renderer.render('{{>partial}}', {'thing': 'world'})
     u'Hello, world!'
 
     """
 
-    def __init__(self, loader=None, file_encoding=None, default_encoding=None,
+    def __init__(self, file_encoding=None, default_encoding=None,
                  decode_errors='strict', search_dirs=None, file_extension=None,
-                 escape=None):
+                 escape=None, partials=None):
         """
         Construct an instance.
 
         Arguments:
 
-          loader: the object (e.g. pystache.Loader or dictionary) that will
-            load templates during the rendering process, for example when
-            loading a partial.
-                The loader should have a get() method that accepts a string
+          partials: an object (e.g. pystache.Loader or dictionary) for
+            custom partial loading during the rendering process.
+                The object should have a get() method that accepts a string
             and returns the corresponding template as a string, preferably
             as a unicode string.  If there is no template with that name,
-            the method should either return None (as dict.get() does) or
-            raise an exception.
-                Defaults to constructing a default Loader, but using the
-            file_encoding and decode_errors arguments.
+            the get() method should either return None (as dict.get() does)
+            or raise an exception.
+                If this argument is None, the rendering process will use
+            the normal procedure of locating and reading templates from
+            the file system -- using the Loader-related instance attributes
+            like search_dirs, file_encoding, etc.
 
           escape: the function used to escape variable tag values when
             rendering a template.  The function should accept a unicode
@@ -96,10 +103,7 @@ class Renderer(object):
             default_encoding = sys.getdefaultencoding()
 
         if escape is None:
-            # The quote=True argument causes double quotes to be escaped,
-            # but not single quotes:
-            #   http://docs.python.org/library/cgi.html#cgi.escape
-            escape = lambda s: cgi.escape(s, quote=True)
+            escape = DEFAULT_ESCAPE
 
         # This needs to be after we set the default default_encoding.
         if file_encoding is None:
@@ -114,22 +118,12 @@ class Renderer(object):
         if isinstance(search_dirs, basestring):
             search_dirs = [search_dirs]
 
-        # This needs to be after we set some of the defaults above.
-        if loader is None:
-            reader = Reader(encoding=file_encoding, decode_errors=decode_errors)
-            loader = Loader(reader=reader, search_dirs=search_dirs, extension=file_extension)
-
         self.decode_errors = decode_errors
         self.default_encoding = default_encoding
         self.escape = escape
         self.file_encoding = file_encoding
         self.file_extension = file_extension
-        # TODO: we should not store a loader attribute because the loader
-        # would no longer reflect the current attributes if, say, someone
-        # changed the search_dirs attribute after instantiation.  Instead,
-        # we should construct the Loader instance each time on the fly,
-        # as we do with the Reader in the read() method.
-        self.loader = loader
+        self.partials = partials
         self.search_dirs = search_dirs
 
     def _to_unicode_soft(self, s):
@@ -191,9 +185,39 @@ class Renderer(object):
 
         return context
 
+    def _make_reader(self):
+        """
+        Create a Reader instance using current attributes.
+
+        """
+        return Reader(encoding=self.file_encoding, decode_errors=self.decode_errors)
+
+    def _make_loader(self):
+        """
+        Create a Loader instance using current attributes.
+
+        """
+        reader = self._make_reader()
+        loader = Loader(reader=reader, search_dirs=self.search_dirs, extension=self.file_extension)
+
+        return loader
+
     def _make_load_partial(self):
+        """
+        Return the load_partial function to pass to RenderEngine.__init__().
+
+        """
+        if self.partials is None:
+            loader = self._make_loader()
+            return loader.get
+
+        # Otherwise, create a load_partial function from the custom loader
+        # that satisfies RenderEngine requirements (and that provides a
+        # nicer exception, etc).
+        get_partial = self.partials.get
+
         def load_partial(name):
-            template = self.loader.get(name)
+            template = get_partial(name)
 
             if template is None:
                 # TODO: make a TemplateNotFoundException type that provides
@@ -226,8 +250,17 @@ class Renderer(object):
         attributes.
 
         """
-        reader = Reader(encoding=self.file_encoding, decode_errors=self.decode_errors)
+        reader = self._make_reader()
         return reader.read(path)
+
+    # TODO: add unit tests for this method.
+    def load_template(self, template_name):
+        """
+        Load a template by name from the file system.
+
+        """
+        loader = self._make_loader()
+        return loader.get(template_name)
 
     def render_path(self, template_path, context=None, **kwargs):
         """

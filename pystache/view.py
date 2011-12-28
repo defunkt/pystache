@@ -25,23 +25,20 @@ class View(object):
     _loader = None
     _renderer = None
 
-    def __init__(self, template=None, context=None, loader=None, **kwargs):
+    def __init__(self, template=None, context=None, partials=None, **kwargs):
         """
         Construct a View instance.
 
         Arguments:
 
-          loader: the object (e.g. pystache.Loader or dictionary) responsible
-            for loading templates during the rendering process, for example
-            when loading partials.  The object should have a get() method
-            that accepts a string and returns the corresponding template
-            as a string, preferably as a unicode string.  The method should
-            return None if there is no template with that name.
+          partials: the object (e.g. pystache.Loader or dictionary)
+            responsible for loading partials during the rendering process.
+            The object should have a get() method that accepts a string and
+            returns the corresponding template as a string, preferably as a
+            unicode string.  The method should return None if there is no
+            template with that name, or raise an exception.
 
         """
-        if loader is not None:
-            self._loader = loader
-
         if template is not None:
             self.template = template
 
@@ -50,6 +47,8 @@ class View(object):
             _context.push(context)
         if kwargs:
             _context.push(kwargs)
+
+        self._partials = partials
 
         self.context = _context
 
@@ -60,7 +59,7 @@ class View(object):
             # instantiation some of the attributes on which the Renderer
             # depends.  This lets users set the template_extension attribute,
             # etc. after View.__init__() has already been called.
-            renderer = Renderer(loader=self._loader,
+            renderer = Renderer(partials=self._partials,
                                 file_encoding=self.template_encoding,
                                 search_dirs=self.template_path,
                                 file_extension=self.template_extension)
@@ -76,7 +75,7 @@ class View(object):
         if not self.template:
             template_name = self._get_template_name()
             renderer = self._get_renderer()
-            self.template = renderer.loader.get(template_name)
+            self.template = renderer.load_template(template_name)
 
         return self.template
 

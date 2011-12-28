@@ -53,7 +53,7 @@ class ViewTestCase(unittest.TestCase):
         """
         template = "{{>partial}}"
         partials = {"partial": "Loaded from dictionary"}
-        view = Simple(template=template, loader=partials)
+        view = Simple(template=template, partials=partials)
         actual = view.render()
 
         self.assertEquals(actual, "Loaded from dictionary")
