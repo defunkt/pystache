@@ -46,12 +46,12 @@ class RendererInitTestCase(unittest.TestCase):
         self.assertEquals(actual.search_dirs, expected.search_dirs)
         self.assertEquals(actual.reader.__dict__, expected.reader.__dict__)
 
-    def test_loader__default__default_encoding(self):
+    def test_loader__default__encoding(self):
         """
-        Test that the default loader inherits default_encoding.
+        Test that the default loader inherits the correct encoding.
 
         """
-        renderer = Renderer(default_encoding='foo')
+        renderer = Renderer(file_encoding='foo')
         reader = renderer.loader.reader
 
         self.assertEquals(reader.encoding, 'foo')
