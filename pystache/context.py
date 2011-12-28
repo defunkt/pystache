@@ -67,6 +67,11 @@ class Context(object):
     Querying the stack for the value of a key queries the items in the
     stack in order from last-added objects to first (last in, first out).
 
+    *Caution*:
+
+      This class currently does not support recursive nesting in that
+      items in the stack cannot themselves be Context instances.
+
     See the docstrings of the methods of this class for more information.
 
     """
@@ -99,8 +104,69 @@ class Context(object):
           In particular, an item can be an ordinary object with no
           mapping-like characteristics.
 
+        *Caution*:
+
+          Items should not themselves be Context instances, as recursive
+          nesting does not behave as one might expect.
+
         """
         self._stack = list(items)
+
+    @staticmethod
+    def create(*context, **kwargs):
+        """
+        Build a Context instance from a sequence of "mapping-like" objects.
+
+        This factory-style method is more general than the Context class's
+        constructor in that Context instances can themselves appear in the
+        argument list.  This is not true of the constructor.
+
+        Here is an example illustrating various aspects of this method:
+
+        >>> obj1 = {'animal': 'cat', 'vegetable': 'carrot', 'mineral': 'copper'}
+        >>> obj2 = Context({'vegetable': 'spinach', 'mineral': 'silver'})
+        >>>
+        >>> context = Context.create(obj1, None, obj2, mineral='gold')
+        >>>
+        >>> context.get('animal')
+        'cat'
+        >>> context.get('vegetable')
+        'spinach'
+        >>> context.get('mineral')
+        'gold'
+
+        Arguments:
+
+          *context: zero or more dictionaries, Context instances, or objects
+            with which to populate the initial context stack.  None
+            arguments will be skipped.  Items in the *context list are
+            added to the stack in order so that later items in the argument
+            list take precedence over earlier items.  This behavior is the
+            same as the constructor's.
+
+          **kwargs: additional key-value data to add to the context stack.
+            As these arguments appear after all items in the *context list,
+            in the case of key conflicts these values take precedence over
+            all items in the *context list.  This behavior is the same as
+            the constructor's.
+
+        """
+        items = context
+
+        context = Context()
+
+        for item in items:
+            if item is None:
+                continue
+            if isinstance(item, Context):
+                context._stack.extend(item._stack)
+            else:
+                context.push(item)
+
+        if kwargs:
+            context.push(kwargs)
+
+        return context
 
     def get(self, key, default=None):
         """
