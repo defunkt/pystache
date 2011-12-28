@@ -43,15 +43,11 @@ class View(object):
         if template is not None:
             self.template = template
 
-        _context = Context(self)
-        if context:
-            _context.push(context)
-        if kwargs:
-            _context.push(kwargs)
+        context = Context.create(self, context, **kwargs)
 
         self._partials = partials
 
-        self.context = _context
+        self.context = context
 
     def _get_renderer(self):
         if self._renderer is None:
