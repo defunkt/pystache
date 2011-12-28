@@ -168,7 +168,7 @@ class GetItemTestCase(TestCase):
         self.assertRaises(AttributeError, _get_item, obj, "foo")
 
 
-class ContextTestCase(TestCase):
+class ContextTests(TestCase):
 
     """
     Test the Context class.
@@ -188,6 +188,67 @@ class ContextTestCase(TestCase):
 
         """
         context = Context({}, {}, {})
+
+    ## Test the static create() method.
+
+    def test_create__dictionary(self):
+        """
+        Test passing a dictionary.
+
+        """
+        context = Context.create({'foo': 'bar'})
+        self.assertEquals(context.get('foo'), 'bar')
+
+    def test_create__none(self):
+        """
+        Test passing None.
+
+        """
+        context = Context.create({'foo': 'bar'}, None)
+        self.assertEquals(context.get('foo'), 'bar')
+
+    def test_create__object(self):
+        """
+        Test passing an object.
+
+        """
+        class Foo(object):
+            foo = 'bar'
+        context = Context.create(Foo())
+        self.assertEquals(context.get('foo'), 'bar')
+
+    def test_create__context(self):
+        """
+        Test passing a Context instance.
+
+        """
+        obj = Context({'foo': 'bar'})
+        context = Context.create(obj)
+        self.assertEquals(context.get('foo'), 'bar')
+
+    def test_create__kwarg(self):
+        """
+        Test passing a keyword argument.
+
+        """
+        context = Context.create(foo='bar')
+        self.assertEquals(context.get('foo'), 'bar')
+
+    def test_create__precedence_positional(self):
+        """
+        Test precedence of positional arguments.
+
+        """
+        context = Context.create({'foo': 'bar'}, {'foo': 'buzz'})
+        self.assertEquals(context.get('foo'), 'buzz')
+
+    def test_create__precedence_keyword(self):
+        """
+        Test precedence of keyword arguments.
+
+        """
+        context = Context.create({'foo': 'bar'}, foo='buzz')
+        self.assertEquals(context.get('foo'), 'buzz')
 
     def test_get__key_present(self):
         """

@@ -167,24 +167,6 @@ class Renderer(object):
         # the default_encoding and decode_errors attributes.
         return unicode(s, self.default_encoding, self.decode_errors)
 
-    def _make_context(self, context, **kwargs):
-        """
-        Initialize the context attribute.
-
-        """
-        if context is None:
-            context = {}
-
-        if isinstance(context, Context):
-            context = context.copy()
-        else:
-            context = Context(context)
-
-        if kwargs:
-            context.push(kwargs)
-
-        return context
-
     def _make_reader(self):
         """
         Create a Reader instance using current attributes.
@@ -262,7 +244,7 @@ class Renderer(object):
         loader = self._make_loader()
         return loader.get(template_name)
 
-    def render_path(self, template_path, context=None, **kwargs):
+    def render_path(self, template_path, *context, **kwargs):
         """
         Render the template at the given path using the given context.
 
@@ -270,9 +252,9 @@ class Renderer(object):
 
         """
         template = self.read(template_path)
-        return self.render(template, context, **kwargs)
+        return self.render(template, *context, **kwargs)
 
-    def render(self, template, context=None, **kwargs):
+    def render(self, template, *context, **kwargs):
         """
         Render the given template using the given context.
 
@@ -285,15 +267,20 @@ class Renderer(object):
             using this instance's default_encoding and decode_errors
             attributes.  See the constructor docstring for more information.
 
-          context: a dictionary, Context, or object (e.g. a View instance).
+          *context: zero or more dictionaries, Context instances, or objects
+            with which to populate the initial context stack.  None
+            arguments are skipped.  Items in the *context list are added to
+            the context stack in order so that later items in the argument
+            list take precedence over earlier items.
 
-          **kwargs: additional key values to add to the context when
-            rendering.  These values take precedence over the context on
-            any key conflicts.
+          **kwargs: additional key-value data to add to the context stack.
+            As these arguments appear after all items in the *context list,
+            in the case of key conflicts these values take precedence over
+            all items in the *context list.
 
         """
         engine = self._make_render_engine()
-        context = self._make_context(context, **kwargs)
+        context = Context.create(*context, **kwargs)
 
         # RenderEngine.render() requires that the template string be unicode.
         template = self._to_unicode_hard(template)
