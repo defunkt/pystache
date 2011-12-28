@@ -16,6 +16,12 @@ from .reader import Reader
 from .renderengine import RenderEngine
 
 
+# The quote=True argument causes double quotes to be escaped,
+# but not single quotes:
+#   http://docs.python.org/library/cgi.html#cgi.escape
+DEFAULT_ESCAPE = lambda s: cgi.escape(s, quote=True)
+
+
 class Renderer(object):
 
     """
@@ -35,6 +41,7 @@ class Renderer(object):
 
     """
 
+    # TODO: rename the loader argument to "partials".
     def __init__(self, loader=None, file_encoding=None, default_encoding=None,
                  decode_errors='strict', search_dirs=None, file_extension=None,
                  escape=None):
@@ -43,16 +50,17 @@ class Renderer(object):
 
         Arguments:
 
-          loader: the object (e.g. pystache.Loader or dictionary) that will
-            load templates during the rendering process, for example when
-            loading a partial.
+          loader: an object (e.g. pystache.Loader or dictionary) for custom
+            partial loading during the rendering process.
                 The loader should have a get() method that accepts a string
             and returns the corresponding template as a string, preferably
             as a unicode string.  If there is no template with that name,
             the method should either return None (as dict.get() does) or
             raise an exception.
-                Defaults to constructing a default Loader, but using the
-            file_encoding and decode_errors arguments.
+                If this argument is None, partial loading takes place using
+            the normal procedure of reading templates from the file system
+            using the Loader-related instance attributes (search_dirs,
+            file_encoding, etc).
 
           escape: the function used to escape variable tag values when
             rendering a template.  The function should accept a unicode
@@ -96,10 +104,7 @@ class Renderer(object):
             default_encoding = sys.getdefaultencoding()
 
         if escape is None:
-            # The quote=True argument causes double quotes to be escaped,
-            # but not single quotes:
-            #   http://docs.python.org/library/cgi.html#cgi.escape
-            escape = lambda s: cgi.escape(s, quote=True)
+            escape = DEFAULT_ESCAPE
 
         # This needs to be after we set the default default_encoding.
         if file_encoding is None:
@@ -114,21 +119,12 @@ class Renderer(object):
         if isinstance(search_dirs, basestring):
             search_dirs = [search_dirs]
 
-        # This needs to be after we set some of the defaults above.
-        if loader is None:
-            reader = Reader(encoding=file_encoding, decode_errors=decode_errors)
-            loader = Loader(reader=reader, search_dirs=search_dirs, extension=file_extension)
-
         self.decode_errors = decode_errors
         self.default_encoding = default_encoding
         self.escape = escape
         self.file_encoding = file_encoding
         self.file_extension = file_extension
-        # TODO: we should not store a loader attribute because the loader
-        # would no longer reflect the current attributes if, say, someone
-        # changed the search_dirs attribute after instantiation.  Instead,
-        # we should construct the Loader instance each time on the fly,
-        # as we do with the Reader in the read() method.
+        # TODO: rename self.loader to self.partials.
         self.loader = loader
         self.search_dirs = search_dirs
 
@@ -191,9 +187,39 @@ class Renderer(object):
 
         return context
 
+    def _make_reader(self):
+        """
+        Create a Reader instance using current attributes.
+
+        """
+        return Reader(encoding=self.file_encoding, decode_errors=self.decode_errors)
+
+    def _make_loader(self):
+        """
+        Create a Loader instance using current attributes.
+
+        """
+        reader = self._make_reader()
+        loader = Loader(reader=reader, search_dirs=self.search_dirs, extension=self.file_extension)
+
+        return loader
+
     def _make_load_partial(self):
+        """
+        Return the load_partial function to pass to RenderEngine.__init__().
+
+        """
+        if self.loader is None:
+            loader = self._make_loader()
+            return loader.get
+
+        # Otherwise, create a load_partial function from the custom loader
+        # that satisfies RenderEngine requirements (and that provides a
+        # nicer exception, etc).
+        loader = self.loader
+
         def load_partial(name):
-            template = self.loader.get(name)
+            template = loader.get(name)
 
             if template is None:
                 # TODO: make a TemplateNotFoundException type that provides
@@ -226,8 +252,17 @@ class Renderer(object):
         attributes.
 
         """
-        reader = Reader(encoding=self.file_encoding, decode_errors=self.decode_errors)
+        reader = self._make_reader()
         return reader.read(path)
+
+    # TODO: add unit tests for this method.
+    def load_template(self, template_name):
+        """
+        Load a template by name from the file system.
+
+        """
+        loader = self._make_loader()
+        return loader.get(template_name)
 
     def render_path(self, template_path, context=None, **kwargs):
         """

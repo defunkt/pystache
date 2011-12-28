@@ -76,7 +76,7 @@ class View(object):
         if not self.template:
             template_name = self._get_template_name()
             renderer = self._get_renderer()
-            self.template = renderer.loader.get(template_name)
+            self.template = renderer.load_template(template_name)
 
         return self.template
 

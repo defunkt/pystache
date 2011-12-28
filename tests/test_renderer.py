@@ -29,8 +29,8 @@ class RendererInitTestCase(unittest.TestCase):
 
         """
         loader = {'foo': 'bar'}
-        r = Renderer(loader=loader)
-        self.assertEquals(r.loader, {'foo': 'bar'})
+        renderer = Renderer(loader=loader)
+        self.assertEquals(renderer.loader, {'foo': 'bar'})
 
     def test_loader__default(self):
         """
@@ -40,52 +40,7 @@ class RendererInitTestCase(unittest.TestCase):
         renderer = Renderer()
         actual = renderer.loader
 
-        expected = Loader()
-
-        self.assertEquals(type(actual), type(expected))
-        self.assertEquals(actual.template_extension, expected.template_extension)
-        self.assertEquals(actual.search_dirs, expected.search_dirs)
-        self.assertEquals(actual.reader.__dict__, expected.reader.__dict__)
-
-    def test_loader__default__encoding(self):
-        """
-        Test that the default loader inherits the correct encoding.
-
-        """
-        renderer = Renderer(file_encoding='foo')
-        reader = renderer.loader.reader
-
-        self.assertEquals(reader.encoding, 'foo')
-
-    def test_loader__default__decode_errors(self):
-        """
-        Test that the default loader inherits decode_errors.
-
-        """
-        renderer = Renderer(decode_errors='foo')
-        reader = renderer.loader.reader
-
-        self.assertEquals(reader.decode_errors, 'foo')
-
-    def test_loader__default__file_extension(self):
-        """
-        Test that the default loader inherits file_extension.
-
-        """
-        renderer = Renderer(file_extension='foo')
-        loader = renderer.loader
-
-        self.assertEquals(loader.template_extension, 'foo')
-
-    def test_loader__default__search_dirs(self):
-        """
-        Test that the default loader inherits search_dirs.
-
-        """
-        renderer = Renderer(search_dirs='foo')
-        loader = renderer.loader
-
-        self.assertEquals(loader.search_dirs, ['foo'])
+        self.assertTrue(renderer.loader is None)
 
     def test_escape__default(self):
         escape = Renderer().escape
@@ -263,6 +218,79 @@ class RendererTestCase(unittest.TestCase):
         renderer.decode_errors = 'ignore'
         actual = self._read(renderer, filename)
         self.assertEquals(actual, 'non-ascii: ')
+
+    ## Test the _make_loader() method.
+
+    def test__make_loader__return_type(self):
+        """
+        Test that _make_loader() returns a Loader.
+
+        """
+        renderer = Renderer()
+        loader = renderer._make_loader()
+
+        self.assertEquals(type(loader), Loader)
+
+    def test__make_loader__file_encoding(self):
+        """
+        Test that _make_loader() respects the file_encoding attribute.
+
+        """
+        renderer = Renderer()
+        renderer.file_encoding = 'foo'
+
+        loader = renderer._make_loader()
+
+        self.assertEquals(loader.reader.encoding, 'foo')
+
+    def test__make_loader__decode_errors(self):
+        """
+        Test that _make_loader() respects the decode_errors attribute.
+
+        """
+        renderer = Renderer()
+        renderer.decode_errors = 'foo'
+
+        loader = renderer._make_loader()
+
+        self.assertEquals(loader.reader.decode_errors, 'foo')
+
+    def test__make_loader__file_extension(self):
+        """
+        Test that _make_loader() respects the file_extension attribute.
+
+        """
+        renderer = Renderer()
+        renderer.file_extension = 'foo'
+
+        loader = renderer._make_loader()
+
+        self.assertEquals(loader.template_extension, 'foo')
+
+    def test__make_loader__search_dirs(self):
+        """
+        Test that _make_loader() respects the search_dirs attribute.
+
+        """
+        renderer = Renderer()
+        renderer.search_dirs = ['foo']
+
+        loader = renderer._make_loader()
+
+        self.assertEquals(loader.search_dirs, ['foo'])
+
+    # This test is a sanity check.  Strictly speaking, it shouldn't
+    # be necessary based on our tests above.
+    def test__make_loader__default(self):
+        renderer = Renderer()
+        actual = renderer._make_loader()
+
+        expected = Loader()
+
+        self.assertEquals(type(actual), type(expected))
+        self.assertEquals(actual.template_extension, expected.template_extension)
+        self.assertEquals(actual.search_dirs, expected.search_dirs)
+        self.assertEquals(actual.reader.__dict__, expected.reader.__dict__)
 
     ## Test the render() method.
 
