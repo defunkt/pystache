@@ -9,6 +9,7 @@ import re
 from types import UnboundMethodType
 
 from .context import Context
+from .loader import make_template_name
 from .loader import Loader
 from .reader import Reader
 from .renderer import Renderer
@@ -94,12 +95,7 @@ class View(object):
         if self.template_name:
             return self.template_name
 
-        template_name = self.__class__.__name__
-
-        def repl(match):
-            return '_' + match.group(0).lower()
-
-        return re.sub('[A-Z]', repl, template_name)[1:]
+        return make_template_name(self)
 
     def render(self):
         """

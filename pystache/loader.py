@@ -6,12 +6,36 @@ This module provides a Loader class.
 """
 
 import os
+import re
 import sys
 
 from .reader import Reader
 
 
 DEFAULT_EXTENSION = 'mustache'
+
+
+def make_template_name(obj):
+    """
+    Return the canonical template name for an object instance.
+
+    This method converts Python-style class names (PEP 8's recommended
+    CamelCase, aka CapWords) to lower_case_with_underscords.  Here
+    is an example with code:
+
+    >>> class HelloWorld(object):
+    ...     pass
+    >>> hi = HelloWorld()
+    >>> make_template_name(hi)
+    'hello_world'
+
+    """
+    template_name = obj.__class__.__name__
+
+    def repl(match):
+        return '_' + match.group(0).lower()
+
+    return re.sub('[A-Z]', repl, template_name)[1:]
 
 
 class Loader(object):

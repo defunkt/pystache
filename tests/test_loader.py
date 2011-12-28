@@ -4,10 +4,26 @@ import os
 import sys
 import unittest
 
+from pystache.loader import make_template_name
 from pystache.loader import Loader
 from pystache.reader import Reader
 
 from .common import DATA_DIR
+
+
+class MakeTemplateNameTests(unittest.TestCase):
+
+    """
+    Test the make_template_name() function.
+
+    """
+
+    def test(self):
+        class FooBar(object):
+            pass
+        foo = FooBar()
+        self.assertEquals(make_template_name(foo), 'foo_bar')
+
 
 class LoaderTestCase(unittest.TestCase):
 
