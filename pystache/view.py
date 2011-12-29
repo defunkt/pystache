@@ -5,13 +5,8 @@ This module provides a View class.
 
 """
 
-import re
-from types import UnboundMethodType
-
 from .context import Context
-from .loader import make_template_name
-from .loader import Loader
-from .reader import Reader
+from .locator import make_template_name
 from .renderer import Renderer
 
 
@@ -23,7 +18,6 @@ class View(object):
     template_encoding = None
     template_extension = None
 
-    _loader = None
     _renderer = None
 
     def __init__(self, template=None, context=None, partials=None, **kwargs):
@@ -32,12 +26,12 @@ class View(object):
 
         Arguments:
 
-          partials: the object (e.g. pystache.Loader or dictionary)
-            responsible for loading partials during the rendering process.
-            The object should have a get() method that accepts a string and
-            returns the corresponding template as a string, preferably as a
-            unicode string.  The method should return None if there is no
-            template with that name, or raise an exception.
+          partials: a custom object (e.g. dictionary) responsible for
+            loading partials during the rendering process.  The object
+            should have a get() method that accepts a string and returns
+            the corresponding template as a string, preferably as a
+            unicode string.  The method should return None if there is
+            no template with that name, or raise an exception.
 
         """
         if template is not None:

@@ -42,13 +42,13 @@ class ViewTestCase(unittest.TestCase):
         view = Simple("Hi {{thing}}!", thing='world')
         self.assertEquals(view.render(), "Hi world!")
 
-    def test_template_load(self):
+    def test_render(self):
         view = Simple(thing='world')
         self.assertEquals(view.render(), "Hi world!")
 
-    def test_load_template__custom_loader(self):
+    def test_render__partials(self):
         """
-        Test passing a custom loader to View.__init__().
+        Test passing partials to View.__init__().
 
         """
         template = "{{>partial}}"
