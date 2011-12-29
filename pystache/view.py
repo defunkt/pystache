@@ -5,9 +5,6 @@ This module provides a View class.
 
 """
 
-import re
-from types import UnboundMethodType
-
 from .context import Context
 from .loader import make_template_name
 from .renderer import Renderer
