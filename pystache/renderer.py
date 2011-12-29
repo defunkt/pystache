@@ -10,8 +10,8 @@ import os
 import sys
 
 from .context import Context
-from .loader import DEFAULT_EXTENSION
-from .loader import Locator
+from .locator import DEFAULT_EXTENSION
+from .locator import Locator
 from .reader import Reader
 from .renderengine import RenderEngine
 

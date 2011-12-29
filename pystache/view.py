@@ -6,7 +6,7 @@ This module provides a View class.
 """
 
 from .context import Context
-from .loader import make_template_name
+from .locator import make_template_name
 from .renderer import Renderer
 
 

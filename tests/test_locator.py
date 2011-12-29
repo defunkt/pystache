@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 """
-Contains loader.py unit tests.
+Contains locator.py unit tests.
 
 """
 
@@ -9,8 +9,8 @@ import os
 import sys
 import unittest
 
-from pystache.loader import make_template_name
-from pystache.loader import Locator
+from pystache.locator import make_template_name
+from pystache.locator import Locator
 from pystache.reader import Reader
 
 from .common import DATA_DIR

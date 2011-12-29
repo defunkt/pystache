@@ -12,7 +12,7 @@ import unittest
 
 from pystache import renderer
 from pystache.renderer import Renderer
-from pystache.loader import Locator
+from pystache.locator import Locator
 
 from .common import get_data_path
 
