@@ -255,6 +255,21 @@ class Renderer(object):
         load_template = self._make_load_template()
         return load_template(template_name)
 
+    def _render_string(self, template, *context, **kwargs):
+        """
+        Render the given template string using the given context.
+
+        """
+        # RenderEngine.render() requires that the template string be unicode.
+        template = self._to_unicode_hard(template)
+
+        context = Context.create(*context, **kwargs)
+
+        engine = self._make_render_engine()
+        rendered = engine.render(template, context)
+
+        return unicode(rendered)
+
     def render_path(self, template_path, *context, **kwargs):
         """
         Render the template at the given path using the given context.
@@ -290,12 +305,5 @@ class Renderer(object):
             all items in the *context list.
 
         """
-        engine = self._make_render_engine()
-        context = Context.create(*context, **kwargs)
+        return self._render_string(template, *context, **kwargs)
 
-        # RenderEngine.render() requires that the template string be unicode.
-        template = self._to_unicode_hard(template)
-
-        rendered = engine.render(template, context)
-
-        return unicode(rendered)
