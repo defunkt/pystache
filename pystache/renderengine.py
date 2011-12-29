@@ -48,7 +48,7 @@ class RenderEngine(object):
     """
     Provides a render() method.
 
-    This class is meant only for internal use by the Template class.
+    This class is meant only for internal use.
 
     As a rule, the code in this class operates on unicode strings where
     possible rather than, say, strings of type str or markupsafe.Markup.

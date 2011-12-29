@@ -26,12 +26,12 @@ class View(object):
 
         Arguments:
 
-          partials: the object (e.g. pystache.Loader or dictionary)
-            responsible for loading partials during the rendering process.
-            The object should have a get() method that accepts a string and
-            returns the corresponding template as a string, preferably as a
-            unicode string.  The method should return None if there is no
-            template with that name, or raise an exception.
+          partials: a custom object (e.g. dictionary) responsible for
+            loading partials during the rendering process.  The object
+            should have a get() method that accepts a string and returns
+            the corresponding template as a string, preferably as a
+            unicode string.  The method should return None if there is
+            no template with that name, or raise an exception.
 
         """
         if template is not None:
