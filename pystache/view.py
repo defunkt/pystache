@@ -10,8 +10,6 @@ from types import UnboundMethodType
 
 from .context import Context
 from .loader import make_template_name
-from .loader import Loader
-from .reader import Reader
 from .renderer import Renderer
 
 
