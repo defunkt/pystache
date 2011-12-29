@@ -1,15 +1,13 @@
 # coding: utf-8
 
 """
-This module provides a Loader class.
+This module provides a Locator class.
 
 """
 
 import os
 import re
 import sys
-
-from .reader import Reader
 
 
 DEFAULT_EXTENSION = 'mustache'
@@ -38,11 +36,11 @@ def make_template_name(obj):
     return re.sub('[A-Z]', repl, template_name)[1:]
 
 
-class Loader(object):
+class Locator(object):
 
-    def __init__(self, search_dirs=None, extension=None, reader=None):
+    def __init__(self, search_dirs=None, extension=None):
         """
-        Construct a template loader.
+        Construct a template locator.
 
         Arguments:
 
@@ -54,14 +52,7 @@ class Loader(object):
           extension: the template file extension.  Defaults to "mustache".
             Pass False for no extension (i.e. extensionless template files).
 
-          reader: the Reader instance to use to read file contents and
-            return them as unicode strings.  Defaults to constructing
-            the default Reader with no constructor arguments.
-
         """
-        if reader is None:
-            reader = Reader()
-
         if extension is None:
             extension = DEFAULT_EXTENSION
 
@@ -71,16 +62,8 @@ class Loader(object):
         if isinstance(search_dirs, basestring):
             search_dirs = [search_dirs]
 
-        self.reader = reader
         self.search_dirs = search_dirs
         self.template_extension = extension
-
-    def _read(self, path):
-        """
-        Read and return a template as a unicode string.
-
-        """
-        return self.reader.read(path)
 
     def make_file_name(self, template_name):
         file_name = template_name
@@ -89,9 +72,9 @@ class Loader(object):
 
         return file_name
 
-    def get(self, template_name):
+    def locate_path(self, template_name):
         """
-        Find and load the given template, and return it as a string.
+        Find and return the path to the template with the given name.
 
         Raises an IOError if the template cannot be found.
 
@@ -103,7 +86,7 @@ class Loader(object):
         for dir_path in search_dirs:
             file_path = os.path.join(dir_path, file_name)
             if os.path.exists(file_path):
-                return self._read(file_path)
+                return file_path
 
         # TODO: we should probably raise an exception of our own type.
         raise IOError('"%s" not found in "%s"' % (template_name, ':'.join(search_dirs),))

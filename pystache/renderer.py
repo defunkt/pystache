@@ -11,7 +11,7 @@ import sys
 
 from .context import Context
 from .loader import DEFAULT_EXTENSION
-from .loader import Loader
+from .loader import Locator
 from .reader import Reader
 from .renderengine import RenderEngine
 
@@ -32,7 +32,7 @@ class Renderer(object):
     passing a custom partial loader.
 
     Here is an example of rendering a template using a custom partial loader
-    that loads partials loaded from a string-string dictionary.
+    that loads partials from a string-string dictionary.
 
     >>> partials = {'partial': 'Hello, {{thing}}!'}
     >>> renderer = Renderer(partials=partials)
@@ -49,8 +49,8 @@ class Renderer(object):
 
         Arguments:
 
-          partials: an object (e.g. pystache.Loader or dictionary) for
-            custom partial loading during the rendering process.
+          partials: an object (e.g. a dictionary) for custom partial loading
+            during the rendering process.
                 The object should have a get() method that accepts a string
             and returns the corresponding template as a string, preferably
             as a unicode string.  If there is no template with that name,
@@ -58,8 +58,8 @@ class Renderer(object):
             or raise an exception.
                 If this argument is None, the rendering process will use
             the normal procedure of locating and reading templates from
-            the file system -- using the Loader-related instance attributes
-            like search_dirs, file_encoding, etc.
+            the file system -- using relevant instance attributes like
+            search_dirs, file_encoding, etc.
 
           escape: the function used to escape variable tag values when
             rendering a template.  The function should accept a unicode
@@ -174,15 +174,26 @@ class Renderer(object):
         """
         return Reader(encoding=self.file_encoding, decode_errors=self.decode_errors)
 
-    def _make_loader(self):
+    def _make_locator(self):
         """
-        Create a Loader instance using current attributes.
+        Create a Locator instance using current attributes.
+
+        """
+        return Locator(search_dirs=self.search_dirs, extension=self.file_extension)
+
+    def _make_load_template(self):
+        """
+        Return a function that loads a template by name.
 
         """
         reader = self._make_reader()
-        loader = Loader(reader=reader, search_dirs=self.search_dirs, extension=self.file_extension)
+        locator = self._make_locator()
 
-        return loader
+        def load_template(template_name):
+            path = locator.locate_path(template_name)
+            return reader.read(path)
+
+        return load_template
 
     def _make_load_partial(self):
         """
@@ -190,20 +201,20 @@ class Renderer(object):
 
         """
         if self.partials is None:
-            loader = self._make_loader()
-            return loader.get
+            load_template = self._make_load_template()
+            return load_template
 
-        # Otherwise, create a load_partial function from the custom loader
-        # that satisfies RenderEngine requirements (and that provides a
-        # nicer exception, etc).
-        get_partial = self.partials.get
+        # Otherwise, create a load_partial function from the custom partial
+        # loader that satisfies RenderEngine requirements (and that provides
+        # a nicer exception, etc).
+        partials = self.partials
 
         def load_partial(name):
-            template = get_partial(name)
+            template = partials.get(name)
 
             if template is None:
                 # TODO: make a TemplateNotFoundException type that provides
-                # the original loader as an attribute.
+                # the original partials as an attribute.
                 raise Exception("Partial not found with name: %s" % repr(name))
 
             # RenderEngine requires that the return value be unicode.
@@ -241,8 +252,8 @@ class Renderer(object):
         Load a template by name from the file system.
 
         """
-        loader = self._make_loader()
-        return loader.get(template_name)
+        load_template = self._make_load_template()
+        return load_template(template_name)
 
     def render_path(self, template_path, *context, **kwargs):
         """

@@ -12,7 +12,7 @@ import unittest
 
 from pystache import renderer
 from pystache.renderer import Renderer
-from pystache.loader import Loader
+from pystache.loader import Locator
 
 from .common import get_data_path
 
@@ -25,7 +25,7 @@ class RendererInitTestCase(unittest.TestCase):
 
     def test_partials__default(self):
         """
-        Test that the default loader is constructed correctly.
+        Test the default value.
 
         """
         renderer = Renderer()
@@ -33,7 +33,7 @@ class RendererInitTestCase(unittest.TestCase):
 
     def test_partials(self):
         """
-        Test that the loader attribute is set correctly.
+        Test that the attribute is set correctly.
 
         """
         renderer = Renderer(partials={'foo': 'bar'})
@@ -216,78 +216,53 @@ class RendererTestCase(unittest.TestCase):
         actual = self._read(renderer, filename)
         self.assertEquals(actual, 'non-ascii: ')
 
-    ## Test the _make_loader() method.
+    ## Test the _make_locator() method.
 
-    def test__make_loader__return_type(self):
+    def test__make_locator__return_type(self):
         """
-        Test that _make_loader() returns a Loader.
-
-        """
-        renderer = Renderer()
-        loader = renderer._make_loader()
-
-        self.assertEquals(type(loader), Loader)
-
-    def test__make_loader__file_encoding(self):
-        """
-        Test that _make_loader() respects the file_encoding attribute.
+        Test that _make_locator() returns a Locator.
 
         """
         renderer = Renderer()
-        renderer.file_encoding = 'foo'
+        locator = renderer._make_locator()
 
-        loader = renderer._make_loader()
+        self.assertEquals(type(locator), Locator)
 
-        self.assertEquals(loader.reader.encoding, 'foo')
-
-    def test__make_loader__decode_errors(self):
+    def test__make_locator__file_extension(self):
         """
-        Test that _make_loader() respects the decode_errors attribute.
-
-        """
-        renderer = Renderer()
-        renderer.decode_errors = 'foo'
-
-        loader = renderer._make_loader()
-
-        self.assertEquals(loader.reader.decode_errors, 'foo')
-
-    def test__make_loader__file_extension(self):
-        """
-        Test that _make_loader() respects the file_extension attribute.
+        Test that _make_locator() respects the file_extension attribute.
 
         """
         renderer = Renderer()
         renderer.file_extension = 'foo'
 
-        loader = renderer._make_loader()
+        locator = renderer._make_locator()
 
-        self.assertEquals(loader.template_extension, 'foo')
+        self.assertEquals(locator.template_extension, 'foo')
 
-    def test__make_loader__search_dirs(self):
+    def test__make_locator__search_dirs(self):
         """
-        Test that _make_loader() respects the search_dirs attribute.
+        Test that _make_locator() respects the search_dirs attribute.
 
         """
         renderer = Renderer()
         renderer.search_dirs = ['foo']
 
-        loader = renderer._make_loader()
+        locator = renderer._make_locator()
 
-        self.assertEquals(loader.search_dirs, ['foo'])
+        self.assertEquals(locator.search_dirs, ['foo'])
 
     # This test is a sanity check.  Strictly speaking, it shouldn't
     # be necessary based on our tests above.
-    def test__make_loader__default(self):
+    def test__make_locator__default(self):
         renderer = Renderer()
-        actual = renderer._make_loader()
+        actual = renderer._make_locator()
 
-        expected = Loader()
+        expected = Locator()
 
         self.assertEquals(type(actual), type(expected))
         self.assertEquals(actual.template_extension, expected.template_extension)
         self.assertEquals(actual.search_dirs, expected.search_dirs)
-        self.assertEquals(actual.reader.__dict__, expected.reader.__dict__)
 
     ## Test the render() method.
 

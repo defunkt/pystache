@@ -1,11 +1,16 @@
 # encoding: utf-8
 
+"""
+Contains loader.py unit tests.
+
+"""
+
 import os
 import sys
 import unittest
 
 from pystache.loader import make_template_name
-from pystache.loader import Loader
+from pystache.loader import Locator
 from pystache.reader import Reader
 
 from .common import DATA_DIR
@@ -25,93 +30,80 @@ class MakeTemplateNameTests(unittest.TestCase):
         self.assertEquals(make_template_name(foo), 'foo_bar')
 
 
-class LoaderTestCase(unittest.TestCase):
+class LocatorTests(unittest.TestCase):
 
     search_dirs = 'examples'
 
-    def _loader(self):
-        return Loader(search_dirs=DATA_DIR)
+    def _locator(self):
+        return Locator(search_dirs=DATA_DIR)
 
     def test_init__search_dirs(self):
         # Test the default value.
-        loader = Loader()
-        self.assertEquals(loader.search_dirs, [os.curdir])
+        locator = Locator()
+        self.assertEquals(locator.search_dirs, [os.curdir])
 
-        loader = Loader(search_dirs=['foo'])
-        self.assertEquals(loader.search_dirs, ['foo'])
+        locator = Locator(search_dirs=['foo'])
+        self.assertEquals(locator.search_dirs, ['foo'])
 
     def test_init__extension(self):
         # Test the default value.
-        loader = Loader()
-        self.assertEquals(loader.template_extension, 'mustache')
+        locator = Locator()
+        self.assertEquals(locator.template_extension, 'mustache')
 
-        loader = Loader(extension='txt')
-        self.assertEquals(loader.template_extension, 'txt')
+        locator = Locator(extension='txt')
+        self.assertEquals(locator.template_extension, 'txt')
 
-        loader = Loader(extension=False)
-        self.assertTrue(loader.template_extension is False)
-
-    def test_init__reader(self):
-        # Test the default value.
-        loader = Loader()
-        reader = loader.reader
-        self.assertEquals(reader.encoding, sys.getdefaultencoding())
-        self.assertEquals(reader.decode_errors, 'strict')
-
-        reader = Reader()
-        loader = Loader(reader=reader)
-        self.assertTrue(loader.reader is reader)
+        locator = Locator(extension=False)
+        self.assertTrue(locator.template_extension is False)
 
     def test_make_file_name(self):
-        loader = Loader()
+        locator = Locator()
 
-        loader.template_extension = 'bar'
-        self.assertEquals(loader.make_file_name('foo'), 'foo.bar')
+        locator.template_extension = 'bar'
+        self.assertEquals(locator.make_file_name('foo'), 'foo.bar')
 
-        loader.template_extension = False
-        self.assertEquals(loader.make_file_name('foo'), 'foo')
+        locator.template_extension = False
+        self.assertEquals(locator.make_file_name('foo'), 'foo')
 
-        loader.template_extension = ''
-        self.assertEquals(loader.make_file_name('foo'), 'foo.')
+        locator.template_extension = ''
+        self.assertEquals(locator.make_file_name('foo'), 'foo.')
 
-    def test_get__template_is_loaded(self):
-        loader = Loader(search_dirs='examples')
-        template = loader.get('simple')
+    def test_locate_path(self):
+        locator = Locator(search_dirs='examples')
+        path = locator.locate_path('simple')
 
-        self.assertEqual(template, 'Hi {{thing}}!{{blank}}')
+        self.assertEquals(os.path.basename(path), 'simple.mustache')
 
-    def test_get__using_list_of_paths(self):
-        loader = Loader(search_dirs=['doesnt_exist', 'examples'])
-        template = loader.get('simple')
+    def test_locate_path__using_list_of_paths(self):
+        locator = Locator(search_dirs=['doesnt_exist', 'examples'])
+        path = locator.locate_path('simple')
 
-        self.assertEqual(template, 'Hi {{thing}}!{{blank}}')
+        self.assertTrue(path)
 
-    def test_get__non_existent_template_fails(self):
-        loader = Loader()
-
-        self.assertRaises(IOError, loader.get, 'doesnt_exist')
-
-    def test_get__extensionless_file(self):
-        loader = Loader(search_dirs=self.search_dirs)
-        self.assertRaises(IOError, loader.get, 'extensionless')
-
-        loader.template_extension = False
-        self.assertEquals(loader.get('extensionless'), "No file extension: {{foo}}")
-
-    def test_get(self):
+    def test_locate_path__precedence(self):
         """
-        Test get().
+        Test the order in which locate_path() searches directories.
 
         """
-        loader = self._loader()
-        self.assertEquals(loader.get('ascii'), 'ascii: abc')
+        locator = Locator()
 
-    def test_get__unicode_return_value(self):
-        """
-        Test that get() returns unicode strings.
+        dir1 = DATA_DIR
+        dir2 = os.path.join(DATA_DIR, 'locator')
 
-        """
-        loader = self._loader()
-        actual = loader.get('ascii')
-        self.assertEqual(type(actual), unicode)
+        locator.search_dirs = [dir1]
+        self.assertTrue(locator.locate_path('duplicate'))
+        locator.search_dirs = [dir2]
+        self.assertTrue(locator.locate_path('duplicate'))
+
+        locator.search_dirs = [dir2, dir1]
+        path = locator.locate_path('duplicate')
+        dirpath = os.path.dirname(path)
+        dirname = os.path.split(dirpath)[-1]
+
+        self.assertEquals(dirname, 'locator')
+
+    def test_locate_path__non_existent_template_fails(self):
+        locator = Locator()
+
+        self.assertRaises(IOError, locator.locate_path, 'doesnt_exist')
 

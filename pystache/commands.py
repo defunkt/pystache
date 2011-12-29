@@ -19,7 +19,6 @@ import sys
 #
 #   ValueError: Attempted relative import in non-package
 #
-from pystache.loader import Loader
 from pystache.renderer import Renderer
 
 
@@ -54,8 +53,10 @@ def main(sys_argv):
     if template.endswith('.mustache'):
         template = template[:-9]
 
+    renderer = Renderer()
+
     try:
-        template = Loader().get(template)
+        template = renderer.load_template(template)
     except IOError:
         pass
 
@@ -63,8 +64,6 @@ def main(sys_argv):
         context = json.load(open(context))
     except IOError:
         context = json.loads(context)
-
-    renderer = Renderer()
 
     rendered = renderer.render(template, context)
     print rendered

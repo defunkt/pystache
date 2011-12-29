@@ -18,7 +18,6 @@ class View(object):
     template_encoding = None
     template_extension = None
 
-    _loader = None
     _renderer = None
 
     def __init__(self, template=None, context=None, partials=None, **kwargs):
