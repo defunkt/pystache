@@ -216,53 +216,40 @@ class RendererTestCase(unittest.TestCase):
         actual = self._read(renderer, filename)
         self.assertEquals(actual, 'non-ascii: ')
 
-    ## Test the _make_locator() method.
+    ## Test the make_locator() method.
 
-    def test__make_locator__return_type(self):
+    def test_make_locator__return_type(self):
         """
-        Test that _make_locator() returns a Locator.
+        Test that make_locator() returns a Locator.
 
         """
         renderer = Renderer()
-        locator = renderer._make_locator()
+        locator = renderer.make_locator()
 
         self.assertEquals(type(locator), Locator)
 
-    def test__make_locator__file_extension(self):
+    def test_make_locator__file_extension(self):
         """
-        Test that _make_locator() respects the file_extension attribute.
+        Test that make_locator() respects the file_extension attribute.
 
         """
         renderer = Renderer()
         renderer.file_extension = 'foo'
 
-        locator = renderer._make_locator()
+        locator = renderer.make_locator()
 
         self.assertEquals(locator.template_extension, 'foo')
 
-    def test__make_locator__search_dirs(self):
-        """
-        Test that _make_locator() respects the search_dirs attribute.
-
-        """
-        renderer = Renderer()
-        renderer.search_dirs = ['foo']
-
-        locator = renderer._make_locator()
-
-        self.assertEquals(locator.search_dirs, ['foo'])
-
     # This test is a sanity check.  Strictly speaking, it shouldn't
     # be necessary based on our tests above.
-    def test__make_locator__default(self):
+    def test_make_locator__default(self):
         renderer = Renderer()
-        actual = renderer._make_locator()
+        actual = renderer.make_locator()
 
         expected = Locator()
 
         self.assertEquals(type(actual), type(expected))
         self.assertEquals(actual.template_extension, expected.template_extension)
-        self.assertEquals(actual.search_dirs, expected.search_dirs)
 
     ## Test the render() method.
 

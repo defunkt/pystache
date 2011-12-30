@@ -174,12 +174,12 @@ class Renderer(object):
         """
         return Reader(encoding=self.file_encoding, decode_errors=self.decode_errors)
 
-    def _make_locator(self):
+    def make_locator(self):
         """
         Create a Locator instance using current attributes.
 
         """
-        return Locator(search_dirs=self.search_dirs, extension=self.file_extension)
+        return Locator(extension=self.file_extension)
 
     def _make_load_template(self):
         """
@@ -187,10 +187,10 @@ class Renderer(object):
 
         """
         reader = self._make_reader()
-        locator = self._make_locator()
+        locator = self.make_locator()
 
         def load_template(template_name):
-            path = locator.locate_path(template_name)
+            path = locator.locate_path(template_name=template_name, search_dirs=self.search_dirs)
             return reader.read(path)
 
         return load_template

@@ -6,7 +6,7 @@ This module provides a View class.
 """
 
 from .context import Context
-from .locator import make_template_name
+from .locator import Locator
 from .renderer import Renderer
 
 
@@ -19,6 +19,8 @@ class View(object):
     template_extension = None
 
     _renderer = None
+
+    locator = Locator()
 
     def __init__(self, template=None, context=None, partials=None, **kwargs):
         """
@@ -85,7 +87,7 @@ class View(object):
         if self.template_name:
             return self.template_name
 
-        return make_template_name(self)
+        return self.locator.make_template_name(self)
 
     def render(self):
         """
