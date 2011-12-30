@@ -88,7 +88,6 @@ class Locator(object):
 
         """
         file_name = self.make_file_name(template_name)
-
         path = self._find_path(file_name, search_dirs)
 
         if path is not None:
