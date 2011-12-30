@@ -19,10 +19,44 @@ import pystache
 
 examples = [
     # Test case: 1
-    ("""\
-{{#person}}Hi {{name}}{{/person}}""",
+    ("""{{#person}}Hi {{name}}{{/person}}""",
     {"person": {"name": "Jon"}},
     "Hi Jon"),
+
+    # Test case: 2
+    ("""\
+<div class="comments">
+<h3>{{header}}</h3>
+<ul>
+{{#comments}}<li class="comment">
+<h5>{{name}}</h5><p>{{body}}</p>
+</li>{{/comments}}
+</ul>
+</div>""",
+    {'header': "My Post Comments",
+     'comments': [
+         {'name': "Joe", 'body': "Thanks for this post!"},
+         {'name': "Sam", 'body': "Thanks for this post!"},
+         {'name': "Heather", 'body': "Thanks for this post!"},
+         {'name': "Kathy", 'body': "Thanks for this post!"},
+         {'name': "George", 'body': "Thanks for this post!"}]},
+    """\
+<div class="comments">
+<h3>My Post Comments</h3>
+<ul>
+<li class="comment">
+<h5>Joe</h5><p>Thanks for this post!</p>
+</li><li class="comment">
+<h5>Sam</h5><p>Thanks for this post!</p>
+</li><li class="comment">
+<h5>Heather</h5><p>Thanks for this post!</p>
+</li><li class="comment">
+<h5>Kathy</h5><p>Thanks for this post!</p>
+</li><li class="comment">
+<h5>George</h5><p>Thanks for this post!</p>
+</li>
+</ul>
+</div>"""),
 ]
 
 
@@ -33,7 +67,7 @@ def make_test_function(example):
     def test():
         actual = pystache.render(template, context)
         if actual != expected:
-            raise Exception("Benchmark mismatch")
+            raise Exception("Benchmark mismatch: \n%s\n*** != ***\n%s" % (expected, actual))
 
     return test
 
