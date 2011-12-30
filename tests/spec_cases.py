@@ -46,8 +46,9 @@ def buildTest(testData, spec_filename):
         expected = testData['expected']
         data     = testData['data']
 
-        renderer = Renderer(loader=partials)
-        actual = renderer.render(template, data).encode('utf-8')
+        renderer = Renderer(partials=partials)
+        actual = renderer.render(template, data)
+        actual = actual.encode('utf-8')
 
         message = """%s
 
