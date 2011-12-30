@@ -10,6 +10,7 @@ import os
 import sys
 import unittest
 
+from examples.simple import Simple
 from pystache import renderer
 from pystache.renderer import Renderer
 from pystache.locator import Locator
@@ -393,6 +394,18 @@ class RendererTestCase(unittest.TestCase):
 
         actual = renderer.render(say_hello, to='Mars')
         self.assertEquals('Hello, Mars', actual)
+
+    def test_render__view(self):
+        """
+        Test rendering a View instance.
+
+        """
+        renderer = Renderer()
+
+        view = Simple()
+        actual = renderer.render(view)
+        self.assertEquals('Hi pizza!', actual)
+
 
 # By testing that Renderer.render() constructs the right RenderEngine,
 # we no longer need to exercise all rendering code paths through
