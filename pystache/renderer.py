@@ -286,6 +286,16 @@ class Renderer(object):
 
         return unicode(rendered)
 
+    def _render_object(self, obj, *context, **kwargs):
+        """
+        Render the template associated with the given object.
+
+        """
+        context = [obj] + list(context)
+        template = self.get_associated_template(obj)
+
+        return self._render_string(template, *context, **kwargs)
+
     def render_path(self, template_path, *context, **kwargs):
         """
         Render the template at the given path using the given context.
@@ -294,7 +304,8 @@ class Renderer(object):
 
         """
         template = self.read(template_path)
-        return self.render(template, *context, **kwargs)
+
+        return self._render_string(template, *context, **kwargs)
 
     def render(self, template, *context, **kwargs):
         """
@@ -328,8 +339,7 @@ class Renderer(object):
 
         """
         if not isinstance(template, basestring):
-            # Then we assume the template is an object instance.
-            context = [template] + list(context)
-            template = self.get_associated_template(template)
+            # Then we assume the template is an object.
+            return self._render_object(template, *context, **kwargs)
 
         return self._render_string(template, *context, **kwargs)
