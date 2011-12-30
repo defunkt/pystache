@@ -174,12 +174,12 @@ class Renderer(object):
         """
         return Reader(encoding=self.file_encoding, decode_errors=self.decode_errors)
 
-    def _make_locator(self):
+    def make_locator(self):
         """
         Create a Locator instance using current attributes.
 
         """
-        return Locator(search_dirs=self.search_dirs, extension=self.file_extension)
+        return Locator(extension=self.file_extension)
 
     def _make_load_template(self):
         """
@@ -187,10 +187,10 @@ class Renderer(object):
 
         """
         reader = self._make_reader()
-        locator = self._make_locator()
+        locator = self.make_locator()
 
         def load_template(template_name):
-            path = locator.locate_path(template_name)
+            path = locator.locate_path(template_name=template_name, search_dirs=self.search_dirs)
             return reader.read(path)
 
         return load_template
@@ -255,6 +255,48 @@ class Renderer(object):
         load_template = self._make_load_template()
         return load_template(template_name)
 
+    def get_associated_template(self, obj):
+        """
+        Find and return the template associated with an object.
+
+        The function first searches the directory containing the object's
+        class definition.
+
+        """
+        locator = self.make_locator()
+
+        template_name = locator.make_template_name(obj)
+        directory = locator.get_object_directory(obj)
+        search_dirs = [directory] + self.search_dirs
+        path = locator.locate_path(template_name=template_name, search_dirs=search_dirs)
+
+        return self.read(path)
+
+    def _render_string(self, template, *context, **kwargs):
+        """
+        Render the given template string using the given context.
+
+        """
+        # RenderEngine.render() requires that the template string be unicode.
+        template = self._to_unicode_hard(template)
+
+        context = Context.create(*context, **kwargs)
+
+        engine = self._make_render_engine()
+        rendered = engine.render(template, context)
+
+        return unicode(rendered)
+
+    def _render_object(self, obj, *context, **kwargs):
+        """
+        Render the template associated with the given object.
+
+        """
+        context = [obj] + list(context)
+        template = self.get_associated_template(obj)
+
+        return self._render_string(template, *context, **kwargs)
+
     def render_path(self, template_path, *context, **kwargs):
         """
         Render the template at the given path using the given context.
@@ -263,20 +305,27 @@ class Renderer(object):
 
         """
         template = self.read(template_path)
-        return self.render(template, *context, **kwargs)
+
+        return self._render_string(template, *context, **kwargs)
 
     def render(self, template, *context, **kwargs):
         """
-        Render the given template using the given context.
+        Render the given template (or templated object) using the given context.
 
-        Returns a unicode string.
+        Returns the rendering as a unicode string.
+
+        Prior to rendering, templates of type str are converted to unicode
+        using the default_encoding and decode_errors attributes.  See the
+        constructor docstring for more information.
 
         Arguments:
 
-          template: a template string that is either unicode or of type str.
-            If the string has type str, it is first converted to unicode
-            using this instance's default_encoding and decode_errors
-            attributes.  See the constructor docstring for more information.
+          template: a template string of type unicode or str, or an object
+            instance.  If the argument is an object, for the template string
+            the function attempts to find a template associated to the
+            object by calling the get_associated_template() method.  The
+            argument in this case is also used as the first element of the
+            context stack when rendering the associated template.
 
           *context: zero or more dictionaries, Context instances, or objects
             with which to populate the initial context stack.  None
@@ -290,12 +339,8 @@ class Renderer(object):
             all items in the *context list.
 
         """
-        engine = self._make_render_engine()
-        context = Context.create(*context, **kwargs)
+        if not isinstance(template, basestring):
+            # Then we assume the template is an object.
+            return self._render_object(template, *context, **kwargs)
 
-        # RenderEngine.render() requires that the template string be unicode.
-        template = self._to_unicode_hard(template)
-
-        rendered = engine.render(template, context)
-
-        return unicode(rendered)
+        return self._render_string(template, *context, **kwargs)
