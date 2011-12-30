@@ -30,7 +30,6 @@ class Locator(object):
 
         self.template_extension = extension
 
-
     def _find_path(self, file_name, search_dirs):
         """
         Search for the given file, and return the path.
@@ -44,6 +43,20 @@ class Locator(object):
                 return file_path
 
         return None
+
+    def get_object_directory(self, obj):
+        """
+        Return the directory containing an object's defining class.
+
+        """
+        module = sys.modules[obj.__module__]
+
+        # TODO: should we handle the case of __file__ not existing, for
+        # example when using the interpreter or using a module in the
+        # standard library)?
+        path = module.__file__
+
+        return os.path.dirname(path)
 
     def make_file_name(self, template_name):
         file_name = template_name
@@ -79,12 +92,6 @@ class Locator(object):
     def locate_path(self, template_name, search_dirs):
         """
         Find and return the path to the template with the given name.
-
-        Raises an IOError if the template cannot be found.
-
-        Arguments:
-
-          search_dirs: the list of directories in which to search for templates.
 
         """
         file_name = self.make_file_name(template_name)

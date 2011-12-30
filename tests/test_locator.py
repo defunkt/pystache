@@ -33,6 +33,16 @@ class LocatorTests(unittest.TestCase):
         locator = Locator(extension=False)
         self.assertTrue(locator.template_extension is False)
 
+    def test_get_object_directory(self):
+        locator = Locator()
+
+        reader = Reader()
+        actual = locator.get_object_directory(reader)
+
+        expected = os.path.join(os.path.dirname(__file__), os.pardir, 'pystache')
+
+        self.assertEquals(os.path.normpath(actual), os.path.normpath(expected))
+
     def test_make_file_name(self):
         locator = Locator()
 

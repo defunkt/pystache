@@ -259,17 +259,18 @@ class Renderer(object):
         """
         Find and return the template associated with an object.
 
-        TODO: document this.
+        The function first searches the directory containing the object's
+        class definition.
 
         """
-        # TODO: implement this as follows:
-        #
-        # (1) call self.locator.make_template_name(obj)
-        # (2) call self.locator.get_director(obj)
-        # (3) call self.locator.locate_path() with template_name argument
-        #     and enlarged search_dirs.
-        # (4) call self.read(), and return the result.
-        raise NotImplementedError()
+        locator = self.make_locator()
+
+        template_name = locator.make_template_name(obj)
+        directory = locator.get_object_directory(obj)
+        search_dirs = [directory] + self.search_dirs
+        path = locator.locate_path(template_name=template_name, search_dirs=search_dirs)
+
+        return self.read(path)
 
     def _render_string(self, template, *context, **kwargs):
         """

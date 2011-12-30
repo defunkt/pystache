@@ -15,6 +15,8 @@ from pystache.renderer import Renderer
 from pystache.locator import Locator
 
 from .common import get_data_path
+from .data.templates import SayHello
+
 
 class RendererInitTestCase(unittest.TestCase):
 
@@ -375,9 +377,22 @@ class RendererTestCase(unittest.TestCase):
         """
         renderer = Renderer()
         path = get_data_path('say_hello.mustache')
-        actual = renderer.render_path(path, to='world')
-        self.assertEquals(actual, "Hello world")
+        actual = renderer.render_path(path, to='foo')
+        self.assertEquals(actual, "Hello, foo")
 
+    def test_render__object(self):
+        """
+        Test rendering an object instance.
+
+        """
+        renderer = Renderer()
+
+        say_hello = SayHello()
+        actual = renderer.render(say_hello)
+        self.assertEquals('Hello, World', actual)
+
+        actual = renderer.render(say_hello, to='Mars')
+        self.assertEquals('Hello, Mars', actual)
 
 # By testing that Renderer.render() constructs the right RenderEngine,
 # we no longer need to exercise all rendering code paths through
