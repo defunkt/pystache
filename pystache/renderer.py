@@ -262,7 +262,13 @@ class Renderer(object):
         TODO: document this.
 
         """
-        # TODO: implement this.
+        # TODO: implement this as follows:
+        #
+        # (1) call self.locator.make_template_name(obj)
+        # (2) call self.locator.get_director(obj)
+        # (3) call self.locator.locate_path() with template_name argument
+        #     and enlarged search_dirs.
+        # (4) call self.read(), and return the result.
         raise NotImplementedError()
 
     def _render_string(self, template, *context, **kwargs):
