@@ -303,11 +303,11 @@ class Renderer(object):
         Arguments:
 
           template: a template string of type unicode or str, or an object
-            instance.  If the argument is an object, the function attempts
-            to find a template associated to the object by calling the
-            get_associated_template() method.  The object is also used as
-            the first element of the context stack when rendering this
-            associated template.
+            instance.  If the argument is an object, for the template string
+            the function attempts to find a template associated to the
+            object by calling the get_associated_template() method.  The
+            argument in this case is also used as the first element of the
+            context stack when rendering the associated template.
 
           *context: zero or more dictionaries, Context instances, or objects
             with which to populate the initial context stack.  None
