@@ -30,6 +30,21 @@ class Locator(object):
 
         self.template_extension = extension
 
+
+    def _find_path(self, file_name, search_dirs):
+        """
+        Search for the given file, and return the path.
+
+        Returns None if the file is not found.
+
+        """
+        for dir_path in search_dirs:
+            file_path = os.path.join(dir_path, file_name)
+            if os.path.exists(file_path):
+                return file_path
+
+        return None
+
     def make_file_name(self, template_name):
         file_name = template_name
         if self.template_extension is not False:
@@ -74,11 +89,11 @@ class Locator(object):
         """
         file_name = self.make_file_name(template_name)
 
-        for dir_path in search_dirs:
-            file_path = os.path.join(dir_path, file_name)
-            if os.path.exists(file_path):
-                return file_path
+        path = self._find_path(file_name, search_dirs)
+
+        if path is not None:
+            return path
 
         # TODO: we should probably raise an exception of our own type.
-        raise IOError('"%s" not found in "%s"' % (template_name, ':'.join(search_dirs),))
-
+        raise IOError('Template %s not found in directories: %s' %
+                      (repr(template_name), repr(search_dirs)))
