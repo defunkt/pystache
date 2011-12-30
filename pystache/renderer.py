@@ -255,6 +255,16 @@ class Renderer(object):
         load_template = self._make_load_template()
         return load_template(template_name)
 
+    def get_associated_template(self, obj):
+        """
+        Find and return the template associated with an object.
+
+        TODO: document this.
+
+        """
+        # TODO: implement this.
+        raise NotImplementedError()
+
     def _render_string(self, template, *context, **kwargs):
         """
         Render the given template string using the given context.
@@ -282,16 +292,22 @@ class Renderer(object):
 
     def render(self, template, *context, **kwargs):
         """
-        Render the given template using the given context.
+        Render the given template (or templated object) using the given context.
 
-        Returns a unicode string.
+        Returns the rendering as a unicode string.
+
+        Prior to rendering, templates of type str are converted to unicode
+        using the default_encoding and decode_errors attributes.  See the
+        constructor docstring for more information.
 
         Arguments:
 
-          template: a template string that is either unicode or of type str.
-            If the string has type str, it is first converted to unicode
-            using this instance's default_encoding and decode_errors
-            attributes.  See the constructor docstring for more information.
+          template: a template string of type unicode or str, or an object
+            instance.  If the argument is an object, the function attempts
+            to find a template associated to the object by calling the
+            get_associated_template() method.  The object is also used as
+            the first element of the context stack when rendering this
+            associated template.
 
           *context: zero or more dictionaries, Context instances, or objects
             with which to populate the initial context stack.  None
@@ -305,5 +321,9 @@ class Renderer(object):
             all items in the *context list.
 
         """
-        return self._render_string(template, *context, **kwargs)
+        if not isinstance(template, basestring):
+            # Then we assume the template is an object instance.
+            context = [template] + list(context)
+            template = self.get_associated_template(template)
 
+        return self._render_string(template, *context, **kwargs)
