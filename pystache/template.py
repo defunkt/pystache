@@ -1,15 +1,25 @@
 import re
 import cgi
 import inspect
+import types
 
 def call(val, view, template=None):
     if callable(val):
         (args, _, _, _) = inspect.getargspec(val)
-        if len(args) is 0:
+
+        args_count = len(args)
+
+        if not isinstance(val, types.FunctionType):
+            # Then val is an instance method.  Subtract one from the
+            # argument count because Python will automatically prepend
+            # self to the argument list when calling.
+            args_count -=1
+
+        if args_count is 0:
             val = val()
-        elif len(args) is 1 and args[0] in ['self', 'context']:
+        elif args_count is 1 and args[0] in ['self', 'context']:
             val = val(view)
-        elif len(args) is 1:
+        elif args_count is 1:
             val = val(template)
         else:
             val = val(view, template)
@@ -117,7 +127,6 @@ class Template(object):
     def _parse(self, template, index=0):
         """Parse a template into a syntax tree."""
 
-        template = template != None and template or self.template
         buffer = []
         pos = index
 
