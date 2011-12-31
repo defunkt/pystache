@@ -37,16 +37,17 @@ Use It
 
     >>> import pystache
     >>> pystache.render('Hi {{person}}!', {'person': 'Mom'})
-    'Hi Mom!'
+    u'Hi Mom!'
 
 You can also create dedicated view classes to hold your view logic.
 
 Here's your simple.py::
 
-    import pystache
-    class Simple(pystache.View):
-        def thing(self):
-            return "pizza"
+    >>> import pystache
+    >>> class Simple(pystache.View):
+    ...     template_path = 'examples'
+    ...     def thing(self):
+    ...         return "pizza"
 
 Then your template, simple.mustache::
 
@@ -55,7 +56,7 @@ Then your template, simple.mustache::
 Pull it together::
 
     >>> Simple().render()
-    'Hi pizza!'
+    u'Hi pizza!'
 
 
 Test It
@@ -65,7 +66,7 @@ nose_ works great! ::
 
     pip install nose
     cd pystache
-    nosetests --with-doctest
+    nosetests --with-doctest --doctest-extension=rst
 
 To include tests from the mustache spec_ in your test runs: ::
 

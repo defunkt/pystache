@@ -310,7 +310,7 @@ class Renderer(object):
 
     def render(self, template, *context, **kwargs):
         """
-        Render the given template (or templated object) using the given context.
+        Render the given template (or template object) using the given context.
 
         Returns the rendering as a unicode string.
 
@@ -321,11 +321,11 @@ class Renderer(object):
         Arguments:
 
           template: a template string of type unicode or str, or an object
-            instance.  If the argument is an object, for the template string
-            the function attempts to find a template associated to the
-            object by calling the get_associated_template() method.  The
-            argument in this case is also used as the first element of the
-            context stack when rendering the associated template.
+            instance.  If the argument is an object, the function first looks
+            for the template associated to the object by calling this class's
+            get_associated_template() method.  The rendering process also
+            uses the passed object as the first element of the context stack
+            when rendering.
 
           *context: zero or more dictionaries, Context instances, or objects
             with which to populate the initial context stack.  None
