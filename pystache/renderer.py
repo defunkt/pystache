@@ -263,11 +263,16 @@ class Renderer(object):
         class definition.
 
         """
+        search_dirs = self.search_dirs
         locator = self.make_locator()
 
         template_name = locator.make_template_name(obj)
+
         directory = locator.get_object_directory(obj)
-        search_dirs = [directory] + self.search_dirs
+        # TODO: add a unit test for the case of a None return value.
+        if directory is not None:
+            search_dirs = [directory] + self.search_dirs
+
         path = locator.locate_path(template_name=template_name, search_dirs=search_dirs)
 
         return self.read(path)
