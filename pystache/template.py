@@ -2,18 +2,18 @@ import re
 import cgi
 import inspect
 
-def call(view, x, template=None):
-    if callable(x):
-        (args, _, _, _) = inspect.getargspec(x)
+def call(view, val, template=None):
+    if callable(val):
+        (args, _, _, _) = inspect.getargspec(val)
         if len(args) is 0:
-            x = x()
+            val = val()
         elif len(args) is 1 and args[0] == 'self':
-            x = x(view)
+            val = val(view)
         elif len(args) is 1:
-            x = x(template)
+            val = val(template)
         else:
-            x = x(view, template)
-    return unicode(x)
+            val = val(view, template)
+    return unicode(val)
 
 def parse(template, view, delims=('{{', '}}')):
     tmpl = Template(template)
