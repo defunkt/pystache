@@ -43,9 +43,7 @@ You can also create dedicated view classes to hold your view logic.
 
 Here's your simple.py::
 
-    >>> import pystache
-    >>> class Simple(pystache.View):
-    ...     template_path = 'examples'
+    >>> class Simple(object):
     ...     def thing(self):
     ...         return "pizza"
 
@@ -55,7 +53,8 @@ Then your template, simple.mustache::
 
 Pull it together::
 
-    >>> Simple().render()
+    >>> renderer = pystache.Renderer(search_dirs='examples')
+    >>> renderer.render(Simple())
     u'Hi pizza!'
 
 
