@@ -20,7 +20,7 @@ def parse(template, view, delims=('{{', '}}')):
     tmpl.view = view
     tmpl.otag, tmpl.ctag = delims
     tmpl._compile_regexps()
-    return tmpl._parse()
+    return tmpl._parse(template)
 
 def renderParseTree(parsed, view, template):
     n = len(parsed)
@@ -114,7 +114,7 @@ class Template(object):
         """
         self.tag_re = re.compile(tag % tags, re.M | re.X)
 
-    def _parse(self, template=None, section=None, index=0):
+    def _parse(self, template, index=0):
         """Parse a template into a syntax tree."""
 
         template = template != None and template or self.template
@@ -173,7 +173,7 @@ class Template(object):
             buffer.append(partialTag(name, captures['whitespace']))
         elif captures['tag'] in ['#', '^']:
             try:
-                self._parse(template, name, pos)
+                self._parse(template, index=pos)
             except EndOfSection as e:
                 bufr = e.buffer
                 tmpl = e.template
