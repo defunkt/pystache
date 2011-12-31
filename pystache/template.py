@@ -2,7 +2,7 @@ import re
 import cgi
 import inspect
 
-def call(view, val, template=None):
+def call(val, view, template=None):
     if callable(val):
         (args, _, _, _) = inspect.getargspec(val)
         if len(args) is 0:
@@ -24,7 +24,7 @@ def parse(template, view, delims=('{{', '}}')):
 
 def renderParseTree(parsed, view, template):
     n = len(parsed)
-    return ''.join(map(call, [view] * n, parsed, [template] * n))
+    return ''.join(map(call, parsed, [view] * n, [template] * n))
 
 def render(template, view, delims=('{{', '}}')):
     parseTree = parse(template, view, delims)
@@ -44,7 +44,7 @@ def sectionTag(name, parsed, template, delims):
         if not data:
             return ''
         elif callable(data):
-            ast = parse(call(self, data, template), self, delims)
+            ast = parse(call(view=self, val=data, template=template), self, delims)
             data = [ data ]
         elif type(data) not in [list, tuple]:
             data = [ data ]
@@ -74,7 +74,7 @@ def escapedTag(name, delims):
 
 def unescapedTag(name, delims):
     def func(self):
-        return unicode(render(call(self, self.get(name)), self))
+        return unicode(render(call(view=self, val=self.get(name)), self))
     return func
 
 class EndOfSection(Exception):
