@@ -7,7 +7,7 @@ def call(val, view, template=None):
         (args, _, _, _) = inspect.getargspec(val)
         if len(args) is 0:
             val = val()
-        elif len(args) is 1 and args[0] == 'self':
+        elif len(args) is 1 and args[0] in ['self', 'context']:
             val = val(view)
         elif len(args) is 1:
             val = val(template)
@@ -73,8 +73,9 @@ def escapedTag(name, delims):
     return func
 
 def unescapedTag(name, delims):
-    def func(self):
-        return unicode(render(call(view=self, val=self.get(name)), self))
+    def func(context):
+        template = call(val=context.get(name), view=context)
+        return unicode(render(template, context))
     return func
 
 class EndOfSection(Exception):
