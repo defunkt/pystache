@@ -48,12 +48,17 @@ class Locator(object):
         """
         Return the directory containing an object's defining class.
 
+        Returns None if there is no such directory, for example if the
+        class was defined in an interactive Python session, or in a
+        doctest that appears in a text file (rather than a Python file).
+
         """
         module = sys.modules[obj.__module__]
 
-        # TODO: should we handle the case of __file__ not existing, for
-        # example when using the interpreter or using a module in the
-        # standard library)?
+        if not hasattr(module, '__file__'):
+            # TODO: add a unit test for this case.
+            return None
+
         path = module.__file__
 
         return os.path.dirname(path)
