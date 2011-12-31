@@ -23,6 +23,10 @@ def call(val, view, template=None):
             val = val(template)
         else:
             val = val(view, template)
+
+    if val is None:
+        val = ''
+
     return unicode(val)
 
 def parse(template, view, delims=('{{', '}}')):
@@ -34,7 +38,8 @@ def parse(template, view, delims=('{{', '}}')):
 
 def renderParseTree(parsed, view, template):
     n = len(parsed)
-    return ''.join(map(call, parsed, [view] * n, [template] * n))
+    parts = map(call, parsed, [view] * n, [template] * n)
+    return ''.join(parts)
 
 def render(template, view, delims=('{{', '}}')):
     parseTree = parse(template, view, delims)
@@ -84,7 +89,8 @@ def escapedTag(name, delims):
 
 def unescapedTag(name, delims):
     def func(context):
-        template = call(val=context.get(name), view=context)
+        val = context.get(name)
+        template = call(val=val, view=context)
         return unicode(render(template, context))
     return func
 
