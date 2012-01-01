@@ -105,19 +105,6 @@ def inverseTag(name, parsed, template, delims):
         return render_parse_tree(parsed, self, delims)
     return func
 
-def escape_tag_function(name):
-    fetch = literal_tag_function(name)
-    def func(self):
-        return cgi.escape(fetch(self), True)
-    return func
-
-def literal_tag_function(name):
-    def func(context):
-        val = context.get(name)
-        template = call(val=val, view=context)
-        return unicode(render(template, context))
-    return func
-
 class EndOfSection(Exception):
     def __init__(self, parse_tree, template, position):
         self.parse_tree = parse_tree
@@ -153,6 +140,19 @@ class Template(object):
             \s* %(ctag)s
         """
         self.tag_re = re.compile(tag % tags, re.M | re.X)
+
+    def escape_tag_function(self, name):
+        fetch = self.literal_tag_function(name)
+        def func(context):
+            return cgi.escape(fetch(context), True)
+        return func
+
+    def literal_tag_function(self, name):
+        def func(context):
+            val = context.get(name)
+            template = call(val=val, view=context)
+            return unicode(render(template, context))
+        return func
 
     def parse_to_tree(self, index=0):
         """
@@ -233,11 +233,11 @@ class Template(object):
 
         elif captures['tag'] in ['{', '&']:
 
-            func = literal_tag_function(name)
+            func = self.literal_tag_function(name)
 
         elif captures['tag'] == '':
 
-            func = escape_tag_function(name)
+            func = self.escape_tag_function(name)
 
         elif captures['tag'] == '/':
 
