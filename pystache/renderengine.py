@@ -389,31 +389,52 @@ class Template(object):
     def partial(self, name, context=None):
         return context.partial(name)
 
+    def _get_string_value(self, context, tag_name):
+        """
+        Get a value from the given context as a basestring instance.
+
+        """
+        val = context.get(tag_name)
+
+        # We use "==" rather than "is" to compare integers, as using "is"
+        # relies on an implementation detail of CPython.  The test about
+        # rendering zeroes failed while using PyPy when using "is".
+        # See issue #34: https://github.com/defunkt/pystache/issues/34
+        if not val and val != 0:
+            if tag_name != '.':
+                return ''
+            val = self.context.top()
+
+        if callable(val):
+            # According to the spec:
+            #
+            #     When used as the data value for an Interpolation tag,
+            #     the lambda MUST be treatable as an arity 0 function,
+            #     and invoked as such.  The returned value MUST be
+            #     rendered against the default delimiters, then
+            #     interpolated in place of the lambda.
+            template = val()
+            val = self.render_template(template, context)
+
+        if not isinstance(val, basestring):
+            val = str(val)
+
+        return val
+
+
     def escape_tag_function(self, name):
         get_literal = self.literal_tag_function(name)
         def func(context):
-            u = get_literal(context)
-            u = self.escape(u)
-            return u
+            s = self._get_string_value(context, name)
+            s = self.escape(s)
+            return s
         return func
 
     def literal_tag_function(self, name):
         def func(context):
-            val = context.get(name)
-
-            if callable(val):
-                # According to the spec:
-                #
-                #     When used as the data value for an Interpolation tag,
-                #     the lambda MUST be treatable as an arity 0 function,
-                #     and invoked as such.  The returned value MUST be
-                #     rendered against the default delimiters, then
-                #     interpolated in place of the lambda.
-                template = val()
-                val = self.render_template(template, context)
-
-            u = self.to_unicode(val)
-            return u
+            s = self._get_string_value(context, name)
+            s = self.to_unicode(s)
+            return s
 
         return func
 
