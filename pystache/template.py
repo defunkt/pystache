@@ -141,17 +141,23 @@ class Template(object):
         """
         self.tag_re = re.compile(tag % tags, re.M | re.X)
 
+    def to_unicode(self, text):
+        return unicode(text)
+
+    def escape(self, text):
+        return cgi.escape(text, True)
+
     def escape_tag_function(self, name):
         fetch = self.literal_tag_function(name)
         def func(context):
-            return cgi.escape(fetch(context), True)
+            return self.escape(fetch(context))
         return func
 
     def literal_tag_function(self, name):
         def func(context):
             val = context.get(name)
             template = call(val=val, view=context)
-            return unicode(render(template, context))
+            return self.to_unicode(render(template, context))
         return func
 
     def parse_to_tree(self, index=0):
