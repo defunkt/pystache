@@ -138,6 +138,9 @@ class Template(object):
     def escape(self, text):
         return cgi.escape(text, True)
 
+    def partial(self, name, context=None):
+        return context.partial(name)
+
     def escape_tag_function(self, name):
         fetch = self.literal_tag_function(name)
         def func(context):
@@ -154,7 +157,7 @@ class Template(object):
     def partial_tag_function(self, name, indentation=''):
         def func(context):
             nonblank = re.compile(r'^(.)', re.M)
-            template = re.sub(nonblank, indentation + r'\1', context.partial(name))
+            template = re.sub(nonblank, indentation + r'\1', self.partial(name, context))
             return render(template, context)
         return func
 
