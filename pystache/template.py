@@ -37,13 +37,6 @@ def call(val, view, template=None):
 
     return unicode(val)
 
-def parse_to_tree(template, view, delims=('{{', '}}')):
-    template = Template(template)
-    template.view = view
-    template.otag, template.ctag = delims
-    template._compile_regexps()
-    return template.parse_to_tree()
-
 def render_parse_tree(parse_tree, view, template):
     """
     Convert a parse-tree into a string.
@@ -53,40 +46,6 @@ def render_parse_tree(parse_tree, view, template):
     parts = map(get_string, parse_tree)
 
     return ''.join(parts)
-
-def render(template, view, delims=('{{', '}}')):
-    """
-    Arguments:
-
-      template: template string
-      view: context
-
-    """
-    parse_tree = parse_to_tree(template, view, delims)
-    return render_parse_tree(parse_tree, view, template)
-
-def sectionTag(name, parse_tree_, template_, delims):
-    def func(self):
-        template = template_
-        parse_tree = parse_tree_
-        data = self.get(name)
-        if not data:
-            return ''
-        elif callable(data):
-            template = call(val=data, view=self, template=template)
-            parse_tree = parse_to_tree(template, self, delims)
-            data = [ data ]
-        elif type(data) not in [list, tuple]:
-            data = [ data ]
-
-        parts = []
-        for element in data:
-            self.context_list.insert(0, element)
-            parts.append(render_parse_tree(parse_tree, self, delims))
-            del self.context_list[0]
-
-        return ''.join(parts)
-    return func
 
 def inverseTag(name, parsed, template, delims):
     def func(self):
@@ -151,15 +110,52 @@ class Template(object):
         def func(context):
             val = context.get(name)
             template = call(val=val, view=context)
-            return self.to_unicode(render(template, context))
+            return self.to_unicode(self.render_template(template, context))
         return func
 
     def partial_tag_function(self, name, indentation=''):
         def func(context):
             nonblank = re.compile(r'^(.)', re.M)
             template = re.sub(nonblank, indentation + r'\1', self.partial(name, context))
-            return render(template, context)
+            return self.render_template(template, context)
         return func
+
+    def section_tag_function(self, name, parse_tree_, template_, delims):
+        def func(context):
+            template = template_
+            parse_tree = parse_tree_
+            data = context.get(name)
+            if not data:
+                return ''
+            elif callable(data):
+                template = call(val=data, view=context, template=template)
+                parse_tree = self.parse_string_to_tree(template, context, delims)
+                data = [ data ]
+            elif type(data) not in [list, tuple]:
+                data = [ data ]
+
+            parts = []
+            for element in data:
+                context.context_list.insert(0, element)
+                parts.append(render_parse_tree(parse_tree, context, delims))
+                del context.context_list[0]
+
+            return ''.join(parts)
+        return func
+
+    def parse_string_to_tree(self, template, view, delims=('{{', '}}')):
+
+        template = Template(template)
+
+        template.view = view
+        template.to_unicode = self.to_unicode
+        template.escape = self.escape
+        template.partial = self.partial
+        template.otag, template.ctag = delims
+
+        template._compile_regexps()
+
+        return template.parse_to_tree()
 
     def parse_to_tree(self, index=0):
         """
@@ -235,7 +231,7 @@ class Template(object):
                 tmpl = e.template
                 end_index = e.position
 
-            tag = sectionTag if captures['tag'] == '#' else inverseTag
+            tag = self.section_tag_function if captures['tag'] == '#' else inverseTag
             func = tag(name, bufr, tmpl, (self.otag, self.ctag))
 
         elif captures['tag'] in ['{', '&']:
@@ -258,8 +254,19 @@ class Template(object):
 
         return end_index
 
+    def render_template(self, template, view, delims=('{{', '}}')):
+        """
+        Arguments:
+
+          template: template string
+          view: context
+
+        """
+        parse_tree = self.parse_string_to_tree(template, view, delims)
+        return render_parse_tree(parse_tree, view, template)
+
     def render(self, encoding=None):
-        result = render(self.template, self.view)
+        result = self.render_template(self.template, self.view)
         if encoding is not None:
             result = result.encode(encoding)
 
