@@ -3,6 +3,10 @@ import cgi
 import inspect
 import types
 
+
+END_OF_LINE_CHARACTERS = ['\r', '\n']
+
+
 def call(val, view, template=None):
     if callable(val):
         (args, _, _, _) = inspect.getargspec(val)
@@ -162,18 +166,18 @@ class Template(object):
         elif captures['raw'] is not None:
             captures.update(tag='{', name=captures['raw_name'])
 
-        # Save the literal text content.
         parse_tree.append(captures['content'])
-        end_index = match.end()
+
         match_index = match.end('content')
+        end_index = match.end()
 
         # Standalone (non-interpolation) tags consume the entire line,
         # both leading whitespace and trailing newline.
-        tagBeganLine = not match_index or template[match_index - 1] in ['\r', '\n']
-        tagEndedLine = (end_index == len(template) or template[end_index] in ['\r', '\n'])
-        interpolationTag = captures['tag'] in ['', '&', '{']
+        did_tag_begin_line = match_index == 0 or template[match_index - 1] in END_OF_LINE_CHARACTERS
+        did_tag_end_line = end_index == len(template) or template[end_index] in END_OF_LINE_CHARACTERS
+        is_tag_interpolating = captures['tag'] in ['', '&', '{']
 
-        if (tagBeganLine and tagEndedLine and not interpolationTag):
+        if did_tag_begin_line and did_tag_end_line and not is_tag_interpolating:
             if end_index < len(template):
                 end_index += template[end_index] == '\r' and 1 or 0
             if end_index < len(template):
