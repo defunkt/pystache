@@ -1,3 +1,3 @@
 class SayHello(object):
     def to(self):
-        return "World"
+        return "Pizza"

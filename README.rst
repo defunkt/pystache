@@ -41,16 +41,18 @@ Use It
 
 You can also create dedicated view classes to hold your view logic.
 
-Here's your view class (in `examples/readme.py`)::
+Here's your view class (in ``examples/readme.py``)::
 
     class SayHello(object):
         def to(self):
-            return "World"
+            return "Pizza"
+
+Like so::
 
     >>> from examples.readme import SayHello
     >>> hello = SayHello()
 
-Then your template, `say_hello.mustache`::
+Then your template, ``say_hello.mustache``::
 
     Hello, {{to}}!
 
@@ -58,7 +60,7 @@ Pull it together::
 
     >>> renderer = pystache.Renderer()
     >>> renderer.render(hello)
-    u'Hello, World!'
+    u'Hello, Pizza!'
 
 
 Test It
@@ -76,7 +78,7 @@ To include tests from the mustache spec_ in your test runs: ::
     git submodule update
     nosetests -i spec
 
-To run all available tests:
+To run all available tests::
 
     nosetests --with-doctest --doctest-extension=rst -i spec
 
