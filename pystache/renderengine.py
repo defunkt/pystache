@@ -407,7 +407,7 @@ class Template(object):
         if not val and val != 0:
             if tag_name != '.':
                 return ''
-            val = self.context.top()
+            val = context.top()
 
         if callable(val):
             # According to the spec:
@@ -454,9 +454,10 @@ class Template(object):
             parse_tree = parse_tree_
             data = context.get(name)
             if not data:
-                return ''
+                data = []
             elif callable(data):
-                template = call(val=data, view=context, template=template)
+                # TODO: should we check the arity?
+                template = data(template)
                 parse_tree = self.parse_string_to_tree(template, delims)
                 data = [ data ]
             elif type(data) not in [list, tuple]:
