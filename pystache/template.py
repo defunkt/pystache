@@ -165,11 +165,11 @@ class Template(object):
         # Save the literal text content.
         buffer.append(captures['content'])
         end_index = match.end()
-        tagPos = match.end('content')
+        match_index = match.end('content')
 
         # Standalone (non-interpolation) tags consume the entire line,
         # both leading whitespace and trailing newline.
-        tagBeganLine = not tagPos or template[tagPos - 1] in ['\r', '\n']
+        tagBeganLine = not match_index or template[match_index - 1] in ['\r', '\n']
         tagEndedLine = (end_index == len(template) or template[end_index] in ['\r', '\n'])
         interpolationTag = captures['tag'] in ['', '&', '{']
 
@@ -180,7 +180,7 @@ class Template(object):
                 end_index += template[end_index] == '\n' and 1 or 0
         elif captures['whitespace']:
             buffer.append(captures['whitespace'])
-            tagPos += len(captures['whitespace'])
+            match_index += len(captures['whitespace'])
             captures['whitespace'] = ''
 
         name = captures['name']
@@ -202,7 +202,7 @@ class Template(object):
             tag = { '#': sectionTag, '^': inverseTag }[captures['tag']]
             buffer.append(tag(name, bufr, tmpl, (self.otag, self.ctag)))
         elif captures['tag'] == '/':
-            raise EndOfSection(buffer, template[start_index:tagPos], end_index)
+            raise EndOfSection(buffer, template[start_index:match_index], end_index)
         elif captures['tag'] in ['{', '&']:
             buffer.append(unescapedTag(name, (self.otag, self.ctag)))
         elif captures['tag'] == '':
