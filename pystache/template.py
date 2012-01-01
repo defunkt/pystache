@@ -43,14 +43,15 @@ def parse(template, view, delims=('{{', '}}')):
     tmpl._compile_regexps()
     return tmpl.parse_to_tree(template)
 
-def renderParseTree(parsed, view, template):
-    n = len(parsed)
-    parts = map(call, parsed, [view] * n, [template] * n)
+def render_parse_tree(parse_tree, view, template):
+    get_string = lambda val: call(val, view, template)
+    parts = map(get_string, parse_tree)
+
     return ''.join(parts)
 
 def render(template, view, delims=('{{', '}}')):
     parseTree = parse(template, view, delims)
-    return renderParseTree(parseTree, view, template)
+    return render_parse_tree(parseTree, view, template)
 
 def partialTag(name, indentation=''):
     def func(self):
@@ -74,7 +75,7 @@ def sectionTag(name, parsed, template, delims):
         parts = []
         for element in data:
             self.context_list.insert(0, element)
-            parts.append(renderParseTree(ast, self, delims))
+            parts.append(render_parse_tree(ast, self, delims))
             del self.context_list[0]
 
         return ''.join(parts)
@@ -85,7 +86,7 @@ def inverseTag(name, parsed, template, delims):
         data = self.get(name)
         if data:
             return ''
-        return renderParseTree(parsed, self, delims)
+        return render_parse_tree(parsed, self, delims)
     return func
 
 def escape_tag_function(name):
