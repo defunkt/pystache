@@ -120,7 +120,7 @@ class RenderEngine(object):
 
         _template.to_unicode = self.literal
         _template.escape = self.escape
-        _template.partial = self.load_partial
+        _template.get_partial = self.load_partial
 
         return _template.render_template(template=template, context=context)
 
@@ -386,8 +386,12 @@ class Template(object):
     def escape(self, text):
         return cgi.escape(text, True)
 
-    def partial(self, name, context=None):
-        return context.partial(name)
+    def get_partial(self, name):
+        pass
+
+    def _render_partial(self, name, context):
+        template = self.get_partial(name)
+        return self.render_template(template, context)
 
     def _get_string_value(self, context, tag_name):
         """
@@ -421,7 +425,6 @@ class Template(object):
 
         return val
 
-
     def escape_tag_function(self, name):
         get_literal = self.literal_tag_function(name)
         def func(context):
@@ -441,7 +444,7 @@ class Template(object):
     def partial_tag_function(self, name, indentation=''):
         def func(context):
             nonblank = re.compile(r'^(.)', re.M)
-            template = re.sub(nonblank, indentation + r'\1', self.partial(name, context))
+            template = re.sub(nonblank, indentation + r'\1', self._render_partial(name, context))
             return self.render_template(template, context)
         return func
 
@@ -476,7 +479,7 @@ class Template(object):
         template.ctag = delims[1]
 
         template.escape = self.escape
-        template.partial = self.partial
+        template.get_partial = self.get_partial
         template.to_unicode = self.to_unicode
 
         template._compile_regexps()
