@@ -76,11 +76,10 @@ To include tests from the mustache spec_ in your test runs: ::
 
     git submodule init
     git submodule update
-    nosetests -i spec
 
-To run all available tests::
+To run all available tests (including doctests)::
 
-    nosetests --with-doctest --doctest-extension=rst -i spec
+    nosetests --with-doctest --doctest-extension=rst
 
 
 Mailing List
