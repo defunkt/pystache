@@ -88,13 +88,13 @@ def inverseTag(name, parsed, template, delims):
         return renderParseTree(parsed, self, delims)
     return func
 
-def escapedTag(name, delims):
-    fetch = unescapedTag(name, delims)
+def escape_tag_function(name):
+    fetch = literal_tag_function(name)
     def func(self):
         return cgi.escape(fetch(self), True)
     return func
 
-def unescapedTag(name, delims):
+def literal_tag_function(name):
     def func(context):
         val = context.get(name)
         template = call(val=val, view=context)
@@ -194,23 +194,30 @@ class Template(object):
             self.otag, self.ctag = name.split()
             self._compile_regexps()
         elif captures['tag'] == '>':
-            parse_tree.append(partialTag(name, captures['whitespace']))
+            func = partialTag(name, captures['whitespace'])
+            parse_tree.append(func)
         elif captures['tag'] in ['#', '^']:
             try:
                 self.parse_to_tree(template, index=end_index)
             except EndOfSection as e:
                 bufr = e.parse_tree
                 tmpl = e.template
-                end_index  = e.position
+                end_index = e.position
 
             tag = { '#': sectionTag, '^': inverseTag }[captures['tag']]
             parse_tree.append(tag(name, bufr, tmpl, (self.otag, self.ctag)))
         elif captures['tag'] == '/':
             raise EndOfSection(parse_tree, template[start_index:match_index], end_index)
         elif captures['tag'] in ['{', '&']:
-            parse_tree.append(unescapedTag(name, (self.otag, self.ctag)))
+
+            func = literal_tag_function(name)
+            parse_tree.append(func)
+
         elif captures['tag'] == '':
-            parse_tree.append(escapedTag(name, (self.otag, self.ctag)))
+
+            func = escape_tag_function(name)
+            parse_tree.append(func)
+
         else:
             raise Exception("'%s' is an unrecognized type!" % captures['tag'])
 
