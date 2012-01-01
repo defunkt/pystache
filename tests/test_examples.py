@@ -56,11 +56,8 @@ Again, Welcome!""")
 ## Again, Welcome! ##""")
 
     def test_delimiters(self):
-        self.assertEquals(Delimiters().render(), """
-* It worked the first time.
-
+        assert_strings(self, Delimiters().render(), """* It worked the first time.
 * And it worked the second time.
-
 * Then, surprisingly, it worked the third time.
 """)
 
