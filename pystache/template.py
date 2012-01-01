@@ -7,6 +7,7 @@ import types
 END_OF_LINE_CHARACTERS = ['\r', '\n']
 
 
+# TODO: what are the possibilities for val?
 def call(val, view, template=None):
     if callable(val):
         (args, _, _, _) = inspect.getargspec(val)
@@ -44,14 +45,27 @@ def parse_to_tree(template, view, delims=('{{', '}}')):
     return template.parse_to_tree()
 
 def render_parse_tree(parse_tree, view, template):
+    """
+    Convert a parse-tree into a string.
+
+    """
     get_string = lambda val: call(val, view, template)
     parts = map(get_string, parse_tree)
 
     return ''.join(parts)
 
 def render(template, view, delims=('{{', '}}')):
+    """
+    Arguments:
+
+      template: template string
+      view: context
+
+    """
     parse_tree = parse_to_tree(template, view, delims)
     return render_parse_tree(parse_tree, view, template)
+
+## The possible function parse-tree elements:
 
 def partialTag(name, indentation=''):
     def func(self):
@@ -60,14 +74,16 @@ def partialTag(name, indentation=''):
         return render(template, self)
     return func
 
-def sectionTag(name, parse_tree_, template, delims):
+def sectionTag(name, parse_tree_, template_, delims):
     def func(self):
+        template = template_
         parse_tree = parse_tree_
         data = self.get(name)
         if not data:
             return ''
         elif callable(data):
-            parse_tree = parse_to_tree(call(view=self, val=data, template=template), self, delims)
+            template = call(val=data, view=self, template=template)
+            parse_tree = parse_to_tree(template, self, delims)
             data = [ data ]
         elif type(data) not in [list, tuple]:
             data = [ data ]
@@ -153,25 +169,27 @@ class Template(object):
             if match is None:
                 break
 
-            index = self._handle_match(template, match, parse_tree, start_index)
+            captures = match.groupdict()
+            match_index = match.end('content')
+            end_index = match.end()
+
+            index = self._handle_match(parse_tree, captures, start_index, match_index, end_index)
 
         # Save the rest of the template.
         parse_tree.append(template[index:])
 
         return parse_tree
 
-    def _handle_match(self, template, match, parse_tree, start_index):
+    def _handle_match(self, parse_tree, captures, start_index, match_index, end_index):
+        template = self.template
+
         # Normalize the captures dictionary.
-        captures = match.groupdict()
         if captures['change'] is not None:
             captures.update(tag='=', name=captures['delims'])
         elif captures['raw'] is not None:
             captures.update(tag='{', name=captures['raw_name'])
 
         parse_tree.append(captures['content'])
-
-        match_index = match.end('content')
-        end_index = match.end()
 
         # Standalone (non-interpolation) tags consume the entire line,
         # both leading whitespace and trailing newline.
@@ -190,15 +208,19 @@ class Template(object):
             captures['whitespace'] = ''
 
         name = captures['name']
+
         if captures['tag'] == '!':
-            pass
-        elif captures['tag'] == '=':
+            return end_index
+
+        if captures['tag'] == '=':
             self.otag, self.ctag = name.split()
             self._compile_regexps()
-        elif captures['tag'] == '>':
+            return end_index
+
+        if captures['tag'] == '>':
             func = partialTag(name, captures['whitespace'])
-            parse_tree.append(func)
         elif captures['tag'] in ['#', '^']:
+
             try:
                 self.parse_to_tree(index=end_index)
             except EndOfSection as e:
@@ -206,22 +228,26 @@ class Template(object):
                 tmpl = e.template
                 end_index = e.position
 
-            tag = { '#': sectionTag, '^': inverseTag }[captures['tag']]
-            parse_tree.append(tag(name, bufr, tmpl, (self.otag, self.ctag)))
-        elif captures['tag'] == '/':
-            raise EndOfSection(parse_tree, template[start_index:match_index], end_index)
+            tag = sectionTag if captures['tag'] == '#' else inverseTag
+            func = tag(name, bufr, tmpl, (self.otag, self.ctag))
+
         elif captures['tag'] in ['{', '&']:
 
             func = literal_tag_function(name)
-            parse_tree.append(func)
 
         elif captures['tag'] == '':
 
             func = escape_tag_function(name)
-            parse_tree.append(func)
+
+        elif captures['tag'] == '/':
+
+            # TODO: don't use exceptions for flow control.
+            raise EndOfSection(parse_tree, template[start_index:match_index], end_index)
 
         else:
             raise Exception("'%s' is an unrecognized type!" % captures['tag'])
+
+        parse_tree.append(func)
 
         return end_index
 
