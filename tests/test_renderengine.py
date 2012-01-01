@@ -68,7 +68,7 @@ class RenderEngineEnderTestCase(unittest.TestCase):
 
         """
         engine = self._engine()
-        partials = {'partial': "{{person}}"}
+        partials = {'partial': u"{{person}}"}
         engine.load_partial = lambda key: partials[key]
 
         self._assert_render('Hi Mom', 'Hi {{>partial}}', {'person': 'Mom'}, engine=engine)

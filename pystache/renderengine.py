@@ -116,6 +116,11 @@ class RenderEngine(object):
           context: a Context instance.
 
         """
+        # Be strict but not too strict.  In other words, accept str instead
+        # of unicode, but don't assume anything about the encoding (e.g.
+        # don't use self.literal).
+        template = unicode(template)
+
         _template = Template(template=template)
 
         _template.to_unicode = self.literal
@@ -424,6 +429,11 @@ class Template(object):
             #     rendered against the default delimiters, then
             #     interpolated in place of the lambda.
             template = val()
+            if not isinstance(template, basestring):
+                # In case the template is an integer, for example.
+                template = str(template)
+            if type(template) is not unicode:
+                template = self.to_unicode(template)
             val = self.render_template(template, context)
 
         if not isinstance(val, basestring):
@@ -600,8 +610,8 @@ class Template(object):
           context: a Context instance
 
         """
-        if not isinstance(template, basestring):
-            raise AssertionError("template: %s" % repr(template))
+        if type(template) is not unicode:
+            raise Exception("Argument 'template' not unicode: %s: %s" % (type(template), repr(template)))
 
         parse_tree = self.parse_string_to_tree(template=template, delims=delims)
         return render_parse_tree(parse_tree, context, template)
