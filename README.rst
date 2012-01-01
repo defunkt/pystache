@@ -65,13 +65,17 @@ nose_ works great! ::
 
     pip install nose
     cd pystache
-    nosetests --with-doctest --doctest-extension=rst
+    nosetests
 
 To include tests from the mustache spec_ in your test runs: ::
 
     git submodule init
     git submodule update
     nosetests -i spec
+
+To run all available tests:
+
+    nosetests --with-doctest --doctest-extension=rst -i spec
 
 
 Mailing List
