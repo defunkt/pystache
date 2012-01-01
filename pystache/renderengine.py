@@ -399,10 +399,6 @@ class Template(object):
     def get_partial(self, name):
         pass
 
-    def _render_partial(self, name, context):
-        template = self.get_partial(name)
-        return self.render_template(template, context)
-
     def _get_string_value(self, context, tag_name):
         """
         Get a value from the given context as a basestring instance.
@@ -454,7 +450,9 @@ class Template(object):
     def partial_tag_function(self, name, indentation=''):
         def func(context):
             nonblank = re.compile(r'^(.)', re.M)
-            template = re.sub(nonblank, indentation + r'\1', self._render_partial(name, context))
+            template = self.get_partial(name)
+            # Indent before rendering.
+            template = re.sub(nonblank, indentation + r'\1', template)
             return self.render_template(template, context)
         return func
 
