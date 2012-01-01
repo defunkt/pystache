@@ -13,6 +13,9 @@ from examples.unicode_output import UnicodeOutput
 from examples.unicode_input import UnicodeInput
 from examples.nested_context import NestedContext
 
+from tests.common import assert_strings
+
+
 class TestView(unittest.TestCase):
     def test_comments(self):
         self.assertEquals(Comments().render(), """<h1>A Comedy of Errors</h1>
@@ -47,13 +50,10 @@ Again, Welcome!""")
     def test_template_partial_extension(self):
         view = TemplatePartial()
         view.template_extension = 'txt'
-        self.assertEquals(view.render(), """Welcome
+        assert_strings(self, view.render(), u"""Welcome
 -------
 
-## Again, Welcome! ##
-
-""")
-
+## Again, Welcome! ##""")
 
     def test_delimiters(self):
         self.assertEquals(Delimiters().render(), """
