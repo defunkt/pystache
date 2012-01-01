@@ -68,7 +68,7 @@ class RenderEngineEnderTestCase(unittest.TestCase):
 
         """
         engine = self._engine()
-        partials = {'partial': "{{person}}"}
+        partials = {'partial': u"{{person}}"}
         engine.load_partial = lambda key: partials[key]
 
         self._assert_render('Hi Mom', 'Hi {{>partial}}', {'person': 'Mom'}, engine=engine)
@@ -243,12 +243,20 @@ class RenderEngineEnderTestCase(unittest.TestCase):
 
     def test_render__section__lambda__tag_in_output(self):
         """
-        Check that callable output isn't treated as a template string (issue #46).
+        Check that callable output is treated as a template string (issue #46).
+
+        The spec says--
+
+            When used as the data value for a Section tag, the lambda MUST
+            be treatable as an arity 1 function, and invoked as such (passing
+            a String containing the unprocessed section contents).  The
+            returned value MUST be rendered against the current delimiters,
+            then interpolated in place of the section.
 
         """
-        template = '{{#test}}Mom{{/test}}'
-        context = {'test': (lambda text: '{{hi}} %s' % text)}
-        self._assert_render('{{hi}} Mom', template, context)
+        template = '{{#test}}Hi {{person}}{{/test}}'
+        context = {'person': 'Mom', 'test': (lambda text: text + " :)")}
+        self._assert_render('Hi Mom :)', template, context)
 
     def test_render__section__comment__multiline(self):
         """

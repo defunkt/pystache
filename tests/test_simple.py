@@ -1,4 +1,5 @@
 import unittest
+
 import pystache
 from pystache import Renderer
 from examples.nested_context import NestedContext
@@ -6,6 +7,9 @@ from examples.complex_view import ComplexView
 from examples.lambdas import Lambdas
 from examples.template_partial import TemplatePartial
 from examples.simple import Simple
+
+from tests.common import assert_strings
+
 
 class TestSimple(unittest.TestCase):
 
@@ -44,11 +48,19 @@ class TestSimple(unittest.TestCase):
 
 
     def test_template_partial_extension(self):
+        """
+        Side note:
+
+        From the spec--
+
+            Partial tags SHOULD be treated as standalone when appropriate.
+
+        In particular, this means that trailing newlines should be removed.
+
+        """
         view = TemplatePartial()
         view.template_extension = 'txt'
-        self.assertEquals(view.render(), """Welcome
+        assert_strings(self, view.render(), u"""Welcome
 -------
 
-## Again, Welcome! ##
-
-""")
+## Again, Welcome! ##""")

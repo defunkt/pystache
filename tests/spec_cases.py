@@ -55,7 +55,11 @@ def buildTest(testData, spec_filename):
   Template: \"""%s\"""
 
   Expected: %s
-  Actual:   %s""" % (description, template, repr(expected), repr(actual))
+  Actual:   %s
+
+  Expected: \"""%s\"""
+  Actual:   \"""%s\"""
+  """ % (description, template, repr(expected), repr(actual), expected, actual)
 
         self.assertEquals(actual, expected, message)
 
