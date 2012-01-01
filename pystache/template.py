@@ -98,8 +98,8 @@ def unescapedTag(name, delims):
     return func
 
 class EndOfSection(Exception):
-    def __init__(self, buffer, template, position):
-        self.buffer   = buffer
+    def __init__(self, parse_tree, template, position):
+        self.parse_tree = parse_tree
         self.template = template
         self.position = position
 
@@ -154,7 +154,7 @@ class Template(object):
 
         return parse_tree
 
-    def _handle_match(self, template, match, buffer, start_index):
+    def _handle_match(self, template, match, parse_tree, start_index):
         # Normalize the captures dictionary.
         captures = match.groupdict()
         if captures['change'] is not None:
@@ -163,7 +163,7 @@ class Template(object):
             captures.update(tag='{', name=captures['raw_name'])
 
         # Save the literal text content.
-        buffer.append(captures['content'])
+        parse_tree.append(captures['content'])
         end_index = match.end()
         match_index = match.end('content')
 
@@ -179,7 +179,7 @@ class Template(object):
             if end_index < len(template):
                 end_index += template[end_index] == '\n' and 1 or 0
         elif captures['whitespace']:
-            buffer.append(captures['whitespace'])
+            parse_tree.append(captures['whitespace'])
             match_index += len(captures['whitespace'])
             captures['whitespace'] = ''
 
@@ -190,23 +190,23 @@ class Template(object):
             self.otag, self.ctag = name.split()
             self._compile_regexps()
         elif captures['tag'] == '>':
-            buffer.append(partialTag(name, captures['whitespace']))
+            parse_tree.append(partialTag(name, captures['whitespace']))
         elif captures['tag'] in ['#', '^']:
             try:
                 self.parse_to_tree(template, index=end_index)
             except EndOfSection as e:
-                bufr = e.buffer
+                bufr = e.parse_tree
                 tmpl = e.template
                 end_index  = e.position
 
             tag = { '#': sectionTag, '^': inverseTag }[captures['tag']]
-            buffer.append(tag(name, bufr, tmpl, (self.otag, self.ctag)))
+            parse_tree.append(tag(name, bufr, tmpl, (self.otag, self.ctag)))
         elif captures['tag'] == '/':
-            raise EndOfSection(buffer, template[start_index:match_index], end_index)
+            raise EndOfSection(parse_tree, template[start_index:match_index], end_index)
         elif captures['tag'] in ['{', '&']:
-            buffer.append(unescapedTag(name, (self.otag, self.ctag)))
+            parse_tree.append(unescapedTag(name, (self.otag, self.ctag)))
         elif captures['tag'] == '':
-            buffer.append(escapedTag(name, (self.otag, self.ctag)))
+            parse_tree.append(escapedTag(name, (self.otag, self.ctag)))
         else:
             raise Exception("'%s' is an unrecognized type!" % captures['tag'])
 
