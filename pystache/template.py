@@ -154,7 +154,7 @@ class Template(object):
 
         return parse_tree
 
-    def _handle_match(self, template, match, buffer, index):
+    def _handle_match(self, template, match, buffer, start_index):
         # Normalize the captures dictionary.
         captures = match.groupdict()
         if captures['change'] is not None:
@@ -202,7 +202,7 @@ class Template(object):
             tag = { '#': sectionTag, '^': inverseTag }[captures['tag']]
             buffer.append(tag(name, bufr, tmpl, (self.otag, self.ctag)))
         elif captures['tag'] == '/':
-            raise EndOfSection(buffer, template[index:tagPos], pos)
+            raise EndOfSection(buffer, template[start_index:tagPos], pos)
         elif captures['tag'] in ['{', '&']:
             buffer.append(unescapedTag(name, (self.otag, self.ctag)))
         elif captures['tag'] == '':
