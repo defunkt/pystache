@@ -24,6 +24,9 @@ def call(val, view, template=None):
         else:
             val = val(view, template)
 
+    if callable(val):
+        val = val(template)
+
     if val is None:
         val = ''
 
