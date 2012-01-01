@@ -36,12 +36,12 @@ def call(val, view, template=None):
 
     return unicode(val)
 
-def parse(template, view, delims=('{{', '}}')):
-    tmpl = Template(template)
-    tmpl.view = view
-    tmpl.otag, tmpl.ctag = delims
-    tmpl._compile_regexps()
-    return tmpl.parse_to_tree(template)
+def parse_to_tree(template, view, delims=('{{', '}}')):
+    template = Template(template)
+    template.view = view
+    template.otag, template.ctag = delims
+    template._compile_regexps()
+    return template.parse_to_tree()
 
 def render_parse_tree(parse_tree, view, template):
     get_string = lambda val: call(val, view, template)
@@ -50,8 +50,8 @@ def render_parse_tree(parse_tree, view, template):
     return ''.join(parts)
 
 def render(template, view, delims=('{{', '}}')):
-    parseTree = parse(template, view, delims)
-    return render_parse_tree(parseTree, view, template)
+    parse_tree = parse_to_tree(template, view, delims)
+    return render_parse_tree(parse_tree, view, template)
 
 def partialTag(name, indentation=''):
     def func(self):
@@ -60,14 +60,14 @@ def partialTag(name, indentation=''):
         return render(template, self)
     return func
 
-def sectionTag(name, parsed, template, delims):
+def sectionTag(name, parse_tree_, template, delims):
     def func(self):
+        parse_tree = parse_tree_
         data = self.get(name)
-        ast = parsed
         if not data:
             return ''
         elif callable(data):
-            ast = parse(call(view=self, val=data, template=template), self, delims)
+            parse_tree = parse_to_tree(call(view=self, val=data, template=template), self, delims)
             data = [ data ]
         elif type(data) not in [list, tuple]:
             data = [ data ]
@@ -75,7 +75,7 @@ def sectionTag(name, parsed, template, delims):
         parts = []
         for element in data:
             self.context_list.insert(0, element)
-            parts.append(render_parse_tree(ast, self, delims))
+            parts.append(render_parse_tree(parse_tree, self, delims))
             del self.context_list[0]
 
         return ''.join(parts)
@@ -138,12 +138,13 @@ class Template(object):
         """
         self.tag_re = re.compile(tag % tags, re.M | re.X)
 
-    def parse_to_tree(self, template, index=0):
+    def parse_to_tree(self, index=0):
         """
         Parse a template into a syntax tree.
 
         """
         parse_tree = []
+        template = self.template
         start_index = index
 
         while True:
@@ -199,7 +200,7 @@ class Template(object):
             parse_tree.append(func)
         elif captures['tag'] in ['#', '^']:
             try:
-                self.parse_to_tree(template, index=end_index)
+                self.parse_to_tree(index=end_index)
             except EndOfSection as e:
                 bufr = e.parse_tree
                 tmpl = e.template
