@@ -41,21 +41,24 @@ Use It
 
 You can also create dedicated view classes to hold your view logic.
 
-Here's your simple.py::
+Here's your view class (in `examples/readme.py`)::
 
-    >>> class Simple(object):
-    ...     def thing(self):
-    ...         return "pizza"
+    class SayHello(object):
+        def to(self):
+            return "World"
 
-Then your template, simple.mustache::
+    >>> from examples.readme import SayHello
+    >>> hello = SayHello()
 
-    Hi {{thing}}!
+Then your template, `say_hello.mustache`::
+
+    Hello, {{to}}!
 
 Pull it together::
 
-    >>> renderer = pystache.Renderer(search_dirs='examples')
-    >>> renderer.render(Simple())
-    u'Hi pizza!'
+    >>> renderer = pystache.Renderer()
+    >>> renderer.render(hello)
+    u'Hello, World!'
 
 
 Test It
