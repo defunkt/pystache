@@ -457,7 +457,7 @@ class Template(object):
                 return ''
             elif callable(data):
                 template = call(val=data, view=context, template=template)
-                parse_tree = self.parse_string_to_tree(template, context, delims)
+                parse_tree = self.parse_string_to_tree(template, delims)
                 data = [ data ]
             elif type(data) not in [list, tuple]:
                 data = [ data ]
