@@ -134,23 +134,25 @@ class Template(object):
         self.tag_re = re.compile(tag % tags, re.M | re.X)
 
     def parse_to_tree(self, template, index=0):
-        """Parse a template into a syntax tree."""
+        """
+        Parse a template into a syntax tree.
 
-        buffer = []
-        pos = index
+        """
+        parse_tree = []
+        start_index = index
 
         while True:
-            match = self.tag_re.search(template, pos)
+            match = self.tag_re.search(template, index)
 
             if match is None:
                 break
 
-            pos = self._handle_match(template, match, buffer, index)
+            index = self._handle_match(template, match, parse_tree, start_index)
 
         # Save the rest of the template.
-        buffer.append(template[pos:])
+        parse_tree.append(template[index:])
 
-        return buffer
+        return parse_tree
 
     def _handle_match(self, template, match, buffer, index):
         # Normalize the captures dictionary.
