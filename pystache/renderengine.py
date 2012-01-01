@@ -366,7 +366,16 @@ class Template(object):
         self.template = template
 
     def _compile_regexps(self):
-        tags = {'otag': re.escape(self.otag), 'ctag': re.escape(self.ctag)}
+
+        # The possible tag type characters following the opening tag,
+        # excluding "=" and "{".
+        tag_types = "!>&/#^"
+
+        # TODO: are we following this in the spec?
+        #
+        #   The tag's content MUST be a non-whitespace character sequence
+        #   NOT containing the current closing delimiter.
+        #
         tag = r"""
             (?P<content>[\s\S]*?)
             (?P<whitespace>[\ \t]*)
@@ -374,11 +383,12 @@ class Template(object):
             (?:
               (?P<change>=) \s* (?P<delims>.+?)   \s* = |
               (?P<raw>{)    \s* (?P<raw_name>.+?) \s* } |
-              (?P<tag>\W?)  \s* (?P<name>[\s\S]+?)
+              (?P<tag>[%(tag_types)s]?)  \s* (?P<name>[\s\S]+?)
             )
             \s* %(ctag)s
-        """
-        self.tag_re = re.compile(tag % tags, re.M | re.X)
+        """ % {'tag_types': tag_types, 'otag': re.escape(self.otag), 'ctag': re.escape(self.ctag)}
+
+        self.tag_re = re.compile(tag, re.M | re.X)
 
     def to_unicode(self, text):
         return unicode(text)
