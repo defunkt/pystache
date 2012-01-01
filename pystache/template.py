@@ -65,15 +65,6 @@ def render(template, view, delims=('{{', '}}')):
     parse_tree = parse_to_tree(template, view, delims)
     return render_parse_tree(parse_tree, view, template)
 
-## The possible function parse-tree elements:
-
-def partialTag(name, indentation=''):
-    def func(self):
-        nonblank = re.compile(r'^(.)', re.M)
-        template = re.sub(nonblank, indentation + r'\1', self.partial(name))
-        return render(template, self)
-    return func
-
 def sectionTag(name, parse_tree_, template_, delims):
     def func(self):
         template = template_
@@ -160,6 +151,13 @@ class Template(object):
             return self.to_unicode(render(template, context))
         return func
 
+    def partial_tag_function(self, name, indentation=''):
+        def func(context):
+            nonblank = re.compile(r'^(.)', re.M)
+            template = re.sub(nonblank, indentation + r'\1', context.partial(name))
+            return render(template, context)
+        return func
+
     def parse_to_tree(self, index=0):
         """
         Parse a template into a syntax tree.
@@ -224,7 +222,7 @@ class Template(object):
             return end_index
 
         if captures['tag'] == '>':
-            func = partialTag(name, captures['whitespace'])
+            func = self.partial_tag_function(name, captures['whitespace'])
         elif captures['tag'] in ['#', '^']:
 
             try:
