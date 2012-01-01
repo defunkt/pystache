@@ -164,20 +164,20 @@ class Template(object):
 
         # Save the literal text content.
         buffer.append(captures['content'])
-        pos = match.end()
+        end_index = match.end()
         tagPos = match.end('content')
 
         # Standalone (non-interpolation) tags consume the entire line,
         # both leading whitespace and trailing newline.
         tagBeganLine = not tagPos or template[tagPos - 1] in ['\r', '\n']
-        tagEndedLine = (pos == len(template) or template[pos] in ['\r', '\n'])
+        tagEndedLine = (end_index == len(template) or template[end_index] in ['\r', '\n'])
         interpolationTag = captures['tag'] in ['', '&', '{']
 
         if (tagBeganLine and tagEndedLine and not interpolationTag):
-            if pos < len(template):
-                pos += template[pos] == '\r' and 1 or 0
-            if pos < len(template):
-                pos += template[pos] == '\n' and 1 or 0
+            if end_index < len(template):
+                end_index += template[end_index] == '\r' and 1 or 0
+            if end_index < len(template):
+                end_index += template[end_index] == '\n' and 1 or 0
         elif captures['whitespace']:
             buffer.append(captures['whitespace'])
             tagPos += len(captures['whitespace'])
@@ -193,16 +193,16 @@ class Template(object):
             buffer.append(partialTag(name, captures['whitespace']))
         elif captures['tag'] in ['#', '^']:
             try:
-                self.parse_to_tree(template, index=pos)
+                self.parse_to_tree(template, index=end_index)
             except EndOfSection as e:
                 bufr = e.buffer
                 tmpl = e.template
-                pos  = e.position
+                end_index  = e.position
 
             tag = { '#': sectionTag, '^': inverseTag }[captures['tag']]
             buffer.append(tag(name, bufr, tmpl, (self.otag, self.ctag)))
         elif captures['tag'] == '/':
-            raise EndOfSection(buffer, template[start_index:tagPos], pos)
+            raise EndOfSection(buffer, template[start_index:tagPos], end_index)
         elif captures['tag'] in ['{', '&']:
             buffer.append(unescapedTag(name, (self.otag, self.ctag)))
         elif captures['tag'] == '':
@@ -210,7 +210,7 @@ class Template(object):
         else:
             raise Exception("'%s' is an unrecognized type!" % captures['tag'])
 
-        return pos
+        return end_index
 
     def render(self, encoding=None):
         result = render(self.template, self.view)
