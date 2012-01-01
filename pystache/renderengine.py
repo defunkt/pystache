@@ -116,11 +116,13 @@ class RenderEngine(object):
           context: a Context instance.
 
         """
-        self.context = context
+        _template = Template(template=template)
 
-        self._compile_regexps()
+        _template.to_unicode = self.literal
+        _template.escape = self.escape
+        _template.partial = self.load_partial
 
-        return self._render(template)
+        return _template.render_template(template=template, context=context)
 
     def _compile_regexps(self):
         """
@@ -333,14 +335,13 @@ def call(val, view, template=None):
 
     return unicode(val)
 
-def render_parse_tree(parse_tree, view, template):
+def render_parse_tree(parse_tree, context, template):
     """
     Convert a parse-tree into a string.
 
     """
-    get_string = lambda val: call(val, view, template)
+    get_string = lambda val: call(val, context, template)
     parts = map(get_string, parse_tree)
-
     return ''.join(parts)
 
 def inverseTag(name, parsed, template, delims):
@@ -361,16 +362,8 @@ class Template(object):
     tag_re = None
     otag, ctag = '{{', '}}'
 
-    def __init__(self, template=None, context={}, **kwargs):
-        from view import View
-
+    def __init__(self, template=None):
         self.template = template
-
-        if kwargs:
-            context.update(kwargs)
-
-        self.view = context if isinstance(context, View) else View(context=context)
-        self._compile_regexps()
 
     def _compile_regexps(self):
         tags = {'otag': re.escape(self.otag), 'ctag': re.escape(self.ctag)}
@@ -397,16 +390,31 @@ class Template(object):
         return context.partial(name)
 
     def escape_tag_function(self, name):
-        fetch = self.literal_tag_function(name)
+        get_literal = self.literal_tag_function(name)
         def func(context):
-            return self.escape(fetch(context))
+            u = get_literal(context)
+            u = self.escape(u)
+            return u
         return func
 
     def literal_tag_function(self, name):
         def func(context):
             val = context.get(name)
-            template = call(val=val, view=context)
-            return self.to_unicode(self.render_template(template, context))
+
+            if callable(val):
+                # According to the spec:
+                #
+                #     When used as the data value for an Interpolation tag,
+                #     the lambda MUST be treatable as an arity 0 function,
+                #     and invoked as such.  The returned value MUST be
+                #     rendered against the default delimiters, then
+                #     interpolated in place of the lambda.
+                template = val()
+                val = self.render_template(template, context)
+
+            u = self.to_unicode(val)
+            return u
+
         return func
 
     def partial_tag_function(self, name, indentation=''):
@@ -432,22 +440,23 @@ class Template(object):
 
             parts = []
             for element in data:
-                context.context_list.insert(0, element)
+                context.push(element)
                 parts.append(render_parse_tree(parse_tree, context, delims))
-                del context.context_list[0]
+                context.pop()
 
             return ''.join(parts)
         return func
 
-    def parse_string_to_tree(self, template, view, delims=('{{', '}}')):
+    def parse_string_to_tree(self, template, delims=('{{', '}}')):
 
         template = Template(template)
 
-        template.view = view
-        template.to_unicode = self.to_unicode
+        template.otag = delims[0]
+        template.ctag = delims[1]
+
         template.escape = self.escape
         template.partial = self.partial
-        template.otag, template.ctag = delims
+        template.to_unicode = self.to_unicode
 
         template._compile_regexps()
 
@@ -550,22 +559,17 @@ class Template(object):
 
         return end_index
 
-    def render_template(self, template, view, delims=('{{', '}}')):
+    def render_template(self, template, context, delims=('{{', '}}')):
         """
         Arguments:
 
           template: template string
-          view: context
+          context: a Context instance
 
         """
-        parse_tree = self.parse_string_to_tree(template, view, delims)
-        return render_parse_tree(parse_tree, view, template)
+        if not isinstance(template, basestring):
+            raise AssertionError("template: %s" % repr(template))
 
-    def render(self, encoding=None):
-        result = self.render_template(self.template, self.view)
-        if encoding is not None:
-            result = result.encode(encoding)
-
-        return result
-
+        parse_tree = self.parse_string_to_tree(template=template, delims=delims)
+        return render_parse_tree(parse_tree, context, template)
 
