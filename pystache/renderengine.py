@@ -17,7 +17,7 @@ DEFAULT_TAG_CLOSING = '}}'
 END_OF_LINE_CHARACTERS = ['\r', '\n']
 
 
-def call(val, view, template=None):
+def call(val, view):
     """
     Arguments:
 
@@ -26,11 +26,16 @@ def call(val, view, template=None):
         * a unicode string
         * the return value of a call to any of the following:
 
-           * RenderEngine.partial_tag_function()
-           * RenderEngine.section_tag_function()
-           * inverseTag()
-           * RenderEngine.literal_tag_function()
-           * RenderEngine.escape_tag_function()
+           * RenderEngine._make_get_literal():
+               Args: context
+           * RenderEngine._make_get_escaped():
+               Args: context
+           * RenderEngine._make_get_partial()
+               Args: context
+           * RenderEngine._make_get_section()
+               Args: context
+           * _make_get_inverse()
+               Args: context
 
     """
     if callable(val):
@@ -62,23 +67,24 @@ def call(val, view, template=None):
     return unicode(val)
 
 
-def render_parse_tree(parse_tree, context, template):
+def render_parse_tree(parse_tree, context):
     """
     Convert a parse-tree into a string.
 
     """
-    get_string = lambda val: call(val, context, template)
+    get_string = lambda val: call(val, context)
     parts = map(get_string, parse_tree)
     return ''.join(parts)
 
 
-def inverseTag(name, parsed, template, delims):
-    def func(self):
-        data = self.get(name)
+def _make_get_inverse(name, parsed, template, delims):
+    def get_inverse(context):
+        data = context.get(name)
         if data:
             return ''
-        return render_parse_tree(parsed, self, delims)
-    return func
+        return render_parse_tree(parsed, context)
+
+    return get_inverse
 
 
 class EndOfSection(Exception):
@@ -177,7 +183,7 @@ class RenderEngine(object):
             raise Exception("Argument 'template' not unicode: %s: %s" % (type(template), repr(template)))
 
         parse_tree = self.parse_string_to_tree(template_string=template)
-        return render_parse_tree(parse_tree, context, template)
+        return render_parse_tree(parse_tree, context)
 
     def parse_string_to_tree(self, template_string, delims=None):
 
@@ -255,33 +261,36 @@ class RenderEngine(object):
 
         return val
 
-    def escape_tag_function(self, name):
-        get_literal = self.literal_tag_function(name)
-        def func(context):
-            s = self._get_string_value(context, name)
-            s = self.escape(s)
-            return s
-        return func
-
-    def literal_tag_function(self, name):
-        def func(context):
+    def _make_get_literal(self, name):
+        def get_literal(context):
             s = self._get_string_value(context, name)
             s = self.literal(s)
             return s
 
-        return func
+        return get_literal
 
-    def partial_tag_function(self, name, indentation=''):
-        def func(context):
+    def _make_get_escaped(self, name):
+        get_literal = self._make_get_literal(name)
+
+        def get_escaped(context):
+            s = self._get_string_value(context, name)
+            s = self.escape(s)
+            return s
+
+        return get_escaped
+
+    def _make_get_partial(self, name, indentation=''):
+        def get_partial(context):
             nonblank = re.compile(r'^(.)', re.M)
             template = self.load_partial(name)
             # Indent before rendering.
             template = re.sub(nonblank, indentation + r'\1', template)
             return self._render_template(template, context)
-        return func
 
-    def section_tag_function(self, name, parse_tree_, template_, delims):
-        def func(context):
+        return get_partial
+
+    def _make_get_section(self, name, parse_tree_, template_, delims):
+        def get_section(context):
             template = template_
             parse_tree = parse_tree_
             data = context.get(name)
@@ -298,11 +307,12 @@ class RenderEngine(object):
             parts = []
             for element in data:
                 context.push(element)
-                parts.append(render_parse_tree(parse_tree, context, delims))
+                parts.append(render_parse_tree(parse_tree, context))
                 context.pop()
 
             return ''.join(parts)
-        return func
+
+        return get_section
 
     def parse_to_tree(self, template, index=0):
         """
@@ -366,7 +376,7 @@ class RenderEngine(object):
             return end_index
 
         if captures['tag'] == '>':
-            func = self.partial_tag_function(name, captures['whitespace'])
+            func = self._make_get_partial(name, captures['whitespace'])
         elif captures['tag'] in ['#', '^']:
 
             try:
@@ -376,16 +386,16 @@ class RenderEngine(object):
                 tmpl = e.template
                 end_index = e.position
 
-            tag = self.section_tag_function if captures['tag'] == '#' else inverseTag
+            tag = self._make_get_section if captures['tag'] == '#' else _make_get_inverse
             func = tag(name, bufr, tmpl, (self.otag, self.ctag))
 
         elif captures['tag'] in ['{', '&']:
 
-            func = self.literal_tag_function(name)
+            func = self._make_get_literal(name)
 
         elif captures['tag'] == '':
 
-            func = self.escape_tag_function(name)
+            func = self._make_get_escaped(name)
 
         elif captures['tag'] == '/':
 
