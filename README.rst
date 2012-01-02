@@ -20,7 +20,9 @@ Logo: David Phillips - http://davidphillips.us/
 Documentation
 =============
 
-The different Mustache tags are documented at `mustache(5)`_.
+The `mustache(5)`_ man page is the main entry point for understanding
+Mustache syntax.  Beyond this, the Mustache spec_ provides more complete
+(and more current) documentation of Mustache's behavior.
 
 Install It
 ==========
@@ -41,9 +43,10 @@ Use It
 
 You can also create dedicated view classes to hold your view logic.
 
-Here's your view class (in ``examples/readme.py``)::
+Here's your view class (in examples/readme.py)::
 
     class SayHello(object):
+
         def to(self):
             return "Pizza"
 
@@ -52,7 +55,7 @@ Like so::
     >>> from examples.readme import SayHello
     >>> hello = SayHello()
 
-Then your template, ``say_hello.mustache``::
+Then your template, say_hello.mustache::
 
     Hello, {{to}}!
 
@@ -72,7 +75,7 @@ nose_ works great! ::
     cd pystache
     nosetests
 
-To include tests from the mustache spec_ in your test runs: ::
+To include tests from the Mustache spec_ in your test runs: ::
 
     git submodule init
     git submodule update
@@ -84,7 +87,8 @@ To run all available tests (including doctests)::
 
 Mailing List
 ==================
-As of Nov 26, 2011, there's a mailing list, pystache@librelist.com.
+
+As of November 2011, there's a mailing list, pystache@librelist.com.
 
 Archive: http://librelist.com/browser/pystache/
 
@@ -96,8 +100,9 @@ Author
 
 ::
 
-    context = { 'author': 'Chris Wanstrath', 'email': 'chris@ozmm.org' }
-    pystache.render("{{author}} :: {{email}}", context)
+    >>> context = { 'author': 'Chris Wanstrath', 'email': 'chris@ozmm.org' }
+    >>> pystache.render("{{author}} :: {{email}}", context)
+    u'Chris Wanstrath :: chris@ozmm.org'
 
 
 .. _ctemplate: http://code.google.com/p/google-ctemplate/
