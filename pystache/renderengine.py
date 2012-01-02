@@ -159,7 +159,35 @@ class RenderEngine(object):
         # don't use self.literal).
         template = unicode(template)
 
-        return self.render_template(template=template, context=context)
+        return self._render_template(template=template, context=context)
+
+    def _render_template(self, template, context):
+        """
+        Arguments:
+
+          template: template string
+          context: a Context instance
+
+        """
+        if type(template) is not unicode:
+            raise Exception("Argument 'template' not unicode: %s: %s" % (type(template), repr(template)))
+
+        parse_tree = self.parse_string_to_tree(template_string=template)
+        return render_parse_tree(parse_tree, context, template)
+
+    def parse_string_to_tree(self, template_string, delims=None):
+
+        engine = RenderEngine(load_partial=self.load_partial,
+                              literal=self.literal,
+                              escape=self.escape)
+
+        if delims is not None:
+            engine.otag = delims[0]
+            engine.ctag = delims[1]
+
+        engine._compile_regexps()
+
+        return engine.parse_to_tree(template=template_string)
 
     def _compile_regexps(self):
 
@@ -216,7 +244,7 @@ class RenderEngine(object):
                 template = str(template)
             if type(template) is not unicode:
                 template = self.literal(template)
-            val = self.render_template(template, context)
+            val = self._render_template(template, context)
 
         if not isinstance(val, basestring):
             val = str(val)
@@ -245,7 +273,7 @@ class RenderEngine(object):
             template = self.load_partial(name)
             # Indent before rendering.
             template = re.sub(nonblank, indentation + r'\1', template)
-            return self.render_template(template, context)
+            return self._render_template(template, context)
         return func
 
     def section_tag_function(self, name, parse_tree_, template_, delims):
@@ -271,18 +299,6 @@ class RenderEngine(object):
 
             return ''.join(parts)
         return func
-
-    def parse_string_to_tree(self, template_string, delims=None):
-
-        engine = RenderEngine(load_partial=self.load_partial, literal=self.literal, escape=self.escape)
-
-        if delims is not None:
-            engine.otag = delims[0]
-            engine.ctag = delims[1]
-
-        engine._compile_regexps()
-
-        return engine.parse_to_tree(template=template_string)
 
     def parse_to_tree(self, template, index=0):
         """
@@ -378,18 +394,4 @@ class RenderEngine(object):
         parse_tree.append(func)
 
         return end_index
-
-    def render_template(self, template, context):
-        """
-        Arguments:
-
-          template: template string
-          context: a Context instance
-
-        """
-        if type(template) is not unicode:
-            raise Exception("Argument 'template' not unicode: %s: %s" % (type(template), repr(template)))
-
-        parse_tree = self.parse_string_to_tree(template_string=template)
-        return render_parse_tree(parse_tree, context, template)
 
