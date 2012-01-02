@@ -51,15 +51,8 @@ def call(val, view):
 
         if args_count is 0:
             val = val()
-        elif args_count is 1 and args[0] in ['self', 'context']:
-            val = val(view)
-        elif args_count is 1:
-            val = val(template)
         else:
-            val = val(view, template)
-
-    if callable(val):
-        val = val(template)
+            val = val(view)
 
     if val is None:
         val = ''
