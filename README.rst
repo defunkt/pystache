@@ -4,8 +4,8 @@ Pystache
 
 .. image:: https://s3.amazonaws.com/webdev_bucket/pystache.png
 
-Inspired by ctemplate_ and et_, Mustache_ is a
-framework-agnostic way to render logic-free views.
+Mustache_ is a framework-agnostic way to render logic-free views that is
+inspired by ctemplate_ and et_.
 
 As ctemplates says, "It emphasizes separating logic from presentation:
 it is impossible to embed application logic in this template language."
