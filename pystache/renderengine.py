@@ -5,11 +5,7 @@ Defines a class responsible for rendering logic.
 
 """
 
-import cgi
-import collections
-import inspect
 import re
-import types
 
 
 DEFAULT_TAG_OPENING = '{{'
