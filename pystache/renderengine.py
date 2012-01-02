@@ -100,7 +100,9 @@ class RenderEngine(object):
     unicode subclasses (e.g. markupsafe.Markup).
 
     """
+
     tag_re = None
+
     otag = '{{'
     ctag = '}}'
 
@@ -155,18 +157,7 @@ class RenderEngine(object):
         # don't use self.literal).
         template = unicode(template)
 
-        _template = Template()
-
-        _template.to_unicode = self.literal
-        _template.escape = self.escape
-        _template.get_partial = self.load_partial
-
-        return _template.render_template(template=template, context=context)
-
-
-class Template(object):
-    tag_re = None
-    otag, ctag = '{{', '}}'
+        return self.render_template(template=template, context=context)
 
     def _compile_regexps(self):
 
@@ -192,15 +183,6 @@ class Template(object):
         """ % {'tag_types': tag_types, 'otag': re.escape(self.otag), 'ctag': re.escape(self.ctag)}
 
         self.tag_re = re.compile(tag, re.M | re.X)
-
-    def to_unicode(self, text):
-        return unicode(text)
-
-    def escape(self, text):
-        return cgi.escape(text, True)
-
-    def get_partial(self, name):
-        pass
 
     def _get_string_value(self, context, tag_name):
         """
@@ -231,7 +213,7 @@ class Template(object):
                 # In case the template is an integer, for example.
                 template = str(template)
             if type(template) is not unicode:
-                template = self.to_unicode(template)
+                template = self.literal(template)
             val = self.render_template(template, context)
 
         if not isinstance(val, basestring):
@@ -250,7 +232,7 @@ class Template(object):
     def literal_tag_function(self, name):
         def func(context):
             s = self._get_string_value(context, name)
-            s = self.to_unicode(s)
+            s = self.literal(s)
             return s
 
         return func
@@ -258,7 +240,7 @@ class Template(object):
     def partial_tag_function(self, name, indentation=''):
         def func(context):
             nonblank = re.compile(r'^(.)', re.M)
-            template = self.get_partial(name)
+            template = self.load_partial(name)
             # Indent before rendering.
             template = re.sub(nonblank, indentation + r'\1', template)
             return self.render_template(template, context)
@@ -290,18 +272,14 @@ class Template(object):
 
     def parse_string_to_tree(self, template_string, delims=('{{', '}}')):
 
-        template = Template()
+        engine = RenderEngine(load_partial=self.load_partial, literal=self.literal, escape=self.escape)
 
-        template.otag = delims[0]
-        template.ctag = delims[1]
+        engine.otag = delims[0]
+        engine.ctag = delims[1]
 
-        template.escape = self.escape
-        template.get_partial = self.get_partial
-        template.to_unicode = self.to_unicode
+        engine._compile_regexps()
 
-        template._compile_regexps()
-
-        return template.parse_to_tree(template=template_string)
+        return engine.parse_to_tree(template=template_string)
 
     def parse_to_tree(self, template, index=0):
         """
