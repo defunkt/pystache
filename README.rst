@@ -5,29 +5,24 @@ Pystache
 .. image:: https://s3.amazonaws.com/webdev_bucket/pystache.png
 
 Mustache_ is a framework-agnostic way to render logic-free views that is
-inspired by ctemplate_ and et_.
+inspired by ctemplate_ and et_.  Like ctemplate_, "it emphasizes
+separating logic from presentation: it is impossible to embed application
+logic in this template language."
 
-As ctemplates says, "It emphasizes separating logic from presentation:
-it is impossible to embed application logic in this template language."
+The `mustache(5)`_ man page provides a good introduction to Mustache's
+syntax.  For a more complete (and more current) description of Mustache's
+behavior, see the official Mustache spec_.
 
-Pystache is a Python implementation of Mustache.  Currently, it passes
-all tests in version v1.0.3_ of the Mustache spec_.
+Pystache_ is a Python implementation of Mustache.  It currently passes
+all tests in `version 1.0.3`_ of the Mustache spec_.  Pystache itself is
+`semantically versioned`_.
 
-Pystache is semantically versioned: http://semver.org.
-
-Logo: David Phillips - http://davidphillips.us/
+Logo: `David Phillips`_
 
 Requirements
 ============
 
 Pystache is currently tested under Python 2.6.
-
-Documentation
-=============
-
-The `mustache(5)`_ man page is the main entry point for understanding
-Mustache syntax.  Beyond this, the Mustache spec_ provides more complete
-(and more current) documentation of Mustache's behavior.
 
 Install It
 ==========
@@ -111,9 +106,12 @@ Author
 
 
 .. _ctemplate: http://code.google.com/p/google-ctemplate/
+.. _David Phillips: http://davidphillips.us/
 .. _et: http://www.ivan.fomichev.name/2008/05/erlang-template-engine-prototype.html
-.. _Mustache: http://defunkt.github.com/mustache/
+.. _Mustache: http://mustache.github.com/
 .. _mustache(5): http://mustache.github.com/mustache.5.html
 .. _nose: http://somethingaboutorange.com/mrl/projects/nose/0.11.1/testing.html
+.. _Pystache: https://github.com/defunkt/pystache
+.. _semantically versioned: http://semver.org
 .. _spec: https://github.com/mustache/spec
-.. _v1.0.3: https://github.com/mustache/spec/tree/48c933b0bb780875acbfd15816297e263c53d6f7
+.. _version 1.0.3: https://github.com/mustache/spec/tree/48c933b0bb780875acbfd15816297e263c53d6f7
