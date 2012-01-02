@@ -283,5 +283,18 @@ class RenderTests(unittest.TestCase):
         """
         template = '{{=[[ ]]=}}[[#foo]]bar[[/foo]]'
         context = {'foo': True}
-        self._assert_render("bar", template, context)
+        self._assert_render(u"bar", template, context)
 
+    def test_sections__nested_truthy(self):
+        """
+        Check that "nested truthy" sections get rendered.
+
+        Test case for issue #24: https://github.com/defunkt/pystache/issues/24
+
+        This test is copied from the spec.  We explicitly include it to
+        prevent regressions for those who don't pull down the spec tests.
+
+        """
+        template = "| A {{#bool}}B {{#bool}}C{{/bool}} D{{/bool}} E |"
+        context = {'bool': True}
+        self._assert_render(u"| A B C D E |", template, context)
