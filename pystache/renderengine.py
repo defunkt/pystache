@@ -22,30 +22,6 @@ except ImportError:
         return hasattr(it, '__call__')
 
 
-class Modifiers(dict):
-
-    """Dictionary with a decorator for assigning functions to keys."""
-
-    def set(self, key):
-        """
-        Return a decorator that assigns the given function to the given key.
-
-        >>> modifiers = Modifiers()
-        >>>
-        >>> @modifiers.set('P')
-        ... def render_tongue(tag_name, context):
-        ...     return "%s :P" % context.get(tag_name)
-        >>>
-        >>> modifiers['P']('text', {'text': 'hello!'})
-        'hello! :P'
-
-        """
-        def decorate(func):
-            self[key] = func
-            return func
-        return decorate
-
-
 class RenderEngine(object):
 
     """
@@ -67,8 +43,6 @@ class RenderEngine(object):
     tag_re = None
     otag = '{{'
     ctag = '}}'
-
-    modifiers = Modifiers()
 
     def __init__(self, load_partial=None, literal=None, escape=None):
         """
@@ -210,7 +184,6 @@ class RenderEngine(object):
 
         return val
 
-    @modifiers.set(None)
     def _render_escaped(self, tag_name):
         """
         Return a variable value as an escaped unicode string.
@@ -219,8 +192,6 @@ class RenderEngine(object):
         s = self._get_string_context(tag_name)
         return self.escape(s)
 
-    @modifiers.set('{')
-    @modifiers.set('&')
     def _render_literal(self, tag_name):
         """
         Return a variable value as a unicode string (unescaped).
@@ -229,16 +200,13 @@ class RenderEngine(object):
         s = self._get_string_context(tag_name)
         return self.literal(s)
 
-    @modifiers.set('!')
     def _render_comment(self, tag_name):
         return ''
 
-    @modifiers.set('>')
     def _render_partial(self, template_name):
         template = self.load_partial(template_name)
         return self._render(template)
 
-    @modifiers.set('=')
     def _change_delimiter(self, tag_name):
         """
         Change the current delimiter.
