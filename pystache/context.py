@@ -112,6 +112,19 @@ class Context(object):
         """
         self._stack = list(items)
 
+    def __repr__(self):
+        """
+        Return a string representation of the instance.
+
+        For example--
+
+        >>> context = Context({'alpha': 'abc'}, {'numeric': 123})
+        >>> repr(context)
+        "Context({'alpha': 'abc'}, {'numeric': 123})"
+
+        """
+        return "%s%s" % (self.__class__.__name__, tuple(self._stack))
+
     @staticmethod
     def create(*context, **kwargs):
         """

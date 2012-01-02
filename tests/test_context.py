@@ -189,6 +189,26 @@ class ContextTests(TestCase):
         """
         context = Context({}, {}, {})
 
+    def test__repr(self):
+        context = Context()
+        self.assertEquals(repr(context), 'Context()')
+
+        context = Context({'foo': 'bar'})
+        self.assertEquals(repr(context), "Context({'foo': 'bar'},)")
+
+        context = Context({'foo': 'bar'}, {'abc': 123})
+        self.assertEquals(repr(context), "Context({'foo': 'bar'}, {'abc': 123})")
+
+    def test__str(self):
+        context = Context()
+        self.assertEquals(str(context), 'Context()')
+
+        context = Context({'foo': 'bar'})
+        self.assertEquals(str(context), "Context({'foo': 'bar'},)")
+
+        context = Context({'foo': 'bar'}, {'abc': 123})
+        self.assertEquals(str(context), "Context({'foo': 'bar'}, {'abc': 123})")
+
     ## Test the static create() method.
 
     def test_create__dictionary(self):
