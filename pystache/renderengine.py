@@ -17,16 +17,6 @@ DEFAULT_TAG_CLOSING = '}}'
 END_OF_LINE_CHARACTERS = ['\r', '\n']
 
 
-try:
-    # The collections.Callable class is not available until Python 2.6.
-    import collections.Callable
-    def check_callable(it):
-        return isinstance(it, collections.Callable)
-except ImportError:
-    def check_callable(it):
-        return hasattr(it, '__call__')
-
-
 # TODO: what are the possibilities for val?
 def call(val, view, template=None):
     if callable(val):
