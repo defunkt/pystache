@@ -17,8 +17,10 @@ DEFAULT_TAG_CLOSING = '}}'
 END_OF_LINE_CHARACTERS = ['\r', '\n']
 
 
-def call(val, view):
+def call(val, context):
     """
+    Returns: a string of type unicode.
+
     Arguments:
 
       val: the argument val can be any of the following:
@@ -28,53 +30,48 @@ def call(val, view):
 
            * RenderEngine._make_get_literal():
                Args: context
+               Returns: unicode
            * RenderEngine._make_get_escaped():
                Args: context
+               Returns: unicode
            * RenderEngine._make_get_partial()
                Args: context
+               Returns: unicode
            * RenderEngine._make_get_section()
                Args: context
+               Returns: unicode
            * _make_get_inverse()
                Args: context
+               Returns: unicode
 
     """
     if callable(val):
-        (args, _, _, _) = inspect.getargspec(val)
+        val = val(context)
 
-        args_count = len(args)
-
-        if not isinstance(val, types.FunctionType):
-            # Then val is an instance method.  Subtract one from the
-            # argument count because Python will automatically prepend
-            # self to the argument list when calling.
-            args_count -=1
-
-        if args_count is 0:
-            val = val()
-        else:
-            val = val(view)
-
-    if val is None:
-        val = ''
-
-    return unicode(val)
+    return val
 
 
 def render_parse_tree(parse_tree, context):
     """
-    Convert a parse-tree into a string.
+    Returns: a string of type unicode.
 
     """
     get_string = lambda val: call(val, context)
     parts = map(get_string, parse_tree)
-    return ''.join(parts)
+    s = ''.join(parts)
+
+    return unicode(s)
 
 
 def _make_get_inverse(name, parsed):
     def get_inverse(context):
+        """
+        Returns a string with type unicode.
+
+        """
         data = context.get(name)
         if data:
-            return ''
+            return u''
         return render_parse_tree(parsed, context)
 
     return get_inverse
@@ -166,6 +163,8 @@ class RenderEngine(object):
 
     def _render_template(self, template, context):
         """
+        Returns: a string of type unicode.
+
         Arguments:
 
           template: template string
@@ -256,6 +255,10 @@ class RenderEngine(object):
 
     def _make_get_literal(self, name):
         def get_literal(context):
+            """
+            Returns: a string of type unicode.
+
+            """
             s = self._get_string_value(context, name)
             s = self.literal(s)
             return s
@@ -266,6 +269,10 @@ class RenderEngine(object):
         get_literal = self._make_get_literal(name)
 
         def get_escaped(context):
+            """
+            Returns: a string of type unicode.
+
+            """
             s = self._get_string_value(context, name)
             s = self.escape(s)
             return s
@@ -274,6 +281,10 @@ class RenderEngine(object):
 
     def _make_get_partial(self, name, indentation=''):
         def get_partial(context):
+            """
+            Returns: a string of type unicode.
+
+            """
             nonblank = re.compile(r'^(.)', re.M)
             template = self.load_partial(name)
             # Indent before rendering.
@@ -284,6 +295,10 @@ class RenderEngine(object):
 
     def _make_get_section(self, name, parse_tree_, template_, delims):
         def get_section(context):
+            """
+            Returns: a string of type unicode.
+
+            """
             template = template_
             parse_tree = parse_tree_
             data = context.get(name)
@@ -303,7 +318,7 @@ class RenderEngine(object):
                 parts.append(render_parse_tree(parse_tree, context))
                 context.pop()
 
-            return ''.join(parts)
+            return unicode(''.join(parts))
 
         return get_section
 
