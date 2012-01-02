@@ -285,6 +285,17 @@ class RenderTests(unittest.TestCase):
         context = {'foo': True}
         self._assert_render(u"bar", template, context)
 
+    def test_custom_delimiters__not_retroactive(self):
+        """
+        Check that changing custom delimiters back is not "retroactive."
+
+        Test case for issue #35: https://github.com/defunkt/pystache/issues/35
+
+        """
+        expected = u' {{foo}} '
+        self._assert_render(expected, '{{=$ $=}} {{foo}} ')
+        self._assert_render(expected, '{{=$ $=}} {{foo}} $={{ }}=$')  # was yielding u'  '.
+
     def test_sections__nested_truthy(self):
         """
         Check that "nested truthy" sections get rendered.
