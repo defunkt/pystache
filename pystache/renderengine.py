@@ -155,7 +155,7 @@ class RenderEngine(object):
         # don't use self.literal).
         template = unicode(template)
 
-        _template = Template(template=template)
+        _template = Template()
 
         _template.to_unicode = self.literal
         _template.escape = self.escape
@@ -167,9 +167,6 @@ class RenderEngine(object):
 class Template(object):
     tag_re = None
     otag, ctag = '{{', '}}'
-
-    def __init__(self, template=None):
-        self.template = template
 
     def _compile_regexps(self):
 
@@ -277,7 +274,7 @@ class Template(object):
             elif callable(data):
                 # TODO: should we check the arity?
                 template = data(template)
-                parse_tree = self.parse_string_to_tree(template, delims)
+                parse_tree = self.parse_string_to_tree(template_string=template, delims=delims)
                 data = [ data ]
             elif type(data) not in [list, tuple]:
                 data = [ data ]
@@ -291,9 +288,9 @@ class Template(object):
             return ''.join(parts)
         return func
 
-    def parse_string_to_tree(self, template, delims=('{{', '}}')):
+    def parse_string_to_tree(self, template_string, delims=('{{', '}}')):
 
-        template = Template(template)
+        template = Template()
 
         template.otag = delims[0]
         template.ctag = delims[1]
@@ -304,15 +301,14 @@ class Template(object):
 
         template._compile_regexps()
 
-        return template.parse_to_tree()
+        return template.parse_to_tree(template=template_string)
 
-    def parse_to_tree(self, index=0):
+    def parse_to_tree(self, template, index=0):
         """
         Parse a template into a syntax tree.
 
         """
         parse_tree = []
-        template = self.template
         start_index = index
 
         while True:
@@ -325,15 +321,14 @@ class Template(object):
             match_index = match.end('content')
             end_index = match.end()
 
-            index = self._handle_match(parse_tree, captures, start_index, match_index, end_index)
+            index = self._handle_match(template, parse_tree, captures, start_index, match_index, end_index)
 
         # Save the rest of the template.
         parse_tree.append(template[index:])
 
         return parse_tree
 
-    def _handle_match(self, parse_tree, captures, start_index, match_index, end_index):
-        template = self.template
+    def _handle_match(self, template, parse_tree, captures, start_index, match_index, end_index):
 
         # Normalize the captures dictionary.
         if captures['change'] is not None:
@@ -374,7 +369,7 @@ class Template(object):
         elif captures['tag'] in ['#', '^']:
 
             try:
-                self.parse_to_tree(index=end_index)
+                self.parse_to_tree(template=template, index=end_index)
             except EndOfSection as e:
                 bufr = e.parse_tree
                 tmpl = e.template
@@ -414,6 +409,6 @@ class Template(object):
         if type(template) is not unicode:
             raise Exception("Argument 'template' not unicode: %s: %s" % (type(template), repr(template)))
 
-        parse_tree = self.parse_string_to_tree(template=template, delims=delims)
+        parse_tree = self.parse_string_to_tree(template_string=template, delims=delims)
         return render_parse_tree(parse_tree, context, template)
 
