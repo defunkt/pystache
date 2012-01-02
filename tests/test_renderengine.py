@@ -283,7 +283,7 @@ class RenderTests(unittest.TestCase):
         """
         template = '{{=[[ ]]=}}[[#foo]]bar[[/foo]]'
         context = {'foo': True}
-        self._assert_render(u"bar", template, context)
+        self._assert_render(u'bar', template, context)
 
     def test_custom_delimiters__not_retroactive(self):
         """
@@ -306,6 +306,22 @@ class RenderTests(unittest.TestCase):
         prevent regressions for those who don't pull down the spec tests.
 
         """
-        template = "| A {{#bool}}B {{#bool}}C{{/bool}} D{{/bool}} E |"
+        template = '| A {{#bool}}B {{#bool}}C{{/bool}} D{{/bool}} E |'
         context = {'bool': True}
-        self._assert_render(u"| A B C D E |", template, context)
+        self._assert_render(u'| A B C D E |', template, context)
+
+    def test_sections__nested_with_same_keys(self):
+        """
+        Check a doubly-nested section with the same context key.
+
+        Test case for issue #36: https://github.com/defunkt/pystache/issues/36
+
+        """
+        # Start with an easier, working case.
+        template = '{{#x}}{{#z}}{{y}}{{/z}}{{/x}}'
+        context = {'x': {'z': {'y': 1}}}
+        self._assert_render(u'1', template, context)
+
+        template = '{{#x}}{{#x}}{{y}}{{/x}}{{/x}}'
+        context = {'x': {'x': {'y': 1}}}
+        self._assert_render(u'1', template, context)
