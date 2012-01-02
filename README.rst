@@ -10,12 +10,17 @@ inspired by ctemplate_ and et_.
 As ctemplates says, "It emphasizes separating logic from presentation:
 it is impossible to embed application logic in this template language."
 
-Pystache is a Python implementation of Mustache. Pystache requires
-Python 2.6.
+Pystache is a Python implementation of Mustache.  Currently, it passes
+all tests in version 1.0.3_ of the Mustache spec_.
 
 Pystache is semantically versioned: http://semver.org.
 
 Logo: David Phillips - http://davidphillips.us/
+
+Requirements
+============
+
+Pystache is currently tested under Python 2.6.
 
 Documentation
 =============
@@ -111,3 +116,4 @@ Author
 .. _mustache(5): http://mustache.github.com/mustache.5.html
 .. _nose: http://somethingaboutorange.com/mrl/projects/nose/0.11.1/testing.html
 .. _spec: https://github.com/mustache/spec
+.. _v1.0.3: https://github.com/mustache/spec/tree/48c933b0bb780875acbfd15816297e263c53d6f7
