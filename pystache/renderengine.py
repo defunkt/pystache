@@ -25,6 +25,63 @@ except ImportError:
         return hasattr(it, '__call__')
 
 
+# TODO: what are the possibilities for val?
+def call(val, view, template=None):
+    if callable(val):
+        (args, _, _, _) = inspect.getargspec(val)
+
+        args_count = len(args)
+
+        if not isinstance(val, types.FunctionType):
+            # Then val is an instance method.  Subtract one from the
+            # argument count because Python will automatically prepend
+            # self to the argument list when calling.
+            args_count -=1
+
+        if args_count is 0:
+            val = val()
+        elif args_count is 1 and args[0] in ['self', 'context']:
+            val = val(view)
+        elif args_count is 1:
+            val = val(template)
+        else:
+            val = val(view, template)
+
+    if callable(val):
+        val = val(template)
+
+    if val is None:
+        val = ''
+
+    return unicode(val)
+
+
+def render_parse_tree(parse_tree, context, template):
+    """
+    Convert a parse-tree into a string.
+
+    """
+    get_string = lambda val: call(val, context, template)
+    parts = map(get_string, parse_tree)
+    return ''.join(parts)
+
+
+def inverseTag(name, parsed, template, delims):
+    def func(self):
+        data = self.get(name)
+        if data:
+            return ''
+        return render_parse_tree(parsed, self, delims)
+    return func
+
+
+class EndOfSection(Exception):
+    def __init__(self, parse_tree, template, position):
+        self.parse_tree = parse_tree
+        self.template = template
+        self.position = position
+
+
 class RenderEngine(object):
 
     """
@@ -275,59 +332,6 @@ class RenderEngine(object):
         output = "".join(output)
         return output
 
-
-# TODO: what are the possibilities for val?
-def call(val, view, template=None):
-    if callable(val):
-        (args, _, _, _) = inspect.getargspec(val)
-
-        args_count = len(args)
-
-        if not isinstance(val, types.FunctionType):
-            # Then val is an instance method.  Subtract one from the
-            # argument count because Python will automatically prepend
-            # self to the argument list when calling.
-            args_count -=1
-
-        if args_count is 0:
-            val = val()
-        elif args_count is 1 and args[0] in ['self', 'context']:
-            val = val(view)
-        elif args_count is 1:
-            val = val(template)
-        else:
-            val = val(view, template)
-
-    if callable(val):
-        val = val(template)
-
-    if val is None:
-        val = ''
-
-    return unicode(val)
-
-def render_parse_tree(parse_tree, context, template):
-    """
-    Convert a parse-tree into a string.
-
-    """
-    get_string = lambda val: call(val, context, template)
-    parts = map(get_string, parse_tree)
-    return ''.join(parts)
-
-def inverseTag(name, parsed, template, delims):
-    def func(self):
-        data = self.get(name)
-        if data:
-            return ''
-        return render_parse_tree(parsed, self, delims)
-    return func
-
-class EndOfSection(Exception):
-    def __init__(self, parse_tree, template, position):
-        self.parse_tree = parse_tree
-        self.template = template
-        self.position = position
 
 class Template(object):
     tag_re = None
