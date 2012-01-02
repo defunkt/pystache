@@ -11,7 +11,7 @@ As ctemplates says, "It emphasizes separating logic from presentation:
 it is impossible to embed application logic in this template language."
 
 Pystache is a Python implementation of Mustache.  Currently, it passes
-all tests in version 1.0.3_ of the Mustache spec_.
+all tests in version v1.0.3_ of the Mustache spec_.
 
 Pystache is semantically versioned: http://semver.org.
 
