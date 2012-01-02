@@ -10,6 +10,7 @@ import unittest
 
 from pystache.context import Context
 from pystache.renderengine import RenderEngine
+from tests.common import assert_strings
 
 
 class RenderEngineTestCase(unittest.TestCase):
@@ -29,9 +30,16 @@ class RenderEngineTestCase(unittest.TestCase):
         self.assertEquals(engine.load_partial, "foo")
 
 
-class RenderEngineEnderTestCase(unittest.TestCase):
+class RenderTests(unittest.TestCase):
 
-    """Test RenderEngine.render()."""
+    """
+    Tests RenderEngine.render().
+
+    Explicit spec-test-like tests best go in this class since the
+    RenderEngine class contains all parsing logic.  This way, the unit tests
+    will be more focused and fail "closer to the code".
+
+    """
 
     def _engine(self):
         """
@@ -57,7 +65,7 @@ class RenderEngineEnderTestCase(unittest.TestCase):
 
         actual = engine.render(template, context)
 
-        self.assertEquals(actual, expected)
+        assert_strings(test_case=self, actual=actual, expected=expected)
 
     def test_render(self):
         self._assert_render('Hi Mom', 'Hi {{person}}', {'person': 'Mom'})
@@ -265,4 +273,15 @@ class RenderEngineEnderTestCase(unittest.TestCase):
         """
         self._assert_render('foobar', 'foo{{! baz }}bar')
         self._assert_render('foobar', 'foo{{! \nbaz }}bar')
+
+    def test_custom_delimiters__sections(self):
+        """
+        Check that custom delimiters can be used to start a section.
+
+        Test case for issue #20: https://github.com/defunkt/pystache/issues/20
+
+        """
+        template = '{{=[[ ]]=}}[[#foo]]bar[[/foo]]'
+        context = {'foo': True}
+        self._assert_render("bar", template, context)
 
