@@ -91,6 +91,8 @@ class RenderEngine(object):
     otag = DEFAULT_TAG_OPENING
     ctag = DEFAULT_TAG_CLOSING
 
+    nonblank_re = re.compile(r'^(.)', re.M)
+
     def __init__(self, load_partial=None, literal=None, escape=None):
         """
         Arguments:
@@ -268,10 +270,9 @@ class RenderEngine(object):
             Returns: a string of type unicode.
 
             """
-            nonblank = re.compile(r'^(.)', re.M)
             template = self.load_partial(name)
             # Indent before rendering.
-            template = re.sub(nonblank, indentation + r'\1', template)
+            template = re.sub(self.nonblank_re, indentation + r'\1', template)
             return self._render_template(template, context)
 
         return get_partial
