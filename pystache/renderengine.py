@@ -12,6 +12,8 @@ import re
 import types
 
 
+DEFAULT_TAG_OPENING = '{{'
+DEFAULT_TAG_CLOSING = '}}'
 END_OF_LINE_CHARACTERS = ['\r', '\n']
 
 
@@ -103,8 +105,8 @@ class RenderEngine(object):
 
     tag_re = None
 
-    otag = '{{'
-    ctag = '}}'
+    otag = DEFAULT_TAG_OPENING
+    ctag = DEFAULT_TAG_CLOSING
 
     def __init__(self, load_partial=None, literal=None, escape=None):
         """
@@ -270,12 +272,13 @@ class RenderEngine(object):
             return ''.join(parts)
         return func
 
-    def parse_string_to_tree(self, template_string, delims=('{{', '}}')):
+    def parse_string_to_tree(self, template_string, delims=None):
 
         engine = RenderEngine(load_partial=self.load_partial, literal=self.literal, escape=self.escape)
 
-        engine.otag = delims[0]
-        engine.ctag = delims[1]
+        if delims is not None:
+            engine.otag = delims[0]
+            engine.ctag = delims[1]
 
         engine._compile_regexps()
 
@@ -376,7 +379,7 @@ class RenderEngine(object):
 
         return end_index
 
-    def render_template(self, template, context, delims=('{{', '}}')):
+    def render_template(self, template, context):
         """
         Arguments:
 
@@ -387,6 +390,6 @@ class RenderEngine(object):
         if type(template) is not unicode:
             raise Exception("Argument 'template' not unicode: %s: %s" % (type(template), repr(template)))
 
-        parse_tree = self.parse_string_to_tree(template_string=template, delims=delims)
+        parse_tree = self.parse_string_to_tree(template_string=template)
         return render_parse_tree(parse_tree, context, template)
 
