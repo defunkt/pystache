@@ -17,8 +17,22 @@ DEFAULT_TAG_CLOSING = '}}'
 END_OF_LINE_CHARACTERS = ['\r', '\n']
 
 
-# TODO: what are the possibilities for val?
 def call(val, view, template=None):
+    """
+    Arguments:
+
+      val: the argument val can be any of the following:
+
+        * a unicode string
+        * the return value of a call to any of the following:
+
+           * RenderEngine.partial_tag_function()
+           * RenderEngine.section_tag_function()
+           * inverseTag()
+           * RenderEngine.literal_tag_function()
+           * RenderEngine.escape_tag_function()
+
+    """
     if callable(val):
         (args, _, _, _) = inspect.getargspec(val)
 
