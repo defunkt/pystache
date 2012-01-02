@@ -12,6 +12,9 @@ import re
 import types
 
 
+END_OF_LINE_CHARACTERS = ['\r', '\n']
+
+
 try:
     # The collections.Callable class is not available until Python 2.6.
     import collections.Callable
@@ -271,11 +274,6 @@ class RenderEngine(object):
 
         output = "".join(output)
         return output
-
-#
-
-
-END_OF_LINE_CHARACTERS = ['\r', '\n']
 
 
 # TODO: what are the possibilities for val?
