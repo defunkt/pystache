@@ -77,7 +77,7 @@ def render_parse_tree(parse_tree, context):
     return ''.join(parts)
 
 
-def _make_get_inverse(name, parsed, template, delims):
+def _make_get_inverse(name, parsed):
     def get_inverse(context):
         data = context.get(name)
         if data:
@@ -386,8 +386,10 @@ class RenderEngine(object):
                 tmpl = e.template
                 end_index = e.position
 
-            tag = self._make_get_section if captures['tag'] == '#' else _make_get_inverse
-            func = tag(name, bufr, tmpl, (self.otag, self.ctag))
+            if captures['tag'] == '#':
+                func = self._make_get_section(name, bufr, tmpl, (self.otag, self.ctag))
+            else:
+                func = _make_get_inverse(name, bufr)
 
         elif captures['tag'] in ['{', '&']:
 
