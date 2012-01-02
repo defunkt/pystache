@@ -17,47 +17,34 @@ DEFAULT_TAG_CLOSING = '}}'
 END_OF_LINE_CHARACTERS = ['\r', '\n']
 
 
-def call(val, context):
-    """
-    Returns: a string of type unicode.
-
-    Arguments:
-
-      val: the argument val can be any of the following:
-
-        * a unicode string
-        * the return value of a call to any of the following:
-
-           * RenderEngine._make_get_literal():
-               Args: context
-               Returns: unicode
-           * RenderEngine._make_get_escaped():
-               Args: context
-               Returns: unicode
-           * RenderEngine._make_get_partial()
-               Args: context
-               Returns: unicode
-           * RenderEngine._make_get_section()
-               Args: context
-               Returns: unicode
-           * _make_get_inverse()
-               Args: context
-               Returns: unicode
-
-    """
-    if callable(val):
-        val = val(context)
-
-    return val
-
-
 def render_parse_tree(parse_tree, context):
     """
     Returns: a string of type unicode.
 
+    The elements of parse_tree can be any of the following:
+
+     * a unicode string
+     * the return value of a call to any of the following:
+
+        * RenderEngine._make_get_literal():
+            Args: context
+            Returns: unicode
+        * RenderEngine._make_get_escaped():
+            Args: context
+            Returns: unicode
+        * RenderEngine._make_get_partial()
+            Args: context
+            Returns: unicode
+        * RenderEngine._make_get_section()
+            Args: context
+            Returns: unicode
+        * _make_get_inverse()
+            Args: context
+            Returns: unicode
+
     """
-    get_string = lambda val: call(val, context)
-    parts = map(get_string, parse_tree)
+    get_unicode = lambda val: val(context) if callable(val) else val
+    parts = map(get_unicode, parse_tree)
     s = ''.join(parts)
 
     return unicode(s)
