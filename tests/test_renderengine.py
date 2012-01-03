@@ -164,20 +164,41 @@ class RenderTests(unittest.TestCase):
         Test an implicit iterator in a literal tag.
 
         """
-        template = """{{#test}}{{.}}{{/test}}"""
-        context = {'test': ['a', 'b']}
+        template = """{{#test}}{{{.}}}{{/test}}"""
+        context = {'test': ['<', '>']}
 
-        self._assert_render('ab', template, context)
+        self._assert_render('<>', template, context)
 
     def test__implicit_iterator__escaped(self):
         """
         Test an implicit iterator in a normal tag.
 
         """
-        template = """{{#test}}{{{.}}}{{/test}}"""
-        context = {'test': ['a', 'b']}
+        template = """{{#test}}{{.}}{{/test}}"""
+        context = {'test': ['<', '>']}
 
-        self._assert_render('ab', template, context)
+        self._assert_render('&lt;&gt;', template, context)
+
+    def test__literal__in_section(self):
+        """
+        Check that literals work in sections.
+
+        """
+        template = '{{#test}}1 {{{less_than}}} 2{{/test}}'
+        context = {'test': {'less_than': '<'}}
+
+        self._assert_render('1 < 2', template, context)
+
+    def test__literal__in_partial(self):
+        """
+        Check that literals work in partials.
+
+        """
+        template = '{{>partial}}'
+        partials = {'partial': '1 {{{less_than}}} 2'}
+        context = {'less_than': '<'}
+
+        self._assert_render('1 < 2', template, context, partials=partials)
 
     def test_render_with_partial(self):
         partials = {'partial': "{{person}}"}
