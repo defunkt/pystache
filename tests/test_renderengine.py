@@ -229,7 +229,7 @@ class RenderTests(unittest.TestCase):
 
         self._assert_render('unescaped: < escaped: &lt;', template, context, engine=engine, partials=partials)
 
-    def test_render__list_referencing_outer_context(self):
+    def test_section__list_referencing_outer_context(self):
         """
         Check that list items can access the parent context.
 
@@ -239,13 +239,13 @@ class RenderTests(unittest.TestCase):
 
         """
         context = {
-            "list": [{"name": "Al"}, {"name": "Bo"}],
             "greeting": "Hi",
+            "list": [{"name": "Al"}, {"name": "Bob"}],
         }
 
-        template = "{{#list}}{{name}}: {{greeting}}; {{/list}}"
+        template = "{{#list}}{{greeting}}, {{name}}; {{/list}}"
 
-        self._assert_render("Al: Hi; Bo: Hi; ", template, context)
+        self._assert_render("Hi, Al; Hi, Bob; ", template, context)
 
     def test_render__tag_in_value(self):
         """
