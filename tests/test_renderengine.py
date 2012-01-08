@@ -159,7 +159,25 @@ class RenderTests(unittest.TestCase):
 
         self._assert_render('FOO 100 100', template, context, engine=engine)
 
-    def test__implicit_iterator__literal(self):
+    def test_tag__output_not_interpolated(self):
+        """
+        Context values should not be treated as templates (issue #44).
+
+        """
+        template = '{{test}}'
+        context = {'test': '{{hello}}'}
+        self._assert_render('{{hello}}', template, context)
+
+    def test_tag__output_not_interpolated__section(self):
+        """
+        Context values should not be treated as templates (issue #44).
+
+        """
+        template = '{{test}}'
+        context = {'test': '{{#hello}}'}
+        self._assert_render('{{#hello}}', template, context)
+
+    def test_implicit_iterator__literal(self):
         """
         Test an implicit iterator in a literal tag.
 
@@ -169,7 +187,7 @@ class RenderTests(unittest.TestCase):
 
         self._assert_render('<>', template, context)
 
-    def test__implicit_iterator__escaped(self):
+    def test_implicit_iterator__escaped(self):
         """
         Test an implicit iterator in a normal tag.
 
@@ -179,7 +197,7 @@ class RenderTests(unittest.TestCase):
 
         self._assert_render('&lt;&gt;', template, context)
 
-    def test__literal__in_section(self):
+    def test_literal__in_section(self):
         """
         Check that literals work in sections.
 
@@ -189,7 +207,7 @@ class RenderTests(unittest.TestCase):
 
         self._assert_render('1 < 2', template, context)
 
-    def test__literal__in_partial(self):
+    def test_literal__in_partial(self):
         """
         Check that literals work in partials.
 
@@ -200,23 +218,11 @@ class RenderTests(unittest.TestCase):
 
         self._assert_render('1 < 2', template, context, partials=partials)
 
-    def test_render_with_partial(self):
+    def test_partial(self):
         partials = {'partial': "{{person}}"}
         self._assert_render('Hi Mom', 'Hi {{>partial}}', {'person': 'Mom'}, partials=partials)
 
-    def test_render__section_context_values(self):
-        """
-        Test that escape and literal work on context values in sections.
-
-        """
-        engine = self._engine()
-
-        template = '{{#test}}unescaped: {{{foo}}} escaped: {{foo}}{{/test}}'
-        context = {'test': {'foo': '<'}}
-
-        self._assert_render('unescaped: < escaped: &lt;', template, context, engine=engine)
-
-    def test_render__partial_context_values(self):
+    def test_partial__context_values(self):
         """
         Test that escape and literal work on context values in partials.
 
@@ -228,6 +234,29 @@ class RenderTests(unittest.TestCase):
         context = {'foo': '<'}
 
         self._assert_render('unescaped: < escaped: &lt;', template, context, engine=engine, partials=partials)
+
+    ## Test cases related specifically to sections.
+
+    def test_section__context_values(self):
+        """
+        Test that escape and literal work on context values in sections.
+
+        """
+        engine = self._engine()
+
+        template = '{{#test}}unescaped: {{{foo}}} escaped: {{foo}}{{/test}}'
+        context = {'test': {'foo': '<'}}
+
+        self._assert_render('unescaped: < escaped: &lt;', template, context, engine=engine)
+
+    def test_section__context_precedence(self):
+        """
+        Check that items higher in the context stack take precedence.
+
+        """
+        template = '{{entree}} : {{#vegetarian}}{{entree}}{{/vegetarian}}'
+        context = {'entree': 'chicken', 'vegetarian': {'entree': 'beans and rice'}}
+        self._assert_render(u'chicken : beans and rice', template, context)
 
     def test_section__list_referencing_outer_context(self):
         """
@@ -243,34 +272,55 @@ class RenderTests(unittest.TestCase):
             "list": [{"name": "Al"}, {"name": "Bob"}],
         }
 
-        template = "{{#list}}{{greeting}}, {{name}}; {{/list}}"
+        template = "{{#list}}{{greeting}} {{name}}, {{/list}}"
 
-        self._assert_render("Hi, Al; Hi, Bob; ", template, context)
+        self._assert_render("Hi Al, Hi Bob, ", template, context)
 
-    def test_render__tag_in_value(self):
+    def test_section__output_not_interpolated(self):
         """
-        Context values should not be treated as templates (issue #44).
-
-        """
-        template = '{{test}}'
-        context = {'test': '{{hello}}'}
-        self._assert_render('{{hello}}', template, context)
-
-    def test_render__section_in_value(self):
-        """
-        Context values should not be treated as templates (issue #44).
+        Check that rendered section output is not interpolated.
 
         """
-        template = '{{test}}'
-        context = {'test': '{{#hello}}'}
-        self._assert_render('{{#hello}}', template, context)
+        template = '{{#section}}{{template}}{{/section}}: {{planet}}'
+        context = {'section': True, 'template': '{{planet}}', 'planet': 'Earth'}
+        self._assert_render(u'{{planet}}: Earth', template, context)
 
-    def test_render__section__lambda(self):
+    def test_section__nested_truthy(self):
+        """
+        Check that "nested truthy" sections get rendered.
+
+        Test case for issue #24: https://github.com/defunkt/pystache/issues/24
+
+        This test is copied from the spec.  We explicitly include it to
+        prevent regressions for those who don't pull down the spec tests.
+
+        """
+        template = '| A {{#bool}}B {{#bool}}C{{/bool}} D{{/bool}} E |'
+        context = {'bool': True}
+        self._assert_render(u'| A B C D E |', template, context)
+
+    def test_section__nested_with_same_keys(self):
+        """
+        Check a doubly-nested section with the same context key.
+
+        Test case for issue #36: https://github.com/defunkt/pystache/issues/36
+
+        """
+        # Start with an easier, working case.
+        template = '{{#x}}{{#z}}{{y}}{{/z}}{{/x}}'
+        context = {'x': {'z': {'y': 1}}}
+        self._assert_render(u'1', template, context)
+
+        template = '{{#x}}{{#x}}{{y}}{{/x}}{{/x}}'
+        context = {'x': {'x': {'y': 1}}}
+        self._assert_render(u'1', template, context)
+
+    def test_section__lambda(self):
         template = '{{#test}}Mom{{/test}}'
         context = {'test': (lambda text: 'Hi %s' % text)}
         self._assert_render('Hi Mom', template, context)
 
-    def test_render__section__lambda__tag_in_output(self):
+    def test_section__lambda__tag_in_output(self):
         """
         Check that callable output is treated as a template string (issue #46).
 
@@ -287,7 +337,7 @@ class RenderTests(unittest.TestCase):
         context = {'person': 'Mom', 'test': (lambda text: text + " :)")}
         self._assert_render('Hi Mom :)', template, context)
 
-    def test_render__section__comment__multiline(self):
+    def test_comment__multiline(self):
         """
         Check that multiline comments are permitted.
 
@@ -316,51 +366,3 @@ class RenderTests(unittest.TestCase):
         expected = u' {{foo}} '
         self._assert_render(expected, '{{=$ $=}} {{foo}} ')
         self._assert_render(expected, '{{=$ $=}} {{foo}} $={{ }}=$')  # was yielding u'  '.
-
-    def test_section__output_not_interpolated(self):
-        """
-        Check that rendered section output is not interpolated.
-
-        """
-        template = '{{#section}}{{template}}{{/section}}: {{planet}}'
-        context = {'section': True, 'template': '{{planet}}', 'planet': 'Earth'}
-        self._assert_render(u'{{planet}}: Earth', template, context)
-
-    def test_section__context_precedence(self):
-        """
-        Check that items higher in the context stack take precedence.
-
-        """
-        template = '{{entree}} : {{#vegetarian}}{{entree}}{{/vegetarian}}'
-        context = {'entree': 'chicken', 'vegetarian': {'entree': 'beans and rice'}}
-        self._assert_render(u'chicken : beans and rice', template, context)
-
-    def test_sections__nested_truthy(self):
-        """
-        Check that "nested truthy" sections get rendered.
-
-        Test case for issue #24: https://github.com/defunkt/pystache/issues/24
-
-        This test is copied from the spec.  We explicitly include it to
-        prevent regressions for those who don't pull down the spec tests.
-
-        """
-        template = '| A {{#bool}}B {{#bool}}C{{/bool}} D{{/bool}} E |'
-        context = {'bool': True}
-        self._assert_render(u'| A B C D E |', template, context)
-
-    def test_sections__nested_with_same_keys(self):
-        """
-        Check a doubly-nested section with the same context key.
-
-        Test case for issue #36: https://github.com/defunkt/pystache/issues/36
-
-        """
-        # Start with an easier, working case.
-        template = '{{#x}}{{#z}}{{y}}{{/z}}{{/x}}'
-        context = {'x': {'z': {'y': 1}}}
-        self._assert_render(u'1', template, context)
-
-        template = '{{#x}}{{#x}}{{y}}{{/x}}{{/x}}'
-        context = {'x': {'x': {'y': 1}}}
-        self._assert_render(u'1', template, context)
