@@ -317,6 +317,24 @@ class RenderTests(unittest.TestCase):
         self._assert_render(expected, '{{=$ $=}} {{foo}} ')
         self._assert_render(expected, '{{=$ $=}} {{foo}} $={{ }}=$')  # was yielding u'  '.
 
+    def test_section__output_not_interpolated(self):
+        """
+        Check that rendered section output is not interpolated.
+
+        """
+        template = '{{#section}}{{template}}{{/section}}: {{planet}}'
+        context = {'section': True, 'template': '{{planet}}', 'planet': 'Earth'}
+        self._assert_render(u'{{planet}}: Earth', template, context)
+
+    def test_section__context_precedence(self):
+        """
+        Check that items higher in the context stack take precedence.
+
+        """
+        template = '{{entree}} : {{#vegetarian}}{{entree}}{{/vegetarian}}'
+        context = {'entree': 'chicken', 'vegetarian': {'entree': 'beans and rice'}}
+        self._assert_render(u'chicken : beans and rice', template, context)
+
     def test_sections__nested_truthy(self):
         """
         Check that "nested truthy" sections get rendered.
