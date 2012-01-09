@@ -164,9 +164,9 @@ class RenderTests(unittest.TestCase):
         Context values should not be treated as templates (issue #44).
 
         """
-        template = '{{test}}'
-        context = {'test': '{{hello}}'}
-        self._assert_render('{{hello}}', template, context)
+        template = '{{template}}: {{planet}}'
+        context = {'template': '{{planet}}', 'planet': 'Earth'}
+        self._assert_render(u'{{planet}}: Earth', template, context)
 
     def test_tag__output_not_interpolated__section(self):
         """
