@@ -73,10 +73,9 @@ class Parser(object):
 
     def parse(self, template, index=0, section_key=None):
         """
-        Parse a template string into a syntax tree using current attributes.
+        Parse a template string into a parse tree.
 
-        This method uses the current RenderEngine instance's attributes,
-        including the current tag delimiter, etc.
+        This method uses the current tag delimiter.
 
         """
         parse_tree = []
