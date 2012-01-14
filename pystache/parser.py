@@ -126,6 +126,11 @@ class Parser(object):
                 match_index += len(leading_whitespace)
                 leading_whitespace = ''
 
+            if tag_type == '/':
+
+                # TODO: check that tag key matches section start tag key.
+                return parse_tree, template[start_index:match_index], end_index
+
             index = self._handle_tag_type(template, parse_tree, tag_type, tag_key, leading_whitespace, start_index, match_index, end_index)
 
         # Save the rest of the template.
@@ -134,14 +139,9 @@ class Parser(object):
         return parse_tree
 
     def _parse_section(self, template, index_start):
-        try:
-            self.parse(template=template, index=index_start)
-        except EndOfSection as err:
-            buff = err.parse_tree
-            template = err.template
-            index_end = err.index_end
+        parse_tree, template, index_end = self.parse(template=template, index=index_start)
 
-        return buff, template, index_end
+        return parse_tree, template, index_end
 
     def _handle_tag_type(self, template, parse_tree, tag_type, tag_key, leading_whitespace, start_index, match_index, end_index):
 
@@ -177,13 +177,8 @@ class Parser(object):
 
             func = engine._make_get_partial(tag_key, leading_whitespace)
 
-        elif tag_type == '/':
-
-            # TODO: check that tag key matches section start tag key.
-            # TODO: don't use exceptions for flow control.
-            raise EndOfSection(parse_tree, template[start_index:match_index], end_index)
-
         else:
+
             raise Exception("Unrecognized tag type: %s" % repr(tag_type))
 
         parse_tree.append(func)
