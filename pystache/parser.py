@@ -39,12 +39,9 @@ def _compile_template_re(delimiters):
     return re.compile(tag, re.VERBOSE)
 
 
-class EndOfSection(Exception):
+class ParsingError(Exception):
 
-    def __init__(self, parse_tree, template, index_end):
-        self.parse_tree = parse_tree
-        self.template = template
-        self.index_end = index_end
+    pass
 
 
 class Parser(object):
@@ -74,7 +71,7 @@ class Parser(object):
         self._delimiters = delimiters
         self.compile_template_re()
 
-    def parse(self, template, index=0):
+    def parse(self, template, index=0, section_key=None):
         """
         Parse a template string into a syntax tree using current attributes.
 
@@ -127,8 +124,9 @@ class Parser(object):
                 leading_whitespace = ''
 
             if tag_type == '/':
+                if tag_key != section_key:
+                    raise ParsingError("Section end tag mismatch: %s != %s" % (repr(tag_key), repr(section_key)))
 
-                # TODO: check that tag key matches section start tag key.
                 return parse_tree, template[start_index:match_index], end_index
 
             index = self._handle_tag_type(template, parse_tree, tag_type, tag_key, leading_whitespace, start_index, match_index, end_index)
@@ -138,8 +136,8 @@ class Parser(object):
 
         return parse_tree
 
-    def _parse_section(self, template, index_start):
-        parse_tree, template, index_end = self.parse(template=template, index=index_start)
+    def _parse_section(self, template, index_start, section_key):
+        parse_tree, template, index_end = self.parse(template=template, index=index_start, section_key=section_key)
 
         return parse_tree, template, index_end
 
@@ -165,12 +163,12 @@ class Parser(object):
 
         elif tag_type == '#':
 
-            buff, template, end_index = self._parse_section(template, end_index)
+            buff, template, end_index = self._parse_section(template, end_index, tag_key)
             func = engine._make_get_section(tag_key, buff, template, self._delimiters)
 
         elif tag_type == '^':
 
-            buff, template, end_index = self._parse_section(template, end_index)
+            buff, template, end_index = self._parse_section(template, end_index, tag_key)
             func = engine._make_get_inverse(tag_key, buff)
 
         elif tag_type == '>':
