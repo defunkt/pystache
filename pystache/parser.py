@@ -155,9 +155,13 @@ class Parser(object):
 
         engine = self.engine
 
-        if tag_type == '>':
+        if tag_type == '':
 
-            func = engine._make_get_partial(tag_key, leading_whitespace)
+            func = engine._make_get_escaped(tag_key)
+
+        elif tag_type == '&':
+
+            func = engine._make_get_literal(tag_key)
 
         elif tag_type == '#':
 
@@ -169,13 +173,9 @@ class Parser(object):
             buff, template, end_index = self._parse_section(template, end_index)
             func = engine._make_get_inverse(tag_key, buff)
 
-        elif tag_type == '&':
+        elif tag_type == '>':
 
-            func = engine._make_get_literal(tag_key)
-
-        elif tag_type == '':
-
-            func = engine._make_get_escaped(tag_key)
+            func = engine._make_get_partial(tag_key, leading_whitespace)
 
         elif tag_type == '/':
 
