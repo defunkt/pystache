@@ -130,7 +130,7 @@ class Parser(object):
 
                 return ParsedTemplate(parse_tree), template[start_index:match_index], end_index
 
-            index = self._handle_tag_type(template, parse_tree, tag_type, tag_key, leading_whitespace, start_index, match_index, end_index)
+            index = self._handle_tag_type(template, parse_tree, tag_type, tag_key, leading_whitespace, end_index)
 
         # Save the rest of the template.
         parse_tree.append(template[index:])
@@ -142,7 +142,7 @@ class Parser(object):
 
         return parsed_template, template, index_end
 
-    def _handle_tag_type(self, template, parse_tree, tag_type, tag_key, leading_whitespace, start_index, match_index, end_index):
+    def _handle_tag_type(self, template, parse_tree, tag_type, tag_key, leading_whitespace, end_index):
 
         if tag_type == '!':
             return end_index
