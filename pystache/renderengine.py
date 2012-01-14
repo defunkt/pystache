@@ -35,7 +35,7 @@ def _compile_template_re(delimiters):
         \s* %(ctag)s
     """ % {'tag_types': tag_types, 'otag': re.escape(delimiters[0]), 'ctag': re.escape(delimiters[1])}
 
-    return re.compile(tag, re.M | re.X)
+    return re.compile(tag, re.VERBOSE)
 
 
 def render_parse_tree(parse_tree, context):
