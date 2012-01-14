@@ -110,12 +110,9 @@ class RenderEngine(object):
 
     """
 
-    _delimiters = None
-    _template_re = None
-
     nonblank_re = re.compile(r'^(.)', re.M)
 
-    def __init__(self, load_partial=None, literal=None, escape=None, delimiters=None):
+    def __init__(self, load_partial=None, literal=None, escape=None):
         """
         Arguments:
 
@@ -145,63 +142,9 @@ class RenderEngine(object):
             from plain unicode strings.
 
         """
-        if delimiters is None:
-            delimiters = DEFAULT_DELIMITERS
-
-        self._delimiters = delimiters
         self.escape = escape
         self.literal = literal
         self.load_partial = load_partial
-
-    def _compile_template_re(self):
-        self._template_re = _compile_template_re(self._delimiters)
-
-    def _change_delimiters(self, delimiters):
-        self._delimiters = delimiters
-        self._compile_template_re()
-
-    def render(self, template, context):
-        """
-        Return a template rendered as a string with type unicode.
-
-        Arguments:
-
-          template: a template string of type unicode (but not a proper
-            subclass of unicode).
-
-          context: a Context instance.
-
-        """
-        # Be strict but not too strict.  In other words, accept str instead
-        # of unicode, but don't assume anything about the encoding (e.g.
-        # don't use self.literal).
-        template = unicode(template)
-
-        return self._render_template(template=template, context=context)
-
-    def _render_template(self, template, context):
-        """
-        Returns: a string of type unicode.
-
-        Arguments:
-
-          template: template string
-          context: a Context instance
-
-        """
-        if type(template) is not unicode:
-            raise Exception("Argument 'template' not unicode: %s: %s" % (type(template), repr(template)))
-
-        parse_tree = self.parse_string_to_tree(template_string=template)
-        return render_parse_tree(parse_tree, context)
-
-    def parse_string_to_tree(self, template_string, delims=None):
-
-        engine = RenderEngine(load_partial=self.load_partial,
-                              literal=self.literal, escape=self.escape, delimiters=delims)
-        engine._compile_template_re()
-
-        return engine.parse_to_tree(template=template_string)
 
     def _get_string_value(self, context, tag_name):
         """
@@ -233,7 +176,7 @@ class RenderEngine(object):
                 template = str(template)
             if type(template) is not unicode:
                 template = self.literal(template)
-            val = self._render_template(template, context)
+            val = self._render(template, context)
 
         if not isinstance(val, basestring):
             val = str(val)
@@ -275,7 +218,7 @@ class RenderEngine(object):
             template = self.load_partial(name)
             # Indent before rendering.
             template = re.sub(self.nonblank_re, indentation + r'\1', template)
-            return self._render_template(template, context)
+            return self._render(template, context)
 
         return get_partial
 
@@ -293,7 +236,7 @@ class RenderEngine(object):
             elif callable(data):
                 # TODO: should we check the arity?
                 template = data(template)
-                parse_tree = self.parse_string_to_tree(template_string=template, delims=delims)
+                parse_tree = self._parse_to_tree(template_string=template, delimiters=delims)
                 data = [ data ]
             elif type(data) not in [list, tuple]:
                 data = [ data ]
@@ -308,7 +251,77 @@ class RenderEngine(object):
 
         return get_section
 
-    def parse_to_tree(self, template, index=0):
+    def _parse_to_tree(self, template_string, delimiters=None):
+        """
+        Parse the given template into a parse tree using a new parser.
+
+        """
+        parser = _Parser(self, delimiters=delimiters)
+        parser.compile_template_re()
+
+        return parser.parse(template=template_string)
+
+    def _render(self, template, context):
+        """
+        Returns: a string of type unicode.
+
+        Arguments:
+
+          template: template string
+          context: a Context instance
+
+        """
+        if type(template) is not unicode:
+            raise Exception("Argument 'template' not unicode: %s: %s" % (type(template), repr(template)))
+
+        parse_tree = self._parse_to_tree(template_string=template)
+
+        return render_parse_tree(parse_tree, context)
+
+    def render(self, template, context):
+        """
+        Return a template rendered as a string with type unicode.
+
+        Arguments:
+
+          template: a template string of type unicode (but not a proper
+            subclass of unicode).
+
+          context: a Context instance.
+
+        """
+        # Be strict but not too strict.  In other words, accept str instead
+        # of unicode, but don't assume anything about the encoding (e.g.
+        # don't use self.literal).
+        template = unicode(template)
+
+        return self._render(template, context)
+
+
+class _Parser(object):
+
+    _delimiters = None
+    _template_re = None
+
+    def __init__(self, engine, delimiters=None):
+        """
+        Construct an instance.
+
+        """
+        if delimiters is None:
+            delimiters = DEFAULT_DELIMITERS
+
+        self._delimiters = delimiters
+        self.engine = engine
+
+    def compile_template_re(self):
+        self._template_re = _compile_template_re(self._delimiters)
+
+    def _change_delimiters(self, delimiters):
+        self._delimiters = delimiters
+        self.compile_template_re()
+
+    def parse(self, template, index=0):
         """
         Parse a template string into a syntax tree using current attributes.
 
@@ -343,11 +356,13 @@ class RenderEngine(object):
 
     def _handle_match(self, template, parse_tree, matches, start_index, match_index, end_index):
 
+        engine = self.engine
+
         # Normalize the matches dictionary.
         if matches['change'] is not None:
             matches.update(tag='=', name=matches['delims'])
         elif matches['raw'] is not None:
-            matches.update(tag='{', name=matches['raw_name'])
+            matches.update(tag='&', name=matches['raw_name'])
 
         tag_type = matches['tag']
 
@@ -355,7 +370,7 @@ class RenderEngine(object):
         # both leading whitespace and trailing newline.
         did_tag_begin_line = match_index == 0 or template[match_index - 1] in END_OF_LINE_CHARACTERS
         did_tag_end_line = end_index == len(template) or template[end_index] in END_OF_LINE_CHARACTERS
-        is_tag_interpolating = tag_type in ['', '&', '{']
+        is_tag_interpolating = tag_type in ['', '&']
 
         if did_tag_begin_line and did_tag_end_line and not is_tag_interpolating:
             if end_index < len(template):
@@ -378,28 +393,28 @@ class RenderEngine(object):
             return end_index
 
         if tag_type == '>':
-            func = self._make_get_partial(name, matches['whitespace'])
+            func = engine._make_get_partial(name, matches['whitespace'])
         elif tag_type in ['#', '^']:
 
             try:
-                self.parse_to_tree(template=template, index=end_index)
+                self.parse(template=template, index=end_index)
             except EndOfSection as e:
                 bufr = e.parse_tree
                 tmpl = e.template
                 end_index = e.position
 
             if tag_type == '#':
-                func = self._make_get_section(name, bufr, tmpl, self._delimiters)
+                func = engine._make_get_section(name, bufr, tmpl, self._delimiters)
             else:
                 func = _make_get_inverse(name, bufr)
 
-        elif tag_type in ['{', '&']:
+        elif tag_type == '&':
 
-            func = self._make_get_literal(name)
+            func = engine._make_get_literal(name)
 
         elif tag_type == '':
 
-            func = self._make_get_escaped(name)
+            func = engine._make_get_escaped(name)
 
         elif tag_type == '/':
 
