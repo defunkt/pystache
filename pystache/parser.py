@@ -126,7 +126,7 @@ class Parser(object):
                 match_index += len(leading_whitespace)
                 leading_whitespace = ''
 
-            index = self._handle_match(template, parse_tree, tag_type, tag_key, leading_whitespace, start_index, match_index, end_index)
+            index = self._handle_tag_type(template, parse_tree, tag_type, tag_key, leading_whitespace, start_index, match_index, end_index)
 
         # Save the rest of the template.
         parse_tree.append(template[index:])
@@ -143,7 +143,7 @@ class Parser(object):
 
         return buff, template, index_end
 
-    def _handle_match(self, template, parse_tree, tag_type, tag_key, leading_whitespace, start_index, match_index, end_index):
+    def _handle_tag_type(self, template, parse_tree, tag_type, tag_key, leading_whitespace, start_index, match_index, end_index):
 
         if tag_type == '!':
             return end_index
@@ -156,15 +156,18 @@ class Parser(object):
         engine = self.engine
 
         if tag_type == '>':
+
             func = engine._make_get_partial(tag_key, leading_whitespace)
-        elif tag_type in ['#', '^']:
+
+        elif tag_type == '#':
 
             buff, template, end_index = self._parse_section(template, end_index)
+            func = engine._make_get_section(tag_key, buff, template, self._delimiters)
 
-            if tag_type == '#':
-                func = engine._make_get_section(tag_key, buff, template, self._delimiters)
-            else:
-                func = engine._make_get_inverse(tag_key, buff)
+        elif tag_type == '^':
+
+            buff, template, end_index = self._parse_section(template, end_index)
+            func = engine._make_get_inverse(tag_key, buff)
 
         elif tag_type == '&':
 
