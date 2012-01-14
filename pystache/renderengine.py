@@ -326,56 +326,56 @@ class RenderEngine(object):
             if match is None:
                 break
 
-            captures = match.groupdict()
+            matches = match.groupdict()
             match_index = match.end('content')
             end_index = match.end()
 
-            index = self._handle_match(template, parse_tree, captures, start_index, match_index, end_index)
+            index = self._handle_match(template, parse_tree, matches, start_index, match_index, end_index)
 
         # Save the rest of the template.
         parse_tree.append(template[index:])
 
         return parse_tree
 
-    def _handle_match(self, template, parse_tree, captures, start_index, match_index, end_index):
+    def _handle_match(self, template, parse_tree, matches, start_index, match_index, end_index):
 
-        # Normalize the captures dictionary.
-        if captures['change'] is not None:
-            captures.update(tag='=', name=captures['delims'])
-        elif captures['raw'] is not None:
-            captures.update(tag='{', name=captures['raw_name'])
+        # Normalize the matches dictionary.
+        if matches['change'] is not None:
+            matches.update(tag='=', name=matches['delims'])
+        elif matches['raw'] is not None:
+            matches.update(tag='{', name=matches['raw_name'])
 
-        parse_tree.append(captures['content'])
+        parse_tree.append(matches['content'])
 
         # Standalone (non-interpolation) tags consume the entire line,
         # both leading whitespace and trailing newline.
         did_tag_begin_line = match_index == 0 or template[match_index - 1] in END_OF_LINE_CHARACTERS
         did_tag_end_line = end_index == len(template) or template[end_index] in END_OF_LINE_CHARACTERS
-        is_tag_interpolating = captures['tag'] in ['', '&', '{']
+        is_tag_interpolating = matches['tag'] in ['', '&', '{']
 
         if did_tag_begin_line and did_tag_end_line and not is_tag_interpolating:
             if end_index < len(template):
                 end_index += template[end_index] == '\r' and 1 or 0
             if end_index < len(template):
                 end_index += template[end_index] == '\n' and 1 or 0
-        elif captures['whitespace']:
-            parse_tree.append(captures['whitespace'])
-            match_index += len(captures['whitespace'])
-            captures['whitespace'] = ''
+        elif matches['whitespace']:
+            parse_tree.append(matches['whitespace'])
+            match_index += len(matches['whitespace'])
+            matches['whitespace'] = ''
 
-        name = captures['name']
+        name = matches['name']
 
-        if captures['tag'] == '!':
+        if matches['tag'] == '!':
             return end_index
 
-        if captures['tag'] == '=':
+        if matches['tag'] == '=':
             delimiters = name.split()
             self._change_delimiters(delimiters)
             return end_index
 
-        if captures['tag'] == '>':
-            func = self._make_get_partial(name, captures['whitespace'])
-        elif captures['tag'] in ['#', '^']:
+        if matches['tag'] == '>':
+            func = self._make_get_partial(name, matches['whitespace'])
+        elif matches['tag'] in ['#', '^']:
 
             try:
                 self.parse_to_tree(template=template, index=end_index)
@@ -384,26 +384,26 @@ class RenderEngine(object):
                 tmpl = e.template
                 end_index = e.position
 
-            if captures['tag'] == '#':
+            if matches['tag'] == '#':
                 func = self._make_get_section(name, bufr, tmpl, self._delimiters)
             else:
                 func = _make_get_inverse(name, bufr)
 
-        elif captures['tag'] in ['{', '&']:
+        elif matches['tag'] in ['{', '&']:
 
             func = self._make_get_literal(name)
 
-        elif captures['tag'] == '':
+        elif matches['tag'] == '':
 
             func = self._make_get_escaped(name)
 
-        elif captures['tag'] == '/':
+        elif matches['tag'] == '/':
 
             # TODO: don't use exceptions for flow control.
             raise EndOfSection(parse_tree, template[start_index:match_index], end_index)
 
         else:
-            raise Exception("'%s' is an unrecognized type!" % captures['tag'])
+            raise Exception("'%s' is an unrecognized type!" % matches['tag'])
 
         parse_tree.append(func)
 
