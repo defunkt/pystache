@@ -24,7 +24,6 @@ def _compile_template_re(delimiters):
     #   NOT containing the current closing delimiter.
     #
     tag = r"""
-        (?P<content>[\s\S]*?)
         (?P<whitespace>[\ \t]*)
         %(otag)s \s*
         (?:
@@ -326,12 +325,14 @@ class RenderEngine(object):
             if match is None:
                 break
 
-            matches = match.groupdict()
-
-            match_index = match.end('content')
+            match_index = match.start()
             end_index = match.end()
 
-            parse_tree.append(matches['content'])
+            before_tag = template[index : match_index]
+
+            parse_tree.append(before_tag)
+
+            matches = match.groupdict()
 
             index = self._handle_match(template, parse_tree, matches, start_index, match_index, end_index)
 
