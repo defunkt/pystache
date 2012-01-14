@@ -327,8 +327,11 @@ class RenderEngine(object):
                 break
 
             matches = match.groupdict()
+
             match_index = match.end('content')
             end_index = match.end()
+
+            parse_tree.append(matches['content'])
 
             index = self._handle_match(template, parse_tree, matches, start_index, match_index, end_index)
 
@@ -344,8 +347,6 @@ class RenderEngine(object):
             matches.update(tag='=', name=matches['delims'])
         elif matches['raw'] is not None:
             matches.update(tag='{', name=matches['raw_name'])
-
-        parse_tree.append(matches['content'])
 
         # Standalone (non-interpolation) tags consume the entire line,
         # both leading whitespace and trailing newline.
