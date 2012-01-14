@@ -13,39 +13,6 @@ from parser import Parser
 NON_BLANK_RE = re.compile(r'^(.)', re.M)
 
 
-def render_parse_tree(parse_tree, context):
-    """
-    Returns: a string of type unicode.
-
-    The elements of parse_tree can be any of the following:
-
-     * a unicode string
-     * the return value of a call to any of the following:
-
-        * RenderEngine._make_get_literal():
-            Args: context
-            Returns: unicode
-        * RenderEngine._make_get_escaped():
-            Args: context
-            Returns: unicode
-        * RenderEngine._make_get_partial()
-            Args: context
-            Returns: unicode
-        * RenderEngine._make_get_section()
-            Args: context
-            Returns: unicode
-        * _make_get_inverse()
-            Args: context
-            Returns: unicode
-
-    """
-    get_unicode = lambda val: val(context) if callable(val) else val
-    parts = map(get_unicode, parse_tree)
-    s = ''.join(parts)
-
-    return unicode(s)
-
-
 class RenderEngine(object):
 
     """
@@ -175,7 +142,7 @@ class RenderEngine(object):
 
         return get_partial
 
-    def _make_get_inverse(self, name, parsed):
+    def _make_get_inverse(self, name, parsed_template):
         def get_inverse(context):
             """
             Returns a string with type unicode.
@@ -184,25 +151,28 @@ class RenderEngine(object):
             data = context.get(name)
             if data:
                 return u''
-            return render_parse_tree(parsed, context)
+            return parsed_template.render(context)
 
         return get_inverse
 
-    def _make_get_section(self, name, parse_tree_, template_, delims):
+    # TODO: the template_ and parsed_template_ arguments don't both seem
+    # to be necessary.  Can we remove one of them?  For example, if
+    # callable(data) is True, then the initial parsed_template isn't used.
+    def _make_get_section(self, name, parsed_template_, template_, delims):
         def get_section(context):
             """
             Returns: a string of type unicode.
 
             """
             template = template_
-            parse_tree = parse_tree_
+            parsed_template = parsed_template_
             data = context.get(name)
             if not data:
                 data = []
             elif callable(data):
                 # TODO: should we check the arity?
                 template = data(template)
-                parse_tree = self._parse_to_tree(template_string=template, delimiters=delims)
+                parsed_template = self._parse(template_string=template, delimiters=delims)
                 data = [ data ]
             elif type(data) not in [list, tuple]:
                 data = [ data ]
@@ -210,16 +180,16 @@ class RenderEngine(object):
             parts = []
             for element in data:
                 context.push(element)
-                parts.append(render_parse_tree(parse_tree, context))
+                parts.append(parsed_template.render(context))
                 context.pop()
 
             return unicode(''.join(parts))
 
         return get_section
 
-    def _parse_to_tree(self, template_string, delimiters=None):
+    def _parse(self, template_string, delimiters=None):
         """
-        Parse the given template into a parse tree using a new parser.
+        Parse the given template, and return a ParsedTemplate instance.
 
         """
         parser = Parser(self, delimiters=delimiters)
@@ -240,9 +210,9 @@ class RenderEngine(object):
         if type(template) is not unicode:
             raise Exception("Argument 'template' not unicode: %s: %s" % (type(template), repr(template)))
 
-        parse_tree = self._parse_to_tree(template_string=template)
+        parsed_template = self._parse(template_string=template)
 
-        return render_parse_tree(parse_tree, context)
+        return parsed_template.render(context)
 
     def render(self, template, context):
         """

@@ -9,6 +9,8 @@ This module is only meant for internal use by the renderengine module.
 
 import re
 
+from template import ParsedTemplate
+
 
 DEFAULT_DELIMITERS = ('{{', '}}')
 END_OF_LINE_CHARACTERS = ['\r', '\n']
@@ -73,7 +75,7 @@ class Parser(object):
 
     def parse(self, template, index=0, section_key=None):
         """
-        Parse a template string into a parse tree.
+        Parse a template string into a ParsedTemplate instance.
 
         This method uses the current tag delimiter.
 
@@ -126,19 +128,19 @@ class Parser(object):
                 if tag_key != section_key:
                     raise ParsingError("Section end tag mismatch: %s != %s" % (repr(tag_key), repr(section_key)))
 
-                return parse_tree, template[start_index:match_index], end_index
+                return ParsedTemplate(parse_tree), template[start_index:match_index], end_index
 
             index = self._handle_tag_type(template, parse_tree, tag_type, tag_key, leading_whitespace, start_index, match_index, end_index)
 
         # Save the rest of the template.
         parse_tree.append(template[index:])
 
-        return parse_tree
+        return ParsedTemplate(parse_tree)
 
     def _parse_section(self, template, index_start, section_key):
-        parse_tree, template, index_end = self.parse(template=template, index=index_start, section_key=section_key)
+        parsed_template, template, index_end = self.parse(template=template, index=index_start, section_key=section_key)
 
-        return parse_tree, template, index_end
+        return parsed_template, template, index_end
 
     def _handle_tag_type(self, template, parse_tree, tag_type, tag_key, leading_whitespace, start_index, match_index, end_index):
 
@@ -162,13 +164,13 @@ class Parser(object):
 
         elif tag_type == '#':
 
-            buff, template, end_index = self._parse_section(template, end_index, tag_key)
-            func = engine._make_get_section(tag_key, buff, template, self._delimiters)
+            parsed_section, template, end_index = self._parse_section(template, end_index, tag_key)
+            func = engine._make_get_section(tag_key, parsed_section, template, self._delimiters)
 
         elif tag_type == '^':
 
-            buff, template, end_index = self._parse_section(template, end_index, tag_key)
-            func = engine._make_get_inverse(tag_key, buff)
+            parsed_section, template, end_index = self._parse_section(template, end_index, tag_key)
+            func = engine._make_get_inverse(tag_key, parsed_section)
 
         elif tag_type == '>':
 
