@@ -31,7 +31,7 @@ def _compile_template_re(delimiters):
         (?:
           (?P<change>=) \s* (?P<delims>.+?)   \s* = |
           (?P<raw>{)    \s* (?P<raw_name>.+?) \s* } |
-          (?P<tag>[%(tag_types)s]?)  \s* (?P<name>[\s\S]+?)
+          (?P<tag>[%(tag_types)s]?)  \s* (?P<tag_key>[\s\S]+?)
         )
         \s* %(ctag)s
     """ % {'tag_types': tag_types, 'otag': re.escape(delimiters[0]), 'ctag': re.escape(delimiters[1])}
@@ -99,53 +99,53 @@ class Parser(object):
 
             matches = match.groupdict()
 
-            index = self._handle_match(template, parse_tree, matches, start_index, match_index, end_index)
+            # Normalize the matches dictionary.
+            if matches['change'] is not None:
+                matches.update(tag='=', tag_key=matches['delims'])
+            elif matches['raw'] is not None:
+                matches.update(tag='&', tag_key=matches['raw_name'])
+
+            tag_type = matches['tag']
+            tag_key = matches['tag_key']
+            leading_whitespace = matches['whitespace']
+
+            # Standalone (non-interpolation) tags consume the entire line,
+            # both leading whitespace and trailing newline.
+            did_tag_begin_line = match_index == 0 or template[match_index - 1] in END_OF_LINE_CHARACTERS
+            did_tag_end_line = end_index == len(template) or template[end_index] in END_OF_LINE_CHARACTERS
+            is_tag_interpolating = tag_type in ['', '&']
+
+            if did_tag_begin_line and did_tag_end_line and not is_tag_interpolating:
+                if end_index < len(template):
+                    end_index += template[end_index] == '\r' and 1 or 0
+                if end_index < len(template):
+                    end_index += template[end_index] == '\n' and 1 or 0
+            elif leading_whitespace:
+                parse_tree.append(leading_whitespace)
+                match_index += len(leading_whitespace)
+                leading_whitespace = ''
+
+            index = self._handle_match(template, parse_tree, tag_type, tag_key, leading_whitespace, start_index, match_index, end_index)
 
         # Save the rest of the template.
         parse_tree.append(template[index:])
 
         return parse_tree
 
-    def _handle_match(self, template, parse_tree, matches, start_index, match_index, end_index):
-
-        engine = self.engine
-
-        # Normalize the matches dictionary.
-        if matches['change'] is not None:
-            matches.update(tag='=', name=matches['delims'])
-        elif matches['raw'] is not None:
-            matches.update(tag='&', name=matches['raw_name'])
-
-        tag_type = matches['tag']
-
-        # Standalone (non-interpolation) tags consume the entire line,
-        # both leading whitespace and trailing newline.
-        did_tag_begin_line = match_index == 0 or template[match_index - 1] in END_OF_LINE_CHARACTERS
-        did_tag_end_line = end_index == len(template) or template[end_index] in END_OF_LINE_CHARACTERS
-        is_tag_interpolating = tag_type in ['', '&']
-
-        if did_tag_begin_line and did_tag_end_line and not is_tag_interpolating:
-            if end_index < len(template):
-                end_index += template[end_index] == '\r' and 1 or 0
-            if end_index < len(template):
-                end_index += template[end_index] == '\n' and 1 or 0
-        elif matches['whitespace']:
-            parse_tree.append(matches['whitespace'])
-            match_index += len(matches['whitespace'])
-            matches['whitespace'] = ''
-
-        name = matches['name']
+    def _handle_match(self, template, parse_tree, tag_type, tag_key, leading_whitespace, start_index, match_index, end_index):
 
         if tag_type == '!':
             return end_index
 
         if tag_type == '=':
-            delimiters = name.split()
+            delimiters = tag_key.split()
             self._change_delimiters(delimiters)
             return end_index
 
+        engine = self.engine
+
         if tag_type == '>':
-            func = engine._make_get_partial(name, matches['whitespace'])
+            func = engine._make_get_partial(tag_key, leading_whitespace)
         elif tag_type in ['#', '^']:
 
             try:
@@ -156,20 +156,21 @@ class Parser(object):
                 end_index = e.position
 
             if tag_type == '#':
-                func = engine._make_get_section(name, bufr, tmpl, self._delimiters)
+                func = engine._make_get_section(tag_key, bufr, tmpl, self._delimiters)
             else:
-                func = engine._make_get_inverse(name, bufr)
+                func = engine._make_get_inverse(tag_key, bufr)
 
         elif tag_type == '&':
 
-            func = engine._make_get_literal(name)
+            func = engine._make_get_literal(tag_key)
 
         elif tag_type == '':
 
-            func = engine._make_get_escaped(name)
+            func = engine._make_get_escaped(tag_key)
 
         elif tag_type == '/':
 
+            # TODO: check that tag key matches section start tag key.
             # TODO: don't use exceptions for flow control.
             raise EndOfSection(parse_tree, template[start_index:match_index], end_index)
 
