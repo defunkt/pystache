@@ -349,11 +349,13 @@ class RenderEngine(object):
         elif matches['raw'] is not None:
             matches.update(tag='{', name=matches['raw_name'])
 
+        tag_type = matches['tag']
+
         # Standalone (non-interpolation) tags consume the entire line,
         # both leading whitespace and trailing newline.
         did_tag_begin_line = match_index == 0 or template[match_index - 1] in END_OF_LINE_CHARACTERS
         did_tag_end_line = end_index == len(template) or template[end_index] in END_OF_LINE_CHARACTERS
-        is_tag_interpolating = matches['tag'] in ['', '&', '{']
+        is_tag_interpolating = tag_type in ['', '&', '{']
 
         if did_tag_begin_line and did_tag_end_line and not is_tag_interpolating:
             if end_index < len(template):
@@ -367,17 +369,17 @@ class RenderEngine(object):
 
         name = matches['name']
 
-        if matches['tag'] == '!':
+        if tag_type == '!':
             return end_index
 
-        if matches['tag'] == '=':
+        if tag_type == '=':
             delimiters = name.split()
             self._change_delimiters(delimiters)
             return end_index
 
-        if matches['tag'] == '>':
+        if tag_type == '>':
             func = self._make_get_partial(name, matches['whitespace'])
-        elif matches['tag'] in ['#', '^']:
+        elif tag_type in ['#', '^']:
 
             try:
                 self.parse_to_tree(template=template, index=end_index)
@@ -386,26 +388,26 @@ class RenderEngine(object):
                 tmpl = e.template
                 end_index = e.position
 
-            if matches['tag'] == '#':
+            if tag_type == '#':
                 func = self._make_get_section(name, bufr, tmpl, self._delimiters)
             else:
                 func = _make_get_inverse(name, bufr)
 
-        elif matches['tag'] in ['{', '&']:
+        elif tag_type in ['{', '&']:
 
             func = self._make_get_literal(name)
 
-        elif matches['tag'] == '':
+        elif tag_type == '':
 
             func = self._make_get_escaped(name)
 
-        elif matches['tag'] == '/':
+        elif tag_type == '/':
 
             # TODO: don't use exceptions for flow control.
             raise EndOfSection(parse_tree, template[start_index:match_index], end_index)
 
         else:
-            raise Exception("'%s' is an unrecognized type!" % matches['tag'])
+            raise Exception("Unrecognized tag type: %s" % repr(tag_type))
 
         parse_tree.append(func)
 
