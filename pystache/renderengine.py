@@ -149,19 +149,17 @@ class RenderEngine(object):
         if delimiters is None:
             delimiters = DEFAULT_DELIMITERS
 
+        self._delimiters = delimiters
         self.escape = escape
         self.literal = literal
         self.load_partial = load_partial
 
-        # TODO: consider an approach that doesn't require compiling a regular
-        # expression in the constructor.  For example, be lazier.  That way
-        # rendering will still work as expected even if the delimiters are
-        # set after the constructor
-        self._set_delimiters(delimiters)
-
-    def _set_delimiters(self, delimiters):
-        self._delimiters = delimiters
+    def _compile_template_re(self):
         self._template_re = _compile_template_re(self._delimiters)
+
+    def _change_delimiters(self, delimiters):
+        self._delimiters = delimiters
+        self._compile_template_re()
 
     def render(self, template, context):
         """
@@ -202,6 +200,7 @@ class RenderEngine(object):
 
         engine = RenderEngine(load_partial=self.load_partial,
                               literal=self.literal, escape=self.escape, delimiters=delims)
+        engine._compile_template_re()
 
         return engine.parse_to_tree(template=template_string)
 
@@ -371,7 +370,7 @@ class RenderEngine(object):
 
         if captures['tag'] == '=':
             delimiters = name.split()
-            self._set_delimiters(delimiters)
+            self._change_delimiters(delimiters)
             return end_index
 
         if captures['tag'] == '>':
