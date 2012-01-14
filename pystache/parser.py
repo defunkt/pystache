@@ -40,10 +40,11 @@ def _compile_template_re(delimiters):
 
 
 class EndOfSection(Exception):
-    def __init__(self, parse_tree, template, position):
+
+    def __init__(self, parse_tree, template, index_end):
         self.parse_tree = parse_tree
         self.template = template
-        self.position = position
+        self.index_end = index_end
 
 
 class Parser(object):
@@ -132,6 +133,16 @@ class Parser(object):
 
         return parse_tree
 
+    def _parse_section(self, template, index_start):
+        try:
+            self.parse(template=template, index=index_start)
+        except EndOfSection as err:
+            buff = err.parse_tree
+            template = err.template
+            index_end = err.index_end
+
+        return buff, template, index_end
+
     def _handle_match(self, template, parse_tree, tag_type, tag_key, leading_whitespace, start_index, match_index, end_index):
 
         if tag_type == '!':
@@ -148,17 +159,12 @@ class Parser(object):
             func = engine._make_get_partial(tag_key, leading_whitespace)
         elif tag_type in ['#', '^']:
 
-            try:
-                self.parse(template=template, index=end_index)
-            except EndOfSection as e:
-                bufr = e.parse_tree
-                tmpl = e.template
-                end_index = e.position
+            buff, template, end_index = self._parse_section(template, end_index)
 
             if tag_type == '#':
-                func = engine._make_get_section(tag_key, bufr, tmpl, self._delimiters)
+                func = engine._make_get_section(tag_key, buff, template, self._delimiters)
             else:
-                func = engine._make_get_inverse(tag_key, bufr)
+                func = engine._make_get_inverse(tag_key, buff)
 
         elif tag_type == '&':
 
