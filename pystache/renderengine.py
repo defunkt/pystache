@@ -8,9 +8,34 @@ Defines a class responsible for rendering logic.
 import re
 
 
-DEFAULT_TAG_OPENING = '{{'
-DEFAULT_TAG_CLOSING = '}}'
+DEFAULT_DELIMITERS = ('{{', '}}')
 END_OF_LINE_CHARACTERS = ['\r', '\n']
+
+
+def _compile_template_re(delimiters):
+
+    # The possible tag type characters following the opening tag,
+    # excluding "=" and "{".
+    tag_types = "!>&/#^"
+
+    # TODO: are we following this in the spec?
+    #
+    #   The tag's content MUST be a non-whitespace character sequence
+    #   NOT containing the current closing delimiter.
+    #
+    tag = r"""
+        (?P<content>[\s\S]*?)
+        (?P<whitespace>[\ \t]*)
+        %(otag)s \s*
+        (?:
+          (?P<change>=) \s* (?P<delims>.+?)   \s* = |
+          (?P<raw>{)    \s* (?P<raw_name>.+?) \s* } |
+          (?P<tag>[%(tag_types)s]?)  \s* (?P<name>[\s\S]+?)
+        )
+        \s* %(ctag)s
+    """ % {'tag_types': tag_types, 'otag': re.escape(delimiters[0]), 'ctag': re.escape(delimiters[1])}
+
+    return re.compile(tag, re.M | re.X)
 
 
 def render_parse_tree(parse_tree, context):
@@ -86,14 +111,12 @@ class RenderEngine(object):
 
     """
 
-    tag_re = None
-
-    otag = DEFAULT_TAG_OPENING
-    ctag = DEFAULT_TAG_CLOSING
+    _delimiters = None
+    _template_re = None
 
     nonblank_re = re.compile(r'^(.)', re.M)
 
-    def __init__(self, load_partial=None, literal=None, escape=None):
+    def __init__(self, load_partial=None, literal=None, escape=None, delimiters=None):
         """
         Arguments:
 
@@ -123,9 +146,22 @@ class RenderEngine(object):
             from plain unicode strings.
 
         """
+        if delimiters is None:
+            delimiters = DEFAULT_DELIMITERS
+
         self.escape = escape
         self.literal = literal
         self.load_partial = load_partial
+
+        # TODO: consider an approach that doesn't require compiling a regular
+        # expression in the constructor.  For example, be lazier.  That way
+        # rendering will still work as expected even if the delimiters are
+        # set after the constructor
+        self._set_delimiters(delimiters)
+
+    def _set_delimiters(self, delimiters):
+        self._delimiters = delimiters
+        self._template_re = _compile_template_re(self._delimiters)
 
     def render(self, template, context):
         """
@@ -165,41 +201,9 @@ class RenderEngine(object):
     def parse_string_to_tree(self, template_string, delims=None):
 
         engine = RenderEngine(load_partial=self.load_partial,
-                              literal=self.literal,
-                              escape=self.escape)
-
-        if delims is not None:
-            engine.otag = delims[0]
-            engine.ctag = delims[1]
-
-        engine._compile_regexps()
+                              literal=self.literal, escape=self.escape, delimiters=delims)
 
         return engine.parse_to_tree(template=template_string)
-
-    def _compile_regexps(self):
-
-        # The possible tag type characters following the opening tag,
-        # excluding "=" and "{".
-        tag_types = "!>&/#^"
-
-        # TODO: are we following this in the spec?
-        #
-        #   The tag's content MUST be a non-whitespace character sequence
-        #   NOT containing the current closing delimiter.
-        #
-        tag = r"""
-            (?P<content>[\s\S]*?)
-            (?P<whitespace>[\ \t]*)
-            %(otag)s \s*
-            (?:
-              (?P<change>=) \s* (?P<delims>.+?)   \s* = |
-              (?P<raw>{)    \s* (?P<raw_name>.+?) \s* } |
-              (?P<tag>[%(tag_types)s]?)  \s* (?P<name>[\s\S]+?)
-            )
-            \s* %(ctag)s
-        """ % {'tag_types': tag_types, 'otag': re.escape(self.otag), 'ctag': re.escape(self.ctag)}
-
-        self.tag_re = re.compile(tag, re.M | re.X)
 
     def _get_string_value(self, context, tag_name):
         """
@@ -318,7 +322,7 @@ class RenderEngine(object):
         start_index = index
 
         while True:
-            match = self.tag_re.search(template, index)
+            match = self._template_re.search(template, index)
 
             if match is None:
                 break
@@ -366,8 +370,8 @@ class RenderEngine(object):
             return end_index
 
         if captures['tag'] == '=':
-            self.otag, self.ctag = name.split()
-            self._compile_regexps()
+            delimiters = name.split()
+            self._set_delimiters(delimiters)
             return end_index
 
         if captures['tag'] == '>':
@@ -382,7 +386,7 @@ class RenderEngine(object):
                 end_index = e.position
 
             if captures['tag'] == '#':
-                func = self._make_get_section(name, bufr, tmpl, (self.otag, self.ctag))
+                func = self._make_get_section(name, bufr, tmpl, self._delimiters)
             else:
                 func = _make_get_inverse(name, bufr)
 
