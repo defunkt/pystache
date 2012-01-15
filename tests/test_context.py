@@ -12,9 +12,9 @@ from pystache.context import _get_item
 from pystache.context import Context
 
 
-class TestCase(unittest.TestCase):
+class AssertIsMixin:
 
-    """A TestCase class with support for assertIs()."""
+    """A mixin for adding assertIs() to a unittest.TestCase."""
 
     # unittest.assertIs() is not available until Python 2.7:
     #   http://docs.python.org/library/unittest.html#unittest.TestCase.assertIsNone
@@ -48,7 +48,7 @@ class MappingObject(object):
         return self._dict[key]
 
 
-class GetItemTestCase(TestCase):
+class GetItemTestCase(unittest.TestCase, AssertIsMixin):
 
     """Test context._get_item()."""
 
@@ -168,7 +168,7 @@ class GetItemTestCase(TestCase):
         self.assertRaises(AttributeError, _get_item, obj, "foo")
 
 
-class ContextTests(TestCase):
+class ContextTests(unittest.TestCase, AssertIsMixin):
 
     """
     Test the Context class.
