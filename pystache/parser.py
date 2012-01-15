@@ -79,6 +79,10 @@ class Parser(object):
 
         This method uses the current tag delimiter.
 
+        Arguments:
+
+          template: a template string of type unicode.
+
         """
         parse_tree = []
         start_index = index

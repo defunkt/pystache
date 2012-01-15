@@ -172,7 +172,7 @@ class RenderEngine(object):
             elif callable(data):
                 # TODO: should we check the arity?
                 template = data(template)
-                parsed_template = self._parse(template_string=template, delimiters=delims)
+                parsed_template = self._parse(template, delimiters=delims)
                 data = [ data ]
             elif type(data) not in [list, tuple]:
                 data = [ data ]
@@ -187,15 +187,19 @@ class RenderEngine(object):
 
         return get_section
 
-    def _parse(self, template_string, delimiters=None):
+    def _parse(self, template, delimiters=None):
         """
         Parse the given template, and return a ParsedTemplate instance.
+
+        Arguments:
+
+          template: a template string of type unicode.
 
         """
         parser = Parser(self, delimiters=delimiters)
         parser.compile_template_re()
 
-        return parser.parse(template=template_string)
+        return parser.parse(template=template)
 
     def _render(self, template, context):
         """
@@ -203,14 +207,18 @@ class RenderEngine(object):
 
         Arguments:
 
-          template: template string
-          context: a Context instance
+          template: a template string of type unicode.
+          context: a Context instance.
 
         """
+        # We keep this type-check as an added check because this method is
+        # called with template strings coming from potentially externally-
+        # supplied functions like self.literal, self.load_partial, etc.
+        # Beyond this point, we have much better control over the type.
         if type(template) is not unicode:
             raise Exception("Argument 'template' not unicode: %s: %s" % (type(template), repr(template)))
 
-        parsed_template = self._parse(template_string=template)
+        parsed_template = self._parse(template)
 
         return parsed_template.render(context)
 
