@@ -5,11 +5,12 @@ Defines a Context class to represent mustache(5)'s notion of context.
 
 """
 
+class NotFound(object): pass
 # We use this private global variable as a return value to represent a key
 # not being found on lookup.  This lets us distinguish between the case
 # of a key's value being None with the case of a key not being found --
 # without having to rely on exceptions (e.g. KeyError) for flow control.
-_NOT_FOUND = object()
+_NOT_FOUND = NotFound()
 
 
 # TODO: share code with template.check_callable().
@@ -17,40 +18,35 @@ def _is_callable(obj):
     return hasattr(obj, '__call__')
 
 
-def _get_item(obj, key):
+def _get_value(item, key):
     """
-    Return a key's value, or _NOT_FOUND if the key does not exist.
+    Retrieve a key's value from an item.
 
-    The obj argument should satisfy the same conditions as those
-    described for the arguments passed to Context.__init__().  These
-    conditions are described in Context.__init__()'s docstring.
+    Returns _NOT_FOUND if the key does not exist.
 
-    The rules for looking up the value of a key are the same as the rules
-    described in Context.get()'s docstring for querying a single item.
-
-    The behavior of this function is undefined if obj is None.
+    The Context.get() docstring documents this function's intended behavior.
 
     """
-    if hasattr(obj, '__getitem__'):
+    if isinstance(item, dict):
+        # Then we consider the argument a "hash" for the purposes of the spec.
+        #
         # We do a membership test to avoid using exceptions for flow control
-        # (e.g. catching KeyError).  In addition, we call __contains__()
-        # explicitly as opposed to using the membership operator "in" to
-        # avoid triggering the following Python fallback behavior:
+        # (e.g. catching KeyError).
+        if key in item:
+            return item[key]
+    elif type(item).__module__ != '__builtin__':
+        # Then we consider the argument an "object" for the purposes of
+        # the spec.
         #
-        #    "For objects that don’t define __contains__(), the membership test
-        #    first tries iteration via __iter__(), then the old sequence
-        #    iteration protocol via __getitem__()...."
-        #
-        # (from http://docs.python.org/reference/datamodel.html#object.__contains__ )
-        if obj.__contains__(key):
-            return obj[key]
-
-    elif hasattr(obj, key):
-        attr = getattr(obj, key)
-        if _is_callable(attr):
-            return attr()
-
-        return attr
+        # The elif test above lets us avoid treating instances of built-in
+        # types like integers and strings as objects (cf. issue #81).
+        # Instances of user-defined classes on the other hand, for example,
+        # are considered objects by the test above.
+        if hasattr(item, key):
+            attr = getattr(item, key)
+            if _is_callable(attr):
+                return attr()
+            return attr
 
     return _NOT_FOUND
 
@@ -61,18 +57,18 @@ class Context(object):
     Provides dictionary-like access to a stack of zero or more items.
 
     Instances of this class are meant to act as the rendering context
-    when rendering mustache templates in accordance with mustache(5).
+    when rendering Mustache templates in accordance with mustache(5)
+    and the Mustache spec.
 
-    Instances encapsulate a private stack of objects and dictionaries.
-    Querying the stack for the value of a key queries the items in the
-    stack in order from last-added objects to first (last in, first out).
+    Instances encapsulate a private stack of hashes, objects, and built-in
+    type instances.  Querying the stack for the value of a key queries
+    the items in the stack in order from last-added objects to first
+    (last in, first out).
 
-    *Caution*:
+    Caution: this class does not currently support recursive nesting in
+    that items in the stack cannot themselves be Context instances.
 
-      This class currently does not support recursive nesting in that
-      items in the stack cannot themselves be Context instances.
-
-    See the docstrings of the methods of this class for more information.
+    See the docstrings of the methods of this class for more details.
 
     """
 
@@ -87,27 +83,8 @@ class Context(object):
         stack in order so that, in particular, items at the end of
         the argument list are queried first when querying the stack.
 
-        Each item should satisfy the following condition:
-
-        * If the item implements __getitem__(), it should also implement
-          __contains__().  Failure to implement __contains__() will cause
-          an AttributeError to be raised when the item is queried during
-          calls to self.get().
-
-          Python dictionaries, in particular, satisfy this condition.
-          An item satisfying this condition we informally call a "mapping
-          object" because it shares some characteristics of the Mapping
-          abstract base class (ABC) in Python's collections package:
-          http://docs.python.org/library/collections.html#collections-abstract-base-classes
-
-          It is not necessary for an item to implement __getitem__().
-          In particular, an item can be an ordinary object with no
-          mapping-like characteristics.
-
-        *Caution*:
-
-          Items should not themselves be Context instances, as recursive
-          nesting does not behave as one might expect.
+        Caution: items should not themselves be Context instances, as
+        recursive nesting does not behave as one might expect.
 
         """
         self._stack = list(items)
@@ -128,11 +105,11 @@ class Context(object):
     @staticmethod
     def create(*context, **kwargs):
         """
-        Build a Context instance from a sequence of "mapping-like" objects.
+        Build a Context instance from a sequence of context-like items.
 
         This factory-style method is more general than the Context class's
-        constructor in that Context instances can themselves appear in the
-        argument list.  This is not true of the constructor.
+        constructor in that, unlike the constructor, the argument list
+        can itself contain Context instances.
 
         Here is an example illustrating various aspects of this method:
 
@@ -185,56 +162,71 @@ class Context(object):
         """
         Query the stack for the given key, and return the resulting value.
 
-        Querying for a key queries items in the stack in order from last-
-        added objects to first (last in, first out).  The value returned
-        is the value of the key for the first item for which the item
-        contains the key.  If the key is not found in any item in the
-        stack, then this method returns the default value.  The default
-        value defaults to None.
+        This method queries items in the stack in order from last-added
+        objects to first (last in, first out).  The value returned is
+        the value of the key in the first item that contains the key.
+        If the key is not found in any item in the stack, then the default
+        value is returned.  The default value defaults to None.
 
-        Querying an item in the stack is done in the following way:
+        When speaking about returning values from a context, the Mustache
+        spec distinguishes between two types of context stack elements:
+        hashes and objects.
 
-        (1) If the item defines __getitem__() and the item contains the
-            key (i.e. __contains__() returns True), then the corresponding
-            value is returned.
-        (2) Otherwise, the method looks for an attribute with the same
-            name as the key.  If such an attribute exists, the value of
-            this attribute is returned.  If the attribute is callable,
-            however, the attribute is first called with no arguments.
-        (3) If there is no attribute with the same name as the key, then
-            the key is considered not found in the item.
+        In accordance with the spec, this method queries items in the
+        stack for a key in the following way.  For the purposes of querying,
+        each item is classified into one of the following three mutually
+        exclusive categories: a hash, an object, or neither:
+
+        (1) Hash: if the item's type is a subclass of dict, then the item
+            is considered a hash (in the terminology of the spec), and
+            the key's value is the dictionary value of the key.  If the
+            dictionary doesn't contain the key, the key is not found.
+
+        (2) Object: if the item isn't a hash and isn't an instance of a
+            built-in type, then the item is considered an object (again
+            using the language of the spec).  In this case, the method
+            looks for an attribute with the same name as the key.  If an
+            attribute with that name exists, the value of the attribute is
+            returned.  If the attribute is callable, however (i.e. if the
+            attribute is a method), then the attribute is called with no
+            arguments and instead that value returned.  If there is no
+            attribute with the same name as the key, then the key is
+            considered not found.
+
+        (3) Neither: if the item is neither a hash nor an object, then
+            the key is considered not found.
 
         *Caution*:
 
-            Callables resulting from a call to __getitem__ (as in (1)
-            above) are handled differently from callables that are merely
-            attributes (as in (2) above).
+          Callables are handled differently depending on whether they are
+          dictionary values, as in (1) above, or attributes, as in (2).
+          The former are returned as-is, while the latter are first
+          called and that value returned.
 
-            The former are returned as-is, while the latter are first called
-            and that value returned.  Here is an example:
+          Here is an example to illustrate:
 
-            >>> def greet():
-            ...     return "Hi Bob!"
-            >>>
-            >>> class Greeter(object):
-            ...     greet = None
-            >>>
-            >>> obj = Greeter()
-            >>> obj.greet = greet
-            >>> dct = {'greet': greet}
-            >>>
-            >>> obj.greet is dct['greet']
-            True
-            >>> Context(obj).get('greet')
-            'Hi Bob!'
-            >>> Context(dct).get('greet')  #doctest: +ELLIPSIS
-            <function greet at 0x...>
+          >>> def greet():
+          ...     return "Hi Bob!"
+          >>>
+          >>> class Greeter(object):
+          ...     greet = None
+          >>>
+          >>> dct = {'greet': greet}
+          >>> obj = Greeter()
+          >>> obj.greet = greet
+          >>>
+          >>> dct['greet'] is obj.greet
+          True
+          >>> Context(dct).get('greet')  #doctest: +ELLIPSIS
+          <function greet at 0x...>
+          >>> Context(obj).get('greet')
+          'Hi Bob!'
 
-            TODO: explain the rationale for this difference in treatment.
+          TODO: explain the rationale for this difference in treatment.
 
         """
         for obj in reversed(self._stack):
-            val = _get_item(obj, key)
+            val = _get_value(obj, key)
             if val is _NOT_FOUND:
                 continue
             # Otherwise, the key was found.

@@ -5,21 +5,12 @@ Unit tests of context.py.
 
 """
 
+from datetime import datetime
 import unittest
 
 from pystache.context import _NOT_FOUND
-from pystache.context import _get_item
+from pystache.context import _get_value
 from pystache.context import Context
-
-
-class TestCase(unittest.TestCase):
-
-    """A TestCase class with support for assertIs()."""
-
-    # unittest.assertIs() is not available until Python 2.7:
-    #   http://docs.python.org/library/unittest.html#unittest.TestCase.assertIsNone
-    def assertIs(self, first, second):
-        self.assertTrue(first is second, msg="%s is not %s" % (repr(first), repr(second)))
 
 
 class SimpleObject(object):
@@ -33,7 +24,7 @@ class SimpleObject(object):
         return "called..."
 
 
-class MappingObject(object):
+class DictLike(object):
 
     """A sample class that implements __getitem__() and __contains__()."""
 
@@ -48,26 +39,36 @@ class MappingObject(object):
         return self._dict[key]
 
 
-class GetItemTestCase(TestCase):
+class AssertIsMixin:
 
-    """Test context._get_item()."""
+    """A mixin for adding assertIs() to a unittest.TestCase."""
 
-    def assertNotFound(self, obj, key):
+    # unittest.assertIs() is not available until Python 2.7:
+    #   http://docs.python.org/library/unittest.html#unittest.TestCase.assertIsNone
+    def assertIs(self, first, second):
+        self.assertTrue(first is second, msg="%s is not %s" % (repr(first), repr(second)))
+
+
+class GetValueTests(unittest.TestCase, AssertIsMixin):
+
+    """Test context._get_value()."""
+
+    def assertNotFound(self, item, key):
         """
-        Assert that a call to _get_item() returns _NOT_FOUND.
+        Assert that a call to _get_value() returns _NOT_FOUND.
 
         """
-        self.assertIs(_get_item(obj, key), _NOT_FOUND)
+        self.assertIs(_get_value(item, key), _NOT_FOUND)
 
-    ### Case: obj is a dictionary.
+    ### Case: the item is a dictionary.
 
     def test_dictionary__key_present(self):
         """
         Test getting a key from a dictionary.
 
         """
-        obj = {"foo": "bar"}
-        self.assertEquals(_get_item(obj, "foo"), "bar")
+        item = {"foo": "bar"}
+        self.assertEquals(_get_value(item, "foo"), "bar")
 
     def test_dictionary__callable_not_called(self):
         """
@@ -77,98 +78,135 @@ class GetItemTestCase(TestCase):
         def foo_callable(self):
             return "bar"
 
-        obj = {"foo": foo_callable}
-        self.assertNotEquals(_get_item(obj, "foo"), "bar")
-        self.assertTrue(_get_item(obj, "foo") is foo_callable)
+        item = {"foo": foo_callable}
+        self.assertNotEquals(_get_value(item, "foo"), "bar")
+        self.assertTrue(_get_value(item, "foo") is foo_callable)
 
     def test_dictionary__key_missing(self):
         """
         Test getting a missing key from a dictionary.
 
         """
-        obj = {}
-        self.assertNotFound(obj, "missing")
+        item = {}
+        self.assertNotFound(item, "missing")
 
     def test_dictionary__attributes_not_checked(self):
         """
         Test that dictionary attributes are not checked.
 
         """
-        obj = {}
+        item = {}
         attr_name = "keys"
-        self.assertEquals(getattr(obj, attr_name)(), [])
-        self.assertNotFound(obj, attr_name)
+        self.assertEquals(getattr(item, attr_name)(), [])
+        self.assertNotFound(item, attr_name)
 
-    ### Case: obj does not implement __getitem__().
+    def test_dictionary__dict_subclass(self):
+        """
+        Test that subclasses of dict are treated as dictionaries.
+
+        """
+        class DictSubclass(dict): pass
+
+        item = DictSubclass()
+        item["foo"] = "bar"
+
+        self.assertEquals(_get_value(item, "foo"), "bar")
+
+    ### Case: the item is an object.
 
     def test_object__attribute_present(self):
         """
         Test getting an attribute from an object.
 
         """
-        obj = SimpleObject()
-        self.assertEquals(_get_item(obj, "foo"), "bar")
+        item = SimpleObject()
+        self.assertEquals(_get_value(item, "foo"), "bar")
 
     def test_object__attribute_missing(self):
         """
         Test getting a missing attribute from an object.
 
         """
-        obj = SimpleObject()
-        self.assertNotFound(obj, "missing")
+        item = SimpleObject()
+        self.assertNotFound(item, "missing")
 
     def test_object__attribute_is_callable(self):
         """
         Test getting a callable attribute from an object.
 
         """
-        obj = SimpleObject()
-        self.assertEquals(_get_item(obj, "foo_callable"), "called...")
+        item = SimpleObject()
+        self.assertEquals(_get_value(item, "foo_callable"), "called...")
 
-    ### Case: obj implements __getitem__() (i.e. a "mapping object").
-
-    def test_mapping__key_present(self):
+    def test_object__non_built_in_type(self):
         """
-        Test getting a key from a mapping object.
+        Test getting an attribute from an instance of a type that isn't built-in.
 
         """
-        obj = MappingObject()
-        self.assertEquals(_get_item(obj, "foo"), "bar")
+        item = datetime(2012, 1, 2)
+        self.assertEquals(_get_value(item, "day"), 2)
 
-    def test_mapping__key_missing(self):
+    def test_object__dict_like(self):
         """
-        Test getting a missing key from a mapping object.
-
-        """
-        obj = MappingObject()
-        self.assertNotFound(obj, "missing")
-
-    def test_mapping__get_attribute(self):
-        """
-        Test getting an attribute from a mapping object.
+        Test getting a key from a dict-like object (an object that implements '__getitem__').
 
         """
-        obj = MappingObject()
-        key = "fuzz"
-        self.assertEquals(getattr(obj, key), "buzz")
-        # As desired, __getitem__()'s presence causes obj.fuzz not to be checked.
-        self.assertNotFound(obj, key)
+        item = DictLike()
+        self.assertEquals(item["foo"], "bar")
+        self.assertNotFound(item, "foo")
 
-    def test_mapping_object__not_implementing_contains(self):
+    ### Case: the item is an instance of a built-in type.
+
+    def test_built_in_type__integer(self):
         """
-        Test querying a mapping object that doesn't define __contains__().
+        Test getting from an integer.
 
         """
-        class Sample(object):
+        class MyInt(int): pass
 
-            def __getitem__(self, key):
-                return "bar"
+        item1 = MyInt(10)
+        item2 = 10
 
-        obj = Sample()
-        self.assertRaises(AttributeError, _get_item, obj, "foo")
+        self.assertEquals(item1.real, 10)
+        self.assertEquals(item2.real, 10)
+
+        self.assertEquals(_get_value(item1, 'real'), 10)
+        self.assertNotFound(item2, 'real')
+
+    def test_built_in_type__string(self):
+        """
+        Test getting from a string.
+
+        """
+        class MyStr(str): pass
+
+        item1 = MyStr('abc')
+        item2 = 'abc'
+
+        self.assertEquals(item1.upper(), 'ABC')
+        self.assertEquals(item2.upper(), 'ABC')
+
+        self.assertEquals(_get_value(item1, 'upper'), 'ABC')
+        self.assertNotFound(item2, 'upper')
+
+    def test_built_in_type__list(self):
+        """
+        Test getting from a list.
+
+        """
+        class MyList(list): pass
+
+        item1 = MyList([1, 2, 3])
+        item2 = [1, 2, 3]
+
+        self.assertEquals(item1.pop(), 3)
+        self.assertEquals(item2.pop(), 3)
+
+        self.assertEquals(_get_value(item1, 'pop'), 2)
+        self.assertNotFound(item2, 'pop')
 
 
-class ContextTests(TestCase):
+class ContextTests(unittest.TestCase, AssertIsMixin):
 
     """
     Test the Context class.
