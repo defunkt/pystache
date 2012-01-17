@@ -177,6 +177,39 @@ class RenderTests(unittest.TestCase):
         context = {'test': '{{#hello}}'}
         self._assert_render('{{#hello}}', template, context)
 
+    def test_interpolation__built_in_type__string(self):
+        """
+        Check tag interpolation with a string on the top of the context stack.
+
+        """
+        item = 'abc'
+        # item.upper() == 'ABC'
+        template = '{{#section}}{{upper}}{{/section}}'
+        context = {'section': item, 'upper': 'XYZ'}
+        self._assert_render(u'XYZ', template, context)
+
+    def test_interpolation__built_in_type__integer(self):
+        """
+        Check tag interpolation with an integer on the top of the context stack.
+
+        """
+        item = 10
+        # item.real == 10
+        template = '{{#section}}{{real}}{{/section}}'
+        context = {'section': item, 'real': 1000}
+        self._assert_render(u'1000', template, context)
+
+    def test_interpolation__built_in_type__list(self):
+        """
+        Check tag interpolation with a list on the top of the context stack.
+
+        """
+        item = [[1, 2, 3]]
+        # item[0].pop() == 3
+        template = '{{#section}}{{pop}}{{/section}}'
+        context = {'section': item, 'pop': 7}
+        self._assert_render(u'7', template, context)
+
     def test_implicit_iterator__literal(self):
         """
         Test an implicit iterator in a literal tag.
