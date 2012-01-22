@@ -9,6 +9,7 @@ import cgi
 import unittest
 
 from pystache.context import Context
+from pystache.parser import ParsingError
 from pystache.renderengine import RenderEngine
 from tests.common import assert_strings
 
@@ -269,6 +270,28 @@ class RenderTests(unittest.TestCase):
         self._assert_render('unescaped: < escaped: &lt;', template, context, engine=engine, partials=partials)
 
     ## Test cases related specifically to sections.
+
+    def test_section__end_tag_with_no_start_tag(self):
+        """
+        Check what happens if there is an end tag with no start tag.
+
+        """
+        template = '{{/section}}'
+        try:
+            self._assert_render(None, template)
+        except ParsingError, err:
+            self.assertEquals(str(err), "Section end tag mismatch: u'section' != None")
+
+    def test_section__end_tag_mismatch(self):
+        """
+        Check what happens if the end tag doesn't match.
+
+        """
+        template = '{{#section_start}}{{/section_end}}'
+        try:
+            self._assert_render(None, template)
+        except ParsingError, err:
+            self.assertEquals(str(err), "Section end tag mismatch: u'section_end' != u'section_start'")
 
     def test_section__context_values(self):
         """

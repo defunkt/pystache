@@ -7,64 +7,7 @@ Defines a class responsible for rendering logic.
 
 import re
 
-
-DEFAULT_TAG_OPENING = '{{'
-DEFAULT_TAG_CLOSING = '}}'
-END_OF_LINE_CHARACTERS = ['\r', '\n']
-
-
-def render_parse_tree(parse_tree, context):
-    """
-    Returns: a string of type unicode.
-
-    The elements of parse_tree can be any of the following:
-
-     * a unicode string
-     * the return value of a call to any of the following:
-
-        * RenderEngine._make_get_literal():
-            Args: context
-            Returns: unicode
-        * RenderEngine._make_get_escaped():
-            Args: context
-            Returns: unicode
-        * RenderEngine._make_get_partial()
-            Args: context
-            Returns: unicode
-        * RenderEngine._make_get_section()
-            Args: context
-            Returns: unicode
-        * _make_get_inverse()
-            Args: context
-            Returns: unicode
-
-    """
-    get_unicode = lambda val: val(context) if callable(val) else val
-    parts = map(get_unicode, parse_tree)
-    s = ''.join(parts)
-
-    return unicode(s)
-
-
-def _make_get_inverse(name, parsed):
-    def get_inverse(context):
-        """
-        Returns a string with type unicode.
-
-        """
-        data = context.get(name)
-        if data:
-            return u''
-        return render_parse_tree(parsed, context)
-
-    return get_inverse
-
-
-class EndOfSection(Exception):
-    def __init__(self, parse_tree, template, position):
-        self.parse_tree = parse_tree
-        self.template = template
-        self.position = position
+from parser import Parser
 
 
 class RenderEngine(object):
@@ -85,13 +28,6 @@ class RenderEngine(object):
     unicode subclasses (e.g. markupsafe.Markup).
 
     """
-
-    tag_re = None
-
-    otag = DEFAULT_TAG_OPENING
-    ctag = DEFAULT_TAG_CLOSING
-
-    nonblank_re = re.compile(r'^(.)', re.M)
 
     def __init__(self, load_partial=None, literal=None, escape=None):
         """
@@ -127,80 +63,6 @@ class RenderEngine(object):
         self.literal = literal
         self.load_partial = load_partial
 
-    def render(self, template, context):
-        """
-        Return a template rendered as a string with type unicode.
-
-        Arguments:
-
-          template: a template string of type unicode (but not a proper
-            subclass of unicode).
-
-          context: a Context instance.
-
-        """
-        # Be strict but not too strict.  In other words, accept str instead
-        # of unicode, but don't assume anything about the encoding (e.g.
-        # don't use self.literal).
-        template = unicode(template)
-
-        return self._render_template(template=template, context=context)
-
-    def _render_template(self, template, context):
-        """
-        Returns: a string of type unicode.
-
-        Arguments:
-
-          template: template string
-          context: a Context instance
-
-        """
-        if type(template) is not unicode:
-            raise Exception("Argument 'template' not unicode: %s: %s" % (type(template), repr(template)))
-
-        parse_tree = self.parse_string_to_tree(template_string=template)
-        return render_parse_tree(parse_tree, context)
-
-    def parse_string_to_tree(self, template_string, delims=None):
-
-        engine = RenderEngine(load_partial=self.load_partial,
-                              literal=self.literal,
-                              escape=self.escape)
-
-        if delims is not None:
-            engine.otag = delims[0]
-            engine.ctag = delims[1]
-
-        engine._compile_regexps()
-
-        return engine.parse_to_tree(template=template_string)
-
-    def _compile_regexps(self):
-
-        # The possible tag type characters following the opening tag,
-        # excluding "=" and "{".
-        tag_types = "!>&/#^"
-
-        # TODO: are we following this in the spec?
-        #
-        #   The tag's content MUST be a non-whitespace character sequence
-        #   NOT containing the current closing delimiter.
-        #
-        tag = r"""
-            (?P<content>[\s\S]*?)
-            (?P<whitespace>[\ \t]*)
-            %(otag)s \s*
-            (?:
-              (?P<change>=) \s* (?P<delims>.+?)   \s* = |
-              (?P<raw>{)    \s* (?P<raw_name>.+?) \s* } |
-              (?P<tag>[%(tag_types)s]?)  \s* (?P<name>[\s\S]+?)
-            )
-            \s* %(ctag)s
-        """ % {'tag_types': tag_types, 'otag': re.escape(self.otag), 'ctag': re.escape(self.ctag)}
-
-        self.tag_re = re.compile(tag, re.M | re.X)
-
     def _get_string_value(self, context, tag_name):
         """
         Get a value from the given context as a basestring instance.
@@ -231,7 +93,7 @@ class RenderEngine(object):
                 template = str(template)
             if type(template) is not unicode:
                 template = self.literal(template)
-            val = self._render_template(template, context)
+            val = self._render(template, context)
 
         if not isinstance(val, basestring):
             val = str(val)
@@ -264,34 +126,47 @@ class RenderEngine(object):
 
         return get_escaped
 
-    def _make_get_partial(self, name, indentation=''):
+    def _make_get_partial(self, template):
         def get_partial(context):
             """
             Returns: a string of type unicode.
 
             """
-            template = self.load_partial(name)
-            # Indent before rendering.
-            template = re.sub(self.nonblank_re, indentation + r'\1', template)
-            return self._render_template(template, context)
+            return self._render(template, context)
 
         return get_partial
 
-    def _make_get_section(self, name, parse_tree_, template_, delims):
+    def _make_get_inverse(self, name, parsed_template):
+        def get_inverse(context):
+            """
+            Returns a string with type unicode.
+
+            """
+            data = context.get(name)
+            if data:
+                return u''
+            return parsed_template.render(context)
+
+        return get_inverse
+
+    # TODO: the template_ and parsed_template_ arguments don't both seem
+    # to be necessary.  Can we remove one of them?  For example, if
+    # callable(data) is True, then the initial parsed_template isn't used.
+    def _make_get_section(self, name, parsed_template_, template_, delims):
         def get_section(context):
             """
             Returns: a string of type unicode.
 
             """
             template = template_
-            parse_tree = parse_tree_
+            parsed_template = parsed_template_
             data = context.get(name)
             if not data:
                 data = []
             elif callable(data):
                 # TODO: should we check the arity?
                 template = data(template)
-                parse_tree = self.parse_string_to_tree(template_string=template, delims=delims)
+                parsed_template = self._parse(template, delimiters=delims)
                 data = [ data ]
             elif type(data) not in [list, tuple]:
                 data = [ data ]
@@ -299,107 +174,63 @@ class RenderEngine(object):
             parts = []
             for element in data:
                 context.push(element)
-                parts.append(render_parse_tree(parse_tree, context))
+                parts.append(parsed_template.render(context))
                 context.pop()
 
             return unicode(''.join(parts))
 
         return get_section
 
-    def parse_to_tree(self, template, index=0):
+    def _parse(self, template, delimiters=None):
         """
-        Parse a template into a syntax tree.
+        Parse the given template, and return a ParsedTemplate instance.
+
+        Arguments:
+
+          template: a template string of type unicode.
 
         """
-        parse_tree = []
-        start_index = index
+        parser = Parser(self, delimiters=delimiters)
+        parser.compile_template_re()
 
-        while True:
-            match = self.tag_re.search(template, index)
+        return parser.parse(template=template)
 
-            if match is None:
-                break
+    def _render(self, template, context):
+        """
+        Returns: a string of type unicode.
 
-            captures = match.groupdict()
-            match_index = match.end('content')
-            end_index = match.end()
+        Arguments:
 
-            index = self._handle_match(template, parse_tree, captures, start_index, match_index, end_index)
+          template: a template string of type unicode.
+          context: a Context instance.
 
-        # Save the rest of the template.
-        parse_tree.append(template[index:])
+        """
+        # We keep this type-check as an added check because this method is
+        # called with template strings coming from potentially externally-
+        # supplied functions like self.literal, self.load_partial, etc.
+        # Beyond this point, we have much better control over the type.
+        if type(template) is not unicode:
+            raise Exception("Argument 'template' not unicode: %s: %s" % (type(template), repr(template)))
 
-        return parse_tree
+        parsed_template = self._parse(template)
 
-    def _handle_match(self, template, parse_tree, captures, start_index, match_index, end_index):
+        return parsed_template.render(context)
 
-        # Normalize the captures dictionary.
-        if captures['change'] is not None:
-            captures.update(tag='=', name=captures['delims'])
-        elif captures['raw'] is not None:
-            captures.update(tag='{', name=captures['raw_name'])
+    def render(self, template, context):
+        """
+        Return a template rendered as a string with type unicode.
 
-        parse_tree.append(captures['content'])
+        Arguments:
 
-        # Standalone (non-interpolation) tags consume the entire line,
-        # both leading whitespace and trailing newline.
-        did_tag_begin_line = match_index == 0 or template[match_index - 1] in END_OF_LINE_CHARACTERS
-        did_tag_end_line = end_index == len(template) or template[end_index] in END_OF_LINE_CHARACTERS
-        is_tag_interpolating = captures['tag'] in ['', '&', '{']
+          template: a template string of type unicode (but not a proper
+            subclass of unicode).
 
-        if did_tag_begin_line and did_tag_end_line and not is_tag_interpolating:
-            if end_index < len(template):
-                end_index += template[end_index] == '\r' and 1 or 0
-            if end_index < len(template):
-                end_index += template[end_index] == '\n' and 1 or 0
-        elif captures['whitespace']:
-            parse_tree.append(captures['whitespace'])
-            match_index += len(captures['whitespace'])
-            captures['whitespace'] = ''
+          context: a Context instance.
 
-        name = captures['name']
+        """
+        # Be strict but not too strict.  In other words, accept str instead
+        # of unicode, but don't assume anything about the encoding (e.g.
+        # don't use self.literal).
+        template = unicode(template)
 
-        if captures['tag'] == '!':
-            return end_index
-
-        if captures['tag'] == '=':
-            self.otag, self.ctag = name.split()
-            self._compile_regexps()
-            return end_index
-
-        if captures['tag'] == '>':
-            func = self._make_get_partial(name, captures['whitespace'])
-        elif captures['tag'] in ['#', '^']:
-
-            try:
-                self.parse_to_tree(template=template, index=end_index)
-            except EndOfSection as e:
-                bufr = e.parse_tree
-                tmpl = e.template
-                end_index = e.position
-
-            if captures['tag'] == '#':
-                func = self._make_get_section(name, bufr, tmpl, (self.otag, self.ctag))
-            else:
-                func = _make_get_inverse(name, bufr)
-
-        elif captures['tag'] in ['{', '&']:
-
-            func = self._make_get_literal(name)
-
-        elif captures['tag'] == '':
-
-            func = self._make_get_escaped(name)
-
-        elif captures['tag'] == '/':
-
-            # TODO: don't use exceptions for flow control.
-            raise EndOfSection(parse_tree, template[start_index:match_index], end_index)
-
-        else:
-            raise Exception("'%s' is an unrecognized type!" % captures['tag'])
-
-        parse_tree.append(func)
-
-        return end_index
-
+        return self._render(template, context)
