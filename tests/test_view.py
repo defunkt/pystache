@@ -6,6 +6,7 @@ from examples.complex_view import ComplexView
 from examples.lambdas import Lambdas
 from examples.inverted import Inverted, InvertedLists
 from pystache.view import View
+from pystache.view import Locator
 
 
 class Thing(object):
@@ -168,5 +169,16 @@ class ViewTestCase(unittest.TestCase):
         view = InvertedLists()
         self.assertEquals(view.render(), """one, two, three, empty list""")
 
-if __name__ == '__main__':
-    unittest.main()
+
+class LocatorTests(unittest.TestCase):
+
+    def _make_locator(self):
+        locator = Locator()
+        return locator
+
+    def test_get_template(self):
+        locator = self._make_locator()
+        view = View()
+        view.template = 'foo'
+
+        self.assertEquals(locator.get_template(view), 'foo')

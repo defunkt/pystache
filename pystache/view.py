@@ -103,3 +103,21 @@ class View(object):
 
     def __str__(self):
         return self.render()
+
+
+class Locator(object):
+
+    """
+    A class for finding the template associated to a View instance.
+
+    """
+
+    def __init__(self):
+        pass
+
+    def get_template(self, view):
+        if view.template is not None:
+            return view.template
+
+        # TODO: locate template
+        return None
