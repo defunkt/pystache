@@ -10,9 +10,6 @@ import re
 from parser import Parser
 
 
-NON_BLANK_RE = re.compile(r'^(.)', re.M)
-
-
 class RenderEngine(object):
 
     """
@@ -129,15 +126,12 @@ class RenderEngine(object):
 
         return get_escaped
 
-    def _make_get_partial(self, name, indentation=''):
+    def _make_get_partial(self, template):
         def get_partial(context):
             """
             Returns: a string of type unicode.
 
             """
-            template = self.load_partial(name)
-            # Indent before rendering.
-            template = re.sub(NON_BLANK_RE, indentation + r'\1', template)
             return self._render(template, context)
 
         return get_partial

@@ -14,6 +14,7 @@ from template import ParsedTemplate
 
 DEFAULT_DELIMITERS = ('{{', '}}')
 END_OF_LINE_CHARACTERS = ['\r', '\n']
+NON_BLANK_RE = re.compile(r'^(.)', re.M)
 
 
 def _compile_template_re(delimiters):
@@ -148,6 +149,7 @@ class Parser(object):
 
     def _handle_tag_type(self, template, parse_tree, tag_type, tag_key, leading_whitespace, end_index):
 
+        # TODO: switch to using a dictionary instead of a bunch of ifs and elifs.
         if tag_type == '!':
             return end_index
 
@@ -178,7 +180,12 @@ class Parser(object):
 
         elif tag_type == '>':
 
-            func = engine._make_get_partial(tag_key, leading_whitespace)
+            template = engine.load_partial(tag_key)
+
+            # Indent before rendering.
+            template = re.sub(NON_BLANK_RE, leading_whitespace + r'\1', template)
+
+            func = engine._make_get_partial(template)
 
         else:
 
