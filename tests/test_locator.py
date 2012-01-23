@@ -5,6 +5,7 @@ Contains locator.py unit tests.
 
 """
 
+from datetime import datetime
 import os
 import sys
 import unittest
@@ -13,11 +14,9 @@ from pystache.locator import Locator
 from pystache.reader import Reader
 
 from .common import DATA_DIR
-
+from data.templates import SayHello
 
 class LocatorTests(unittest.TestCase):
-
-    search_dirs = 'examples'
 
     def _locator(self):
         return Locator(search_dirs=DATA_DIR)
@@ -36,12 +35,20 @@ class LocatorTests(unittest.TestCase):
     def test_get_object_directory(self):
         locator = Locator()
 
-        reader = Reader()
-        actual = locator.get_object_directory(reader)
+        obj = SayHello()
+        actual = locator.get_object_directory(obj)
 
-        expected = os.path.join(os.path.dirname(__file__), os.pardir, 'pystache')
+        self.assertEquals(actual, os.path.abspath(DATA_DIR))
 
-        self.assertEquals(os.path.normpath(actual), os.path.normpath(expected))
+    def test_get_object_directory__not_hasattr_module(self):
+        locator = Locator()
+
+        obj = datetime(2000, 1, 1)
+        self.assertFalse(hasattr(obj, '__module__'))
+        self.assertEquals(locator.get_object_directory(obj), None)
+
+        self.assertFalse(hasattr(None, '__module__'))
+        self.assertEquals(locator.get_object_directory(None), None)
 
     def test_make_file_name(self):
         locator = Locator()
@@ -55,21 +62,21 @@ class LocatorTests(unittest.TestCase):
         locator.template_extension = ''
         self.assertEquals(locator.make_file_name('foo'), 'foo.')
 
-    def test_locate_path(self):
+    def test_find_path(self):
         locator = Locator()
-        path = locator.locate_path('simple', search_dirs=['examples'])
+        path = locator.find_path(search_dirs=['examples'], template_name='simple')
 
         self.assertEquals(os.path.basename(path), 'simple.mustache')
 
-    def test_locate_path__using_list_of_paths(self):
+    def test_find_path__using_list_of_paths(self):
         locator = Locator()
-        path = locator.locate_path('simple', search_dirs=['doesnt_exist', 'examples'])
+        path = locator.find_path(search_dirs=['doesnt_exist', 'examples'], template_name='simple')
 
         self.assertTrue(path)
 
-    def test_locate_path__precedence(self):
+    def test_find_path__precedence(self):
         """
-        Test the order in which locate_path() searches directories.
+        Test the order in which find_path() searches directories.
 
         """
         locator = Locator()
@@ -77,19 +84,40 @@ class LocatorTests(unittest.TestCase):
         dir1 = DATA_DIR
         dir2 = os.path.join(DATA_DIR, 'locator')
 
-        self.assertTrue(locator.locate_path('duplicate', search_dirs=[dir1]))
-        self.assertTrue(locator.locate_path('duplicate', search_dirs=[dir2]))
+        self.assertTrue(locator.find_path(search_dirs=[dir1], template_name='duplicate'))
+        self.assertTrue(locator.find_path(search_dirs=[dir2], template_name='duplicate'))
 
-        path = locator.locate_path('duplicate', search_dirs=[dir2, dir1])
+        path = locator.find_path(search_dirs=[dir2, dir1], template_name='duplicate')
         dirpath = os.path.dirname(path)
         dirname = os.path.split(dirpath)[-1]
 
         self.assertEquals(dirname, 'locator')
 
-    def test_locate_path__non_existent_template_fails(self):
+    def test_find_path__non_existent_template_fails(self):
         locator = Locator()
 
-        self.assertRaises(IOError, locator.locate_path, 'doesnt_exist', search_dirs=[])
+        self.assertRaises(IOError, locator.find_path, search_dirs=[], template_name='doesnt_exist')
+
+    def test_find_path_by_object(self):
+        locator = Locator()
+
+        obj = SayHello()
+
+        actual = locator.find_path_by_object(search_dirs=[], template_name='say_hello', obj=obj)
+        expected = os.path.abspath(os.path.join(DATA_DIR, 'say_hello.mustache'))
+
+        self.assertEquals(actual, expected)
+
+    def test_find_path_by_object__none_object_directory(self):
+        locator = Locator()
+
+        obj = None
+        self.assertEquals(None, locator.get_object_directory(obj))
+
+        actual = locator.find_path_by_object(search_dirs=[DATA_DIR], template_name='say_hello', obj=obj)
+        expected = os.path.join(DATA_DIR, 'say_hello.mustache')
+
+        self.assertEquals(actual, expected)
 
     def test_make_template_name(self):
         """

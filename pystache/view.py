@@ -8,7 +8,7 @@ This module provides a View class.
 import os.path
 
 from .context import Context
-from .locator import Locator
+from .locator import Locator as TemplateLocator
 from .renderer import Renderer
 
 
@@ -22,7 +22,7 @@ class View(object):
 
     _renderer = None
 
-    locator = Locator()
+    locator = TemplateLocator()
 
     def __init__(self, template=None, context=None, partials=None, **kwargs):
         """
@@ -114,8 +114,9 @@ class Locator(object):
 
     """
 
-    def __init__(self, reader):
+    def __init__(self, reader, template_locator):
         self.reader = reader
+        self.template_locator = template_locator
 
     # TODO: unit test
     def get_relative_template_location(self, view):
@@ -135,6 +136,11 @@ class Locator(object):
         Return the path to the view's associated template.
 
         """
+        dir_path, file_name = self.get_relative_template_location(view)
+
+        if dir_path is None:
+            path = self.template_locator.find_path(search_dirs, file_name, obj=view)
+
         if view.template_path is not None:
             return os.path.split(view.template_path)
 

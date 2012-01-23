@@ -53,6 +53,9 @@ class Locator(object):
         doctest that appears in a text file (rather than a Python file).
 
         """
+        if not hasattr(obj, '__module__'):
+            return None
+
         module = sys.modules[obj.__module__]
 
         if not hasattr(module, '__file__'):
@@ -94,17 +97,30 @@ class Locator(object):
 
         return re.sub('[A-Z]', repl, template_name)[1:]
 
-    def locate_path(self, template_name, search_dirs):
+    def find_path(self, search_dirs, template_name):
         """
-        Find and return the path to the template with the given name.
+        Return the path to a template with the given name.
 
         """
         file_name = self.make_file_name(template_name)
+
         path = self._find_path(file_name, search_dirs)
 
-        if path is not None:
-            return path
+        if path is None:
+            # TODO: we should probably raise an exception of our own type.
+            raise IOError('Template %s not found in directories: %s' %
+                          (repr(template_name), repr(search_dirs)))
 
-        # TODO: we should probably raise an exception of our own type.
-        raise IOError('Template %s not found in directories: %s' %
-                      (repr(template_name), repr(search_dirs)))
+        return path
+
+    def find_path_by_object(self, search_dirs, template_name, obj):
+        """
+        Return the path to a template associated with the given object.
+
+        """
+        dir_path = self.get_object_directory(obj)
+
+        if dir_path is not None:
+            search_dirs = [dir_path] + search_dirs
+
+        return self.find_path(search_dirs, template_name)

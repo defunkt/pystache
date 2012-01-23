@@ -179,12 +179,13 @@ class LocatorTests(unittest.TestCase, AssertIsMixin):
                 return "read: %s" % repr(path)
 
         reader = MockReader()
-        locator = Locator(reader=reader)
+        # TODO: include a locator?
+        locator = Locator(reader=reader, template_locator=None)
         return locator
 
     def test_init__reader(self):
         reader = "reader"  # in practice, this is a reader instance.
-        locator = Locator(reader)
+        locator = Locator(reader, template_locator=None)
 
         self.assertIs(locator.reader, reader)
 

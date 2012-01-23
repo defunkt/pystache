@@ -190,8 +190,8 @@ class Renderer(object):
         locator = self.make_locator()
 
         def load_template(template_name):
-            path = locator.locate_path(template_name=template_name, search_dirs=self.search_dirs)
-            return reader.read(path)
+            template_path = locator.find_path(self.search_dirs, template_name)
+            return reader.read(template_path)
 
         return load_template
 
@@ -263,19 +263,13 @@ class Renderer(object):
         class definition.
 
         """
-        search_dirs = self.search_dirs
         locator = self.make_locator()
 
         template_name = locator.make_template_name(obj)
 
-        directory = locator.get_object_directory(obj)
-        # TODO: add a unit test for the case of a None return value.
-        if directory is not None:
-            search_dirs = [directory] + self.search_dirs
+        template_path = locator.find_path_by_object(self.search_dirs, template_name, obj)
 
-        path = locator.locate_path(template_name=template_name, search_dirs=search_dirs)
-
-        return self.read(path)
+        return self.read(template_path)
 
     def _render_string(self, template, *context, **kwargs):
         """
