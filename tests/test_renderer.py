@@ -16,7 +16,7 @@ from pystache.renderer import Renderer
 from pystache.locator import Locator
 
 from .common import get_data_path
-from .data.templates import SayHello
+from .data.views import SayHello
 
 
 class RendererInitTestCase(unittest.TestCase):

@@ -190,7 +190,8 @@ class Renderer(object):
         locator = self.make_locator()
 
         def load_template(template_name):
-            template_path = locator.find_path(self.search_dirs, template_name)
+            template_path = locator.find_path_by_name(self.search_dirs, template_name)
+
             return reader.read(template_path)
 
         return load_template
@@ -264,10 +265,7 @@ class Renderer(object):
 
         """
         locator = self.make_locator()
-
-        template_name = locator.make_template_name(obj)
-
-        template_path = locator.find_path_by_object(self.search_dirs, template_name, obj)
+        template_path = locator.find_path_by_object(self.search_dirs, obj)
 
         return self.read(template_path)
 

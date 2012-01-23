@@ -97,30 +97,44 @@ class Locator(object):
 
         return re.sub('[A-Z]', repl, template_name)[1:]
 
-    def find_path(self, search_dirs, template_name):
+    def _find_path_by_file_name(self, search_dirs, file_name):
+        """
+        Return the path to a template with the given file name.
+
+        """
+        path = self._find_path(file_name, search_dirs)
+
+        if path is None:
+            # TODO: we should probably raise an exception of our own type.
+            raise IOError('Template file %s not found in directories: %s' %
+                          (repr(file_name), repr(search_dirs)))
+
+        return path
+
+    def find_path_by_name(self, search_dirs, template_name):
         """
         Return the path to a template with the given name.
 
         """
         file_name = self.make_file_name(template_name)
 
-        path = self._find_path(file_name, search_dirs)
+        return self._find_path_by_file_name(search_dirs, file_name)
 
-        if path is None:
-            # TODO: we should probably raise an exception of our own type.
-            raise IOError('Template %s not found in directories: %s' %
-                          (repr(template_name), repr(search_dirs)))
-
-        return path
-
-    def find_path_by_object(self, search_dirs, template_name, obj):
+    def find_path_by_object(self, search_dirs, obj, file_name=None):
         """
         Return the path to a template associated with the given object.
 
         """
+        if file_name is None:
+            # TODO: should we define a make_file_name() method?
+            template_name = self.make_template_name(obj)
+            file_name = self.make_file_name(template_name)
+
         dir_path = self.get_object_directory(obj)
 
         if dir_path is not None:
             search_dirs = [dir_path] + search_dirs
 
-        return self.find_path(search_dirs, template_name)
+        path = self._find_path_by_file_name(search_dirs, file_name)
+
+        return path

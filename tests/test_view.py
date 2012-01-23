@@ -1,13 +1,16 @@
+import os.path
 import unittest
-import pystache
 
 from examples.simple import Simple
 from examples.complex_view import ComplexView
 from examples.lambdas import Lambdas
 from examples.inverted import Inverted, InvertedLists
+from pystache.locator import Locator as TemplateLocator
 from pystache.view import View
-from pystache.view import Locator
-from tests.common import AssertIsMixin
+from pystache.view import Locator as ViewLocator
+from .common import AssertIsMixin
+from .common import DATA_DIR
+from .data.views import SampleView
 
 
 class Thing(object):
@@ -179,13 +182,14 @@ class LocatorTests(unittest.TestCase, AssertIsMixin):
                 return "read: %s" % repr(path)
 
         reader = MockReader()
-        # TODO: include a locator?
-        locator = Locator(reader=reader, template_locator=None)
+        template_locator = TemplateLocator()
+        locator = ViewLocator(reader=reader, search_dirs=[DATA_DIR], template_locator=template_locator)
         return locator
 
+    # TODO: fully test constructor.
     def test_init__reader(self):
         reader = "reader"  # in practice, this is a reader instance.
-        locator = Locator(reader, template_locator=None)
+        locator = ViewLocator(reader, search_dirs=None, template_locator=None)
 
         self.assertIs(locator.reader, reader)
 
@@ -204,6 +208,37 @@ class LocatorTests(unittest.TestCase, AssertIsMixin):
 
         view.template_path = 'foo.txt'
         self.assertEquals(locator.get_relative_template_location(view), ('', 'foo.txt'))
+
+    def test_get_template_path__with_directory(self):
+        """
+        Test get_template_path() with a view that has a directory specified.
+
+        """
+        locator = self._make_locator()
+
+        view = SampleView()
+        view.template_path = 'foo/bar.txt'
+        self.assertTrue(locator.get_relative_template_location(view)[0] is not None)
+
+        actual = locator.get_template_path(view)
+        expected = os.path.abspath(os.path.join(DATA_DIR, 'foo/bar.txt'))
+
+        self.assertEquals(actual, expected)
+
+    def test_get_template_path__without_directory(self):
+        """
+        Test get_template_path() with a view that doesn't have a directory specified.
+
+        """
+        locator = self._make_locator()
+
+        view = SampleView()
+        self.assertTrue(locator.get_relative_template_location(view)[0] is None)
+
+        actual = locator.get_template_path(view)
+        expected = os.path.abspath(os.path.join(DATA_DIR, 'sample_view.mustache'))
+
+        self.assertEquals(actual, expected)
 
     def test_get_template__template_attribute_set(self):
         """

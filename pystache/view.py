@@ -12,6 +12,7 @@ from .locator import Locator as TemplateLocator
 from .renderer import Renderer
 
 
+# TODO: rename this class to something else (e.g. ITemplateInfo)
 class View(object):
 
     template_name = None
@@ -114,8 +115,9 @@ class Locator(object):
 
     """
 
-    def __init__(self, reader, template_locator):
+    def __init__(self, reader, search_dirs, template_locator):
         self.reader = reader
+        self.search_dirs = search_dirs
         self.template_locator = template_locator
 
     # TODO: unit test
@@ -127,10 +129,10 @@ class Locator(object):
         if view.template_path is not None:
             return os.path.split(view.template_path)
 
-        # TODO: finish this
-        return None
 
-    # TODO: unit test
+        # TODO: finish this
+        return (None, None)
+
     def get_template_path(self, view):
         """
         Return the path to the view's associated template.
@@ -139,13 +141,13 @@ class Locator(object):
         dir_path, file_name = self.get_relative_template_location(view)
 
         if dir_path is None:
-            path = self.template_locator.find_path(search_dirs, file_name, obj=view)
+            # Then we need to search for the path.
+            path = self.template_locator.find_path_by_object(self.search_dirs, view, file_name=file_name)
+        else:
+            obj_dir = self.template_locator.get_object_directory(view)
+            path = os.path.join(obj_dir, dir_path, file_name)
 
-        if view.template_path is not None:
-            return os.path.split(view.template_path)
-
-        # TODO: finish this
-        return None
+        return path
 
     def get_template(self, view):
         if view.template is not None:
