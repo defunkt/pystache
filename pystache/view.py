@@ -150,6 +150,10 @@ class Locator(object):
         return path
 
     def get_template(self, view):
+        """
+        Return the unicode template string associated with a view.
+
+        """
         if view.template is not None:
             return view.template
 

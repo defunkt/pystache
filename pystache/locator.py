@@ -30,20 +30,6 @@ class Locator(object):
 
         self.template_extension = extension
 
-    def _find_path(self, file_name, search_dirs):
-        """
-        Search for the given file, and return the path.
-
-        Returns None if the file is not found.
-
-        """
-        for dir_path in search_dirs:
-            file_path = os.path.join(dir_path, file_name)
-            if os.path.exists(file_path):
-                return file_path
-
-        return None
-
     def get_object_directory(self, obj):
         """
         Return the directory containing an object's defining class.
@@ -65,13 +51,6 @@ class Locator(object):
         path = module.__file__
 
         return os.path.dirname(path)
-
-    def make_file_name(self, template_name):
-        file_name = template_name
-        if self.template_extension is not False:
-            file_name += os.path.extsep + self.template_extension
-
-        return file_name
 
     def make_template_name(self, obj):
         """
@@ -97,12 +76,33 @@ class Locator(object):
 
         return re.sub('[A-Z]', repl, template_name)[1:]
 
-    def _find_path_by_file_name(self, search_dirs, file_name):
+    def make_file_name(self, template_name):
+        file_name = template_name
+        if self.template_extension is not False:
+            file_name += os.path.extsep + self.template_extension
+
+        return file_name
+
+    def _find_path(self, search_dirs, file_name):
+        """
+        Search for the given file, and return the path.
+
+        Returns None if the file is not found.
+
+        """
+        for dir_path in search_dirs:
+            file_path = os.path.join(dir_path, file_name)
+            if os.path.exists(file_path):
+                return file_path
+
+        return None
+
+    def _find_path_required(self, search_dirs, file_name):
         """
         Return the path to a template with the given file name.
 
         """
-        path = self._find_path(file_name, search_dirs)
+        path = self._find_path(search_dirs, file_name)
 
         if path is None:
             # TODO: we should probably raise an exception of our own type.
@@ -118,7 +118,7 @@ class Locator(object):
         """
         file_name = self.make_file_name(template_name)
 
-        return self._find_path_by_file_name(search_dirs, file_name)
+        return self._find_path_required(search_dirs, file_name)
 
     def find_path_by_object(self, search_dirs, obj, file_name=None):
         """
@@ -135,6 +135,6 @@ class Locator(object):
         if dir_path is not None:
             search_dirs = [dir_path] + search_dirs
 
-        path = self._find_path_by_file_name(search_dirs, file_name)
+        path = self._find_path_required(search_dirs, file_name)
 
         return path
