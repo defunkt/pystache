@@ -5,6 +5,8 @@ This module provides a View class.
 
 """
 
+import os.path
+
 from .context import Context
 from .locator import Locator
 from .renderer import Renderer
@@ -112,12 +114,37 @@ class Locator(object):
 
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, reader):
+        self.reader = reader
+
+    # TODO: unit test
+    def get_relative_template_location(self, view):
+        """
+        Return the relative template path as a (dir, file_name) pair.
+
+        """
+        if view.template_path is not None:
+            return os.path.split(view.template_path)
+
+        # TODO: finish this
+        return None
+
+    # TODO: unit test
+    def get_template_path(self, view):
+        """
+        Return the path to the view's associated template.
+
+        """
+        if view.template_path is not None:
+            return os.path.split(view.template_path)
+
+        # TODO: finish this
+        return None
 
     def get_template(self, view):
         if view.template is not None:
             return view.template
 
-        # TODO: locate template
-        return None
+        path = self.get_template_path(view)
+
+        return self.reader.read(path)

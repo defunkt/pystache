@@ -11,7 +11,7 @@ import unittest
 from pystache.context import _NOT_FOUND
 from pystache.context import _get_value
 from pystache.context import Context
-
+from tests.common import AssertIsMixin
 
 class SimpleObject(object):
 
@@ -37,16 +37,6 @@ class DictLike(object):
 
     def __getitem__(self, key):
         return self._dict[key]
-
-
-class AssertIsMixin:
-
-    """A mixin for adding assertIs() to a unittest.TestCase."""
-
-    # unittest.assertIs() is not available until Python 2.7:
-    #   http://docs.python.org/library/unittest.html#unittest.TestCase.assertIsNone
-    def assertIs(self, first, second):
-        self.assertTrue(first is second, msg="%s is not %s" % (repr(first), repr(second)))
 
 
 class GetValueTests(unittest.TestCase, AssertIsMixin):

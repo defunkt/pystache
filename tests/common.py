@@ -27,3 +27,11 @@ def assert_strings(test_case, actual, expected):
     test_case.assertEquals(actual, expected, message)
 
 
+class AssertIsMixin:
+
+    """A mixin for adding assertIs() to a unittest.TestCase."""
+
+    # unittest.assertIs() is not available until Python 2.7:
+    #   http://docs.python.org/library/unittest.html#unittest.TestCase.assertIsNone
+    def assertIs(self, first, second):
+        self.assertTrue(first is second, msg="%s is not %s" % (repr(first), repr(second)))

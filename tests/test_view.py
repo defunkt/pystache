@@ -7,6 +7,7 @@ from examples.lambdas import Lambdas
 from examples.inverted import Inverted, InvertedLists
 from pystache.view import View
 from pystache.view import Locator
+from tests.common import AssertIsMixin
 
 
 class Thing(object):
@@ -170,15 +171,59 @@ class ViewTestCase(unittest.TestCase):
         self.assertEquals(view.render(), """one, two, three, empty list""")
 
 
-class LocatorTests(unittest.TestCase):
+class LocatorTests(unittest.TestCase, AssertIsMixin):
 
     def _make_locator(self):
-        locator = Locator()
+        class MockReader(object):
+            def read(self, path):
+                return "read: %s" % repr(path)
+
+        reader = MockReader()
+        locator = Locator(reader=reader)
         return locator
 
-    def test_get_template(self):
+    def test_init__reader(self):
+        reader = "reader"  # in practice, this is a reader instance.
+        locator = Locator(reader)
+
+        self.assertIs(locator.reader, reader)
+
+    # TODO: make this test real
+    def test_get_relative_template_location__template_path__file_name(self):
+        locator = self._make_locator()
+        view = View()
+
+        view.template_path = 'foo.txt'
+        self.assertEquals(locator.get_relative_template_location(view), ('', 'foo.txt'))
+
+    # TODO: make this test real
+    def test_get_relative_template_location__template_path__full_path(self):
+        locator = self._make_locator()
+        view = View()
+
+        view.template_path = 'foo.txt'
+        self.assertEquals(locator.get_relative_template_location(view), ('', 'foo.txt'))
+
+    def test_get_template__template_attribute_set(self):
+        """
+        Test get_template() with view.template set to a non-None value.
+
+        """
         locator = self._make_locator()
         view = View()
         view.template = 'foo'
 
         self.assertEquals(locator.get_template(view), 'foo')
+
+    def test_get_template__template_attribute_not_set(self):
+        """
+        Test get_template() with view.template set to None.
+
+        """
+        locator = self._make_locator()
+        locator.get_template_path = lambda view: "path"
+
+        view = View()
+        view.template = None
+
+        self.assertEquals(locator.get_template(view), "read: 'path'")
