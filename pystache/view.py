@@ -15,11 +15,33 @@ from .renderer import Renderer
 # TODO: rename this class to something else (e.g. ITemplateInfo)
 class View(object):
 
-    template_name = None
-    template_path = None
+    """
+    Subclass this class only if template customizations are needed.
+
+    The following attributes allow one to customize/override template
+    information on a per View basis.  A None value means to use default
+    behavior and perform no customization.  All attributes are initially
+    set to None.
+
+    Attributes:
+
+      template: the template to use, as a unicode string.
+
+      template_path: the path to the template file, relative to the
+        directory containing the module defining the class.
+
+      template_extension: the template file extension.  Defaults to "mustache".
+        Pass False for no extension (i.e. extensionless template files).
+
+    """
+
     template = None
-    template_encoding = None
+    template_path = None
+
+    template_name = None
     template_extension = None
+
+    template_encoding = None
 
     _renderer = None
 
@@ -120,7 +142,6 @@ class Locator(object):
         self.search_dirs = search_dirs
         self.template_locator = template_locator
 
-    # TODO: unit test
     def get_relative_template_location(self, view):
         """
         Return the relative template path as a (dir, file_name) pair.
@@ -128,10 +149,14 @@ class Locator(object):
         """
         if view.template_path is not None:
             return os.path.split(view.template_path)
+        # Otherwise, we don't know the directory.
 
+        template_name = (view.template_name if view.template_name is not None else
+                         self.template_locator.make_template_name(view))
 
-        # TODO: finish this
-        return (None, None)
+        file_name = self.template_locator.make_file_name(template_name, view.template_extension)
+
+        return (None, file_name)
 
     def get_template_path(self, view):
         """
@@ -155,8 +180,10 @@ class Locator(object):
 
         """
         if view.template is not None:
+            # TODO: unit test rendering with a non-unicode value for this attribute.
             return view.template
 
         path = self.get_template_path(view)
 
+        # TODO: add support for encoding.
         return self.reader.read(path)

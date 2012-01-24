@@ -193,21 +193,54 @@ class LocatorTests(unittest.TestCase, AssertIsMixin):
 
         self.assertIs(locator.reader, reader)
 
-    # TODO: make this test real
-    def test_get_relative_template_location__template_path__file_name(self):
+    def _assert_template_location(self, view, expected):
         locator = self._make_locator()
-        view = View()
+        actual = locator.get_relative_template_location(view)
+        self.assertEquals(actual, expected)
 
-        view.template_path = 'foo.txt'
-        self.assertEquals(locator.get_relative_template_location(view), ('', 'foo.txt'))
+    def test_get_relative_template_location(self):
+        """
+        Test get_relative_template_location(): default behavior (no attributes set).
 
-    # TODO: make this test real
-    def test_get_relative_template_location__template_path__full_path(self):
-        locator = self._make_locator()
-        view = View()
+        """
+        view = SampleView()
+        self._assert_template_location(view, (None, 'sample_view.mustache'))
 
-        view.template_path = 'foo.txt'
-        self.assertEquals(locator.get_relative_template_location(view), ('', 'foo.txt'))
+    def test_get_relative_template_location__template_path__file_name_only(self):
+        """
+        Test get_relative_template_location(): template_path attribute.
+
+        """
+        view = SampleView()
+        view.template_path = 'template.txt'
+        self._assert_template_location(view, ('', 'template.txt'))
+
+    def test_get_relative_template_location__template_path__file_name_with_directory(self):
+        """
+        Test get_relative_template_location(): template_path attribute.
+
+        """
+        view = SampleView()
+        view.template_path = 'foo/bar/template.txt'
+        self._assert_template_location(view, ('foo/bar', 'template.txt'))
+
+    def test_get_relative_template_location__template_name(self):
+        """
+        Test get_relative_template_location(): template_name attribute.
+
+        """
+        view = SampleView()
+        view.template_name = 'new_name'
+        self._assert_template_location(view, (None, 'new_name.mustache'))
+
+    def test_get_relative_template_location__template_extension(self):
+        """
+        Test get_relative_template_location(): template_extension attribute.
+
+        """
+        view = SampleView()
+        view.template_extension = 'txt'
+        self._assert_template_location(view, (None, 'sample_view.txt'))
 
     def test_get_template_path__with_directory(self):
         """
