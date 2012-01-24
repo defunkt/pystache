@@ -55,7 +55,7 @@ class ReaderTestCase(unittest.TestCase):
         contents = reader.read(path)
         self.assertEqual(type(contents), unicode)
 
-    def test_read__encoding(self):
+    def test_read__encoding__attribute(self):
         """
         Test read(): encoding attribute respected.
 
@@ -66,6 +66,17 @@ class ReaderTestCase(unittest.TestCase):
         self.assertRaises(UnicodeDecodeError, reader.read, path)
         reader.encoding = 'utf-8'
         self.assertEquals(reader.read(path), u'non-ascii: é')
+
+    def test_read__encoding__argument(self):
+        """
+        Test read(): encoding argument respected.
+
+        """
+        reader = Reader()
+        path = self._get_path('nonascii.mustache')
+
+        self.assertRaises(UnicodeDecodeError, reader.read, path)
+        self.assertEquals(reader.read(path, encoding='utf-8'), u'non-ascii: é')
 
     def test_get__decode_errors(self):
         """
