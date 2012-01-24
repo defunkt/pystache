@@ -76,10 +76,22 @@ class Locator(object):
 
         return re.sub('[A-Z]', repl, template_name)[1:]
 
-    def make_file_name(self, template_name):
+    def make_file_name(self, template_name, template_extension=None):
+        """
+        Generate and return the file name for the given template name.
+
+        Arguments:
+
+          template_extension: defaults to the instance's extension.
+
+        """
         file_name = template_name
-        if self.template_extension is not False:
-            file_name += os.path.extsep + self.template_extension
+
+        if template_extension is None:
+            template_extension = self.template_extension
+
+        if template_extension is not False:
+            file_name += os.path.extsep + template_extension
 
         return file_name
 

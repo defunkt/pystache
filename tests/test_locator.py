@@ -63,6 +63,11 @@ class LocatorTests(unittest.TestCase):
         locator.template_extension = ''
         self.assertEquals(locator.make_file_name('foo'), 'foo.')
 
+    def test_make_file_name__template_extension_argument(self):
+        locator = Locator()
+
+        self.assertEquals(locator.make_file_name('foo', template_extension='bar'), 'foo.bar')
+
     def test_find_path_by_name(self):
         locator = Locator()
         path = locator.find_path_by_name(search_dirs=['examples'], template_name='simple')
