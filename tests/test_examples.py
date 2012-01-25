@@ -37,12 +37,6 @@ class TestView(unittest.TestCase):
     def test_literal(self):
         self.assertEquals(Unescaped().render(), "<h1>Bear > Shark</h1>")
 
-    def test_literal_sigil(self):
-        view = Escaped(template="<h1>{{& thing}}</h1>", context={
-                'thing': 'Bear > Giraffe'
-                })
-        self.assertEquals(view.render(), "<h1>Bear > Giraffe</h1>")
-
     def test_template_partial(self):
         self.assertEquals(TemplatePartial().render(), """<h1>Welcome</h1>
 Again, Welcome!""")

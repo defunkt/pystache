@@ -47,10 +47,6 @@ class ViewTestCase(unittest.TestCase):
         view = View(context=context, fuzz="buzz")
         self.assertEquals(context, {"foo": "bar"})
 
-    def test_basic(self):
-        view = Simple("Hi {{thing}}!", { 'thing': 'world' })
-        self.assertEquals(view.render(), "Hi world!")
-
     def test_kwargs(self):
         view = Simple("Hi {{thing}}!", thing='world')
         self.assertEquals(view.render(), "Hi world!")
@@ -58,18 +54,6 @@ class ViewTestCase(unittest.TestCase):
     def test_render(self):
         view = Simple(thing='world')
         self.assertEquals(view.render(), "Hi world!")
-
-    def test_render__partials(self):
-        """
-        Test passing partials to View.__init__().
-
-        """
-        template = "{{>partial}}"
-        partials = {"partial": "Loaded from dictionary"}
-        view = Simple(template=template, partials=partials)
-        actual = view.render()
-
-        self.assertEquals(actual, "Loaded from dictionary")
 
     def test_template_path(self):
         """

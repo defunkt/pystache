@@ -92,6 +92,14 @@ class RenderTests(unittest.TestCase):
 
         self._assert_render('BAR', '{{{foo}}}', {'foo': 'bar'}, engine=engine)
 
+    def test_literal__sigil(self):
+        template = "<h1>{{& thing}}</h1>"
+        context = {'thing': 'Bear > Giraffe'}
+
+        expected = "<h1>Bear > Giraffe</h1>"
+
+        self._assert_render(expected, template, context)
+
     def test__escape(self):
         """
         Test that render() uses the escape attribute.
