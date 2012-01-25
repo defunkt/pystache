@@ -31,6 +31,9 @@ class View(object):
       template_path: the path to the template file, relative to the
         directory containing the module defining the class.
 
+      template_dir: the directory containing the template file, relative
+        to the directory containing the module defining the class.
+
       template_extension: the template file extension.  Defaults to "mustache".
         Pass False for no extension (i.e. extensionless template files).
 
@@ -39,6 +42,7 @@ class View(object):
     template = None
     template_path = None
 
+    template_directory = None
     template_name = None
     template_extension = None
 
@@ -157,6 +161,9 @@ class Locator(object):
         """
         if view.template_path is not None:
             return os.path.split(view.template_path)
+
+        template_dir = view.template_directory
+
         # Otherwise, we don't know the directory.
 
         template_name = (view.template_name if view.template_name is not None else
@@ -164,7 +171,7 @@ class Locator(object):
 
         file_name = self.template_locator.make_file_name(template_name, view.template_extension)
 
-        return (None, file_name)
+        return (template_dir, file_name)
 
     def get_template_path(self, view):
         """

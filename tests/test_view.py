@@ -226,6 +226,16 @@ class LocatorTests(unittest.TestCase, AssertIsMixin):
         view.template_path = 'foo/bar/template.txt'
         self._assert_template_location(view, ('foo/bar', 'template.txt'))
 
+    def test_get_relative_template_location__template_directory(self):
+        """
+        Test get_relative_template_location(): template_directory attribute.
+
+        """
+        view = SampleView()
+        view.template_directory = 'foo'
+
+        self._assert_template_location(view, ('foo', 'sample_view.mustache'))
+
     def test_get_relative_template_location__template_name(self):
         """
         Test get_relative_template_location(): template_name attribute.
