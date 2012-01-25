@@ -52,7 +52,7 @@ class View(object):
 
     locator = TemplateLocator()
 
-    def __init__(self, context=None, partials=None, **kwargs):
+    def __init__(self, context=None, partials=None):
         """
         Construct a View instance.
 
@@ -66,7 +66,7 @@ class View(object):
             no template with that name, or raise an exception.
 
         """
-        context = Context.create(self, context, **kwargs)
+        context = Context.create(self, context)
 
         self._partials = partials
 

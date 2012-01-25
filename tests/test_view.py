@@ -38,23 +38,6 @@ class ViewTestCase(unittest.TestCase):
         view = TestView()
         self.assertEquals(view.template, "foo")
 
-    def test_init__kwargs_does_not_modify_context(self):
-        """
-        Test that passing **kwargs does not modify the passed context.
-
-        """
-        context = {"foo": "bar"}
-        view = View(context=context, fuzz="buzz")
-        self.assertEquals(context, {"foo": "bar"})
-
-    def test_kwargs(self):
-        view = Simple("Hi {{thing}}!", thing='world')
-        self.assertEquals(view.render(), "Hi world!")
-
-    def test_render(self):
-        view = Simple(thing='world')
-        self.assertEquals(view.render(), "Hi world!")
-
     def test_template_path(self):
         """
         Test that View.template_path is respected.
@@ -85,24 +68,6 @@ class ViewTestCase(unittest.TestCase):
         view.template_path = "examples"
         self.assertEquals(view.render(), "Partial: No tags...")
 
-    def test_template_load_from_multiple_path(self):
-        path = Simple.template_path
-        Simple.template_path = ('examples/nowhere','examples',)
-        try:
-            view = Simple(thing='world')
-            self.assertEquals(view.render(), "Hi world!")
-        finally:
-            Simple.template_path = path
-
-    def test_template_load_from_multiple_path_fail(self):
-        path = Simple.template_path
-        Simple.template_path = ('examples/nowhere',)
-        try:
-            view = Simple(thing='world')
-            self.assertRaises(IOError, view.render)
-        finally:
-            Simple.template_path = path
-
     def test_basic_method_calls(self):
         view = Simple()
         self.assertEquals(view.render(), "Hi pizza!")
@@ -113,7 +78,7 @@ class ViewTestCase(unittest.TestCase):
         self.assertEquals(view.render(), "Hi Chris!")
 
     def test_view_instances_as_attributes(self):
-        other = Simple(name='chris')
+        other = Simple(context={'name': 'chris'})
         other.template = '{{name}}'
         view = Simple()
         view.thing = other
