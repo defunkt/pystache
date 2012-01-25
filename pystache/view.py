@@ -116,9 +116,6 @@ class View(object):
     def get(self, key, default=None):
         return self.context.get(key, default)
 
-    def __str__(self):
-        return self.render()
-
 
 class Locator(object):
 
