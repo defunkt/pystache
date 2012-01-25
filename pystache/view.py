@@ -9,6 +9,7 @@ import os.path
 
 from .context import Context
 from .locator import Locator as TemplateLocator
+from .reader import Reader
 from .renderer import Renderer
 
 
@@ -137,7 +138,14 @@ class Locator(object):
 
     """
 
-    def __init__(self, reader, search_dirs, template_locator):
+    # TODO: unit test this.
+    def __init__(self, search_dirs, template_locator=None, reader=None):
+        if reader is None:
+            reader = Reader()
+
+        if template_locator is None:
+            template_locator = TemplateLocator()
+
         self.reader = reader
         self.search_dirs = search_dirs
         self.template_locator = template_locator
@@ -180,10 +188,8 @@ class Locator(object):
 
         """
         if view.template is not None:
-            # TODO: unit test rendering with a non-unicode value for this attribute.
-            return view.template
+            return self.reader.unicode(view.template, view.template_encoding)
 
         path = self.get_template_path(view)
 
-        # TODO: add support for encoding.
-        return self.reader.read(path)
+        return self.reader.read(path, view.template_encoding)

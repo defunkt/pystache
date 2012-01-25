@@ -100,7 +100,7 @@ class ReaderTestCase(unittest.TestCase):
 
         """
         reader = Reader()
-        path = self._get_path('nonascii.mustache')
+        path = self._get_path('non_ascii.mustache')
 
         self.assertRaises(UnicodeDecodeError, reader.read, path)
         reader.encoding = 'utf-8'
@@ -112,7 +112,7 @@ class ReaderTestCase(unittest.TestCase):
 
         """
         reader = Reader()
-        path = self._get_path('nonascii.mustache')
+        path = self._get_path('non_ascii.mustache')
 
         self.assertRaises(UnicodeDecodeError, reader.read, path)
         self.assertEquals(reader.read(path, encoding='utf-8'), u'non-ascii: é')
@@ -123,7 +123,7 @@ class ReaderTestCase(unittest.TestCase):
 
         """
         reader = Reader()
-        path = self._get_path('nonascii.mustache')
+        path = self._get_path('non_ascii.mustache')
 
         self.assertRaises(UnicodeDecodeError, reader.read, path)
         reader.decode_errors = 'replace'

@@ -1,3 +1,10 @@
+# coding: utf-8
+
+"""
+Unit tests of view.py.
+
+"""
+
 import os.path
 import unittest
 
@@ -5,12 +12,13 @@ from examples.simple import Simple
 from examples.complex_view import ComplexView
 from examples.lambdas import Lambdas
 from examples.inverted import Inverted, InvertedLists
-from pystache.locator import Locator as TemplateLocator
+from pystache.reader import Reader
 from pystache.view import View
 from pystache.view import Locator as ViewLocator
 from .common import AssertIsMixin
 from .common import DATA_DIR
 from .data.views import SampleView
+from .data.views import NonAscii
 
 
 class Thing(object):
@@ -177,19 +185,13 @@ class ViewTestCase(unittest.TestCase):
 class LocatorTests(unittest.TestCase, AssertIsMixin):
 
     def _make_locator(self):
-        class MockReader(object):
-            def read(self, path):
-                return "read: %s" % repr(path)
-
-        reader = MockReader()
-        template_locator = TemplateLocator()
-        locator = ViewLocator(reader=reader, search_dirs=[DATA_DIR], template_locator=template_locator)
+        locator = ViewLocator(search_dirs=[DATA_DIR])
         return locator
 
     # TODO: fully test constructor.
     def test_init__reader(self):
         reader = "reader"  # in practice, this is a reader instance.
-        locator = ViewLocator(reader, search_dirs=None, template_locator=None)
+        locator = ViewLocator(search_dirs=None, template_locator=None, reader=reader)
 
         self.assertIs(locator.reader, reader)
 
@@ -273,26 +275,53 @@ class LocatorTests(unittest.TestCase, AssertIsMixin):
 
         self.assertEquals(actual, expected)
 
-    def test_get_template__template_attribute_set(self):
+    def _assert_get_template(self, view, expected):
+        locator = self._make_locator()
+        actual = locator.get_template(view)
+
+        self.assertEquals(type(actual), unicode)
+        self.assertEquals(actual, expected)
+
+    def test_get_template(self):
         """
-        Test get_template() with view.template set to a non-None value.
+        Test get_template(): default behavior (no attributes set).
 
         """
-        locator = self._make_locator()
-        view = View()
+        view = SampleView()
+
+        self._assert_get_template(view, u"ascii: abc")
+
+    def test_get_template__template(self):
+        """
+        Test get_template(): template attribute.
+
+        """
+        view = SampleView()
         view.template = 'foo'
 
-        self.assertEquals(locator.get_template(view), 'foo')
+        self._assert_get_template(view, 'foo')
 
-    def test_get_template__template_attribute_not_set(self):
+    def test_get_template__template__template_encoding(self):
         """
-        Test get_template() with view.template set to None.
+        Test get_template(): template attribute with template encoding attribute.
 
         """
-        locator = self._make_locator()
-        locator.get_template_path = lambda view: "path"
+        view = SampleView()
+        view.template = u'é'.encode('utf-8')
 
-        view = View()
-        view.template = None
+        self.assertRaises(UnicodeDecodeError, self._assert_get_template, view, 'foo')
 
-        self.assertEquals(locator.get_template(view), "read: 'path'")
+        view.template_encoding = 'utf-8'
+        self._assert_get_template(view, u'é')
+
+    def test_get_template__template_encoding(self):
+        """
+        Test get_template(): template_encoding attribute.
+
+        """
+        view = NonAscii()
+
+        self.assertRaises(UnicodeDecodeError, self._assert_get_template, view, 'foo')
+
+        view.template_encoding = 'utf-8'
+        self._assert_get_template(view, u"non-ascii: é")

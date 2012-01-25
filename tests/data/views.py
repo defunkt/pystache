@@ -10,3 +10,7 @@ class SayHello(object):
 
 class SampleView(View):
     pass
+
+
+class NonAscii(View):
+    pass
