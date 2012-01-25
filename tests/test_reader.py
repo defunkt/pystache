@@ -36,6 +36,45 @@ class ReaderTestCase(unittest.TestCase):
         reader = Reader(encoding='foo')
         self.assertEquals(reader.encoding, 'foo')
 
+    def test_unicode(self):
+        """
+        Test unicode(): default values.
+
+        """
+        reader = Reader()
+
+        actual = reader.unicode("foo")
+
+        self.assertEquals(type(actual), unicode)
+        self.assertEquals(actual, u"foo")
+
+    def test_unicode__encoding_attribute(self):
+        """
+        Test unicode(): encoding attribute.
+
+        """
+        reader = Reader()
+
+        non_ascii = u'é'.encode('utf-8')
+
+        self.assertRaises(UnicodeDecodeError, reader.unicode, non_ascii)
+
+        reader.encoding = 'utf-8'
+        self.assertEquals(reader.unicode(non_ascii), u"é")
+
+    def test_unicode__encoding_argument(self):
+        """
+        Test unicode(): encoding argument.
+
+        """
+        reader = Reader()
+
+        non_ascii = u'é'.encode('utf-8')
+
+        self.assertRaises(UnicodeDecodeError, reader.unicode, non_ascii)
+
+        self.assertEquals(reader.unicode(non_ascii, encoding='utf-8'), u'é')
+
     def test_read(self):
         """
         Test read().

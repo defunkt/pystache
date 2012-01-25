@@ -42,17 +42,18 @@ class Reader(object):
         self.decode_errors = decode_errors
         self.encoding = encoding
 
+    def unicode(self, text, encoding=None):
+        if encoding is None:
+            encoding = self.encoding
+
+        return unicode(text, encoding, self.decode_errors)
+
     def read(self, path, encoding=None):
         """
         Read the template at the given path, and return it as a unicode string.
 
         """
-        if encoding is None:
-            encoding = self.encoding
-
         with open(path, 'r') as f:
             text = f.read()
 
-        text = unicode(text, encoding, self.decode_errors)
-
-        return text
+        return self.unicode(text, encoding)
