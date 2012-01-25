@@ -52,23 +52,12 @@ class View(object):
 
     locator = TemplateLocator()
 
-    def __init__(self, context=None, partials=None):
+    def __init__(self, context=None):
         """
         Construct a View instance.
 
-        Arguments:
-
-          partials: a custom object (e.g. dictionary) responsible for
-            loading partials during the rendering process.  The object
-            should have a get() method that accepts a string and returns
-            the corresponding template as a string, preferably as a
-            unicode string.  The method should return None if there is
-            no template with that name, or raise an exception.
-
         """
         context = Context.create(self, context)
-
-        self._partials = partials
 
         self.context = context
 
@@ -79,8 +68,7 @@ class View(object):
             # instantiation some of the attributes on which the Renderer
             # depends.  This lets users set the template_extension attribute,
             # etc. after View.__init__() has already been called.
-            renderer = Renderer(partials=self._partials,
-                                file_encoding=self.template_encoding,
+            renderer = Renderer(file_encoding=self.template_encoding,
                                 search_dirs=self.template_path,
                                 file_extension=self.template_extension)
             self._renderer = renderer
