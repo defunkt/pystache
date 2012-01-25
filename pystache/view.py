@@ -113,9 +113,6 @@ class View(object):
         renderer = self._get_renderer()
         return renderer.render(template, self.context)
 
-    def get(self, key, default=None):
-        return self.context.get(key, default)
-
 
 class Locator(object):
 
