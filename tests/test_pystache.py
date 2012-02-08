@@ -75,7 +75,7 @@ class TestPystache(unittest.TestCase):
         ret = pystache.render(template, context)
         self.assertEquals(ret, """<ul><li>Chris</li><li>Tom</li><li>PJ</li></ul>""")
         
-    def test_single_block_rendering(self):
+    def test_nested_context(self):
         template = """{{#equipment}}{{mainhand}}{{/equipment}}"""
         context = {'equipment': {'mainhand': 'sweet sword'} }
         ret = pystache.render(template, context)
