@@ -74,6 +74,12 @@ class TestPystache(unittest.TestCase):
         context = { 'users': [ 'Chris', 'Tom','PJ' ] }
         ret = pystache.render(template, context)
         self.assertEquals(ret, """<ul><li>Chris</li><li>Tom</li><li>PJ</li></ul>""")
+        
+    def test_nested_context(self):
+        template = """{{#equipment}}{{mainhand}}{{/equipment}}"""
+        context = {'equipment': {'mainhand': 'sweet sword'} }
+        ret = pystache.render(template, context)
+        self.assertEquals(ret, """sweet sword""")
 
 if __name__ == '__main__':
     unittest.main()
