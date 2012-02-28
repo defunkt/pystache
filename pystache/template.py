@@ -53,7 +53,11 @@ class Template(object):
         if kwargs:
             context.update(kwargs)
 
-        self.view = context if isinstance(context, View) else View(context=context)
+        if isinstance(context, View):
+            self.view = context  
+        else:
+            self.view = View(context=context)
+
         self._compile_regexps()
 
     def _compile_regexps(self):
@@ -80,7 +84,8 @@ class Template(object):
             replacer = ''
 
             # Callable
-            if it and isinstance(it, collections.Callable):
+            # if it and isinstance(it, collections.Callable):
+            if it and callable(it):
                 replacer = it(inner)
             # Dictionary
             elif it and hasattr(it, 'keys') and hasattr(it, '__getitem__'):
