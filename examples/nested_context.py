@@ -16,4 +16,7 @@ class NestedContext(pystache.View):
         return [{'outer': 'car'}]
         
     def nested_context_in_view(self):
-        return 'it works!' if self.get('outer') == self.get('inner') else ''
+        if self.get('outer') == self.get('inner'):
+            return 'it works!'  
+        else:
+            return ''
