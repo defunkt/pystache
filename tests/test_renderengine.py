@@ -376,6 +376,22 @@ class RenderTests(unittest.TestCase):
         context = {'test': (lambda text: 'Hi %s' % text)}
         self._assert_render('Hi Mom', template, context)
 
+    def test_section__generator(self):
+        """
+        Generator expressions should behave the same way as lists do.
+        This actually tests for everything which has an __iter__ method.
+        """
+        template = '{{#gen}}{{.}}{{/gen}}'
+        context = {'gen': (i for i in range(5))}
+        self._assert_render('01234', template, context)
+
+        context = {'gen': xrange(5)}
+        self._assert_render('01234', template, context)
+
+        d = {'1': 1, '2': 2, 'abc': 3}
+        context = {'gen': d.iterkeys()}
+        self._assert_render(''.join(d.keys()), template, context)
+
     def test_section__lambda__tag_in_output(self):
         """
         Check that callable output is treated as a template string (issue #46).
