@@ -34,6 +34,11 @@ class Modifiers(dict):
             return func
         return setter
 
+def replace(string, span, replacement):
+    if span[0] == span[1] == -1:
+        return string
+
+    return unicode(string[:span[0]]) + unicode(replacement) + unicode(string[span[1]:])
 
 class Template(object):
 
@@ -69,8 +74,9 @@ class Template(object):
         self.tag_re = re.compile(tag % tags)
 
     def _render_sections(self, template, view):
+        match = None
         while True:
-            match = self.section_re.search(template)
+            match = self.section_re.search(template, pos=match.start() if match else 0)
             if match is None:
                 break
 
@@ -98,13 +104,14 @@ class Template(object):
             elif (not it and section[2] == '^') or (it and section[2] != '^'):
                 replacer = self._render_dictionary(inner, it)
 
-            template = literal(template.replace(section, replacer))
+            template = literal(replace(template, match.span(), replacer))
 
         return template
 
     def _render_tags(self, template):
+        match = None
         while True:
-            match = self.tag_re.search(template)
+            match = self.tag_re.search(template, pos=match.start() if match else 0)
             if match is None:
                 break
 
@@ -112,7 +119,7 @@ class Template(object):
             tag_name = tag_name.strip()
             func = self.modifiers[tag_type]
             replacement = func(self, tag_name)
-            template = template.replace(tag, replacement)
+            template = replace(template, match.span(), replacement)
 
         return template
 

@@ -9,6 +9,7 @@ from examples.escaped import Escaped
 from examples.unescaped import Unescaped
 from examples.template_partial import TemplatePartial
 from examples.delimiters import Delimiters
+from examples.delimiters_complex import DelimitersComplex
 from examples.unicode_output import UnicodeOutput
 from examples.unicode_input import UnicodeInput
 from examples.nested_context import NestedContext
@@ -65,6 +66,9 @@ Again, Welcome!
 
 * Then, surprisingly, it worked the third time.
 """)
+
+    def test_delimiters_complex(self):
+        self.assertEquals(DelimitersComplex().render(), r"<%a%>bc{{d}}e<%f%>")
 
     def test_nested_context(self):
         self.assertEquals(NestedContext().render(), "one and foo and two")
