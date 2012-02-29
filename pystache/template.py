@@ -38,7 +38,7 @@ def replace(string, span, replacement):
     if span[0] == span[1] == -1:
         return string
 
-    return string[:span[0]] + unicode(replacement) + string[span[1]:]
+    return unicode(string[:span[0]]) + unicode(replacement) + unicode(string[span[1]:])
 
 class Template(object):
 
