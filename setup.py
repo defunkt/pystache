@@ -2,9 +2,31 @@
 # coding: utf-8
 
 """
-Run the following to publish to PyPI:
+To push a new version of pystache to PyPI--
 
-> python setup.py publish
+    http://pypi.python.org/pypi/pystache
+
+you first need to be added as a "Package Index Owner" of pystache.
+
+Then run the following (after preparing the release, bumping the version
+number, etc):
+
+    > python setup.py publish
+
+If you get an error like the following--
+
+    Upload failed (401): You must be identified to edit package information
+
+then add a file called .pyirc to your home directory with the following
+contents:
+
+    [server-login]
+    username: <PyPI username>
+    password: <PyPI password>
+
+as described here, for example:
+
+    http://docs.python.org/release/2.5.2/dist/pypirc.html
 
 """
 
