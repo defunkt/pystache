@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+"""
+Run the following to publish to PyPI:
+
+> python setup.py publish
+
+"""
+
 import os
 import sys
 
@@ -36,7 +43,7 @@ if sys.argv[-1] == 'publish':
 long_description = make_long_description()
 
 setup(name='pystache',
-      version='0.3.1',
+      version='0.4.0',
       description='Mustache for Python',
       long_description=long_description,
       author='Chris Wanstrath',
