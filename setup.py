@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+"""
+Run the following to publish to PyPI:
+
+> python setup.py publish
+
+"""
 
 import os
 import sys
@@ -25,7 +31,7 @@ setup(name='pystache',
       url='http://github.com/defunkt/pystache',
       packages=['pystache'],
       license='MIT',
-      classifiers = ( 
+      classifiers = (
         "Development Status :: 4 - Beta",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",
