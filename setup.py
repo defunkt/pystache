@@ -2,14 +2,19 @@
 # coding: utf-8
 
 """
-To push a new version of pystache to PyPI--
+This script supports installing and distributing pystache.
+
+Below are instructions to pystache maintainers on how to push a new
+version of pystache to PyPI--
 
     http://pypi.python.org/pypi/pystache
 
-you first need to be added as a "Package Index Owner" of pystache.
+Create a PyPI user account.  The user account will need permissions to push
+to PyPI.  A current "Package Index Owner" of pystache can grant you those
+permissions.
 
-Then run the following (after preparing the release, bumping the version
-number, etc):
+When you have permissions, run the following (after preparing the release,
+bumping the version number in setup.py, etc):
 
     > python setup.py publish
 
