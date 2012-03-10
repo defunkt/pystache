@@ -376,6 +376,29 @@ class RenderTests(unittest.TestCase):
         context = {'test': (lambda text: 'Hi %s' % text)}
         self._assert_render('Hi Mom', template, context)
 
+    def test_section__iterable(self):
+        """
+        Check that objects supporting iteration (aside from dicts) behave like lists.
+
+        """
+        template = '{{#iterable}}{{.}}{{/iterable}}'
+
+        context = {'iterable': (i for i in range(3))}  # type 'generator'
+        self._assert_render('012', template, context)
+
+        context = {'iterable': xrange(4)}  # type 'xrange'
+        self._assert_render('0123', template, context)
+
+        d = {'foo': 0, 'bar': 0}
+        # We don't know what order of keys we'll be given, but from the
+        # Python documentation:
+        #  "If items(), keys(), values(), iteritems(), iterkeys(), and
+        #   itervalues() are called with no intervening modifications to
+        #   the dictionary, the lists will directly correspond."
+        expected = ''.join(d.keys())
+        context = {'iterable': d.iterkeys()}  # type 'dictionary-keyiterator'
+        self._assert_render(expected, template, context)
+
     def test_section__lambda__tag_in_output(self):
         """
         Check that callable output is treated as a template string (issue #46).
