@@ -168,7 +168,7 @@ class RenderEngine(object):
                 template = data(template)
                 parsed_template = self._parse(template, delimiters=delims)
                 data = [ data ]
-            elif type(data) not in [list, tuple]:
+            elif not hasattr(data, '__iter__') or isinstance(data, dict):
                 data = [ data ]
 
             parts = []
