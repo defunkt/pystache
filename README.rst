@@ -4,6 +4,8 @@ Pystache
 
 .. image:: https://s3.amazonaws.com/webdev_bucket/pystache.png
 
+Pystache_ is a Python implementation of Mustache.
+
 Mustache_ is a framework-agnostic way to render logic-free views that is
 inspired by ctemplate_ and et_.  Like ctemplate_, "it emphasizes
 separating logic from presentation: it is impossible to embed application
@@ -13,9 +15,8 @@ The `mustache(5)`_ man page provides a good introduction to Mustache's
 syntax.  For a more complete (and more current) description of Mustache's
 behavior, see the official Mustache spec_.
 
-Pystache_ is a Python implementation of Mustache.  It currently passes
-all tests in `version 1.0.3`_ of the Mustache spec_.  Pystache itself is
-`semantically versioned`_.
+Pystache is `semantically versioned`_.  This version of Pystache passes all
+tests in `version 1.0.3`_ of the Mustache spec_.
 
 Logo: `David Phillips`_
 
