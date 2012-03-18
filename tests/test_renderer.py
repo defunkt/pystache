@@ -16,7 +16,7 @@ from pystache.renderer import Renderer
 from pystache.locator import Locator
 
 from .common import get_data_path
-from .data.templates import SayHello
+from .data.views import SayHello
 
 
 class RendererInitTestCase(unittest.TestCase):
@@ -200,7 +200,7 @@ class RendererTestCase(unittest.TestCase):
         self.assertEquals(type(actual), unicode)
 
     def test_read__file_encoding(self):
-        filename = 'nonascii.mustache'
+        filename = 'non_ascii.mustache'
 
         renderer = Renderer()
         renderer.file_encoding = 'ascii'
@@ -211,7 +211,7 @@ class RendererTestCase(unittest.TestCase):
         self.assertEquals(actual, u'non-ascii: é')
 
     def test_read__decode_errors(self):
-        filename = 'nonascii.mustache'
+        filename = 'non_ascii.mustache'
         renderer = Renderer()
 
         self.assertRaises(UnicodeDecodeError, self._read, renderer, filename)

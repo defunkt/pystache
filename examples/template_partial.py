@@ -13,4 +13,4 @@ class TemplatePartial(pystache.View):
         return [{'item': 'one'}, {'item': 'two'}, {'item': 'three'}]
 
     def thing(self):
-        return self.get('prop')
+        return self.context.get('prop')
