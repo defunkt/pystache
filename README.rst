@@ -84,6 +84,10 @@ To run all available tests (including doctests)::
 
     nosetests --with-doctest --doctest-extension=rst
 
+or alternatively::
+
+    python setup.py nosetests
+
 
 Mailing List
 ==================
