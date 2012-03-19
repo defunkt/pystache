@@ -11,7 +11,6 @@ import sys
 import unittest
 
 from examples.simple import Simple
-from pystache import renderer
 from pystache.renderer import Renderer
 from pystache.locator import Locator
 

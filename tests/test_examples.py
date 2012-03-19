@@ -1,7 +1,6 @@
 # encoding: utf-8
 
 import unittest
-import pystache
 
 from examples.comments import Comments
 from examples.double_section import DoubleSection
@@ -12,14 +11,16 @@ from examples.delimiters import Delimiters
 from examples.unicode_output import UnicodeOutput
 from examples.unicode_input import UnicodeInput
 from examples.nested_context import NestedContext
-
+from pystache.renderer import Renderer
 from tests.common import assert_strings
 
 
 class TestView(unittest.TestCase):
+
     def test_comments(self):
-        self.assertEquals(Comments().render(), """<h1>A Comedy of Errors</h1>
-""")
+        renderer = Renderer()
+        expected = renderer.render(Comments())
+        self.assertEquals(expected, "<h1>A Comedy of Errors</h1>")
 
     def test_double_section(self):
         self.assertEquals(DoubleSection().render(),"""* first\n* second\n* third""")

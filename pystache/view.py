@@ -13,8 +13,7 @@ from .reader import Reader
 from .renderer import Renderer
 
 
-# TODO: rename this class to something else (e.g. ITemplateInfo)
-class View(object):
+class CustomizedTemplate(object):
 
     """
     Subclass this class only if template customizations are needed.
@@ -47,6 +46,10 @@ class View(object):
     template_extension = None
 
     template_encoding = None
+
+
+# TODO: remove this class.
+class View(CustomizedTemplate):
 
     _renderer = None
 

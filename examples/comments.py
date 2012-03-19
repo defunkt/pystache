@@ -1,6 +1,6 @@
-import pystache
+from pystache import CustomizedTemplate
 
-class Comments(pystache.View):
+class Comments(CustomizedTemplate):
     template_path = 'examples'
 
     def title(self):

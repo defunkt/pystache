@@ -7,9 +7,10 @@ This module contains the initialization logic called by __init__.py.
 
 from .renderer import Renderer
 from .view import View
+from .view import  CustomizedTemplate
 
 
-__all__ = ['render', 'Renderer', 'View']
+__all__ = ['render', 'Renderer', 'View', 'CustomizedTemplate']
 
 
 def render(template, context=None, **kwargs):
