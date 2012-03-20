@@ -12,6 +12,7 @@ from examples.simple import Simple
 from examples.complex_view import ComplexView
 from examples.lambdas import Lambdas
 from examples.inverted import Inverted, InvertedLists
+from pystache import Renderer
 from pystache.reader import Reader
 from pystache.view import View
 from pystache.view import Locator as ViewLocator
@@ -78,8 +79,15 @@ class ViewTestCase(unittest.TestCase):
         self.assertEquals(view.render(), "Hi Chris!")
 
     def test_complex(self):
-        self.assertEquals(ComplexView().render(),
-            """<h1>Colors</h1><ul><li><strong>red</strong></li><li><a href="#Green">green</a></li><li><a href="#Blue">blue</a></li></ul>""")
+        renderer = Renderer()
+        expected = renderer.render(ComplexView())
+        self.assertEquals(expected, """\
+<h1>Colors</h1>
+<ul>
+<li><strong>red</strong></li>
+<li><a href="#Green">green</a></li>
+<li><a href="#Blue">blue</a></li>
+</ul>""")
 
     def test_higher_order_replace(self):
         view = Lambdas()

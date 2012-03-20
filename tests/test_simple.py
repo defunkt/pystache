@@ -19,12 +19,14 @@ class TestSimple(unittest.TestCase):
         self.assertEquals(view.render(), "one and foo and two")
 
     def test_looping_and_negation_context(self):
-        view = ComplexView()
-        view.template = '{{#item}}{{header}}: {{name}} {{/item}}{{^item}} Shouldnt see me{{/item}}'
-        self.assertEquals(view.render(), "Colors: red Colors: green Colors: blue ")
+        template = '{{#item}}{{header}}: {{name}} {{/item}}{{^item}} Shouldnt see me{{/item}}'
+        context = ComplexView()
+
+        renderer = Renderer()
+        expected = renderer.render(template, context)
+        self.assertEquals(expected, "Colors: red Colors: green Colors: blue ")
 
     def test_empty_context(self):
-        view = ComplexView()
         template = '{{#empty_list}}Shouldnt see me {{/empty_list}}{{^empty_list}}Should see me{{/empty_list}}'
         self.assertEquals(pystache.Renderer().render(template), "Should see me")
 
