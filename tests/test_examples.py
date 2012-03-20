@@ -17,13 +17,16 @@ from tests.common import assert_strings
 
 class TestView(unittest.TestCase):
 
-    def test_comments(self):
+    def _assert(self, obj, expected):
         renderer = Renderer()
-        expected = renderer.render(Comments())
-        self.assertEquals(expected, "<h1>A Comedy of Errors</h1>")
+        actual = renderer.render(obj)
+        assert_strings(self, actual, expected)
+
+    def test_comments(self):
+        self._assert(Comments(), "<h1>A Comedy of Errors</h1>")
 
     def test_double_section(self):
-        self.assertEquals(DoubleSection().render(),"""* first\n* second\n* third""")
+        self._assert(DoubleSection(), "* first\n* second\n* third")
 
     def test_unicode_output(self):
         self.assertEquals(UnicodeOutput().render(), u'<p>Name: Henri Poincaré</p>')
@@ -33,7 +36,7 @@ class TestView(unittest.TestCase):
             u'<p>If alive today, Henri Poincaré would be 156 years old.</p>')
 
     def test_escaping(self):
-        self.assertEquals(Escaped().render(), "<h1>Bear &gt; Shark</h1>")
+        self._assert(Escaped(), "<h1>Bear &gt; Shark</h1>")
 
     def test_literal(self):
         self.assertEquals(Unescaped().render(), "<h1>Bear > Shark</h1>")
@@ -52,8 +55,8 @@ Again, Welcome!""")
 
     def test_delimiters(self):
         renderer = Renderer()
-        expected = renderer.render(Delimiters())
-        assert_strings(self, expected, """\
+        actual = renderer.render(Delimiters())
+        assert_strings(self, actual, """\
 * It worked the first time.
 * And it worked the second time.
 * Then, surprisingly, it worked the third time.

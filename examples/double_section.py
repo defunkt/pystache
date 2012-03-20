@@ -1,7 +1,4 @@
-import pystache
-
-class DoubleSection(pystache.View):
-    template_path = 'examples'
+class DoubleSection(object):
 
     def t(self):
         return True
