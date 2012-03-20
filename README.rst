@@ -84,7 +84,7 @@ To run all available tests (including doctests)::
 
     nosetests --with-doctest --doctest-extension=rst
 
-or alternatively::
+or alternatively (using setup.cfg)::
 
     python setup.py nosetests
 
