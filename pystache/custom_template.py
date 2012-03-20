@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-This module provides a View class.
+This module supports specifying custom template information per view.
 
 """
 
