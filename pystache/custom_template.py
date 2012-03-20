@@ -173,14 +173,20 @@ class Loader(object):
 
         return path
 
-    def get_template(self, view):
+    def load(self, custom):
         """
-        Return the unicode template string associated with a view.
+        Find and return the template associated to a CustomizedTemplate instance.
+
+        Returns the template as a unicode string.
+
+        Arguments:
+
+          custom: a CustomizedTemplate instance.
 
         """
-        if view.template is not None:
-            return self.reader.unicode(view.template, view.template_encoding)
+        if custom.template is not None:
+            return self.reader.unicode(custom.template, custom.template_encoding)
 
-        path = self.get_template_path(view)
+        path = self.get_template_path(custom)
 
-        return self.reader.read(path, view.template_encoding)
+        return self.reader.read(path, custom.template_encoding)

@@ -236,9 +236,9 @@ class LoaderTests(unittest.TestCase, AssertIsMixin):
 
         self.assertEquals(actual, expected)
 
-    def _assert_get_template(self, view, expected):
+    def _assert_get_template(self, custom, expected):
         locator = self._make_locator()
-        actual = locator.get_template(view)
+        actual = locator.load(custom)
 
         self.assertEquals(type(actual), unicode)
         self.assertEquals(actual, expected)
