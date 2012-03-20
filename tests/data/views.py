@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from pystache.view import View
+from pystache import View
 
 class SayHello(object):
 

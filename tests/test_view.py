@@ -13,9 +13,9 @@ from examples.complex_view import ComplexView
 from examples.lambdas import Lambdas
 from examples.inverted import Inverted, InvertedLists
 from pystache import Renderer
+from pystache import View
 from pystache.reader import Reader
-from pystache.view import View
-from pystache.view import Locator as ViewLocator
+from pystache.custom_template import Locator as ViewLocator
 from .common import AssertIsMixin
 from .common import DATA_DIR
 from .data.views import SampleView

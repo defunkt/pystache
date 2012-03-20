@@ -5,9 +5,9 @@ This module contains the initialization logic called by __init__.py.
 
 """
 
+from .custom_template import View
+from .custom_template import  CustomizedTemplate
 from .renderer import Renderer
-from .view import View
-from .view import  CustomizedTemplate
 
 
 __all__ = ['render', 'Renderer', 'View', 'CustomizedTemplate']
