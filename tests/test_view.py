@@ -15,7 +15,7 @@ from examples.inverted import Inverted, InvertedLists
 from pystache import Renderer
 from pystache import View
 from pystache.reader import Reader
-from pystache.custom_template import Locator as ViewLocator
+from pystache.custom_template import Loader
 from .common import AssertIsMixin
 from .common import DATA_DIR
 from .data.views import SampleView
@@ -132,16 +132,17 @@ class ViewTestCase(unittest.TestCase):
         self.assertEquals(view.render(), """one, two, three, empty list""")
 
 
-class LocatorTests(unittest.TestCase, AssertIsMixin):
+class LoaderTests(unittest.TestCase, AssertIsMixin):
 
+    # TODO: rename this method to _make_loader().
     def _make_locator(self):
-        locator = ViewLocator(search_dirs=[DATA_DIR])
+        locator = Loader(search_dirs=[DATA_DIR])
         return locator
 
     # TODO: fully test constructor.
     def test_init__reader(self):
         reader = "reader"  # in practice, this is a reader instance.
-        locator = ViewLocator(search_dirs=None, template_locator=None, reader=reader)
+        locator = Loader(search_dirs=None, template_locator=None, reader=reader)
 
         self.assertIs(locator.reader, reader)
 

@@ -16,6 +16,8 @@ from .renderer import Renderer
 class CustomizedTemplate(object):
 
     """
+    A mixin for specifying custom template information.
+
     Subclass this class only if template customizations are needed.
 
     The following attributes allow one to customize/override template
@@ -117,10 +119,10 @@ class View(CustomizedTemplate):
         return renderer.render(template, self.context)
 
 
-class Locator(object):
+class Loader(object):
 
     """
-    A class for finding the template associated to a View instance.
+    Supports loading the template of a CustomizedTemplate instance.
 
     """
 
