@@ -1,5 +1,4 @@
 class ComplexView(object):
-    template_path = 'examples'
 
     def header(self):
         return "Colors"
