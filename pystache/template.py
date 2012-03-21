@@ -1,6 +1,5 @@
 import re
 import cgi
-import collections
 import os
 import copy
 
@@ -80,7 +79,7 @@ class Template(object):
             replacer = ''
 
             # Callable
-            if it and isinstance(it, collections.Callable):
+            if it and callable(it):
                 replacer = it(inner)
             # Dictionary
             elif it and hasattr(it, 'keys') and hasattr(it, '__getitem__'):
