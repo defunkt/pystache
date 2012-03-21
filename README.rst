@@ -11,7 +11,7 @@ As ctemplates says, "It emphasizes separating logic from presentation:
 it is impossible to embed application logic in this template language."
 
 Pystache is a Python implementation of Mustache. Pystache requires
-Python 2.6.
+Python 2.4.
 
 Pystache is semantically versioned: http://semver.org.
 
