@@ -126,18 +126,17 @@ class Loader(object):
 
     """
 
-    # TODO: rename template_locator to locator.
-    def __init__(self, search_dirs, template_locator=None, reader=None):
+    def __init__(self, search_dirs, locator=None, reader=None):
         if reader is None:
             reader = Reader()
 
-        if template_locator is None:
-            template_locator = TemplateLocator()
+        if locator is None:
+            locator = TemplateLocator()
 
         self.reader = reader
         self.search_dirs = search_dirs
         # TODO: rename this to locator.
-        self.template_locator = template_locator
+        self.template_locator = locator
 
     # TODO: make this private.
     def get_relative_template_location(self, view):

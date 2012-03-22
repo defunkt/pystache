@@ -177,7 +177,7 @@ class LoaderTests(unittest.TestCase, AssertIsMixin):
 
     def test_init__locator(self):
         locator = Locator()
-        loader = Loader([], template_locator=locator)
+        loader = Loader([], locator=locator)
 
         self.assertIs(loader.template_locator, locator)
 
