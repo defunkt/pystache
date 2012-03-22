@@ -173,12 +173,11 @@ class LoaderTests(unittest.TestCase, AssertIsMixin):
 
 
 # TODO: migrate these tests into the LoaderTests class.
-# TODO: switch these tests to using the CustomizedTemplate class instead of View.
 # TODO: rename the get_template() tests to test load().
 # TODO: condense, reorganize, and rename the tests so that it is
 #   clear whether we have full test coverage (e.g. organized by
 #   CustomizedTemplate attributes or something).
-class ViewTests(unittest.TestCase):
+class CustomizedTemplateTests(unittest.TestCase):
 
     # TODO: rename this method to _make_loader().
     def _make_locator(self):

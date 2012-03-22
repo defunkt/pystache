@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from pystache import View
+from pystache import CustomizedTemplate
 
 class SayHello(object):
 
@@ -8,9 +8,9 @@ class SayHello(object):
         return "World"
 
 
-class SampleView(View):
+class SampleView(CustomizedTemplate):
     pass
 
 
-class NonAscii(View):
+class NonAscii(CustomizedTemplate):
     pass
