@@ -159,8 +159,8 @@ class LoaderTests(unittest.TestCase, AssertIsMixin):
         self.assertEquals(reader.decode_errors, 'strict')
         self.assertEquals(reader.encoding, sys.getdefaultencoding())
 
-        # Check the template_locator attribute.
-        locator = loader.template_locator
+        # Check the locator attribute.
+        locator = loader.locator
         self.assertEquals(locator.template_extension, 'mustache')
 
     def test_init__search_dirs(self):
@@ -179,7 +179,7 @@ class LoaderTests(unittest.TestCase, AssertIsMixin):
         locator = Locator()
         loader = Loader([], locator=locator)
 
-        self.assertIs(loader.template_locator, locator)
+        self.assertIs(loader.locator, locator)
 
     def test_get_relative_template_location(self):
         """

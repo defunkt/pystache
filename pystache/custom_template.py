@@ -135,8 +135,7 @@ class Loader(object):
 
         self.reader = reader
         self.search_dirs = search_dirs
-        # TODO: rename this to locator.
-        self.template_locator = locator
+        self.locator = locator
 
     # TODO: make this private.
     def get_relative_template_location(self, view):
@@ -152,9 +151,9 @@ class Loader(object):
         # Otherwise, we don't know the directory.
 
         template_name = (view.template_name if view.template_name is not None else
-                         self.template_locator.make_template_name(view))
+                         self.locator.make_template_name(view))
 
-        file_name = self.template_locator.make_file_name(template_name, view.template_extension)
+        file_name = self.locator.make_file_name(template_name, view.template_extension)
 
         return (template_dir, file_name)
 
@@ -168,9 +167,9 @@ class Loader(object):
 
         if dir_path is None:
             # Then we need to search for the path.
-            path = self.template_locator.find_path_by_object(self.search_dirs, view, file_name=file_name)
+            path = self.locator.find_path_by_object(self.search_dirs, view, file_name=file_name)
         else:
-            obj_dir = self.template_locator.get_object_directory(view)
+            obj_dir = self.locator.get_object_directory(view)
             path = os.path.join(obj_dir, dir_path, file_name)
 
         return path
