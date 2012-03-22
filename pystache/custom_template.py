@@ -29,10 +29,10 @@ class CustomizedTemplate(object):
 
       template: the template to use, as a unicode string.
 
-      template_path: the path to the template file, relative to the
+      template_rel_path: the path to the template file, relative to the
         directory containing the module defining the class.
 
-      template_dir: the directory containing the template file, relative
+      template_rel_directory: the directory containing the template file, relative
         to the directory containing the module defining the class.
 
       template_extension: the template file extension.  Defaults to "mustache".
@@ -41,12 +41,12 @@ class CustomizedTemplate(object):
     """
 
     template = None
+    # TODO: remove template_path.
     template_path = None
-
-    template_directory = None
+    template_rel_path = None
+    template_rel_directory = None
     template_name = None
     template_extension = None
-
     template_encoding = None
 
 
@@ -126,7 +126,6 @@ class Loader(object):
 
     """
 
-    # TODO: unit test this.
     def __init__(self, search_dirs, template_locator=None, reader=None):
         if reader is None:
             reader = Reader()
@@ -143,10 +142,10 @@ class Loader(object):
         Return the relative template path as a (dir, file_name) pair.
 
         """
-        if view.template_path is not None:
-            return os.path.split(view.template_path)
+        if view.template_rel_path is not None:
+            return os.path.split(view.template_rel_path)
 
-        template_dir = view.template_directory
+        template_dir = view.template_rel_directory
 
         # Otherwise, we don't know the directory.
 

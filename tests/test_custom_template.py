@@ -6,6 +6,7 @@ Unit tests of view.py.
 """
 
 import os.path
+import sys
 import unittest
 
 from examples.simple import Simple
@@ -14,8 +15,9 @@ from examples.lambdas import Lambdas
 from examples.inverted import Inverted, InvertedLists
 from pystache import Renderer
 from pystache import View
-from pystache.reader import Reader
 from pystache.custom_template import Loader
+from pystache.locator import Locator
+from pystache.reader import Reader
 from .common import AssertIsMixin
 from .common import DATA_DIR
 from .data.views import SampleView
@@ -56,7 +58,7 @@ class ViewTestCase(unittest.TestCase):
 
     def test_template_path_for_partials(self):
         """
-        Test that View.template_path is respected for partials.
+        Test that View.template_rel_path is respected for partials.
 
         """
         class TestView(View):
@@ -139,17 +141,40 @@ class LoaderTests(unittest.TestCase, AssertIsMixin):
         locator = Loader(search_dirs=[DATA_DIR])
         return locator
 
-    # TODO: fully test constructor.
-    def test_init__reader(self):
-        reader = "reader"  # in practice, this is a reader instance.
-        locator = Loader(search_dirs=None, template_locator=None, reader=reader)
-
-        self.assertIs(locator.reader, reader)
-
     def _assert_template_location(self, view, expected):
         locator = self._make_locator()
         actual = locator.get_relative_template_location(view)
         self.assertEquals(actual, expected)
+
+    def test_init__defaults(self):
+        loader = Loader([])
+
+        # Check the reader attribute.
+        reader = loader.reader
+        self.assertEquals(reader.decode_errors, 'strict')
+        self.assertEquals(reader.encoding, sys.getdefaultencoding())
+
+        # Check the template_locator attribute.
+        locator = loader.template_locator
+        self.assertEquals(locator.template_extension, 'mustache')
+
+    def test_init__search_dirs(self):
+        search_dirs = ['a', 'b']
+        loader = Loader(search_dirs)
+
+        self.assertEquals(loader.search_dirs, ['a', 'b'])
+
+    def test_init__reader(self):
+        reader = Reader()
+        loader = Loader([], reader=reader)
+
+        self.assertIs(loader.reader, reader)
+
+    def test_init__locator(self):
+        locator = Locator()
+        loader = Loader([], template_locator=locator)
+
+        self.assertIs(loader.template_locator, locator)
 
     def test_get_relative_template_location(self):
         """
@@ -159,31 +184,31 @@ class LoaderTests(unittest.TestCase, AssertIsMixin):
         view = SampleView()
         self._assert_template_location(view, (None, 'sample_view.mustache'))
 
-    def test_get_relative_template_location__template_path__file_name_only(self):
+    def test_get_relative_template_location__template_rel_path__file_name_only(self):
         """
-        Test get_relative_template_location(): template_path attribute.
+        Test get_relative_template_location(): template_rel_path attribute.
 
         """
         view = SampleView()
-        view.template_path = 'template.txt'
+        view.template_rel_path = 'template.txt'
         self._assert_template_location(view, ('', 'template.txt'))
 
-    def test_get_relative_template_location__template_path__file_name_with_directory(self):
+    def test_get_relative_template_location__template_rel_path__file_name_with_directory(self):
         """
-        Test get_relative_template_location(): template_path attribute.
+        Test get_relative_template_location(): template_rel_path attribute.
 
         """
         view = SampleView()
-        view.template_path = 'foo/bar/template.txt'
+        view.template_rel_path = 'foo/bar/template.txt'
         self._assert_template_location(view, ('foo/bar', 'template.txt'))
 
-    def test_get_relative_template_location__template_directory(self):
+    def test_get_relative_template_location__template_rel_directory(self):
         """
-        Test get_relative_template_location(): template_directory attribute.
+        Test get_relative_template_location(): template_rel_directory attribute.
 
         """
         view = SampleView()
-        view.template_directory = 'foo'
+        view.template_rel_directory = 'foo'
 
         self._assert_template_location(view, ('foo', 'sample_view.mustache'))
 
@@ -213,7 +238,7 @@ class LoaderTests(unittest.TestCase, AssertIsMixin):
         locator = self._make_locator()
 
         view = SampleView()
-        view.template_path = 'foo/bar.txt'
+        view.template_rel_path = 'foo/bar.txt'
         self.assertTrue(locator.get_relative_template_location(view)[0] is not None)
 
         actual = locator.get_template_path(view)
