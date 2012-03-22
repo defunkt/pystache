@@ -134,22 +134,12 @@ class ViewTestCase(unittest.TestCase):
         self.assertEquals(view.render(), """one, two, three, empty list""")
 
 
-# TODO: switch these tests to using the CustomizedTemplate class instead of View.
-# TODO: rename the get_template() tests to test load().
-# TODO: condense, reorganize, and rename the tests so that it is
-#   clear whether we have full test coverage (e.g. organized by
-#   CustomizedTemplate attributes or something).
 class LoaderTests(unittest.TestCase, AssertIsMixin):
 
-    # TODO: rename this method to _make_loader().
-    def _make_locator(self):
-        locator = Loader(search_dirs=[DATA_DIR])
-        return locator
+    """
+    Tests the custom_template.Loader class.
 
-    def _assert_template_location(self, view, expected):
-        locator = self._make_locator()
-        actual = locator.get_relative_template_location(view)
-        self.assertEquals(actual, expected)
+    """
 
     def test_init__defaults(self):
         loader = Loader([])
@@ -180,6 +170,25 @@ class LoaderTests(unittest.TestCase, AssertIsMixin):
         loader = Loader([], locator=locator)
 
         self.assertIs(loader.locator, locator)
+
+
+# TODO: migrate these tests into the LoaderTests class.
+# TODO: switch these tests to using the CustomizedTemplate class instead of View.
+# TODO: rename the get_template() tests to test load().
+# TODO: condense, reorganize, and rename the tests so that it is
+#   clear whether we have full test coverage (e.g. organized by
+#   CustomizedTemplate attributes or something).
+class ViewTests(unittest.TestCase):
+
+    # TODO: rename this method to _make_loader().
+    def _make_locator(self):
+        locator = Loader(search_dirs=[DATA_DIR])
+        return locator
+
+    def _assert_template_location(self, view, expected):
+        locator = self._make_locator()
+        actual = locator.get_relative_template_location(view)
+        self.assertEquals(actual, expected)
 
     def test_get_relative_template_location(self):
         """
