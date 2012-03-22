@@ -150,7 +150,7 @@ class Template(object):
     @modifiers.set('>')
     def _render_partial(self, template_name):
         from pystache import Loader
-        markup = Loader().load_template(template_name, self.view.template_path, encoding=self.view.template_encoding)
+        markup = Loader().load_template(template_name, self.view.template_path, encoding=self.view.template_encoding, extension=self.view.template_extension)
         template = Template(markup, self.view)
         return template.render()
 
