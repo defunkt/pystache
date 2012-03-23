@@ -13,6 +13,7 @@ from .reader import Reader
 from .renderer import Renderer
 
 
+# TODO: rename this to Template?
 class CustomizedTemplate(object):
 
     """
@@ -126,16 +127,19 @@ class Loader(object):
 
     """
 
-    def __init__(self, search_dirs, locator=None, reader=None):
-        if reader is None:
-            reader = Reader()
-
+    def __init__(self, search_dirs=None, locator=None, reader=None):
         if locator is None:
             locator = TemplateLocator()
 
+        if reader is None:
+            reader = Reader()
+
+        if search_dirs is None:
+            search_dirs = []
+
+        self.locator = locator
         self.reader = reader
         self.search_dirs = search_dirs
-        self.locator = locator
 
     # TODO: make this private.
     def get_relative_template_location(self, view):

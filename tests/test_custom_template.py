@@ -13,6 +13,7 @@ from examples.simple import Simple
 from examples.complex_view import ComplexView
 from examples.lambdas import Lambdas
 from examples.inverted import Inverted, InvertedLists
+from pystache import CustomizedTemplate as Template
 from pystache import Renderer
 from pystache import View
 from pystache.custom_template import Loader
@@ -142,16 +143,19 @@ class LoaderTests(unittest.TestCase, AssertIsMixin):
     """
 
     def test_init__defaults(self):
-        loader = Loader([])
+        loader = Loader()
+
+        # Check the locator attribute.
+        locator = loader.locator
+        self.assertEquals(locator.template_extension, 'mustache')
 
         # Check the reader attribute.
         reader = loader.reader
         self.assertEquals(reader.decode_errors, 'strict')
         self.assertEquals(reader.encoding, sys.getdefaultencoding())
 
-        # Check the locator attribute.
-        locator = loader.locator
-        self.assertEquals(locator.template_extension, 'mustache')
+        # Check search_dirs.
+        self.assertEquals(loader.search_dirs, [])
 
     def test_init__search_dirs(self):
         search_dirs = ['a', 'b']
@@ -170,6 +174,18 @@ class LoaderTests(unittest.TestCase, AssertIsMixin):
         loader = Loader([], locator=locator)
 
         self.assertIs(loader.locator, locator)
+
+    def test_load__template__basic(self):
+        """
+        Test the template attribute.
+
+        """
+        template = Template()
+        template.template = "abc"
+
+        loader = Loader()
+        self.assertEquals(loader.load(template), "wxy")
+
 
 
 # TODO: migrate these tests into the LoaderTests class.
