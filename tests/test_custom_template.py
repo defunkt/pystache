@@ -222,6 +222,36 @@ class LoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         custom.template_encoding = 'utf-8'
         self._assert_template(Loader(), custom, u'é')
 
+    def test_load__template__correct_reader(self):
+        """
+        Test that reader.unicode() is called with the correct arguments.
+
+        This test is a catch-all for the template attribute in addition to
+        the other test cases.
+
+        """
+        class TestReader(Reader):
+
+            def __init__(self):
+                self.s = None
+                self.encoding = None
+
+            def unicode(self, s, encoding=None):
+                self.s = s
+                self.encoding = encoding
+                return u"foo"
+
+        reader = TestReader()
+        loader = Loader(reader=reader)
+
+        custom = Template()
+        custom.template = "template-foo"
+        custom.template_encoding = "encoding-foo"
+
+        self._assert_template(loader, custom, u'foo')
+        self.assertEquals(reader.s, "template-foo")
+        self.assertEquals(reader.encoding, "encoding-foo")
+
 
 # TODO: migrate these tests into the LoaderTests class.
 # TODO: rename the get_template() tests to test load().
