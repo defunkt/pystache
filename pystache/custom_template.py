@@ -123,7 +123,7 @@ class View(CustomizedTemplate):
 class Loader(object):
 
     """
-    Supports loading the template of a CustomizedTemplate instance.
+    Supports loading a custom-specified template.
 
     """
 

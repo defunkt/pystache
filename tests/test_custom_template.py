@@ -139,7 +139,7 @@ class ViewTestCase(unittest.TestCase):
 class LoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
 
     """
-    Tests the custom_template.Loader class.
+    Tests custom_template.Loader.
 
     """
 
@@ -176,16 +176,51 @@ class LoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
 
         self.assertIs(loader.locator, locator)
 
-    def test_load__template__basic(self):
+    def _assert_template(self, loader, custom, expected):
+        self.assertString(loader.load(custom), expected)
+
+    def test_load__template__type_str(self):
         """
-        Test the template attribute.
+        Test the template attribute: str string.
 
         """
-        template = Template()
-        template.template = "abc"
+        custom = Template()
+        custom.template = "abc"
 
-        loader = Loader()
-        self.assertString(loader.load(template), u"abc")
+        self._assert_template(Loader(), custom, u"abc")
+
+    def test_load__template__type_unicode(self):
+        """
+        Test the template attribute: unicode string.
+
+        """
+        custom = Template()
+        custom.template = u"abc"
+
+        self._assert_template(Loader(), custom, u"abc")
+
+    def test_load__template__unicode_non_ascii(self):
+        """
+        Test the template attribute: non-ascii unicode string.
+
+        """
+        custom = Template()
+        custom.template = u"é"
+
+        self._assert_template(Loader(), custom, u"é")
+
+    def test_load__template__with_template_encoding(self):
+        """
+        Test the template attribute: with template encoding attribute.
+
+        """
+        custom = Template()
+        custom.template = u'é'.encode('utf-8')
+
+        self.assertRaises(UnicodeDecodeError, self._assert_template, Loader(), custom, u'é')
+
+        custom.template_encoding = 'utf-8'
+        self._assert_template(Loader(), custom, u'é')
 
 
 # TODO: migrate these tests into the LoaderTests class.
