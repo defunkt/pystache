@@ -11,7 +11,7 @@ import unittest
 from pystache.context import Context
 from pystache.parser import ParsingError
 from pystache.renderengine import RenderEngine
-from tests.common import assert_strings
+from tests.common import AssertStringMixin
 
 
 class RenderEngineTestCase(unittest.TestCase):
@@ -31,7 +31,7 @@ class RenderEngineTestCase(unittest.TestCase):
         self.assertEquals(engine.load_partial, "foo")
 
 
-class RenderTests(unittest.TestCase):
+class RenderTests(unittest.TestCase, AssertStringMixin):
 
     """
     Tests RenderEngine.render().
@@ -66,10 +66,10 @@ class RenderTests(unittest.TestCase):
 
         actual = engine.render(template, context)
 
-        assert_strings(test_case=self, actual=actual, expected=expected)
+        self.assertString(actual=actual, expected=expected)
 
     def test_render(self):
-        self._assert_render('Hi Mom', 'Hi {{person}}', {'person': 'Mom'})
+        self._assert_render(u'Hi Mom', 'Hi {{person}}', {'person': 'Mom'})
 
     def test__load_partial(self):
         """
@@ -80,7 +80,7 @@ class RenderTests(unittest.TestCase):
         partials = {'partial': u"{{person}}"}
         engine.load_partial = lambda key: partials[key]
 
-        self._assert_render('Hi Mom', 'Hi {{>partial}}', {'person': 'Mom'}, engine=engine)
+        self._assert_render(u'Hi Mom', 'Hi {{>partial}}', {'person': 'Mom'}, engine=engine)
 
     def test__literal(self):
         """
@@ -90,13 +90,13 @@ class RenderTests(unittest.TestCase):
         engine = self._engine()
         engine.literal = lambda s: s.upper()
 
-        self._assert_render('BAR', '{{{foo}}}', {'foo': 'bar'}, engine=engine)
+        self._assert_render(u'BAR', '{{{foo}}}', {'foo': 'bar'}, engine=engine)
 
     def test_literal__sigil(self):
         template = "<h1>{{& thing}}</h1>"
         context = {'thing': 'Bear > Giraffe'}
 
-        expected = "<h1>Bear > Giraffe</h1>"
+        expected = u"<h1>Bear > Giraffe</h1>"
 
         self._assert_render(expected, template, context)
 
@@ -108,7 +108,7 @@ class RenderTests(unittest.TestCase):
         engine = self._engine()
         engine.escape = lambda s: "**" + s
 
-        self._assert_render('**bar', '{{foo}}', {'foo': 'bar'}, engine=engine)
+        self._assert_render(u'**bar', '{{foo}}', {'foo': 'bar'}, engine=engine)
 
     def test__escape_does_not_call_literal(self):
         """
@@ -122,7 +122,7 @@ class RenderTests(unittest.TestCase):
         template = 'literal: {{{foo}}} escaped: {{foo}}'
         context = {'foo': 'bar'}
 
-        self._assert_render('literal: BAR escaped: **bar', template, context, engine=engine)
+        self._assert_render(u'literal: BAR escaped: **bar', template, context, engine=engine)
 
     def test__escape_preserves_unicode_subclasses(self):
         """
@@ -147,7 +147,7 @@ class RenderTests(unittest.TestCase):
         template = '{{foo1}} {{foo2}}'
         context = {'foo1': MyUnicode('bar'), 'foo2': 'bar'}
 
-        self._assert_render('**bar bar**', template, context, engine=engine)
+        self._assert_render(u'**bar bar**', template, context, engine=engine)
 
     def test__non_basestring__literal_and_escaped(self):
         """
@@ -166,7 +166,7 @@ class RenderTests(unittest.TestCase):
         template = '{{text}} {{int}} {{{int}}}'
         context = {'int': 100, 'text': 'foo'}
 
-        self._assert_render('FOO 100 100', template, context, engine=engine)
+        self._assert_render(u'FOO 100 100', template, context, engine=engine)
 
     def test_tag__output_not_interpolated(self):
         """
@@ -184,7 +184,7 @@ class RenderTests(unittest.TestCase):
         """
         template = '{{test}}'
         context = {'test': '{{#hello}}'}
-        self._assert_render('{{#hello}}', template, context)
+        self._assert_render(u'{{#hello}}', template, context)
 
     def test_interpolation__built_in_type__string(self):
         """
@@ -227,7 +227,7 @@ class RenderTests(unittest.TestCase):
         template = """{{#test}}{{{.}}}{{/test}}"""
         context = {'test': ['<', '>']}
 
-        self._assert_render('<>', template, context)
+        self._assert_render(u'<>', template, context)
 
     def test_implicit_iterator__escaped(self):
         """
@@ -237,7 +237,7 @@ class RenderTests(unittest.TestCase):
         template = """{{#test}}{{.}}{{/test}}"""
         context = {'test': ['<', '>']}
 
-        self._assert_render('&lt;&gt;', template, context)
+        self._assert_render(u'&lt;&gt;', template, context)
 
     def test_literal__in_section(self):
         """
@@ -247,7 +247,7 @@ class RenderTests(unittest.TestCase):
         template = '{{#test}}1 {{{less_than}}} 2{{/test}}'
         context = {'test': {'less_than': '<'}}
 
-        self._assert_render('1 < 2', template, context)
+        self._assert_render(u'1 < 2', template, context)
 
     def test_literal__in_partial(self):
         """
@@ -258,11 +258,11 @@ class RenderTests(unittest.TestCase):
         partials = {'partial': '1 {{{less_than}}} 2'}
         context = {'less_than': '<'}
 
-        self._assert_render('1 < 2', template, context, partials=partials)
+        self._assert_render(u'1 < 2', template, context, partials=partials)
 
     def test_partial(self):
         partials = {'partial': "{{person}}"}
-        self._assert_render('Hi Mom', 'Hi {{>partial}}', {'person': 'Mom'}, partials=partials)
+        self._assert_render(u'Hi Mom', 'Hi {{>partial}}', {'person': 'Mom'}, partials=partials)
 
     def test_partial__context_values(self):
         """
@@ -275,7 +275,7 @@ class RenderTests(unittest.TestCase):
         partials = {'partial': 'unescaped: {{{foo}}} escaped: {{foo}}'}
         context = {'foo': '<'}
 
-        self._assert_render('unescaped: < escaped: &lt;', template, context, engine=engine, partials=partials)
+        self._assert_render(u'unescaped: < escaped: &lt;', template, context, engine=engine, partials=partials)
 
     ## Test cases related specifically to sections.
 
@@ -311,7 +311,7 @@ class RenderTests(unittest.TestCase):
         template = '{{#test}}unescaped: {{{foo}}} escaped: {{foo}}{{/test}}'
         context = {'test': {'foo': '<'}}
 
-        self._assert_render('unescaped: < escaped: &lt;', template, context, engine=engine)
+        self._assert_render(u'unescaped: < escaped: &lt;', template, context, engine=engine)
 
     def test_section__context_precedence(self):
         """
@@ -338,7 +338,7 @@ class RenderTests(unittest.TestCase):
 
         template = "{{#list}}{{greeting}} {{name}}, {{/list}}"
 
-        self._assert_render("Hi Al, Hi Bob, ", template, context)
+        self._assert_render(u"Hi Al, Hi Bob, ", template, context)
 
     def test_section__output_not_interpolated(self):
         """
@@ -382,7 +382,7 @@ class RenderTests(unittest.TestCase):
     def test_section__lambda(self):
         template = '{{#test}}Mom{{/test}}'
         context = {'test': (lambda text: 'Hi %s' % text)}
-        self._assert_render('Hi Mom', template, context)
+        self._assert_render(u'Hi Mom', template, context)
 
     def test_section__iterable(self):
         """
@@ -392,10 +392,10 @@ class RenderTests(unittest.TestCase):
         template = '{{#iterable}}{{.}}{{/iterable}}'
 
         context = {'iterable': (i for i in range(3))}  # type 'generator'
-        self._assert_render('012', template, context)
+        self._assert_render(u'012', template, context)
 
         context = {'iterable': xrange(4)}  # type 'xrange'
-        self._assert_render('0123', template, context)
+        self._assert_render(u'0123', template, context)
 
         d = {'foo': 0, 'bar': 0}
         # We don't know what order of keys we'll be given, but from the
@@ -403,7 +403,7 @@ class RenderTests(unittest.TestCase):
         #  "If items(), keys(), values(), iteritems(), iterkeys(), and
         #   itervalues() are called with no intervening modifications to
         #   the dictionary, the lists will directly correspond."
-        expected = ''.join(d.keys())
+        expected = u''.join(d.keys())
         context = {'iterable': d.iterkeys()}  # type 'dictionary-keyiterator'
         self._assert_render(expected, template, context)
 
@@ -422,15 +422,15 @@ class RenderTests(unittest.TestCase):
         """
         template = '{{#test}}Hi {{person}}{{/test}}'
         context = {'person': 'Mom', 'test': (lambda text: text + " :)")}
-        self._assert_render('Hi Mom :)', template, context)
+        self._assert_render(u'Hi Mom :)', template, context)
 
     def test_comment__multiline(self):
         """
         Check that multiline comments are permitted.
 
         """
-        self._assert_render('foobar', 'foo{{! baz }}bar')
-        self._assert_render('foobar', 'foo{{! \nbaz }}bar')
+        self._assert_render(u'foobar', 'foo{{! baz }}bar')
+        self._assert_render(u'foobar', 'foo{{! \nbaz }}bar')
 
     def test_custom_delimiters__sections(self):
         """

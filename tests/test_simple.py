@@ -8,10 +8,10 @@ from examples.lambdas import Lambdas
 from examples.template_partial import TemplatePartial
 from examples.simple import Simple
 
-from tests.common import assert_strings
+from tests.common import AssertStringMixin
 
 
-class TestSimple(unittest.TestCase):
+class TestSimple(unittest.TestCase, AssertStringMixin):
 
     def test_nested_context(self):
         view = NestedContext()
@@ -62,7 +62,7 @@ class TestSimple(unittest.TestCase):
         """
         view = TemplatePartial()
         view.template_extension = 'txt'
-        assert_strings(self, view.render(), u"""Welcome
+        self.assertString(view.render(), u"""Welcome
 -------
 
 ## Again, Welcome! ##""")

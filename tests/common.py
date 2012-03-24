@@ -14,23 +14,31 @@ def get_data_path(file_name):
     return os.path.join(DATA_DIR, file_name)
 
 
-# TODO: convert this to a mixin.
-def assert_strings(test_case, actual, expected):
-    # Show both friendly and literal versions.
-    message = """\
+class AssertStringMixin:
+
+    """A unittest.TestCase mixin to check string equality."""
+
+    def assertString(self, actual, expected):
+        """
+        Assert that the given strings are equal and have the same type.
+
+        """
+        # Show both friendly and literal versions.
+        message = """\
 
 
-    Expected: \"""%s\"""
-    Actual:   \"""%s\"""
+        Expected: \"""%s\"""
+        Actual:   \"""%s\"""
 
-    Expected: %s
-    Actual:   %s""" % (expected, actual, repr(expected), repr(actual))
-    test_case.assertEquals(actual, expected, message)
+        Expected: %s
+        Actual:   %s""" % (expected, actual, repr(expected), repr(actual))
+        self.assertEquals(actual, expected, message)
+        self.assertEquals(type(actual), type(expected), "Type mismatch: " + message)
 
 
 class AssertIsMixin:
 
-    """A mixin for adding assertIs() to a unittest.TestCase."""
+    """A unittest.TestCase mixin adding assertIs()."""
 
     # unittest.assertIs() is not available until Python 2.7:
     #   http://docs.python.org/library/unittest.html#unittest.TestCase.assertIsNone
