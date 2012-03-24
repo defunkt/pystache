@@ -341,29 +341,6 @@ class CustomizedTemplateTests(unittest.TestCase):
 
         self._assert_get_template(view, u"ascii: abc")
 
-    def test_get_template__template(self):
-        """
-        Test get_template(): template attribute.
-
-        """
-        view = SampleView()
-        view.template = 'foo'
-
-        self._assert_get_template(view, 'foo')
-
-    def test_get_template__template__template_encoding(self):
-        """
-        Test get_template(): template attribute with template encoding attribute.
-
-        """
-        view = SampleView()
-        view.template = u'é'.encode('utf-8')
-
-        self.assertRaises(UnicodeDecodeError, self._assert_get_template, view, 'foo')
-
-        view.template_encoding = 'utf-8'
-        self._assert_get_template(view, u'é')
-
     def test_get_template__template_encoding(self):
         """
         Test get_template(): template_encoding attribute.
