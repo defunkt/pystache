@@ -14,6 +14,7 @@ def get_data_path(file_name):
     return os.path.join(DATA_DIR, file_name)
 
 
+# TODO: convert this to a mixin.
 def assert_strings(test_case, actual, expected):
     # Show both friendly and literal versions.
     message = """\

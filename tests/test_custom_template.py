@@ -142,6 +142,11 @@ class LoaderTests(unittest.TestCase, AssertIsMixin):
 
     """
 
+    def assertString(self, actual, expected):
+        # TODO: use the assertStrings mixin.
+        self.assertEquals(type(actual), type(expected))
+        self.assertEquals(actual, expected)
+
     def test_init__defaults(self):
         loader = Loader()
 
@@ -184,8 +189,7 @@ class LoaderTests(unittest.TestCase, AssertIsMixin):
         template.template = "abc"
 
         loader = Loader()
-        self.assertEquals(loader.load(template), "wxy")
-
+        self.assertString(loader.load(template), u"abc")
 
 
 # TODO: migrate these tests into the LoaderTests class.

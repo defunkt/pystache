@@ -13,7 +13,7 @@ from .reader import Reader
 from .renderer import Renderer
 
 
-# TODO: rename this to Template?
+# TODO: consider renaming this to something like Template or TemplateInfo.
 class CustomizedTemplate(object):
 
     """
