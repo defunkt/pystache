@@ -224,10 +224,12 @@ class LoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
 
     def test_load__template__correct_reader(self):
         """
-        Test that reader.unicode() is called with the correct arguments.
+        Test that reader.unicode() is called correctly.
 
-        This test is a catch-all for the template attribute in addition to
-        the other test cases.
+        This test tests that the correct reader is called with the correct
+        arguments.  This is a catch-all test to supplement the other
+        test cases.  It tests Loader.load() independent of reader.unicode()
+        being implemented correctly (and tested).
 
         """
         class TestReader(Reader):
@@ -242,7 +244,8 @@ class LoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
                 return u"foo"
 
         reader = TestReader()
-        loader = Loader(reader=reader)
+        loader = Loader()
+        loader.reader = reader
 
         custom = Template()
         custom.template = "template-foo"
