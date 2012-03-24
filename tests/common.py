@@ -24,7 +24,7 @@ class AssertStringMixin:
 
         """
         # Show both friendly and literal versions.
-        message = """\
+        message = """String mismatch: %%s\
 
 
         Expected: \"""%s\"""
@@ -32,8 +32,11 @@ class AssertStringMixin:
 
         Expected: %s
         Actual:   %s""" % (expected, actual, repr(expected), repr(actual))
-        self.assertEquals(actual, expected, message)
-        self.assertEquals(type(actual), type(expected), "Type mismatch: " + message)
+
+        self.assertEquals(actual, expected, message % "different characters")
+
+        details = "types different: %s != %s" % (repr(type(expected)), repr(type(actual)))
+        self.assertEquals(type(expected), type(actual), message % details)
 
 
 class AssertIsMixin:

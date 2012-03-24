@@ -42,11 +42,25 @@ class Reader(object):
         self.decode_errors = decode_errors
         self.encoding = encoding
 
-    def unicode(self, text, encoding=None):
+    def unicode(self, s, encoding=None):
+        """
+        Call Python's built-in function unicode(), and return the result.
+
+        For unicode strings (or unicode subclasses), this function calls
+        Python's unicode() without the encoding and errors arguments.
+        Thus, unlike Python's built-in unicode(), it is okay to pass unicode
+        strings to this function.  (Passing a unicode string to Python's
+        unicode() with the encoding argument throws the following
+        error: "TypeError: decoding Unicode is not supported.")
+
+        """
+        if isinstance(s, unicode):
+            return unicode(s)
+
         if encoding is None:
             encoding = self.encoding
 
-        return unicode(text, encoding, self.decode_errors)
+        return unicode(s, encoding, self.decode_errors)
 
     def read(self, path, encoding=None):
         """

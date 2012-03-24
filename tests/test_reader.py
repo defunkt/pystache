@@ -9,13 +9,14 @@ import os
 import sys
 import unittest
 
+from .common import AssertStringMixin
 from pystache.reader import Reader
 
 
 DATA_DIR = 'tests/data'
 
 
-class ReaderTestCase(unittest.TestCase):
+class ReaderTestCase(unittest.TestCase, AssertStringMixin):
 
     def _get_path(self, filename):
         return os.path.join(DATA_DIR, filename)
@@ -36,17 +37,40 @@ class ReaderTestCase(unittest.TestCase):
         reader = Reader(encoding='foo')
         self.assertEquals(reader.encoding, 'foo')
 
-    def test_unicode(self):
+    def test_unicode__basic__input_str(self):
         """
-        Test unicode(): default values.
+        Test unicode(): default arguments with str input.
 
         """
         reader = Reader()
-
         actual = reader.unicode("foo")
 
-        self.assertEquals(type(actual), unicode)
-        self.assertEquals(actual, u"foo")
+        self.assertString(actual, u"foo")
+
+    def test_unicode__basic__input_unicode(self):
+        """
+        Test unicode(): default arguments with unicode input.
+
+        """
+        reader = Reader()
+        actual = reader.unicode(u"foo")
+
+        self.assertString(actual, u"foo")
+
+    def test_unicode__basic__input_unicode_subclass(self):
+        """
+        Test unicode(): default arguments with unicode-subclass input.
+
+        """
+        class UnicodeSubclass(unicode):
+            pass
+
+        s = UnicodeSubclass(u"foo")
+
+        reader = Reader()
+        actual = reader.unicode(s)
+
+        self.assertString(actual, u"foo")
 
     def test_unicode__encoding_attribute(self):
         """
