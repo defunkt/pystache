@@ -20,6 +20,7 @@ from pystache.custom_template import Loader
 from pystache.locator import Locator
 from pystache.reader import Reader
 from .common import AssertIsMixin
+from .common import AssertStringMixin
 from .common import DATA_DIR
 from .data.views import SampleView
 from .data.views import NonAscii
@@ -135,17 +136,12 @@ class ViewTestCase(unittest.TestCase):
         self.assertEquals(view.render(), """one, two, three, empty list""")
 
 
-class LoaderTests(unittest.TestCase, AssertIsMixin):
+class LoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
 
     """
     Tests the custom_template.Loader class.
 
     """
-
-    def assertString(self, actual, expected):
-        # TODO: use the assertStrings mixin.
-        self.assertEquals(type(actual), type(expected))
-        self.assertEquals(actual, expected)
 
     def test_init__defaults(self):
         loader = Loader()
