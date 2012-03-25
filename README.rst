@@ -15,7 +15,7 @@ Python 2.6.
 
 Pystache is semantically versioned: http://semver.org.
 
-Logo: David Phillips - http://davidphillips.us/ 
+Logo: David Phillips - http://davidphillips.us/
 
 Documentation
 =============
@@ -66,6 +66,11 @@ nose_ works great! ::
     pip install nose
     cd pystache
     nosetests
+
+Depending on your Python version and nose installation, you may need
+to type, for example ::
+
+    nosetests-2.4
 
 
 Mailing List
