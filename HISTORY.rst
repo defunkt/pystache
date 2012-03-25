@@ -1,7 +1,7 @@
 History
 =======
 
-0.4.1 (2011-03-25)
+0.4.1 (2012-03-25)
 ------------------
 * Added support for Python 2.4. [wangtz, jvantuyl]
 
