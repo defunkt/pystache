@@ -1,6 +1,10 @@
 History
 =======
 
+0.4.1 (2011-03-25)
+------------------
+* Added support for Python 2.4. [wangtz, jvantuyl]
+
 0.4.0 (2011-01-12)
 ------------------
 * Add support for nested contexts (within template and view)
