@@ -9,7 +9,7 @@ import os.path
 
 from .context import Context
 from .locator import Locator as TemplateLocator
-from .reader import Reader
+from .loader import Reader
 from .renderer import Renderer
 
 

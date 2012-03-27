@@ -12,7 +12,7 @@ import sys
 from .context import Context
 from .locator import DEFAULT_EXTENSION
 from .locator import Locator
-from .reader import Reader
+from .loader import Reader
 from .renderengine import RenderEngine
 
 

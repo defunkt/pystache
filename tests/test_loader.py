@@ -10,7 +10,7 @@ import sys
 import unittest
 
 from .common import AssertStringMixin
-from pystache.reader import Reader
+from pystache.loader import Reader
 
 
 DATA_DIR = 'tests/data'

@@ -18,7 +18,7 @@ from pystache import Renderer
 from pystache import View
 from pystache.custom_template import Loader
 from pystache.locator import Locator
-from pystache.reader import Reader
+from pystache.loader import Reader
 from .common import AssertIsMixin
 from .common import AssertStringMixin
 from .common import DATA_DIR
