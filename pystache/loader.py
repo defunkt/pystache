@@ -14,7 +14,7 @@ import sys
 DEFAULT_DECODE_ERRORS = 'strict'
 
 
-class Reader(object):
+class Loader(object):
 
     def __init__(self, encoding=None, decode_errors=None):
         """

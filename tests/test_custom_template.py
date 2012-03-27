@@ -18,7 +18,8 @@ from pystache import Renderer
 from pystache import View
 from pystache.custom_template import Loader as CustomLoader
 from pystache.locator import Locator
-from pystache.loader import Reader
+# TODO: remove this alias.
+from pystache.loader import Loader as Reader
 from .common import AssertIsMixin
 from .common import AssertStringMixin
 from .common import DATA_DIR

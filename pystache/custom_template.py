@@ -9,7 +9,8 @@ import os.path
 
 from .context import Context
 from .locator import Locator as TemplateLocator
-from .loader import Reader
+# TODO: remove this alias.
+from pystache.loader import Loader as Reader
 from .renderer import Renderer
 
 

@@ -10,7 +10,8 @@ import sys
 import unittest
 
 from .common import AssertStringMixin
-from pystache.loader import Reader
+# TODO: remove this alias.
+from pystache.loader import Loader as Reader
 
 
 DATA_DIR = 'tests/data'

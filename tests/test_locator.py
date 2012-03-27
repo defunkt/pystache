@@ -10,8 +10,9 @@ import os
 import sys
 import unittest
 
+# TODO: remove this alias.
+from pystache.loader import Loader as Reader
 from pystache.locator import Locator
-from pystache.loader import Reader
 
 from .common import DATA_DIR
 from data.views import SayHello

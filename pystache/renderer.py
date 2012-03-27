@@ -10,9 +10,10 @@ import os
 import sys
 
 from .context import Context
+# TODO: remove this alias.
+from .loader import Loader as Reader
 from .locator import DEFAULT_EXTENSION
 from .locator import Locator
-from .loader import Reader
 from .renderengine import RenderEngine
 
 
