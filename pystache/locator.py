@@ -9,8 +9,7 @@ import os
 import re
 import sys
 
-
-DEFAULT_EXTENSION = 'mustache'
+from . import defaults
 
 
 class Locator(object):
@@ -21,12 +20,13 @@ class Locator(object):
 
         Arguments:
 
-          extension: the template file extension.  Defaults to "mustache".
-            Pass False for no extension (i.e. extensionless template files).
+          extension: the template file extension.  Pass False for no
+            extension (i.e. to use extensionless template files).
+            Defaults to the package default.
 
         """
         if extension is None:
-            extension = DEFAULT_EXTENSION
+            extension = defaults.TEMPLATE_EXTENSION
 
         self.template_extension = extension
 

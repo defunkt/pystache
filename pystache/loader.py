@@ -10,8 +10,7 @@ from __future__ import with_statement
 import os
 import sys
 
-
-DEFAULT_DECODE_ERRORS = 'strict'
+from . import defaults
 
 
 class Loader(object):
@@ -29,12 +28,12 @@ class Loader(object):
             sys.getdefaultencoding().
 
           decode_errors: the string to pass as the errors argument to the
-            built-in function unicode() when converting file contents to
-            unicode.  Defaults to "strict".
+            built-in function unicode() when converting str strings to
+            unicode.  Defaults to the package default.
 
         """
         if decode_errors is None:
-            decode_errors = DEFAULT_DECODE_ERRORS
+            decode_errors = defaults.DECODE_ERRORS
 
         if encoding is None:
             encoding = sys.getdefaultencoding()

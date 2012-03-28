@@ -9,10 +9,10 @@ import cgi
 import os
 import sys
 
+from . import defaults
 from .context import Context
 # TODO: remove this alias.
 from .loader import Loader as Reader
-from .locator import DEFAULT_EXTENSION
 from .locator import Locator
 from .renderengine import RenderEngine
 
@@ -96,8 +96,9 @@ class Renderer(object):
             current working directory.  If given a string, the string is
             interpreted as a single directory.
 
-          file_extension: the template file extension.  Defaults to "mustache".
-            Pass False for no extension (i.e. for extensionless files).
+          file_extension: the template file extension.  Pass False for no
+            extension (i.e. to use extensionless template files).
+            Defaults to the package default.
 
         """
         if default_encoding is None:
@@ -111,7 +112,7 @@ class Renderer(object):
             file_encoding = default_encoding
 
         if file_extension is None:
-            file_extension = DEFAULT_EXTENSION
+            file_extension = defaults.TEMPLATE_EXTENSION
 
         if search_dirs is None:
             search_dirs = os.curdir  # i.e. "."
