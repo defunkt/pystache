@@ -38,6 +38,14 @@ class ReaderTestCase(unittest.TestCase, AssertStringMixin):
         reader = Reader(encoding='foo')
         self.assertEquals(reader.encoding, 'foo')
 
+    def test_init__extension(self):
+        # Test the default value.
+        reader = Reader()
+        self.assertEquals(reader.extension, 'mustache')
+
+        reader = Reader(extension='foo')
+        self.assertEquals(reader.extension, 'foo')
+
     def test_unicode__basic__input_str(self):
         """
         Test unicode(): default arguments with str input.

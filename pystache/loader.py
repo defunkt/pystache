@@ -15,11 +15,15 @@ from . import defaults
 
 class Loader(object):
 
-    def __init__(self, encoding=None, decode_errors=None):
+    def __init__(self, encoding=None, decode_errors=None, extension=None):
         """
         Construct a template reader.
 
         Arguments:
+
+          decode_errors: the string to pass as the errors argument to the
+            built-in function unicode() when converting str strings to
+            unicode.  Defaults to the package default.
 
           encoding: the file encoding.  This is the name of the encoding to
             use when converting file contents to unicode.  This name is
@@ -27,9 +31,9 @@ class Loader(object):
             unicode().  Defaults to the encoding name returned by
             sys.getdefaultencoding().
 
-          decode_errors: the string to pass as the errors argument to the
-            built-in function unicode() when converting str strings to
-            unicode.  Defaults to the package default.
+          extension: the template file extension.  Pass False for no
+            extension (i.e. to use extensionless template files).
+            Defaults to the package default.
 
         """
         if decode_errors is None:
@@ -38,8 +42,12 @@ class Loader(object):
         if encoding is None:
             encoding = sys.getdefaultencoding()
 
+        if extension is None:
+            extension = defaults.TEMPLATE_EXTENSION
+
         self.decode_errors = decode_errors
         self.encoding = encoding
+        self.extension = extension
 
     def unicode(self, s, encoding=None):
         """
