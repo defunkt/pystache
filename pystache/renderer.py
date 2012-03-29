@@ -11,9 +11,7 @@ import sys
 
 from . import defaults
 from .context import Context
-# TODO: remove this alias.
-from .loader import Loader as Reader
-from .locator import Locator
+from .loader import Loader
 from .renderengine import RenderEngine
 
 
@@ -43,7 +41,7 @@ class Renderer(object):
     """
 
     def __init__(self, file_encoding=None, default_encoding=None,
-                 decode_errors='strict', search_dirs=None, file_extension=None,
+                 decode_errors=None, search_dirs=None, file_extension=None,
                  escape=None, partials=None):
         """
         Construct an instance.
@@ -87,9 +85,8 @@ class Renderer(object):
             encoding name returned by sys.getdefaultencoding().
 
           decode_errors: the string to pass as the errors argument to the
-            built-in function unicode() when converting to unicode any
-            strings of type str encountered during the rendering process.
-            Defaults to "strict".
+            built-in function unicode() when converting str strings to
+            unicode.  Defaults to the package default.
 
           search_dirs: the list of directories in which to search for
             templates when loading a template by name.  Defaults to the
@@ -101,6 +98,9 @@ class Renderer(object):
             Defaults to the package default.
 
         """
+        if decode_errors is None:
+            decode_errors = defaults.DECODE_ERRORS
+
         if default_encoding is None:
             default_encoding = sys.getdefaultencoding()
 
@@ -169,32 +169,23 @@ class Renderer(object):
         # the default_encoding and decode_errors attributes.
         return unicode(s, self.default_encoding, self.decode_errors)
 
-    def _make_reader(self):
+    def _make_loader(self):
         """
-        Create a Reader instance using current attributes.
+        Create a Loader instance using current attributes.
 
         """
-        return Reader(encoding=self.file_encoding, decode_errors=self.decode_errors)
-
-    def make_locator(self):
-        """
-        Create a Locator instance using current attributes.
-
-        """
-        return Locator(extension=self.file_extension)
+        return Loader(encoding=self.file_encoding, decode_errors=self.decode_errors,
+                      extension=self.file_extension)
 
     def _make_load_template(self):
         """
         Return a function that loads a template by name.
 
         """
-        reader = self._make_reader()
-        locator = self.make_locator()
+        loader = self._make_loader()
 
         def load_template(template_name):
-            template_path = locator.find_path_by_name(self.search_dirs, template_name)
-
-            return reader.read(template_path)
+            return loader.load(template_name, self.search_dirs)
 
         return load_template
 
@@ -237,18 +228,6 @@ class Renderer(object):
                               escape=self._escape_to_unicode)
         return engine
 
-    def read(self, path):
-        """
-        Read and return as a unicode string the file contents at path.
-
-        This class uses this method whenever it needs to read a template
-        file.  This method uses the file_encoding and decode_errors
-        attributes.
-
-        """
-        reader = self._make_reader()
-        return reader.read(path)
-
     # TODO: add unit tests for this method.
     def load_template(self, template_name):
         """
@@ -257,19 +236,6 @@ class Renderer(object):
         """
         load_template = self._make_load_template()
         return load_template(template_name)
-
-    def get_associated_template(self, obj):
-        """
-        Find and return the template associated with an object.
-
-        The function first searches the directory containing the object's
-        class definition.
-
-        """
-        locator = self.make_locator()
-        template_path = locator.find_path_by_object(self.search_dirs, obj)
-
-        return self.read(template_path)
 
     def _render_string(self, template, *context, **kwargs):
         """
@@ -291,8 +257,10 @@ class Renderer(object):
         Render the template associated with the given object.
 
         """
+        loader = self._make_loader()
+        template = loader.load(obj, self.search_dirs)
+
         context = [obj] + list(context)
-        template = self.get_associated_template(obj)
 
         return self._render_string(template, *context, **kwargs)
 
@@ -303,7 +271,8 @@ class Renderer(object):
         Read the render() docstring for more information.
 
         """
-        template = self.read(template_path)
+        loader = self._make_loader()
+        template = loader.read(template_path)
 
         return self._render_string(template, *context, **kwargs)
 

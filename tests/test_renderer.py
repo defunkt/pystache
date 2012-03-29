@@ -12,7 +12,7 @@ import unittest
 
 from examples.simple import Simple
 from pystache.renderer import Renderer
-from pystache.locator import Locator
+from pystache.loader import Loader
 
 from .common import get_data_path
 from .data.views import SayHello
@@ -182,76 +182,33 @@ class RendererTestCase(unittest.TestCase):
         # U+FFFD is the official Unicode replacement character.
         self.assertEquals(renderer.unicode(s), u'd\ufffd\ufffdf')
 
-    ## Test the read() method.
+    ## Test the _make_loader() method.
 
-    def _read(self, renderer, filename):
-        path = get_data_path(filename)
-        return renderer.read(path)
-
-    def test_read(self):
-        renderer = Renderer()
-        actual = self._read(renderer, 'ascii.mustache')
-        self.assertEquals(actual, 'ascii: abc')
-
-    def test_read__returns_unicode(self):
-        renderer = Renderer()
-        actual = self._read(renderer, 'ascii.mustache')
-        self.assertEquals(type(actual), unicode)
-
-    def test_read__file_encoding(self):
-        filename = 'non_ascii.mustache'
-
-        renderer = Renderer()
-        renderer.file_encoding = 'ascii'
-
-        self.assertRaises(UnicodeDecodeError, self._read, renderer, filename)
-        renderer.file_encoding = 'utf-8'
-        actual = self._read(renderer, filename)
-        self.assertEquals(actual, u'non-ascii: é')
-
-    def test_read__decode_errors(self):
-        filename = 'non_ascii.mustache'
-        renderer = Renderer()
-
-        self.assertRaises(UnicodeDecodeError, self._read, renderer, filename)
-        renderer.decode_errors = 'ignore'
-        actual = self._read(renderer, filename)
-        self.assertEquals(actual, 'non-ascii: ')
-
-    ## Test the make_locator() method.
-
-    def test_make_locator__return_type(self):
+    def test__make_loader__return_type(self):
         """
-        Test that make_locator() returns a Locator.
+        Test that _make_loader() returns a Loader.
 
         """
         renderer = Renderer()
-        locator = renderer.make_locator()
+        loader = renderer._make_loader()
 
-        self.assertEquals(type(locator), Locator)
+        self.assertEquals(type(loader), Loader)
 
-    def test_make_locator__file_extension(self):
+    def test__make_loader__attributes(self):
         """
-        Test that make_locator() respects the file_extension attribute.
+        Test that _make_locator() sets all attributes correctly..
 
         """
         renderer = Renderer()
-        renderer.file_extension = 'foo'
+        renderer.decode_errors = 'dec'
+        renderer.file_encoding = 'enc'
+        renderer.file_extension = 'ext'
 
-        locator = renderer.make_locator()
+        loader = renderer._make_loader()
 
-        self.assertEquals(locator.template_extension, 'foo')
-
-    # This test is a sanity check.  Strictly speaking, it shouldn't
-    # be necessary based on our tests above.
-    def test_make_locator__default(self):
-        renderer = Renderer()
-        actual = renderer.make_locator()
-
-        expected = Locator()
-
-        self.assertEquals(type(actual), type(expected))
-        self.assertEquals(actual.template_extension, expected.template_extension)
+        self.assertEquals(loader.decode_errors, 'dec')
+        self.assertEquals(loader.encoding, 'enc')
+        self.assertEquals(loader.extension, 'ext')
 
     ## Test the render() method.
 

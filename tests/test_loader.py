@@ -10,40 +10,39 @@ import sys
 import unittest
 
 from .common import AssertStringMixin
-# TODO: remove this alias.
-from pystache.loader import Loader as Reader
+from pystache.loader import Loader
 
 
 DATA_DIR = 'tests/data'
 
 
-class ReaderTestCase(unittest.TestCase, AssertStringMixin):
+class LoaderTestCase(unittest.TestCase, AssertStringMixin):
 
     def _get_path(self, filename):
         return os.path.join(DATA_DIR, filename)
 
     def test_init__decode_errors(self):
         # Test the default value.
-        reader = Reader()
+        reader = Loader()
         self.assertEquals(reader.decode_errors, 'strict')
 
-        reader = Reader(decode_errors='replace')
+        reader = Loader(decode_errors='replace')
         self.assertEquals(reader.decode_errors, 'replace')
 
     def test_init__encoding(self):
         # Test the default value.
-        reader = Reader()
+        reader = Loader()
         self.assertEquals(reader.encoding, sys.getdefaultencoding())
 
-        reader = Reader(encoding='foo')
+        reader = Loader(encoding='foo')
         self.assertEquals(reader.encoding, 'foo')
 
     def test_init__extension(self):
         # Test the default value.
-        reader = Reader()
+        reader = Loader()
         self.assertEquals(reader.extension, 'mustache')
 
-        reader = Reader(extension='foo')
+        reader = Loader(extension='foo')
         self.assertEquals(reader.extension, 'foo')
 
     def test_unicode__basic__input_str(self):
@@ -51,7 +50,7 @@ class ReaderTestCase(unittest.TestCase, AssertStringMixin):
         Test unicode(): default arguments with str input.
 
         """
-        reader = Reader()
+        reader = Loader()
         actual = reader.unicode("foo")
 
         self.assertString(actual, u"foo")
@@ -61,7 +60,7 @@ class ReaderTestCase(unittest.TestCase, AssertStringMixin):
         Test unicode(): default arguments with unicode input.
 
         """
-        reader = Reader()
+        reader = Loader()
         actual = reader.unicode(u"foo")
 
         self.assertString(actual, u"foo")
@@ -76,7 +75,7 @@ class ReaderTestCase(unittest.TestCase, AssertStringMixin):
 
         s = UnicodeSubclass(u"foo")
 
-        reader = Reader()
+        reader = Loader()
         actual = reader.unicode(s)
 
         self.assertString(actual, u"foo")
@@ -86,7 +85,7 @@ class ReaderTestCase(unittest.TestCase, AssertStringMixin):
         Test unicode(): encoding attribute.
 
         """
-        reader = Reader()
+        reader = Loader()
 
         non_ascii = u'é'.encode('utf-8')
 
@@ -100,65 +99,63 @@ class ReaderTestCase(unittest.TestCase, AssertStringMixin):
         Test unicode(): encoding argument.
 
         """
-        reader = Reader()
+        reader = Loader()
 
         non_ascii = u'é'.encode('utf-8')
 
         self.assertRaises(UnicodeDecodeError, reader.unicode, non_ascii)
 
-        self.assertEquals(reader.unicode(non_ascii, encoding='utf-8'), u'é')
+        actual = reader.unicode(non_ascii, encoding='utf-8')
+        self.assertEquals(actual, u'é')
 
     def test_read(self):
         """
         Test read().
 
         """
-        reader = Reader()
+        reader = Loader()
         path = self._get_path('ascii.mustache')
-        self.assertEquals(reader.read(path), 'ascii: abc')
-
-    def test_read__returns_unicode(self):
-        """
-        Test that read() returns unicode strings.
-
-        """
-        reader = Reader()
-        path = self._get_path('ascii.mustache')
-        contents = reader.read(path)
-        self.assertEqual(type(contents), unicode)
+        actual = reader.read(path)
+        self.assertString(actual, u'ascii: abc')
 
     def test_read__encoding__attribute(self):
         """
         Test read(): encoding attribute respected.
 
         """
-        reader = Reader()
+        reader = Loader()
         path = self._get_path('non_ascii.mustache')
 
         self.assertRaises(UnicodeDecodeError, reader.read, path)
+
         reader.encoding = 'utf-8'
-        self.assertEquals(reader.read(path), u'non-ascii: é')
+        actual = reader.read(path)
+        self.assertString(actual, u'non-ascii: é')
 
     def test_read__encoding__argument(self):
         """
         Test read(): encoding argument respected.
 
         """
-        reader = Reader()
+        reader = Loader()
         path = self._get_path('non_ascii.mustache')
 
         self.assertRaises(UnicodeDecodeError, reader.read, path)
-        self.assertEquals(reader.read(path, encoding='utf-8'), u'non-ascii: é')
+
+        actual = reader.read(path, encoding='utf-8')
+        self.assertString(actual, u'non-ascii: é')
 
     def test_get__decode_errors(self):
         """
         Test get(): decode_errors attribute.
 
         """
-        reader = Reader()
+        reader = Loader()
         path = self._get_path('non_ascii.mustache')
 
         self.assertRaises(UnicodeDecodeError, reader.read, path)
-        reader.decode_errors = 'replace'
-        self.assertEquals(reader.read(path), u'non-ascii: \ufffd\ufffd')
+
+        reader.decode_errors = 'ignore'
+        actual = reader.read(path)
+        self.assertString(actual, u'non-ascii: ')
 

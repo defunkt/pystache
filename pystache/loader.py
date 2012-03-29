@@ -11,6 +11,7 @@ import os
 import sys
 
 from . import defaults
+from .locator import Locator
 
 
 class Loader(object):
@@ -78,3 +79,26 @@ class Loader(object):
             text = f.read()
 
         return self.unicode(text, encoding)
+
+    def load(self, obj, search_dirs):
+        """
+        Find and return the template associated to the given object.
+
+        Arguments:
+
+          obj: a string or object instance.  If obj is a string, then obj
+            will be interpreted as the template name.  Otherwise, obj will
+            be interpreted as an instance of a user-defined class.
+
+          search_dirs: the list of directories in which to search for
+            templates when loading a template by name.
+
+        """
+        locator = Locator(extension=self.extension)
+
+        if isinstance(obj, basestring):
+            path = locator.find_path_by_name(search_dirs, obj)
+        else:
+            path = locator.find_path_by_object(search_dirs, obj)
+
+        return self.read(path)
