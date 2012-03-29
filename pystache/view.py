@@ -27,11 +27,12 @@ class View(object):
     template_encoding = None
     template_extension = 'mustache'
     
-    def __init__(self, template=None, context=None, **kwargs):
+    def __init__(self, template=None, context=None, path=None, **kwargs):
         self.template = template
         context = context or {}
         context.update(**kwargs)
 
+        self.template_path = path
         self.context_list = [context]
         
     def get(self, attr, default=None):

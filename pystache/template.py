@@ -7,11 +7,10 @@ import copy
 try:
     import markupsafe
     escape = markupsafe.escape
-    literal = markupsafe.Markup
-
 except ImportError:
     escape = lambda x: cgi.escape(unicode(x))
-    literal = unicode
+    
+literal = unicode
 
 
 class Modifiers(dict):
