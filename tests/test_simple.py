@@ -47,3 +47,7 @@ class TestSimple(unittest.TestCase):
 
 Again, Welcome!
 """)
+
+
+if __name__ == '__main__':
+    unittest.main()
