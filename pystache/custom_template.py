@@ -8,9 +8,8 @@ This module supports specifying custom template information per view.
 import os.path
 
 from .context import Context
+from .loader import Loader
 from .locator import Locator as TemplateLocator
-# TODO: remove this alias.
-from pystache.loader import Loader as Reader
 from .renderer import Renderer
 
 
@@ -121,7 +120,7 @@ class View(CustomizedTemplate):
         return renderer.render(template, self.context)
 
 
-class Loader(object):
+class CustomLoader(object):
 
     """
     Supports loading a custom-specified template.
@@ -133,7 +132,7 @@ class Loader(object):
             locator = TemplateLocator()
 
         if reader is None:
-            reader = Reader()
+            reader = Loader()
 
         if search_dirs is None:
             search_dirs = []

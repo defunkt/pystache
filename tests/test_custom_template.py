@@ -16,7 +16,7 @@ from examples.inverted import Inverted, InvertedLists
 from pystache import CustomizedTemplate as Template
 from pystache import Renderer
 from pystache import View
-from pystache.custom_template import Loader as CustomLoader
+from pystache.custom_template import CustomLoader
 from pystache.locator import Locator
 # TODO: remove this alias.
 from pystache.loader import Loader as Reader
