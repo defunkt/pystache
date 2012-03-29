@@ -9,7 +9,7 @@ import os.path
 
 from .context import Context
 from .loader import Loader
-from .locator import Locator as TemplateLocator
+from .locator import Locator
 from .renderer import Renderer
 
 
@@ -56,7 +56,7 @@ class View(CustomizedTemplate):
 
     _renderer = None
 
-    locator = TemplateLocator()
+    locator = Locator()
 
     def __init__(self, context=None):
         """
@@ -127,18 +127,14 @@ class CustomLoader(object):
 
     """
 
-    def __init__(self, search_dirs=None, locator=None, reader=None):
-        if locator is None:
-            locator = TemplateLocator()
-
-        if reader is None:
-            reader = Loader()
+    def __init__(self, search_dirs=None, loader=None):
+        if loader is None:
+            loader = Loader()
 
         if search_dirs is None:
             search_dirs = []
 
-        self.locator = locator
-        self.reader = reader
+        self.loader = loader
         self.search_dirs = search_dirs
 
     # TODO: make this private.
@@ -154,10 +150,13 @@ class CustomLoader(object):
 
         # Otherwise, we don't know the directory.
 
-        template_name = (view.template_name if view.template_name is not None else
-                         self.locator.make_template_name(view))
+        # TODO: share code with the loader attribute here.
+        locator = Locator(extension=self.loader.extension)
 
-        file_name = self.locator.make_file_name(template_name, view.template_extension)
+        template_name = (view.template_name if view.template_name is not None else
+                         locator.make_template_name(view))
+
+        file_name = locator.make_file_name(template_name, view.template_extension)
 
         return (template_dir, file_name)
 
@@ -169,11 +168,14 @@ class CustomLoader(object):
         """
         dir_path, file_name = self.get_relative_template_location(view)
 
+        # TODO: share code with the loader attribute here.
+        locator = Locator(extension=self.loader.extension)
+
         if dir_path is None:
             # Then we need to search for the path.
-            path = self.locator.find_path_by_object(self.search_dirs, view, file_name=file_name)
+            path = locator.find_path_by_object(self.search_dirs, view, file_name=file_name)
         else:
-            obj_dir = self.locator.get_object_directory(view)
+            obj_dir = locator.get_object_directory(view)
             path = os.path.join(obj_dir, dir_path, file_name)
 
         return path
@@ -190,8 +192,8 @@ class CustomLoader(object):
 
         """
         if custom.template is not None:
-            return self.reader.unicode(custom.template, custom.template_encoding)
+            return self.loader.unicode(custom.template, custom.template_encoding)
 
         path = self.get_template_path(custom)
 
-        return self.reader.read(path, custom.template_encoding)
+        return self.loader.read(path, custom.template_encoding)
