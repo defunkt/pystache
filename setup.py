@@ -23,7 +23,7 @@ if sys.argv[-1] == "publish":
     sys.exit()
 
 setup(name='pystache',
-      version='0.4.0',
+      version='0.4.1',
       description='Mustache for Python',
       long_description=open('README.rst').read() + '\n\n' + open('HISTORY.rst').read(),
       author='Chris Wanstrath',
@@ -35,8 +35,10 @@ setup(name='pystache',
         "Development Status :: 4 - Beta",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",
+        "Programming Language :: Python :: 2.4",
         "Programming Language :: Python :: 2.5",
         "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 2.7",
         )
      )
 
