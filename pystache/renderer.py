@@ -185,7 +185,7 @@ class Renderer(object):
         loader = self._make_loader()
 
         def load_template(template_name):
-            return loader.load(template_name, self.search_dirs)
+            return loader.load_name(template_name, self.search_dirs)
 
         return load_template
 
@@ -258,7 +258,7 @@ class Renderer(object):
 
         """
         loader = self._make_loader()
-        template = loader.load(obj, self.search_dirs)
+        template = loader.load_object(obj, self.search_dirs)
 
         context = [obj] + list(context)
 

@@ -50,6 +50,7 @@ class Loader(object):
         self.encoding = encoding
         self.extension = extension
 
+    # TODO: eliminate redundancy with the Renderer class's unicode code.
     def unicode(self, s, encoding=None):
         """
         Call Python's built-in function unicode(), and return the result.
@@ -80,25 +81,38 @@ class Loader(object):
 
         return self.unicode(text, encoding)
 
-    def load(self, obj, search_dirs):
+    # TODO: unit-test this method.
+    def load_name(self, name, search_dirs):
+        """
+        Find and return the template with the given name.
+
+        Arguments:
+
+          name: the name of the template.
+
+          search_dirs: the list of directories in which to search.
+
+        """
+        locator = Locator(extension=self.extension)
+
+        path = locator.find_path_by_name(search_dirs, name)
+
+        return self.read(path)
+
+    # TODO: unit-test this method.
+    def load_object(self, obj, search_dirs):
         """
         Find and return the template associated to the given object.
 
         Arguments:
 
-          obj: a string or object instance.  If obj is a string, then obj
-            will be interpreted as the template name.  Otherwise, obj will
-            be interpreted as an instance of a user-defined class.
+          obj: an instance of a user-defined class.
 
-          search_dirs: the list of directories in which to search for
-            templates when loading a template by name.
+          search_dirs: the list of directories in which to search.
 
         """
         locator = Locator(extension=self.extension)
 
-        if isinstance(obj, basestring):
-            path = locator.find_path_by_name(search_dirs, obj)
-        else:
-            path = locator.find_path_by_object(search_dirs, obj)
+        path = locator.find_path_by_object(search_dirs, obj)
 
         return self.read(path)
