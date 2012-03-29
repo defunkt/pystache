@@ -36,7 +36,7 @@ class View(object):
         
     def get(self, attr, default=None):
         attr = get_or_attr(self.context_list, attr, getattr(self, attr, default))
-        if hasattr(attr, '__call__') and type(attr) is UnboundMethodType:
+        if hasattr(attr, '__call__') and type(attr) is MethodType:
             return attr()
         else:
             return attr

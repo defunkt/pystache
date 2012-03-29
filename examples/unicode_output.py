@@ -6,4 +6,7 @@ class UnicodeOutput(pystache.View):
     template_path = 'examples'
 
     def name(self):
-        return u'Henri Poincaré'
+        try:
+            return 'Henri Poincaré'.decode('utf-8')
+        except AttributeError:
+            return 'Henri Poincaré'

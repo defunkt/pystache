@@ -22,14 +22,24 @@ class TestView(unittest.TestCase):
         self.assertEquals(DoubleSection().render(),"""* first\n* second\n* third""")
 
     def test_unicode_output(self):
-        self.assertEquals(UnicodeOutput().render(), u'<p>Name: Henri Poincaré</p>')
+        try:
+            self.assertEquals(UnicodeOutput().render(), '<p>Name: Henri Poincaré</p>'.decode('utf-8'))
+        except AttributeError:
+            self.assertEquals(UnicodeOutput().render(), '<p>Name: Henri Poincaré</p>')
 
     def test_encoded_output(self):
-        self.assertEquals(UnicodeOutput().render('utf8'), '<p>Name: Henri Poincar\xc3\xa9</p>')
+        if 'é' == '\xc3\xa9': # 2.x
+            self.assertEquals(UnicodeOutput().render('utf8'), '<p>Name: Henri Poincar\xc3\xa9</p>')
+        else: # 3.x
+            self.assertEquals(UnicodeOutput().render('utf8'), b'<p>Name: Henri Poincar\xc3\xa9</p>')
 
     def test_unicode_input(self):
-        self.assertEquals(UnicodeInput().render(),
-            u'<p>If alive today, Henri Poincaré would be 156 years old.</p>')
+        try:
+            self.assertEquals(UnicodeInput().render(),
+                '<p>If alive today, Henri Poincaré would be 156 years old.</p>'.decode('utf-8'))
+        except AttributeError:
+            self.assertEquals(UnicodeInput().render(),
+                '<p>If alive today, Henri Poincaré would be 156 years old.</p>')
 
     def test_escaped(self):
         self.assertEquals(Escaped().render(), "<h1>Bear &gt; Shark</h1>")
