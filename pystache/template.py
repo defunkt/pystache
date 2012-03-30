@@ -1,8 +1,8 @@
 import re
 import cgi
-import collections
 import os
 import copy
+import types
 
 try:
     import markupsafe
@@ -17,11 +17,11 @@ except ImportError:
 class Modifiers(dict):
     """Dictionary with a decorator for assigning functions to keys."""
 
-    def set(self, key):
+    def set(self, key, func=None):
         """
         Decorator function to set the given key to the decorated function.
 
-            >>> modifiers = Modifiers()
+            >>> modifiers = {}
             >>> @modifiers.set('P')
             ... def render_tongue(self, tag_name=None, context=None):
             ...     return ":P %s" % tag_name
@@ -32,7 +32,13 @@ class Modifiers(dict):
         def setter(func):
             self[key] = func
             return func
-        return setter
+            
+        if isinstance(func, (types.FunctionType, types.MethodType)):
+            # called directly, before the method has been bound
+            return setter(func)
+        else:
+            # called as a decorator
+            return setter
 
 
 class Template(object):
@@ -105,7 +111,7 @@ class Template(object):
             template = literal(template.replace(section, replacer))
 
         return template
-
+    
     def _render_tags(self, template):
         while True:
             match = self.tag_re.search(template)
@@ -134,7 +140,6 @@ class Template(object):
 
         return ''.join(insides)
 
-    @modifiers.set(None)
     def _render_tag(self, tag_name):
         raw = self.view.get(tag_name, '')
 
@@ -146,30 +151,31 @@ class Template(object):
                 return ''
 
         return escape(raw)
+    _render_tag = modifiers.set(None, _render_tag)
 
-    @modifiers.set('!')
     def _render_comment(self, tag_name):
         return ''
+    _render_comment = modifiers.set('!', _render_comment)
 
-    @modifiers.set('>')
     def _render_partial(self, template_name):
         from pystache import Loader
         markup = Loader().load_template(template_name, self.view.template_path, encoding=self.view.template_encoding)
         template = Template(markup, self.view)
         return template.render()
+    _render_partial = modifiers.set('>', _render_partial)
 
-    @modifiers.set('=')
     def _change_delimiter(self, tag_name):
         """Changes the Mustache delimiter."""
         self.otag, self.ctag = tag_name.split(' ')
         self._compile_regexps()
         return ''
+    _change_delimiter = modifiers.set('=', _change_delimiter)
 
-    @modifiers.set('{')
-    @modifiers.set('&')
     def render_unescaped(self, tag_name):
         """Render a tag without escaping it."""
         return literal(self.view.get(tag_name, ''))
+    render_unescaped = modifiers.set('{', render_unescaped)
+    render_unescaped = modifiers.set('&', render_unescaped)
 
     def render(self, encoding=None):
         template = self._render_sections(self.template, self.view)
