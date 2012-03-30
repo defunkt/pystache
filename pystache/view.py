@@ -30,7 +30,7 @@ class View(object):
     def __init__(self, template=None, context=None, **kwargs):
         self.template = template
         context = context or {}
-        context.update(**kwargs)
+        context.update(kwargs)
 
         self.context_list = [context]
         
