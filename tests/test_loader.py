@@ -19,3 +19,7 @@ class TestLoader(unittest.TestCase):
         loader = pystache.Loader()
         
         self.assertRaises(IOError, loader.load_template, 'simple', 'doesnt_exist')
+
+
+if __name__ == '__main__':
+    unittest.main()
