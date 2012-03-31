@@ -19,10 +19,17 @@ tests in `version 1.0.3`_ of the spec.
 
 Logo: `David Phillips`_
 
+
 Requirements
 ============
 
-Pystache is currently tested under Python 2.6.
+Pystache currently works using the following versions of Python:
+
+* Python 2.4
+* Python 2.5
+* Python 2.6
+* Python 2.7
+
 
 Install It
 ==========
@@ -75,6 +82,11 @@ nose_ works great! ::
     cd pystache
     nosetests
 
+Depending on your Python version and nose installation, you may need
+to type, for example ::
+
+    nosetests-2.4
+
 To include tests from the Mustache spec in your test runs: ::
 
     git submodule init
@@ -92,8 +104,9 @@ To run a subset of the tests, you can use this pattern, for example: ::
 
     nosetests --tests tests/test_context.py:GetValueTests.test_dictionary__key_present
 
+
 Mailing List
-==================
+============
 
 As of November 2011, there's a mailing list, pystache@librelist.com.
 
@@ -101,6 +114,7 @@ Archive: http://librelist.com/browser/pystache/
 
 Note: There's a bit of a delay in seeing the latest emails appear
 in the archive.
+
 
 Author
 ======
