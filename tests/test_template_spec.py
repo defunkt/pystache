@@ -16,7 +16,7 @@ from examples.inverted import Inverted, InvertedLists
 from pystache import CustomizedTemplate as Template
 from pystache import Renderer
 from pystache import View
-from pystache.custom_template import CustomLoader
+from pystache.template_spec import CustomLoader
 from pystache.locator import Locator
 from pystache.loader import Loader
 from .common import AssertIsMixin
@@ -139,7 +139,7 @@ class ViewTestCase(unittest.TestCase):
 class CustomLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
 
     """
-    Tests custom_template.CustomLoader.
+    Tests template_spec.CustomLoader.
 
     """
 

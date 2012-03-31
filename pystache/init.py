@@ -5,8 +5,8 @@ This module contains the initialization logic called by __init__.py.
 
 """
 
-from .custom_template import View
-from .custom_template import  CustomizedTemplate
+from .template_spec import View
+from .template_spec import  CustomizedTemplate
 from .renderer import Renderer
 
 
