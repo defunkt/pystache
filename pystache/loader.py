@@ -51,8 +51,8 @@ class Loader(object):
 
             It should accept a string of type str and an optional encoding
             name and return a string of type unicode.  Defaults to calling
-            Python's built-in function unicode() using the package encoding
-            and decode-errors defaults.
+            Python's built-in function unicode() using the package string
+            encoding and decode errors defaults.
 
         """
         if extension is None:
@@ -67,6 +67,9 @@ class Loader(object):
         self.extension = extension
         self.file_encoding = file_encoding
         self.to_unicode = to_unicode
+
+    def _make_locator(self):
+        return Locator(extension=self.extension)
 
     def unicode(self, s, encoding=None):
         """
@@ -116,7 +119,7 @@ class Loader(object):
           search_dirs: the list of directories in which to search.
 
         """
-        locator = Locator(extension=self.extension)
+        locator = self._make_locator()
 
         path = locator.find_path_by_name(search_dirs, name)
 
@@ -134,7 +137,7 @@ class Loader(object):
           search_dirs: the list of directories in which to search.
 
         """
-        locator = Locator(extension=self.extension)
+        locator = self._make_locator()
 
         path = locator.find_path_by_object(search_dirs, obj)
 
