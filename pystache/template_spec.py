@@ -184,7 +184,7 @@ class SpecLoader(object):
 
         return path
 
-    def load(self, custom):
+    def load(self, spec):
         """
         Find and return the template associated to a TemplateSpec instance.
 
@@ -192,12 +192,12 @@ class SpecLoader(object):
 
         Arguments:
 
-          custom: a TemplateSpec instance.
+          spec: a TemplateSpec instance.
 
         """
-        if custom.template is not None:
-            return self.loader.unicode(custom.template, custom.template_encoding)
+        if spec.template is not None:
+            return self.loader.unicode(spec.template, spec.template_encoding)
 
-        path = self.get_template_path(custom)
+        path = self.get_template_path(spec)
 
-        return self.loader.read(path, custom.template_encoding)
+        return self.loader.read(path, spec.template_encoding)
