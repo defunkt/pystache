@@ -16,7 +16,7 @@ from examples.inverted import Inverted, InvertedLists
 from pystache import TemplateSpec as Template
 from pystache import Renderer
 from pystache import View
-from pystache.template_spec import CustomLoader
+from pystache.template_spec import SpecLoader
 from pystache.locator import Locator
 from pystache.loader import Loader
 from .common import AssertIsMixin
@@ -136,15 +136,15 @@ class ViewTestCase(unittest.TestCase):
         self.assertEquals(view.render(), """one, two, three, empty list""")
 
 
-class CustomLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
+class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
 
     """
-    Tests template_spec.CustomLoader.
+    Tests template_spec.SpecLoader.
 
     """
 
     def test_init__defaults(self):
-        custom = CustomLoader()
+        custom = SpecLoader()
 
         # Check the loader attribute.
         loader = custom.loader
@@ -157,13 +157,13 @@ class CustomLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
 
     def test_init__search_dirs(self):
         search_dirs = ['a', 'b']
-        loader = CustomLoader(search_dirs)
+        loader = SpecLoader(search_dirs)
 
         self.assertEquals(loader.search_dirs, ['a', 'b'])
 
     def test_init__loader(self):
         loader = Loader()
-        custom = CustomLoader([], loader=loader)
+        custom = SpecLoader([], loader=loader)
 
         self.assertIs(custom.loader, loader)
 
@@ -179,7 +179,7 @@ class CustomLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         custom = Template()
         custom.template = "abc"
 
-        self._assert_template(CustomLoader(), custom, u"abc")
+        self._assert_template(SpecLoader(), custom, u"abc")
 
     def test_load__template__type_unicode(self):
         """
@@ -189,7 +189,7 @@ class CustomLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         custom = Template()
         custom.template = u"abc"
 
-        self._assert_template(CustomLoader(), custom, u"abc")
+        self._assert_template(SpecLoader(), custom, u"abc")
 
     def test_load__template__unicode_non_ascii(self):
         """
@@ -199,7 +199,7 @@ class CustomLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         custom = Template()
         custom.template = u"é"
 
-        self._assert_template(CustomLoader(), custom, u"é")
+        self._assert_template(SpecLoader(), custom, u"é")
 
     def test_load__template__with_template_encoding(self):
         """
@@ -209,10 +209,10 @@ class CustomLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         custom = Template()
         custom.template = u'é'.encode('utf-8')
 
-        self.assertRaises(UnicodeDecodeError, self._assert_template, CustomLoader(), custom, u'é')
+        self.assertRaises(UnicodeDecodeError, self._assert_template, SpecLoader(), custom, u'é')
 
         custom.template_encoding = 'utf-8'
-        self._assert_template(CustomLoader(), custom, u'é')
+        self._assert_template(SpecLoader(), custom, u'é')
 
     # TODO: make this test complete.
     def test_load__template__correct_loader(self):
@@ -221,7 +221,7 @@ class CustomLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
 
         This test tests that the correct reader is called with the correct
         arguments.  This is a catch-all test to supplement the other
-        test cases.  It tests CustomLoader.load() independent of reader.unicode()
+        test cases.  It tests SpecLoader.load() independent of reader.unicode()
         being implemented correctly (and tested).
 
         """
@@ -238,7 +238,7 @@ class CustomLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
                 return u"foo"
 
         loader = MockLoader()
-        custom_loader = CustomLoader()
+        custom_loader = SpecLoader()
         custom_loader.loader = loader
 
         view = Template()
@@ -251,7 +251,7 @@ class CustomLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         self.assertEquals(loader.encoding, "encoding-foo")
 
 
-# TODO: migrate these tests into the CustomLoaderTests class.
+# TODO: migrate these tests into the SpecLoaderTests class.
 # TODO: rename the get_template() tests to test load().
 # TODO: condense, reorganize, and rename the tests so that it is
 #   clear whether we have full test coverage (e.g. organized by
@@ -260,7 +260,7 @@ class TemplateSpecTests(unittest.TestCase):
 
     # TODO: rename this method to _make_loader().
     def _make_locator(self):
-        locator = CustomLoader(search_dirs=[DATA_DIR])
+        locator = SpecLoader(search_dirs=[DATA_DIR])
         return locator
 
     def _assert_template_location(self, view, expected):
