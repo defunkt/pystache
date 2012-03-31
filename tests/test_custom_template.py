@@ -146,10 +146,11 @@ class CustomLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
     def test_init__defaults(self):
         custom = CustomLoader()
 
-        # Check the reader attribute.
+        # Check the loader attribute.
         loader = custom.loader
-        self.assertEquals(loader.decode_errors, 'strict')
-        self.assertEquals(loader.encoding, sys.getdefaultencoding())
+        self.assertEquals(loader.extension, 'mustache')
+        self.assertEquals(loader.file_encoding, sys.getdefaultencoding())
+        to_unicode = loader.to_unicode
 
         # Check search_dirs.
         self.assertEquals(custom.search_dirs, [])

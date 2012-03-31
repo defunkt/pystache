@@ -120,6 +120,9 @@ class View(CustomizedTemplate):
         return renderer.render(template, self.context)
 
 
+# TODO: finalize this class's name.
+# TODO: get this class fully working with test cases, and then refactor
+#   and replace the View class.
 class CustomLoader(object):
 
     """

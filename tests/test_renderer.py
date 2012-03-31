@@ -196,19 +196,21 @@ class RendererTestCase(unittest.TestCase):
 
     def test__make_loader__attributes(self):
         """
-        Test that _make_locator() sets all attributes correctly..
+        Test that _make_loader() sets all attributes correctly..
 
         """
+        unicode_ = lambda x: x
+
         renderer = Renderer()
-        renderer.decode_errors = 'dec'
         renderer.file_encoding = 'enc'
         renderer.file_extension = 'ext'
+        renderer.unicode = unicode_
 
         loader = renderer._make_loader()
 
-        self.assertEquals(loader.decode_errors, 'dec')
-        self.assertEquals(loader.encoding, 'enc')
         self.assertEquals(loader.extension, 'ext')
+        self.assertEquals(loader.file_encoding, 'enc')
+        self.assertEquals(loader.to_unicode, unicode_)
 
     ## Test the render() method.
 

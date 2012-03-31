@@ -3,7 +3,14 @@
 """
 This module provides a central location for defining default behavior.
 
+Throughout the package, these defaults take effect only when the user
+does not otherwise specify a value.
+
 """
+
+import cgi
+import sys
+
 
 # How to handle encoding errors when decoding strings from str to unicode.
 #
@@ -13,6 +20,26 @@ This module provides a central location for defining default behavior.
 #   http://docs.python.org/library/functions.html#unicode
 #
 DECODE_ERRORS = 'strict'
+
+# The name of the encoding to use when converting to unicode any strings of
+# type str encountered during the rendering process.
+STRING_ENCODING = sys.getdefaultencoding()
+
+# The name of the encoding to use when converting file contents to unicode.
+# This default takes precedence over the STRING_ENCODING default for
+# strings that arise from files.
+FILE_ENCODING = sys.getdefaultencoding()
+
+# The escape function to apply to strings that require escaping when
+# rendering templates (e.g. for tags enclosed in double braces).
+# Only unicode strings will be passed to this function.
+#
+# The quote=True argument causes double quotes to be escaped,
+# but not single quotes:
+#
+#   http://docs.python.org/library/cgi.html#cgi.escape
+#
+TAG_ESCAPE = lambda u: cgi.escape(u, quote=True)
 
 # The default template extension.
 TEMPLATE_EXTENSION = 'mustache'

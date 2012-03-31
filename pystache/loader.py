@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-This module provides a Reader class to read a template given a path.
+This module provides a Loader class for locating and reading templates.
 
 """
 
@@ -14,62 +14,82 @@ from . import defaults
 from .locator import Locator
 
 
+def _to_unicode(s, encoding=None):
+    """
+    Raises a TypeError exception if the given string is already unicode.
+
+    """
+    if encoding is None:
+        encoding = defaults.STRING_ENCODING
+    return unicode(s, encoding, defaults.DECODE_ERRORS)
+
+
 class Loader(object):
 
-    def __init__(self, encoding=None, decode_errors=None, extension=None):
+    """
+    Loads the template associated to a name or user-defined object.
+
+    """
+
+    def __init__(self, file_encoding=None, extension=None, to_unicode=None):
         """
-        Construct a template reader.
+        Construct a template loader instance.
 
         Arguments:
-
-          decode_errors: the string to pass as the errors argument to the
-            built-in function unicode() when converting str strings to
-            unicode.  Defaults to the package default.
-
-          encoding: the file encoding.  This is the name of the encoding to
-            use when converting file contents to unicode.  This name is
-            passed as the encoding argument to Python's built-in function
-            unicode().  Defaults to the encoding name returned by
-            sys.getdefaultencoding().
 
           extension: the template file extension.  Pass False for no
             extension (i.e. to use extensionless template files).
             Defaults to the package default.
 
+          file_encoding: the name of the encoding to use when converting file
+            contents to unicode.  Defaults to the package default.
+
+          to_unicode: the function to use when converting strings of type
+            str to unicode.  The function should have the signature:
+
+              to_unicode(s, encoding=None)
+
+            It should accept a string of type str and an optional encoding
+            name and return a string of type unicode.  Defaults to calling
+            Python's built-in function unicode() using the package encoding
+            and decode-errors defaults.
+
         """
-        if decode_errors is None:
-            decode_errors = defaults.DECODE_ERRORS
-
-        if encoding is None:
-            encoding = sys.getdefaultencoding()
-
         if extension is None:
             extension = defaults.TEMPLATE_EXTENSION
 
-        self.decode_errors = decode_errors
-        self.encoding = encoding
-        self.extension = extension
+        if file_encoding is None:
+            file_encoding = defaults.FILE_ENCODING
 
-    # TODO: eliminate redundancy with the Renderer class's unicode code.
+        if to_unicode is None:
+            to_unicode = _to_unicode
+
+        self.extension = extension
+        self.file_encoding = file_encoding
+        self.to_unicode = to_unicode
+
     def unicode(self, s, encoding=None):
         """
-        Call Python's built-in function unicode(), and return the result.
+        Convert a string to unicode using the given encoding, and return it.
 
-        For unicode strings (or unicode subclasses), this function calls
-        Python's unicode() without the encoding and errors arguments.
-        Thus, unlike Python's built-in unicode(), it is okay to pass unicode
-        strings to this function.  (Passing a unicode string to Python's
-        unicode() with the encoding argument throws the following
-        error: "TypeError: decoding Unicode is not supported.")
+        This function uses the underlying to_unicode attribute.
+
+        Arguments:
+
+          s: a basestring instance to convert to unicode.  Unlike Python's
+            built-in unicode() function, it is okay to pass unicode strings
+            to this function.  (Passing a unicode string to Python's unicode()
+            with the encoding argument throws the error, "TypeError: decoding
+            Unicode is not supported.")
+
+          encoding: the encoding to pass to the to_unicode attribute.
+            Defaults to None.
 
         """
         if isinstance(s, unicode):
             return unicode(s)
 
-        if encoding is None:
-            encoding = self.encoding
-
-        return unicode(s, encoding, self.decode_errors)
+        return self.to_unicode(s, encoding)
 
     def read(self, path, encoding=None):
         """
@@ -78,6 +98,9 @@ class Loader(object):
         """
         with open(path, 'r') as f:
             text = f.read()
+
+        if encoding is None:
+            encoding = self.file_encoding
 
         return self.unicode(text, encoding)
 

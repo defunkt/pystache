@@ -5,20 +5,12 @@ This module provides a Renderer class to render templates.
 
 """
 
-import cgi
 import os
-import sys
 
 from . import defaults
 from .context import Context
 from .loader import Loader
 from .renderengine import RenderEngine
-
-
-# The quote=True argument causes double quotes to be escaped,
-# but not single quotes:
-#   http://docs.python.org/library/cgi.html#cgi.escape
-DEFAULT_ESCAPE = lambda s: cgi.escape(s, quote=True)
 
 
 class Renderer(object):
@@ -40,6 +32,7 @@ class Renderer(object):
 
     """
 
+    # TODO: rename default_encoding to string_encoding.
     def __init__(self, file_encoding=None, default_encoding=None,
                  decode_errors=None, search_dirs=None, file_extension=None,
                  escape=None, partials=None):
@@ -82,7 +75,7 @@ class Renderer(object):
             to unicode any strings of type str encountered during the
             rendering process.  The name will be passed as the encoding
             argument to the built-in function unicode().  Defaults to the
-            encoding name returned by sys.getdefaultencoding().
+            package default.
 
           decode_errors: the string to pass as the errors argument to the
             built-in function unicode() when converting str strings to
@@ -102,10 +95,10 @@ class Renderer(object):
             decode_errors = defaults.DECODE_ERRORS
 
         if default_encoding is None:
-            default_encoding = sys.getdefaultencoding()
+            default_encoding = defaults.STRING_ENCODING
 
         if escape is None:
-            escape = DEFAULT_ESCAPE
+            escape = defaults.TAG_ESCAPE
 
         # This needs to be after we set the default default_encoding.
         if file_encoding is None:
@@ -121,6 +114,7 @@ class Renderer(object):
             search_dirs = [search_dirs]
 
         self.decode_errors = decode_errors
+        # TODO: rename this attribute to string_encoding.
         self.default_encoding = default_encoding
         self.escape = escape
         self.file_encoding = file_encoding
@@ -152,7 +146,7 @@ class Renderer(object):
         """
         return unicode(self.escape(self._to_unicode_soft(s)))
 
-    def unicode(self, s):
+    def unicode(self, s, encoding=None):
         """
         Convert a string to unicode, using default_encoding and decode_errors.
 
@@ -165,17 +159,20 @@ class Renderer(object):
               TypeError: decoding Unicode is not supported
 
         """
+        if encoding is None:
+            encoding = self.default_encoding
+
         # TODO: Wrap UnicodeDecodeErrors with a message about setting
         # the default_encoding and decode_errors attributes.
-        return unicode(s, self.default_encoding, self.decode_errors)
+        return unicode(s, encoding, self.decode_errors)
 
     def _make_loader(self):
         """
         Create a Loader instance using current attributes.
 
         """
-        return Loader(encoding=self.file_encoding, decode_errors=self.decode_errors,
-                      extension=self.file_extension)
+        return Loader(file_encoding=self.file_encoding, extension=self.file_extension,
+                      to_unicode=self.unicode)
 
     def _make_load_template(self):
         """
