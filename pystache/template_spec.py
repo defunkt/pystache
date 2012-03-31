@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-This module supports specifying custom template information per view.
+This module supports customized (or special/specified) template loading.
 
 """
 
@@ -13,21 +13,24 @@ from .locator import Locator
 from .renderer import Renderer
 
 
+# TODO: finish the class docstring.
 class TemplateSpec(object):
 
     """
-    A mixin for specifying custom template information.
+    A mixin or interface for specifying custom template information.
 
-    Subclass this class only if template customizations are needed.
+    The "spec" in TemplateSpec can be taken to mean that the template
+    information is either "specified" or "special."
 
-    The following attributes allow one to customize/override template
-    information on a per View basis.  A None value means to use default
-    behavior and perform no customization.  All attributes are initially
-    set to None.
+    A view should subclass this class only if customized template loading
+    is needed.  The following attributes allow one to customize/override
+    template information on a per view basis.  A None value means to use
+    default behavior for that value and perform no customization.  All
+    attributes are initialized to None.
 
     Attributes:
 
-      template: the template to use, as a unicode string.
+      template: the template as a string.
 
       template_rel_path: the path to the template file, relative to the
         directory containing the module defining the class.
