@@ -88,6 +88,9 @@ or alternatively (using setup.cfg)::
 
     python setup.py nosetests
 
+To run a subset of the tests, you can use this pattern, for example: ::
+
+    nosetests --tests tests/test_context.py:GetValueTests.test_dictionary__key_present
 
 Mailing List
 ==================
