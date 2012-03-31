@@ -13,7 +13,7 @@ from examples.simple import Simple
 from examples.complex_view import ComplexView
 from examples.lambdas import Lambdas
 from examples.inverted import Inverted, InvertedLists
-from pystache import CustomizedTemplate as Template
+from pystache import TemplateSpec as Template
 from pystache import Renderer
 from pystache import View
 from pystache.template_spec import CustomLoader
@@ -255,8 +255,8 @@ class CustomLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
 # TODO: rename the get_template() tests to test load().
 # TODO: condense, reorganize, and rename the tests so that it is
 #   clear whether we have full test coverage (e.g. organized by
-#   CustomizedTemplate attributes or something).
-class CustomizedTemplateTests(unittest.TestCase):
+#   TemplateSpec attributes or something).
+class TemplateSpecTests(unittest.TestCase):
 
     # TODO: rename this method to _make_loader().
     def _make_locator(self):

@@ -13,8 +13,7 @@ from .locator import Locator
 from .renderer import Renderer
 
 
-# TODO: consider renaming this to something like Template or TemplateInfo.
-class CustomizedTemplate(object):
+class TemplateSpec(object):
 
     """
     A mixin for specifying custom template information.
@@ -52,7 +51,7 @@ class CustomizedTemplate(object):
 
 
 # TODO: remove this class.
-class View(CustomizedTemplate):
+class View(TemplateSpec):
 
     _renderer = None
 
@@ -185,13 +184,13 @@ class CustomLoader(object):
 
     def load(self, custom):
         """
-        Find and return the template associated to a CustomizedTemplate instance.
+        Find and return the template associated to a TemplateSpec instance.
 
         Returns the template as a unicode string.
 
         Arguments:
 
-          custom: a CustomizedTemplate instance.
+          custom: a TemplateSpec instance.
 
         """
         if custom.template is not None:

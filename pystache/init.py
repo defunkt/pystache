@@ -6,11 +6,11 @@ This module contains the initialization logic called by __init__.py.
 """
 
 from .template_spec import View
-from .template_spec import  CustomizedTemplate
+from .template_spec import  TemplateSpec
 from .renderer import Renderer
 
 
-__all__ = ['render', 'Renderer', 'View', 'CustomizedTemplate']
+__all__ = ['render', 'Renderer', 'View', 'TemplateSpec']
 
 
 def render(template, context=None, **kwargs):
