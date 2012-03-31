@@ -14,8 +14,8 @@ The `mustache(5)`_ man page provides a good introduction to Mustache's
 syntax.  For a more complete (and more current) description of Mustache's
 behavior, see the official `Mustache spec`_.
 
-Pystache is `semantically versioned`_.  This version of Pystache passes all
-tests in `version 1.0.3`_ of the spec.
+Pystache is `semantically versioned`_ and can be found on PyPI_.  This
+version of Pystache passes all tests in `version 1.0.3`_ of the spec.
 
 Logo: `David Phillips`_
 
@@ -133,6 +133,7 @@ Author
 .. _Mustache spec: https://github.com/mustache/spec
 .. _mustache(5): http://mustache.github.com/mustache.5.html
 .. _nose: http://somethingaboutorange.com/mrl/projects/nose/0.11.1/testing.html
+.. _PyPI: http://pypi.python.org/pypi/pystache
 .. _Pystache: https://github.com/defunkt/pystache
 .. _semantically versioned: http://semver.org
 .. _version 1.0.3: https://github.com/mustache/spec/tree/48c933b0bb780875acbfd15816297e263c53d6f7
