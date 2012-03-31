@@ -32,8 +32,8 @@ class Renderer(object):
 
     """
 
-    # TODO: rename default_encoding to string_encoding.
-    def __init__(self, file_encoding=None, default_encoding=None,
+    # TODO: file_encoding should default to the package default.
+    def __init__(self, file_encoding=None, string_encoding=None,
                  decode_errors=None, search_dirs=None, file_extension=None,
                  escape=None, partials=None):
         """
@@ -66,12 +66,13 @@ class Renderer(object):
             escape function, for example.  One may also wish to consider
             using markupsafe's escape function: markupsafe.escape().
 
-          file_encoding: the name of the encoding of all template files.
-            This encoding is used when reading and converting any template
-            files to unicode.  All templates are converted to unicode prior
-            to parsing.  Defaults to the default_encoding argument.
+          file_encoding: the name of the default encoding to use when reading
+            template files.  All templates are converted to unicode prior
+            to parsing.  This encoding is used when reading template files
+            and converting them to unicode.  Defaults to the value of the
+            string_encoding argument.
 
-          default_encoding: the name of the encoding to use when converting
+          string_encoding: the name of the encoding to use when converting
             to unicode any strings of type str encountered during the
             rendering process.  The name will be passed as the encoding
             argument to the built-in function unicode().  Defaults to the
@@ -94,15 +95,15 @@ class Renderer(object):
         if decode_errors is None:
             decode_errors = defaults.DECODE_ERRORS
 
-        if default_encoding is None:
-            default_encoding = defaults.STRING_ENCODING
+        if string_encoding is None:
+            string_encoding = defaults.STRING_ENCODING
 
         if escape is None:
             escape = defaults.TAG_ESCAPE
 
-        # This needs to be after we set the default default_encoding.
+        # This needs to be after we set the default string_encoding.
         if file_encoding is None:
-            file_encoding = default_encoding
+            file_encoding = string_encoding
 
         if file_extension is None:
             file_extension = defaults.TEMPLATE_EXTENSION
@@ -114,8 +115,7 @@ class Renderer(object):
             search_dirs = [search_dirs]
 
         self.decode_errors = decode_errors
-        # TODO: rename this attribute to string_encoding.
-        self.default_encoding = default_encoding
+        self.string_encoding = string_encoding
         self.escape = escape
         self.file_encoding = file_encoding
         self.file_extension = file_extension
@@ -148,7 +148,7 @@ class Renderer(object):
 
     def unicode(self, s, encoding=None):
         """
-        Convert a string to unicode, using default_encoding and decode_errors.
+        Convert a string to unicode, using string_encoding and decode_errors.
 
         Raises:
 
@@ -160,10 +160,10 @@ class Renderer(object):
 
         """
         if encoding is None:
-            encoding = self.default_encoding
+            encoding = self.string_encoding
 
         # TODO: Wrap UnicodeDecodeErrors with a message about setting
-        # the default_encoding and decode_errors attributes.
+        # the string_encoding and decode_errors attributes.
         return unicode(s, encoding, self.decode_errors)
 
     def _make_loader(self):
@@ -280,7 +280,7 @@ class Renderer(object):
         Returns the rendering as a unicode string.
 
         Prior to rendering, templates of type str are converted to unicode
-        using the default_encoding and decode_errors attributes.  See the
+        using the string_encoding and decode_errors attributes.  See the
         constructor docstring for more information.
 
         Arguments:

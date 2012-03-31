@@ -54,21 +54,21 @@ class RendererInitTestCase(unittest.TestCase):
         renderer = Renderer(escape=escape)
         self.assertEquals(renderer.escape("bar"), "**bar")
 
-    def test_default_encoding__default(self):
+    def test_string_encoding__default(self):
         """
         Check the default value.
 
         """
         renderer = Renderer()
-        self.assertEquals(renderer.default_encoding, sys.getdefaultencoding())
+        self.assertEquals(renderer.string_encoding, sys.getdefaultencoding())
 
-    def test_default_encoding(self):
+    def test_string_encoding(self):
         """
         Check that the constructor sets the attribute correctly.
 
         """
-        renderer = Renderer(default_encoding="foo")
-        self.assertEquals(renderer.default_encoding, "foo")
+        renderer = Renderer(string_encoding="foo")
+        self.assertEquals(renderer.string_encoding, "foo")
 
     def test_decode_errors__default(self):
         """
@@ -92,7 +92,7 @@ class RendererInitTestCase(unittest.TestCase):
 
         """
         renderer = Renderer()
-        self.assertEquals(renderer.file_encoding, renderer.default_encoding)
+        self.assertEquals(renderer.file_encoding, renderer.string_encoding)
 
     def test_file_encoding(self):
         """
@@ -152,18 +152,18 @@ class RendererTestCase(unittest.TestCase):
 
     ## Test Renderer.unicode().
 
-    def test_unicode__default_encoding(self):
+    def test_unicode__string_encoding(self):
         """
-        Test that the default_encoding attribute is respected.
+        Test that the string_encoding attribute is respected.
 
         """
         renderer = Renderer()
         s = "é"
 
-        renderer.default_encoding = "ascii"
+        renderer.string_encoding = "ascii"
         self.assertRaises(UnicodeDecodeError, renderer.unicode, s)
 
-        renderer.default_encoding = "utf-8"
+        renderer.string_encoding = "utf-8"
         self.assertEquals(renderer.unicode(s), u"é")
 
     def test_unicode__decode_errors(self):
@@ -172,7 +172,7 @@ class RendererTestCase(unittest.TestCase):
 
         """
         renderer = Renderer()
-        renderer.default_encoding = "ascii"
+        renderer.string_encoding = "ascii"
         s = "déf"
 
         renderer.decode_errors = "ignore"
@@ -289,12 +289,12 @@ class RendererTestCase(unittest.TestCase):
         renderer = Renderer()
         template = "déf"
 
-        # Check that decode_errors and default_encoding are both respected.
+        # Check that decode_errors and string_encoding are both respected.
         renderer.decode_errors = 'ignore'
-        renderer.default_encoding = 'ascii'
+        renderer.string_encoding = 'ascii'
         self.assertEquals(renderer.render(template), "df")
 
-        renderer.default_encoding = 'utf_8'
+        renderer.string_encoding = 'utf_8'
         self.assertEquals(renderer.render(template), u"déf")
 
     def test_make_load_partial(self):
@@ -387,7 +387,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
             pass
 
         renderer = Renderer()
-        renderer.default_encoding = 'ascii'
+        renderer.string_encoding = 'ascii'
         renderer.partials = {'str': 'foo', 'subclass': MyUnicode('abc')}
 
         engine = renderer._make_render_engine()
@@ -439,7 +439,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
 
         """
         renderer = Renderer()
-        renderer.default_encoding = 'ascii'
+        renderer.string_encoding = 'ascii'
 
         engine = renderer._make_render_engine()
         literal = engine.literal
@@ -452,7 +452,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
 
         """
         renderer = Renderer()
-        renderer.default_encoding = 'ascii'
+        renderer.string_encoding = 'ascii'
 
         engine = renderer._make_render_engine()
         literal = engine.literal
@@ -520,7 +520,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
 
         """
         renderer = Renderer()
-        renderer.default_encoding = 'ascii'
+        renderer.string_encoding = 'ascii'
 
         engine = renderer._make_render_engine()
         escape = engine.escape
