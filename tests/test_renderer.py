@@ -54,22 +54,6 @@ class RendererInitTestCase(unittest.TestCase):
         renderer = Renderer(escape=escape)
         self.assertEquals(renderer.escape("bar"), "**bar")
 
-    def test_string_encoding__default(self):
-        """
-        Check the default value.
-
-        """
-        renderer = Renderer()
-        self.assertEquals(renderer.string_encoding, sys.getdefaultencoding())
-
-    def test_string_encoding(self):
-        """
-        Check that the constructor sets the attribute correctly.
-
-        """
-        renderer = Renderer(string_encoding="foo")
-        self.assertEquals(renderer.string_encoding, "foo")
-
     def test_decode_errors__default(self):
         """
         Check the default value.
@@ -141,6 +125,22 @@ class RendererInitTestCase(unittest.TestCase):
         """
         renderer = Renderer(search_dirs=['foo'])
         self.assertEquals(renderer.search_dirs, ['foo'])
+
+    def test_string_encoding__default(self):
+        """
+        Check the default value.
+
+        """
+        renderer = Renderer()
+        self.assertEquals(renderer.string_encoding, sys.getdefaultencoding())
+
+    def test_string_encoding(self):
+        """
+        Check that the constructor sets the attribute correctly.
+
+        """
+        renderer = Renderer(string_encoding="foo")
+        self.assertEquals(renderer.string_encoding, "foo")
 
 
 class RendererTestCase(unittest.TestCase):

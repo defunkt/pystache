@@ -5,8 +5,6 @@ This module provides a Renderer class to render templates.
 
 """
 
-import os
-
 from . import defaults
 from .context import Context
 from .loader import Loader
@@ -32,7 +30,6 @@ class Renderer(object):
 
     """
 
-    # TODO: file_encoding should default to the package default.
     def __init__(self, file_encoding=None, string_encoding=None,
                  decode_errors=None, search_dirs=None, file_extension=None,
                  escape=None, partials=None):
@@ -53,6 +50,10 @@ class Renderer(object):
             the file system -- using relevant instance attributes like
             search_dirs, file_encoding, etc.
 
+          decode_errors: the string to pass as the errors argument to the
+            built-in function unicode() when converting str strings to
+            unicode.  Defaults to the package default.
+
           escape: the function used to escape variable tag values when
             rendering a template.  The function should accept a unicode
             string (or subclass of unicode) and return an escaped string
@@ -69,8 +70,16 @@ class Renderer(object):
           file_encoding: the name of the default encoding to use when reading
             template files.  All templates are converted to unicode prior
             to parsing.  This encoding is used when reading template files
-            and converting them to unicode.  Defaults to the value of the
-            string_encoding argument.
+            and converting them to unicode.  Defaults to the package default.
+
+          file_extension: the template file extension.  Pass False for no
+            extension (i.e. to use extensionless template files).
+            Defaults to the package default.
+
+          search_dirs: the list of directories in which to search for
+            templates when loading a template by name.  If given a string,
+            the method interprets the string as a single directory.
+            Defaults to the package default.
 
           string_encoding: the name of the encoding to use when converting
             to unicode any strings of type str encountered during the
@@ -78,49 +87,35 @@ class Renderer(object):
             argument to the built-in function unicode().  Defaults to the
             package default.
 
-          decode_errors: the string to pass as the errors argument to the
-            built-in function unicode() when converting str strings to
-            unicode.  Defaults to the package default.
-
-          search_dirs: the list of directories in which to search for
-            templates when loading a template by name.  Defaults to the
-            current working directory.  If given a string, the string is
-            interpreted as a single directory.
-
-          file_extension: the template file extension.  Pass False for no
-            extension (i.e. to use extensionless template files).
-            Defaults to the package default.
-
         """
         if decode_errors is None:
             decode_errors = defaults.DECODE_ERRORS
 
-        if string_encoding is None:
-            string_encoding = defaults.STRING_ENCODING
-
         if escape is None:
             escape = defaults.TAG_ESCAPE
 
-        # This needs to be after we set the default string_encoding.
         if file_encoding is None:
-            file_encoding = string_encoding
+            file_encoding = defaults.FILE_ENCODING
 
         if file_extension is None:
             file_extension = defaults.TEMPLATE_EXTENSION
 
         if search_dirs is None:
-            search_dirs = os.curdir  # i.e. "."
+            search_dirs = defaults.SEARCH_DIRS
+
+        if string_encoding is None:
+            string_encoding = defaults.STRING_ENCODING
 
         if isinstance(search_dirs, basestring):
             search_dirs = [search_dirs]
 
         self.decode_errors = decode_errors
-        self.string_encoding = string_encoding
         self.escape = escape
         self.file_encoding = file_encoding
         self.file_extension = file_extension
         self.partials = partials
         self.search_dirs = search_dirs
+        self.string_encoding = string_encoding
 
     def _to_unicode_soft(self, s):
         """

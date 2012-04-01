@@ -9,6 +9,7 @@ does not otherwise specify a value.
 """
 
 import cgi
+import os
 import sys
 
 
@@ -29,6 +30,10 @@ STRING_ENCODING = sys.getdefaultencoding()
 # This default takes precedence over the STRING_ENCODING default for
 # strings that arise from files.
 FILE_ENCODING = sys.getdefaultencoding()
+
+# The starting list of directories in which to search for templates when
+# loading a template by file name.
+SEARCH_DIRS = [os.curdir]  # i.e. ['.']
 
 # The escape function to apply to strings that require escaping when
 # rendering templates (e.g. for tags enclosed in double braces).
