@@ -33,7 +33,10 @@ class TestSimple(unittest.TestCase, AssertStringMixin):
     def test_callables(self):
         view = Lambdas()
         view.template = '{{#replace_foo_with_bar}}foo != bar. oh, it does!{{/replace_foo_with_bar}}'
-        self.assertEquals(view.render(), 'bar != bar. oh, it does!')
+
+        renderer = Renderer()
+        expected = renderer.render(view)
+        self.assertString(expected, u'bar != bar. oh, it does!')
 
     def test_rendering_partial(self):
         view = TemplatePartial()

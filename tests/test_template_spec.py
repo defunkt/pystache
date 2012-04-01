@@ -9,6 +9,7 @@ import os.path
 import sys
 import unittest
 
+import examples
 from examples.simple import Simple
 from examples.complex import Complex
 from examples.lambdas import Lambdas
@@ -24,6 +25,9 @@ from .common import AssertStringMixin
 from .common import DATA_DIR
 from .data.views import SampleView
 from .data.views import NonAscii
+
+
+EXAMPLES_DIR = os.path.dirname(examples.__file__)
 
 
 class Thing(object):
@@ -94,29 +98,41 @@ class ViewTestCase(unittest.TestCase, AssertStringMixin):
 </ul>""")
 
     def test_higher_order_replace(self):
-        view = Lambdas()
-        self.assertEquals(view.render(),
-                          'bar != bar. oh, it does!')
+        renderer = Renderer()
+        expected = renderer.render(Lambdas())
+        self.assertEquals(expected, 'bar != bar. oh, it does!')
 
     def test_higher_order_rot13(self):
         view = Lambdas()
         view.template = '{{#rot13}}abcdefghijklm{{/rot13}}'
-        self.assertEquals(view.render(), 'nopqrstuvwxyz')
+
+        renderer = Renderer()
+        expected = renderer.render(view)
+        self.assertString(expected, u'nopqrstuvwxyz')
 
     def test_higher_order_lambda(self):
         view = Lambdas()
         view.template = '{{#sort}}zyxwvutsrqponmlkjihgfedcba{{/sort}}'
-        self.assertEquals(view.render(), 'abcdefghijklmnopqrstuvwxyz')
+
+        renderer = Renderer()
+        expected = renderer.render(view)
+        self.assertString(expected, u'abcdefghijklmnopqrstuvwxyz')
 
     def test_partials_with_lambda(self):
         view = Lambdas()
         view.template = '{{>partial_with_lambda}}'
-        self.assertEquals(view.render(), 'nopqrstuvwxyz')
+
+        renderer = Renderer(search_dirs=EXAMPLES_DIR)
+        expected = renderer.render(view)
+        self.assertEquals(expected, u'nopqrstuvwxyz')
 
     def test_hierarchical_partials_with_lambdas(self):
         view = Lambdas()
         view.template = '{{>partial_with_partial_and_lambda}}'
-        self.assertEquals(view.render(), 'nopqrstuvwxyznopqrstuvwxyz')
+
+        renderer = Renderer(search_dirs=EXAMPLES_DIR)
+        expected = renderer.render(view)
+        self.assertString(expected, u'nopqrstuvwxyznopqrstuvwxyz')
 
     def test_inverted(self):
         renderer = Renderer()
