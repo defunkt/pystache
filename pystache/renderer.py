@@ -9,6 +9,8 @@ from . import defaults
 from .context import Context
 from .loader import Loader
 from .renderengine import RenderEngine
+from .template_spec import SpecLoader
+from .template_spec import TemplateSpec
 
 
 class Renderer(object):
@@ -250,7 +252,17 @@ class Renderer(object):
 
         """
         loader = self._make_loader()
-        template = loader.load_object(obj)
+
+        # TODO: consider an approach that does not require using an if
+        #   block here.  For example, perhaps this class's loader can be
+        #   a SpecLoader in all cases, and the SpecLoader instance can
+        #   check the object's type.  Or perhaps Loader and SpecLoader
+        #   can be refactored to implement the same interface.
+        if isinstance(obj, TemplateSpec):
+            loader = SpecLoader(loader)
+            template = loader.load(obj)
+        else:
+            template = loader.load_object(obj)
 
         context = [obj] + list(context)
 
@@ -299,8 +311,8 @@ class Renderer(object):
             all items in the *context list.
 
         """
-        if not isinstance(template, basestring):
-            # Then we assume the template is an object.
-            return self._render_object(template, *context, **kwargs)
+        if isinstance(template, basestring):
+            return self._render_string(template, *context, **kwargs)
+        # Otherwise, we assume the template is an object.
 
-        return self._render_string(template, *context, **kwargs)
+        return self._render_object(template, *context, **kwargs)
