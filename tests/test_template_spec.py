@@ -10,7 +10,7 @@ import sys
 import unittest
 
 from examples.simple import Simple
-from examples.complex_view import ComplexView
+from examples.complex import Complex
 from examples.lambdas import Lambdas
 from examples.inverted import Inverted, InvertedLists
 from pystache import TemplateSpec as Template
@@ -84,8 +84,8 @@ class ViewTestCase(unittest.TestCase, AssertStringMixin):
 
     def test_complex(self):
         renderer = Renderer()
-        expected = renderer.render(ComplexView())
-        self.assertEquals(expected, """\
+        expected = renderer.render(Complex())
+        self.assertString(expected, u"""\
 <h1>Colors</h1>
 <ul>
 <li><strong>red</strong></li>

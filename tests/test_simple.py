@@ -3,7 +3,7 @@ import unittest
 import pystache
 from pystache import Renderer
 from examples.nested_context import NestedContext
-from examples.complex_view import ComplexView
+from examples.complex import Complex
 from examples.lambdas import Lambdas
 from examples.template_partial import TemplatePartial
 from examples.simple import Simple
@@ -20,7 +20,7 @@ class TestSimple(unittest.TestCase, AssertStringMixin):
 
     def test_looping_and_negation_context(self):
         template = '{{#item}}{{header}}: {{name}} {{/item}}{{^item}} Shouldnt see me{{/item}}'
-        context = ComplexView()
+        context = Complex()
 
         renderer = Renderer()
         expected = renderer.render(template, context)

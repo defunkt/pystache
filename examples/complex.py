@@ -1,4 +1,4 @@
-class ComplexView(object):
+class Complex(object):
 
     def header(self):
         return "Colors"
