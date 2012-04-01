@@ -76,8 +76,8 @@ class Renderer(object):
             extension (i.e. to use extensionless template files).
             Defaults to the package default.
 
-          search_dirs: the list of directories in which to search for
-            templates when loading a template by name.  If given a string,
+          search_dirs: the list of directories in which to search when
+            loading a template by name or file name.  If given a string,
             the method interprets the string as a single directory.
             Defaults to the package default.
 
@@ -167,7 +167,7 @@ class Renderer(object):
 
         """
         return Loader(file_encoding=self.file_encoding, extension=self.file_extension,
-                      to_unicode=self.unicode)
+                      to_unicode=self.unicode, search_dirs=self.search_dirs)
 
     def _make_load_template(self):
         """
@@ -177,7 +177,7 @@ class Renderer(object):
         loader = self._make_loader()
 
         def load_template(template_name):
-            return loader.load_name(template_name, self.search_dirs)
+            return loader.load_name(template_name)
 
         return load_template
 
@@ -250,7 +250,7 @@ class Renderer(object):
 
         """
         loader = self._make_loader()
-        template = loader.load_object(obj, self.search_dirs)
+        template = loader.load_object(obj)
 
         context = [obj] + list(context)
 

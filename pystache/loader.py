@@ -31,7 +31,8 @@ class Loader(object):
 
     """
 
-    def __init__(self, file_encoding=None, extension=None, to_unicode=None):
+    def __init__(self, file_encoding=None, extension=None, to_unicode=None,
+                 search_dirs=None):
         """
         Construct a template loader instance.
 
@@ -43,6 +44,9 @@ class Loader(object):
 
           file_encoding: the name of the encoding to use when converting file
             contents to unicode.  Defaults to the package default.
+
+          search_dirs: the list of directories in which to search when loading
+            a template by name or file name.  Defaults to the package default.
 
           to_unicode: the function to use when converting strings of type
             str to unicode.  The function should have the signature:
@@ -61,11 +65,16 @@ class Loader(object):
         if file_encoding is None:
             file_encoding = defaults.FILE_ENCODING
 
+        if search_dirs is None:
+            search_dirs = defaults.SEARCH_DIRS
+
         if to_unicode is None:
             to_unicode = _to_unicode
 
         self.extension = extension
         self.file_encoding = file_encoding
+        # TODO: unit test setting this attribute.
+        self.search_dirs = search_dirs
         self.to_unicode = to_unicode
 
     def _make_locator(self):
@@ -107,9 +116,8 @@ class Loader(object):
 
         return self.unicode(text, encoding)
 
-    # TODO: consider passing search_dirs in the constructor.
     # TODO: unit-test this method.
-    def load_name(self, name, search_dirs):
+    def load_name(self, name):
         """
         Find and return the template with the given name.
 
@@ -122,13 +130,13 @@ class Loader(object):
         """
         locator = self._make_locator()
 
-        path = locator.find_name(search_dirs, name)
+        # TODO: change the order of these arguments.
+        path = locator.find_name(self.search_dirs, name)
 
         return self.read(path)
 
-    # TODO: consider passing search_dirs in the constructor.
     # TODO: unit-test this method.
-    def load_object(self, obj, search_dirs):
+    def load_object(self, obj):
         """
         Find and return the template associated to the given object.
 
@@ -141,6 +149,7 @@ class Loader(object):
         """
         locator = self._make_locator()
 
-        path = locator.find_object(search_dirs, obj)
+        # TODO: change the order of these arguments.
+        path = locator.find_object(self.search_dirs, obj)
 
         return self.read(path)
