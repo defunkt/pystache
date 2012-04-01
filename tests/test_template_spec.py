@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-Unit tests of view.py.
+Unit tests for template_spec.py.
 
 """
 

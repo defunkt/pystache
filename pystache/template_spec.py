@@ -141,27 +141,28 @@ class SpecLoader(object):
         self.loader = loader
         self.search_dirs = search_dirs
 
-    def _find_relative(self, view):
+    def _find_relative(self, spec):
         """
-        Return the relative template path as a (dir, file_name) pair.
+        Return the path to the template as a relative (dir, file_name) pair.
+
+        The directory returned is relative to the directory containing the
+        class definition of the given object.  The method returns None for
+        this directory if the directory is unknown without first searching
+        the search directories.
 
         """
-        if view.template_rel_path is not None:
-            return os.path.split(view.template_rel_path)
+        if spec.template_rel_path is not None:
+            return os.path.split(spec.template_rel_path)
 
-        template_dir = view.template_rel_directory
+        # Otherwise, determine the file name separately.
+        locator = self.loader._make_locator()
 
-        # Otherwise, we don't know the directory.
+        template_name = (spec.template_name if spec.template_name is not None else
+                         locator.make_template_name(spec))
 
-        # TODO: share code with the loader attribute here.
-        locator = Locator(extension=self.loader.extension)
+        file_name = locator.make_file_name(template_name, spec.template_extension)
 
-        template_name = (view.template_name if view.template_name is not None else
-                         locator.make_template_name(view))
-
-        file_name = locator.make_file_name(template_name, view.template_extension)
-
-        return (template_dir, file_name)
+        return (spec.template_rel_directory, file_name)
 
     def _find(self, spec):
         """
@@ -170,8 +171,7 @@ class SpecLoader(object):
         """
         dir_path, file_name = self._find_relative(spec)
 
-        # TODO: share code with the loader attribute here.
-        locator = Locator(extension=self.loader.extension)
+        locator = self.loader._make_locator()
 
         if dir_path is None:
             # Then we need to search for the path.
