@@ -107,6 +107,7 @@ class Loader(object):
 
         return self.unicode(text, encoding)
 
+    # TODO: consider passing search_dirs in the constructor.
     # TODO: unit-test this method.
     def load_name(self, name, search_dirs):
         """
@@ -121,10 +122,11 @@ class Loader(object):
         """
         locator = self._make_locator()
 
-        path = locator.find_path_by_name(search_dirs, name)
+        path = locator.find_name(search_dirs, name)
 
         return self.read(path)
 
+    # TODO: consider passing search_dirs in the constructor.
     # TODO: unit-test this method.
     def load_object(self, obj, search_dirs):
         """
@@ -139,6 +141,6 @@ class Loader(object):
         """
         locator = self._make_locator()
 
-        path = locator.find_path_by_object(search_dirs, obj)
+        path = locator.find_object(search_dirs, obj)
 
         return self.read(path)

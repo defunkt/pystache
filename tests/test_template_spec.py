@@ -322,9 +322,9 @@ class TemplateSpecTests(unittest.TestCase):
         view.template_extension = 'txt'
         self._assert_template_location(view, (None, 'sample_view.txt'))
 
-    def test_get_template_path__with_directory(self):
+    def test_find__with_directory(self):
         """
-        Test get_template_path() with a view that has a directory specified.
+        Test _find() with a view that has a directory specified.
 
         """
         locator = self._make_locator()
@@ -333,14 +333,14 @@ class TemplateSpecTests(unittest.TestCase):
         view.template_rel_path = 'foo/bar.txt'
         self.assertTrue(locator.get_relative_template_location(view)[0] is not None)
 
-        actual = locator.get_template_path(view)
+        actual = locator._find(view)
         expected = os.path.abspath(os.path.join(DATA_DIR, 'foo/bar.txt'))
 
         self.assertEquals(actual, expected)
 
-    def test_get_template_path__without_directory(self):
+    def test_find__without_directory(self):
         """
-        Test get_template_path() with a view that doesn't have a directory specified.
+        Test _find() with a view that doesn't have a directory specified.
 
         """
         locator = self._make_locator()
@@ -348,7 +348,7 @@ class TemplateSpecTests(unittest.TestCase):
         view = SampleView()
         self.assertTrue(locator.get_relative_template_location(view)[0] is None)
 
-        actual = locator.get_template_path(view)
+        actual = locator._find(view)
         expected = os.path.abspath(os.path.join(DATA_DIR, 'sample_view.mustache'))
 
         self.assertEquals(actual, expected)

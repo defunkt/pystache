@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-This module supports customized (or special/specified) template loading.
+This module supports customized (aka special or specified) template loading.
 
 """
 
@@ -164,22 +164,21 @@ class SpecLoader(object):
 
         return (template_dir, file_name)
 
-    # TODO: make this private.
-    def get_template_path(self, view):
+    def _find(self, spec):
         """
-        Return the path to the view's associated template.
+        Find and return the path to the template associated to the instance.
 
         """
-        dir_path, file_name = self.get_relative_template_location(view)
+        dir_path, file_name = self.get_relative_template_location(spec)
 
         # TODO: share code with the loader attribute here.
         locator = Locator(extension=self.loader.extension)
 
         if dir_path is None:
             # Then we need to search for the path.
-            path = locator.find_path_by_object(self.search_dirs, view, file_name=file_name)
+            path = locator.find_object(self.search_dirs, spec, file_name=file_name)
         else:
-            obj_dir = locator.get_object_directory(view)
+            obj_dir = locator.get_object_directory(spec)
             path = os.path.join(obj_dir, dir_path, file_name)
 
         return path
@@ -198,6 +197,6 @@ class SpecLoader(object):
         if spec.template is not None:
             return self.loader.unicode(spec.template, spec.template_encoding)
 
-        path = self.get_template_path(spec)
+        path = self._find(spec)
 
         return self.loader.read(path, spec.template_encoding)

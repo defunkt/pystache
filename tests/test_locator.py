@@ -69,21 +69,21 @@ class LocatorTests(unittest.TestCase):
 
         self.assertEquals(locator.make_file_name('foo', template_extension='bar'), 'foo.bar')
 
-    def test_find_path_by_name(self):
+    def test_find_name(self):
         locator = Locator()
-        path = locator.find_path_by_name(search_dirs=['examples'], template_name='simple')
+        path = locator.find_name(search_dirs=['examples'], template_name='simple')
 
         self.assertEquals(os.path.basename(path), 'simple.mustache')
 
-    def test_find_path_by_name__using_list_of_paths(self):
+    def test_find_name__using_list_of_paths(self):
         locator = Locator()
-        path = locator.find_path_by_name(search_dirs=['doesnt_exist', 'examples'], template_name='simple')
+        path = locator.find_name(search_dirs=['doesnt_exist', 'examples'], template_name='simple')
 
         self.assertTrue(path)
 
-    def test_find_path_by_name__precedence(self):
+    def test_find_name__precedence(self):
         """
-        Test the order in which find_path_by_name() searches directories.
+        Test the order in which find_name() searches directories.
 
         """
         locator = Locator()
@@ -91,47 +91,47 @@ class LocatorTests(unittest.TestCase):
         dir1 = DATA_DIR
         dir2 = os.path.join(DATA_DIR, 'locator')
 
-        self.assertTrue(locator.find_path_by_name(search_dirs=[dir1], template_name='duplicate'))
-        self.assertTrue(locator.find_path_by_name(search_dirs=[dir2], template_name='duplicate'))
+        self.assertTrue(locator.find_name(search_dirs=[dir1], template_name='duplicate'))
+        self.assertTrue(locator.find_name(search_dirs=[dir2], template_name='duplicate'))
 
-        path = locator.find_path_by_name(search_dirs=[dir2, dir1], template_name='duplicate')
+        path = locator.find_name(search_dirs=[dir2, dir1], template_name='duplicate')
         dirpath = os.path.dirname(path)
         dirname = os.path.split(dirpath)[-1]
 
         self.assertEquals(dirname, 'locator')
 
-    def test_find_path_by_name__non_existent_template_fails(self):
+    def test_find_name__non_existent_template_fails(self):
         locator = Locator()
 
-        self.assertRaises(IOError, locator.find_path_by_name, search_dirs=[], template_name='doesnt_exist')
+        self.assertRaises(IOError, locator.find_name, search_dirs=[], template_name='doesnt_exist')
 
-    def test_find_path_by_object(self):
+    def test_find_object(self):
         locator = Locator()
 
         obj = SayHello()
 
-        actual = locator.find_path_by_object(search_dirs=[], obj=obj, file_name='sample_view.mustache')
+        actual = locator.find_object(search_dirs=[], obj=obj, file_name='sample_view.mustache')
         expected = os.path.abspath(os.path.join(DATA_DIR, 'sample_view.mustache'))
 
         self.assertEquals(actual, expected)
 
-    def test_find_path_by_object__none_file_name(self):
+    def test_find_object__none_file_name(self):
         locator = Locator()
 
         obj = SayHello()
 
-        actual = locator.find_path_by_object(search_dirs=[], obj=obj)
+        actual = locator.find_object(search_dirs=[], obj=obj)
         expected = os.path.abspath(os.path.join(DATA_DIR, 'say_hello.mustache'))
 
         self.assertEquals(actual, expected)
 
-    def test_find_path_by_object__none_object_directory(self):
+    def test_find_object__none_object_directory(self):
         locator = Locator()
 
         obj = None
         self.assertEquals(None, locator.get_object_directory(obj))
 
-        actual = locator.find_path_by_object(search_dirs=[DATA_DIR], obj=obj, file_name='say_hello.mustache')
+        actual = locator.find_object(search_dirs=[DATA_DIR], obj=obj, file_name='say_hello.mustache')
         expected = os.path.join(DATA_DIR, 'say_hello.mustache')
 
         self.assertEquals(actual, expected)
