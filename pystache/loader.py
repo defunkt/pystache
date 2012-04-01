@@ -130,7 +130,6 @@ class Loader(object):
         """
         locator = self._make_locator()
 
-        # TODO: change the order of these arguments.
         path = locator.find_name(name, self.search_dirs)
 
         return self.read(path)
@@ -149,7 +148,6 @@ class Loader(object):
         """
         locator = self._make_locator()
 
-        # TODO: change the order of these arguments.
         path = locator.find_object(obj, self.search_dirs)
 
         return self.read(path)
