@@ -88,8 +88,8 @@ class ViewTestCase(unittest.TestCase, AssertStringMixin):
 
     def test_complex(self):
         renderer = Renderer()
-        expected = renderer.render(Complex())
-        self.assertString(expected, u"""\
+        actual = renderer.render(Complex())
+        self.assertString(actual, u"""\
 <h1>Colors</h1>
 <ul>
 <li><strong>red</strong></li>
@@ -99,45 +99,45 @@ class ViewTestCase(unittest.TestCase, AssertStringMixin):
 
     def test_higher_order_replace(self):
         renderer = Renderer()
-        expected = renderer.render(Lambdas())
-        self.assertEquals(expected, 'bar != bar. oh, it does!')
+        actual = renderer.render(Lambdas())
+        self.assertEquals(actual, 'bar != bar. oh, it does!')
 
     def test_higher_order_rot13(self):
         view = Lambdas()
         view.template = '{{#rot13}}abcdefghijklm{{/rot13}}'
 
         renderer = Renderer()
-        expected = renderer.render(view)
-        self.assertString(expected, u'nopqrstuvwxyz')
+        actual = renderer.render(view)
+        self.assertString(actual, u'nopqrstuvwxyz')
 
     def test_higher_order_lambda(self):
         view = Lambdas()
         view.template = '{{#sort}}zyxwvutsrqponmlkjihgfedcba{{/sort}}'
 
         renderer = Renderer()
-        expected = renderer.render(view)
-        self.assertString(expected, u'abcdefghijklmnopqrstuvwxyz')
+        actual = renderer.render(view)
+        self.assertString(actual, u'abcdefghijklmnopqrstuvwxyz')
 
     def test_partials_with_lambda(self):
         view = Lambdas()
         view.template = '{{>partial_with_lambda}}'
 
         renderer = Renderer(search_dirs=EXAMPLES_DIR)
-        expected = renderer.render(view)
-        self.assertEquals(expected, u'nopqrstuvwxyz')
+        actual = renderer.render(view)
+        self.assertEquals(actual, u'nopqrstuvwxyz')
 
     def test_hierarchical_partials_with_lambdas(self):
         view = Lambdas()
         view.template = '{{>partial_with_partial_and_lambda}}'
 
         renderer = Renderer(search_dirs=EXAMPLES_DIR)
-        expected = renderer.render(view)
-        self.assertString(expected, u'nopqrstuvwxyznopqrstuvwxyz')
+        actual = renderer.render(view)
+        self.assertString(actual, u'nopqrstuvwxyznopqrstuvwxyz')
 
     def test_inverted(self):
         renderer = Renderer()
-        expected = renderer.render(Inverted())
-        self.assertString(expected, u"""one, two, three, empty list""")
+        actual = renderer.render(Inverted())
+        self.assertString(actual, u"""one, two, three, empty list""")
 
     def test_accessing_properties_on_parent_object_from_child_objects(self):
         parent = Thing()
@@ -150,8 +150,8 @@ class ViewTestCase(unittest.TestCase, AssertStringMixin):
 
     def test_inverted_lists(self):
         renderer = Renderer()
-        expected = renderer.render(InvertedLists())
-        self.assertString(expected, u"""one, two, three, empty list""")
+        actual = renderer.render(InvertedLists())
+        self.assertString(actual, u"""one, two, three, empty list""")
 
 
 class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):

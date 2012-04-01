@@ -14,9 +14,12 @@ from tests.common import AssertStringMixin
 class TestSimple(unittest.TestCase, AssertStringMixin):
 
     def test_nested_context(self):
-        view = NestedContext()
+        renderer = Renderer()
+        view = NestedContext(renderer)
         view.template = '{{#foo}}{{thing1}} and {{thing2}} and {{outer_thing}}{{/foo}}{{^foo}}Not foo!{{/foo}}'
-        self.assertEquals(view.render(), "one and foo and two")
+
+        actual = renderer.render(view)
+        self.assertString(actual, u"one and foo and two")
 
     def test_looping_and_negation_context(self):
         template = '{{#item}}{{header}}: {{name}} {{/item}}{{^item}} Shouldnt see me{{/item}}'

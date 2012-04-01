@@ -63,12 +63,18 @@ Again, Welcome!""")
 """)
 
     def test_nested_context(self):
-        self.assertEquals(NestedContext().render(), "one and foo and two")
+        renderer = Renderer()
+        actual = renderer.render(NestedContext(renderer))
+        self.assertString(actual, u"one and foo and two")
 
     def test_nested_context_is_available_in_view(self):
-        view = NestedContext()
+        renderer = Renderer()
+
+        view = NestedContext(renderer)
         view.template = '{{#herp}}{{#derp}}{{nested_context_in_view}}{{/derp}}{{/herp}}'
-        self.assertEquals(view.render(), 'it works!')
+
+        actual = renderer.render(view)
+        self.assertString(actual, u'it works!')
 
     def test_partial_in_partial_has_access_to_grand_parent_context(self):
         view = TemplatePartial(context = {'prop': 'derp'})

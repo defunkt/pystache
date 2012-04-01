@@ -1,7 +1,12 @@
-import pystache
+from pystache import TemplateSpec
 
-class NestedContext(pystache.View):
-    template_path = 'examples'
+class NestedContext(TemplateSpec):
+
+    def __init__(self, renderer):
+        self.renderer = renderer
+
+    def _context_get(self, key):
+        return self.renderer.context.get(key)
 
     def outer_thing(self):
         return "two"
@@ -16,6 +21,6 @@ class NestedContext(pystache.View):
         return [{'outer': 'car'}]
 
     def nested_context_in_view(self):
-        if self.context.get('outer') == self.context.get('inner'):
+        if self._context_get('outer') == self._context_get('inner'):
             return 'it works!'
         return ''

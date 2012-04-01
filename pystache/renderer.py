@@ -111,6 +111,7 @@ class Renderer(object):
         if isinstance(search_dirs, basestring):
             search_dirs = [search_dirs]
 
+        self._context = None
         self.decode_errors = decode_errors
         self.escape = escape
         self.file_encoding = file_encoding
@@ -118,6 +119,19 @@ class Renderer(object):
         self.partials = partials
         self.search_dirs = search_dirs
         self.string_encoding = string_encoding
+
+    # This is an experimental way of giving views access to the current context.
+    # TODO: consider another approach of not giving access via a property,
+    #   but instead letting the caller pass the initial context to the
+    #   main render() method by reference.  This approach would probably
+    #   be less likely to be misused.
+    @property
+    def context(self):
+        """
+        Return the current rendering context [experimental].
+
+        """
+        return self._context
 
     def _to_unicode_soft(self, s):
         """
@@ -240,6 +254,7 @@ class Renderer(object):
         template = self._to_unicode_hard(template)
 
         context = Context.create(*context, **kwargs)
+        self._context = context
 
         engine = self._make_render_engine()
         rendered = engine.render(template, context)
