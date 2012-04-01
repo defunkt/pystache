@@ -1,7 +1,6 @@
-import pystache
+from pystache import TemplateSpec
 
-class Inverted(pystache.View):
-    template_path = 'examples'
+class Inverted(object):
 
     def t(self):
         return True
@@ -14,11 +13,11 @@ class Inverted(pystache.View):
 
     def empty_list(self):
         return []
-        
+
     def populated_list(self):
         return ['some_value']
 
-class InvertedLists(Inverted):
+class InvertedLists(Inverted, TemplateSpec):
     template_name = 'inverted'
 
     def t(self):

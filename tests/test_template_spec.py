@@ -30,7 +30,7 @@ class Thing(object):
     pass
 
 
-class ViewTestCase(unittest.TestCase):
+class ViewTestCase(unittest.TestCase, AssertStringMixin):
 
     def test_init(self):
         """
@@ -119,8 +119,9 @@ class ViewTestCase(unittest.TestCase):
         self.assertEquals(view.render(), 'nopqrstuvwxyznopqrstuvwxyz')
 
     def test_inverted(self):
-        view = Inverted()
-        self.assertEquals(view.render(), """one, two, three, empty list""")
+        renderer = Renderer()
+        expected = renderer.render(Inverted())
+        self.assertString(expected, u"""one, two, three, empty list""")
 
     def test_accessing_properties_on_parent_object_from_child_objects(self):
         parent = Thing()
@@ -132,8 +133,9 @@ class ViewTestCase(unittest.TestCase):
         self.assertEquals(view.render(), 'derp')
 
     def test_inverted_lists(self):
-        view = InvertedLists()
-        self.assertEquals(view.render(), """one, two, three, empty list""")
+        renderer = Renderer()
+        expected = renderer.render(InvertedLists())
+        self.assertString(expected, u"""one, two, three, empty list""")
 
 
 class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
