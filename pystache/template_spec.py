@@ -141,8 +141,7 @@ class SpecLoader(object):
         self.loader = loader
         self.search_dirs = search_dirs
 
-    # TODO: make this private.
-    def get_relative_template_location(self, view):
+    def _find_relative(self, view):
         """
         Return the relative template path as a (dir, file_name) pair.
 
@@ -169,7 +168,7 @@ class SpecLoader(object):
         Find and return the path to the template associated to the instance.
 
         """
-        dir_path, file_name = self.get_relative_template_location(spec)
+        dir_path, file_name = self._find_relative(spec)
 
         # TODO: share code with the loader attribute here.
         locator = Locator(extension=self.loader.extension)

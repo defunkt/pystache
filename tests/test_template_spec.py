@@ -265,38 +265,38 @@ class TemplateSpecTests(unittest.TestCase):
 
     def _assert_template_location(self, view, expected):
         locator = self._make_locator()
-        actual = locator.get_relative_template_location(view)
+        actual = locator._find_relative(view)
         self.assertEquals(actual, expected)
 
-    def test_get_relative_template_location(self):
+    def test_find_relative(self):
         """
-        Test get_relative_template_location(): default behavior (no attributes set).
+        Test _find_relative(): default behavior (no attributes set).
 
         """
         view = SampleView()
         self._assert_template_location(view, (None, 'sample_view.mustache'))
 
-    def test_get_relative_template_location__template_rel_path__file_name_only(self):
+    def test_find_relative__template_rel_path__file_name_only(self):
         """
-        Test get_relative_template_location(): template_rel_path attribute.
+        Test _find_relative(): template_rel_path attribute.
 
         """
         view = SampleView()
         view.template_rel_path = 'template.txt'
         self._assert_template_location(view, ('', 'template.txt'))
 
-    def test_get_relative_template_location__template_rel_path__file_name_with_directory(self):
+    def test_find_relative__template_rel_path__file_name_with_directory(self):
         """
-        Test get_relative_template_location(): template_rel_path attribute.
+        Test _find_relative(): template_rel_path attribute.
 
         """
         view = SampleView()
         view.template_rel_path = 'foo/bar/template.txt'
         self._assert_template_location(view, ('foo/bar', 'template.txt'))
 
-    def test_get_relative_template_location__template_rel_directory(self):
+    def test_find_relative__template_rel_directory(self):
         """
-        Test get_relative_template_location(): template_rel_directory attribute.
+        Test _find_relative(): template_rel_directory attribute.
 
         """
         view = SampleView()
@@ -304,18 +304,18 @@ class TemplateSpecTests(unittest.TestCase):
 
         self._assert_template_location(view, ('foo', 'sample_view.mustache'))
 
-    def test_get_relative_template_location__template_name(self):
+    def test_find_relative__template_name(self):
         """
-        Test get_relative_template_location(): template_name attribute.
+        Test _find_relative(): template_name attribute.
 
         """
         view = SampleView()
         view.template_name = 'new_name'
         self._assert_template_location(view, (None, 'new_name.mustache'))
 
-    def test_get_relative_template_location__template_extension(self):
+    def test_find_relative__template_extension(self):
         """
-        Test get_relative_template_location(): template_extension attribute.
+        Test _find_relative(): template_extension attribute.
 
         """
         view = SampleView()
@@ -331,7 +331,7 @@ class TemplateSpecTests(unittest.TestCase):
 
         view = SampleView()
         view.template_rel_path = 'foo/bar.txt'
-        self.assertTrue(locator.get_relative_template_location(view)[0] is not None)
+        self.assertTrue(locator._find_relative(view)[0] is not None)
 
         actual = locator._find(view)
         expected = os.path.abspath(os.path.join(DATA_DIR, 'foo/bar.txt'))
@@ -346,7 +346,7 @@ class TemplateSpecTests(unittest.TestCase):
         locator = self._make_locator()
 
         view = SampleView()
-        self.assertTrue(locator.get_relative_template_location(view)[0] is None)
+        self.assertTrue(locator._find_relative(view)[0] is None)
 
         actual = locator._find(view)
         expected = os.path.abspath(os.path.join(DATA_DIR, 'sample_view.mustache'))
