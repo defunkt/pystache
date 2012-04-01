@@ -150,20 +150,12 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         loader = custom.loader
         self.assertEquals(loader.extension, 'mustache')
         self.assertEquals(loader.file_encoding, sys.getdefaultencoding())
+        # TODO: finish testing the other Loader attributes.
         to_unicode = loader.to_unicode
-
-        # Check search_dirs.
-        self.assertEquals(custom.search_dirs, [])
-
-    def test_init__search_dirs(self):
-        search_dirs = ['a', 'b']
-        loader = SpecLoader(search_dirs)
-
-        self.assertEquals(loader.search_dirs, ['a', 'b'])
 
     def test_init__loader(self):
         loader = Loader()
-        custom = SpecLoader([], loader=loader)
+        custom = SpecLoader(loader=loader)
 
         self.assertIs(custom.loader, loader)
 
@@ -260,8 +252,7 @@ class TemplateSpecTests(unittest.TestCase):
 
     # TODO: rename this method to _make_loader().
     def _make_locator(self):
-        locator = SpecLoader(search_dirs=[DATA_DIR])
-        return locator
+        return SpecLoader()
 
     def _assert_template_location(self, view, expected):
         locator = self._make_locator()

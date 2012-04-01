@@ -122,8 +122,8 @@ class View(TemplateSpec):
         return renderer.render(template, self.context)
 
 
-# TODO: get this class fully working with test cases, and then refactor
-#   and replace the View class.
+# TODO: add test cases for this class, and then refactor while replacing the
+#   View class.
 class SpecLoader(object):
 
     """
@@ -131,15 +131,11 @@ class SpecLoader(object):
 
     """
 
-    def __init__(self, search_dirs=None, loader=None):
+    def __init__(self, loader=None):
         if loader is None:
             loader = Loader()
 
-        if search_dirs is None:
-            search_dirs = []
-
         self.loader = loader
-        self.search_dirs = search_dirs
 
     def _find_relative(self, spec):
         """
@@ -175,7 +171,7 @@ class SpecLoader(object):
 
         if dir_path is None:
             # Then we need to search for the path.
-            path = locator.find_object(spec, self.search_dirs, file_name=file_name)
+            path = locator.find_object(spec, self.loader.search_dirs, file_name=file_name)
         else:
             obj_dir = locator.get_object_directory(spec)
             path = os.path.join(obj_dir, dir_path, file_name)
