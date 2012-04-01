@@ -175,7 +175,7 @@ class SpecLoader(object):
 
         if dir_path is None:
             # Then we need to search for the path.
-            path = locator.find_object(self.search_dirs, spec, file_name=file_name)
+            path = locator.find_object(spec, self.search_dirs, file_name=file_name)
         else:
             obj_dir = locator.get_object_directory(spec)
             path = os.path.join(obj_dir, dir_path, file_name)

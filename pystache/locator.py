@@ -123,7 +123,7 @@ class Locator(object):
 
         return path
 
-    def find_name(self, search_dirs, template_name):
+    def find_name(self, template_name, search_dirs):
         """
         Return the path to a template with the given name.
 
@@ -132,7 +132,7 @@ class Locator(object):
 
         return self._find_path_required(search_dirs, file_name)
 
-    def find_object(self, search_dirs, obj, file_name=None):
+    def find_object(self, obj, search_dirs, file_name=None):
         """
         Return the path to a template associated with the given object.
 
