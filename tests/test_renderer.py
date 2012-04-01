@@ -11,10 +11,12 @@ import sys
 import unittest
 
 from examples.simple import Simple
-from pystache.renderer import Renderer
+from pystache import Renderer
+from pystache import TemplateSpec
 from pystache.loader import Loader
 
 from .common import get_data_path
+from .common import AssertStringMixin
 from .data.views import SayHello
 
 
@@ -143,7 +145,7 @@ class RendererInitTestCase(unittest.TestCase):
         self.assertEquals(renderer.string_encoding, "foo")
 
 
-class RendererTestCase(unittest.TestCase):
+class RendererTests(unittest.TestCase, AssertStringMixin):
 
     """Test the Renderer class."""
 
@@ -352,6 +354,21 @@ class RendererTestCase(unittest.TestCase):
 
         actual = renderer.render(say_hello, to='Mars')
         self.assertEquals('Hello, Mars', actual)
+
+    def test_render__template_spec(self):
+        """
+        Test rendering a TemplateSpec instance.
+
+        """
+        renderer = Renderer()
+
+        class Spec(TemplateSpec):
+            template = "hello, {{to}}"
+            to = 'world'
+
+        spec = Spec()
+        actual = renderer.render(spec)
+        self.assertString(actual, u'hello, world')
 
     def test_render__view(self):
         """
