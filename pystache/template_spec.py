@@ -7,11 +7,10 @@ This module supports customized (aka special or specified) template loading.
 
 import os.path
 
-from .context import Context
 from .loader import Loader
-from .locator import Locator
-from .renderer import Renderer
 
+
+# TODO: consider putting TemplateSpec and SpecLoader in separate modules.
 
 # TODO: finish the class docstring.
 class TemplateSpec(object):
@@ -51,75 +50,6 @@ class TemplateSpec(object):
     template_name = None
     template_extension = None
     template_encoding = None
-
-
-# TODO: remove this class.
-class View(TemplateSpec):
-
-    _renderer = None
-
-    locator = Locator()
-
-    def __init__(self, context=None):
-        """
-        Construct a View instance.
-
-        """
-        context = Context.create(self, context)
-
-        self.context = context
-
-    def _get_renderer(self):
-        if self._renderer is None:
-            # We delay setting self._renderer until now (instead of, say,
-            # setting it in the constructor) in case the user changes after
-            # instantiation some of the attributes on which the Renderer
-            # depends.  This lets users set the template_extension attribute,
-            # etc. after View.__init__() has already been called.
-            renderer = Renderer(file_encoding=self.template_encoding,
-                                search_dirs=self.template_path,
-                                file_extension=self.template_extension)
-            self._renderer = renderer
-
-        return self._renderer
-
-    def get_template(self):
-        """
-        Return the current template after setting it, if necessary.
-
-        """
-        if not self.template:
-            template_name = self._get_template_name()
-            renderer = self._get_renderer()
-            self.template = renderer.load_template(template_name)
-
-        return self.template
-
-    def _get_template_name(self):
-        """
-        Return the name of the template to load.
-
-        If the template_name attribute is not set, then this method constructs
-        the template name from the class name as follows, for example:
-
-            TemplatePartial => template_partial
-
-        Otherwise, this method returns the template_name.
-
-        """
-        if self.template_name:
-            return self.template_name
-
-        return self.locator.make_template_name(self)
-
-    def render(self):
-        """
-        Return the view rendered using the current context.
-
-        """
-        template = self.get_template()
-        renderer = self._get_renderer()
-        return renderer.render(template, self.context)
 
 
 # TODO: add test cases for this class, and then refactor while replacing the
