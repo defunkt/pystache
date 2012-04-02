@@ -14,9 +14,8 @@ from examples.simple import Simple
 from examples.complex import Complex
 from examples.lambdas import Lambdas
 from examples.inverted import Inverted, InvertedLists
-from pystache import TemplateSpec
 from pystache import Renderer
-from pystache.spec_loader import SpecLoader
+from pystache import TemplateSpec
 from pystache.locator import Locator
 from pystache.loader import Loader
 from pystache.spec_loader import SpecLoader
