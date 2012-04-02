@@ -13,7 +13,7 @@ Key Changes:
 
 * Pystache now passes all tests in version 1.0.3 of the `Mustache spec`_. [pvande]
 * Removed View class: it is no longer necessary to subclass from View or
-  from any class to create a view.
+  from any other class to create a view.
 * Replaced Template with Renderer class: template rendering behavior can
   be modified via the Renderer constructor or by setting attributes on a Renderer instance.
 * Added TemplateSpec class: template rendering can be specified on a per-view
@@ -29,7 +29,6 @@ Features:
 * Views and Renderers accept a custom template loader.  Also, this loader
   can be a dictionary of partials. [cjerdonek]
 * Added a command-line interface. [vrde, cjerdonek]
-* Markupsafe can now be disabled after import. [cjerdonek]
 * Custom escape function can now be passed to Template constructor. [cjerdonek]
 * Template class can now handle non-ascii characters in non-unicode strings.
   Added default_encoding and decode_errors to Template constructor arguments.
@@ -38,8 +37,6 @@ Features:
 
 API changes:
 
-* Template class replaced by a Renderer class. [cjerdonek]
-* ``Loader.load_template()`` changed to ``Loader.get()``. [cjerdonek]
 * Removed output_encoding options. [cjerdonek]
 * Removed automatic use of markupsafe, if available. [cjerdonek]
 
