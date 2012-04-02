@@ -15,9 +15,9 @@ from pystache import Renderer
 from pystache import TemplateSpec
 from pystache.loader import Loader
 
-from .common import get_data_path
-from .common import AssertStringMixin
-from .data.views import SayHello
+from tests.common import get_data_path
+from tests.common import AssertStringMixin
+from tests.data.views import SayHello
 
 
 class RendererInitTestCase(unittest.TestCase):

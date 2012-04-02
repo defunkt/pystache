@@ -12,8 +12,8 @@ from examples.unicode_output import UnicodeOutput
 from examples.unicode_input import UnicodeInput
 from examples.nested_context import NestedContext
 from pystache import Renderer
-from .common import EXAMPLES_DIR
-from .common import AssertStringMixin
+from tests.common import EXAMPLES_DIR
+from tests.common import AssertStringMixin
 
 
 class TestView(unittest.TestCase, AssertStringMixin):

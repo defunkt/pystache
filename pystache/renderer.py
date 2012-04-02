@@ -6,11 +6,11 @@ This module provides a Renderer class to render templates.
 """
 
 from . import defaults
-from .context import Context
-from .loader import Loader
-from .renderengine import RenderEngine
-from .spec_loader import SpecLoader
-from .template_spec import TemplateSpec
+from pystache.context import Context
+from pystache.loader import Loader
+from pystache.renderengine import RenderEngine
+from pystache.spec_loader import SpecLoader
+from pystache.template_spec import TemplateSpec
 
 
 class Renderer(object):

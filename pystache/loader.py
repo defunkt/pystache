@@ -11,7 +11,7 @@ import os
 import sys
 
 from . import defaults
-from .locator import Locator
+from pystache.locator import Locator
 
 
 def _to_unicode(s, encoding=None):

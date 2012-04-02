@@ -9,7 +9,7 @@ import os
 import sys
 import unittest
 
-from .common import AssertStringMixin
+from tests.common import AssertStringMixin
 from pystache import defaults
 from pystache.loader import Loader
 
