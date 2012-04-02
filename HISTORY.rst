@@ -7,9 +7,22 @@ History
 This version represents a major rewrite and refactoring of the code base
 that also adds features and fixes many bugs.  All functionality and nearly
 all unit tests have been preserved.  However, some backwards incompatible
-changes have been made to the API.
+changes to the API have been made.
 
-TODO: add a section describing key changes.
+Key Changes:
+
+* Pystache now passes all tests in version 1.0.3 of the Mustache spec. [pvande]
+* Removed View class: it is no longer necessary to subclass from the View class
+  or any class to create a view.
+* Replaced Template with Renderer class: template rendering behavior can
+  be modified via the Renderer constructor or by setting attributes on a Renderer instance.
+* Added TemplateSpec class: template rendering can be specified on a per-view
+  basis by subclassing from TemplateSpec.
+* Removed circular dependencies between modules (e.g. between Template and View)
+  and introduced separation of concerns (cf. issue #13).
+* Unicode now used consistently throughout the rendering process.
+
+TODO: complete the list of key changes.
 
 Features:
 
