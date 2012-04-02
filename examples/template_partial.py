@@ -1,7 +1,12 @@
-import pystache
+from pystache import TemplateSpec
 
-class TemplatePartial(pystache.View):
-    template_path = 'examples'
+class TemplatePartial(TemplateSpec):
+
+    def __init__(self, renderer):
+        self.renderer = renderer
+
+    def _context_get(self, key):
+        return self.renderer.context.get(key)
 
     def title(self):
         return "Welcome"
@@ -13,4 +18,4 @@ class TemplatePartial(pystache.View):
         return [{'item': 'one'}, {'item': 'two'}, {'item': 'three'}]
 
     def thing(self):
-        return self.context.get('prop')
+        return self._context_get('prop')

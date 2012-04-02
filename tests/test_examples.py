@@ -12,7 +12,8 @@ from examples.unicode_output import UnicodeOutput
 from examples.unicode_input import UnicodeInput
 from examples.nested_context import NestedContext
 from pystache import Renderer
-from tests.common import AssertStringMixin
+from .common import EXAMPLES_DIR
+from .common import AssertStringMixin
 
 
 class TestView(unittest.TestCase, AssertStringMixin):
@@ -42,13 +43,19 @@ class TestView(unittest.TestCase, AssertStringMixin):
         self.assertEquals(Unescaped().render(), "<h1>Bear > Shark</h1>")
 
     def test_template_partial(self):
-        self.assertEquals(TemplatePartial().render(), """<h1>Welcome</h1>
+        renderer = Renderer(search_dirs=EXAMPLES_DIR)
+        actual = renderer.render(TemplatePartial(renderer=renderer))
+
+        self.assertString(actual, u"""<h1>Welcome</h1>
 Again, Welcome!""")
 
     def test_template_partial_extension(self):
-        view = TemplatePartial()
-        view.template_extension = 'txt'
-        self.assertString(view.render(), u"""Welcome
+        renderer = Renderer(search_dirs=EXAMPLES_DIR, file_extension='txt')
+
+        view = TemplatePartial(renderer=renderer)
+
+        actual = renderer.render(view)
+        self.assertString(actual, u"""Welcome
 -------
 
 ## Again, Welcome! ##""")
@@ -77,9 +84,13 @@ Again, Welcome!""")
         self.assertString(actual, u'it works!')
 
     def test_partial_in_partial_has_access_to_grand_parent_context(self):
-        view = TemplatePartial(context = {'prop': 'derp'})
+        renderer = Renderer(search_dirs=EXAMPLES_DIR)
+
+        view = TemplatePartial(renderer=renderer)
         view.template = '''{{>partial_in_partial}}'''
-        self.assertEquals(view.render(), 'Hi derp!')
+
+        actual = renderer.render(view, {'prop': 'derp'})
+        self.assertEquals(actual, 'Hi derp!')
 
 if __name__ == '__main__':
     unittest.main()

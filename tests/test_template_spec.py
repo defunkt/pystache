@@ -20,14 +20,12 @@ from pystache import View
 from pystache.template_spec import SpecLoader
 from pystache.locator import Locator
 from pystache.loader import Loader
+from .common import DATA_DIR
+from .common import EXAMPLES_DIR
 from .common import AssertIsMixin
 from .common import AssertStringMixin
-from .common import DATA_DIR
 from .data.views import SampleView
 from .data.views import NonAscii
-
-
-EXAMPLES_DIR = os.path.dirname(examples.__file__)
 
 
 class Thing(object):
@@ -78,13 +76,18 @@ class ViewTestCase(unittest.TestCase, AssertStringMixin):
         self.assertEquals(view.render(), "Partial: No tags...")
 
     def test_basic_method_calls(self):
-        view = Simple()
-        self.assertEquals(view.render(), "Hi pizza!")
+        renderer = Renderer()
+        actual = renderer.render(Simple())
+
+        self.assertString(actual, u"Hi pizza!")
 
     def test_non_callable_attributes(self):
         view = Simple()
         view.thing = 'Chris'
-        self.assertEquals(view.render(), "Hi Chris!")
+
+        renderer = Renderer()
+        actual = renderer.render(view)
+        self.assertEquals(actual, "Hi Chris!")
 
     def test_complex(self):
         renderer = Renderer()
@@ -143,10 +146,13 @@ class ViewTestCase(unittest.TestCase, AssertStringMixin):
         parent = Thing()
         parent.this = 'derp'
         parent.children = [Thing()]
-        view = Simple(context={'parent': parent})
+        view = Simple()
         view.template = "{{#parent}}{{#children}}{{this}}{{/children}}{{/parent}}"
 
-        self.assertEquals(view.render(), 'derp')
+        renderer = Renderer()
+        actual = renderer.render(view, {'parent': parent})
+
+        self.assertString(actual, u'derp')
 
     def test_inverted_lists(self):
         renderer = Renderer()

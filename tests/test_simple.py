@@ -8,7 +8,8 @@ from examples.lambdas import Lambdas
 from examples.template_partial import TemplatePartial
 from examples.simple import Simple
 
-from tests.common import AssertStringMixin
+from .common import EXAMPLES_DIR
+from .common import AssertStringMixin
 
 
 class TestSimple(unittest.TestCase, AssertStringMixin):
@@ -26,8 +27,8 @@ class TestSimple(unittest.TestCase, AssertStringMixin):
         context = Complex()
 
         renderer = Renderer()
-        expected = renderer.render(template, context)
-        self.assertEquals(expected, "Colors: red Colors: green Colors: blue ")
+        actual = renderer.render(template, context)
+        self.assertEquals(actual, "Colors: red Colors: green Colors: blue ")
 
     def test_empty_context(self):
         template = '{{#empty_list}}Shouldnt see me {{/empty_list}}{{^empty_list}}Should see me{{/empty_list}}'
@@ -38,16 +39,21 @@ class TestSimple(unittest.TestCase, AssertStringMixin):
         view.template = '{{#replace_foo_with_bar}}foo != bar. oh, it does!{{/replace_foo_with_bar}}'
 
         renderer = Renderer()
-        expected = renderer.render(view)
-        self.assertString(expected, u'bar != bar. oh, it does!')
+        actual = renderer.render(view)
+        self.assertString(actual, u'bar != bar. oh, it does!')
 
     def test_rendering_partial(self):
-        view = TemplatePartial()
+        renderer = Renderer(search_dirs=EXAMPLES_DIR)
+
+        view = TemplatePartial(renderer=renderer)
         view.template = '{{>inner_partial}}'
-        self.assertEquals(view.render(), 'Again, Welcome!')
+
+        actual = renderer.render(view)
+        self.assertString(actual, u'Again, Welcome!')
 
         view.template = '{{#looping}}{{>inner_partial}} {{/looping}}'
-        self.assertEquals(view.render(), '''Again, Welcome! Again, Welcome! Again, Welcome! ''')
+        actual = renderer.render(view)
+        self.assertString(actual, u"Again, Welcome! Again, Welcome! Again, Welcome! ")
 
     def test_non_existent_value_renders_blank(self):
         view = Simple()
@@ -66,9 +72,12 @@ class TestSimple(unittest.TestCase, AssertStringMixin):
         In particular, this means that trailing newlines should be removed.
 
         """
-        view = TemplatePartial()
-        view.template_extension = 'txt'
-        self.assertString(view.render(), u"""Welcome
+        renderer = Renderer(search_dirs=EXAMPLES_DIR, file_extension='txt')
+
+        view = TemplatePartial(renderer=renderer)
+
+        actual = renderer.render(view)
+        self.assertString(actual, u"""Welcome
 -------
 
 ## Again, Welcome! ##""")

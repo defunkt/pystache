@@ -7,8 +7,12 @@ Provides test-related code that can be used by all tests.
 
 import os
 
+import examples
+
 
 DATA_DIR = 'tests/data'
+EXAMPLES_DIR = os.path.dirname(examples.__file__)
+
 
 def get_data_path(file_name):
     return os.path.join(DATA_DIR, file_name)
