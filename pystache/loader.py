@@ -10,7 +10,7 @@ from __future__ import with_statement
 import os
 import sys
 
-from . import defaults
+from pystache import defaults
 from pystache.locator import Locator
 
 

@@ -5,7 +5,7 @@ This module provides a Renderer class to render templates.
 
 """
 
-from . import defaults
+from pystache import defaults
 from pystache.context import Context
 from pystache.loader import Loader
 from pystache.renderengine import RenderEngine

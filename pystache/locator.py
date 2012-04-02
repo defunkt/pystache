@@ -9,7 +9,7 @@ import os
 import re
 import sys
 
-from . import defaults
+from pystache import defaults
 
 
 class Locator(object):
