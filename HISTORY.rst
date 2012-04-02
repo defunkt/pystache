@@ -18,8 +18,8 @@ Key Changes:
   be modified via the Renderer constructor or by setting attributes on a Renderer instance.
 * Added TemplateSpec class: template rendering can be specified on a per-view
   basis by subclassing from TemplateSpec.
-* Removed circular dependencies between modules (e.g. between Template and View)
-  and introduced separation of concerns (cf. `issue #13`_).
+* Introduced separation of concerns between modules and removed circular
+  dependencies (e.g. between Template and View, cf. `issue #13`_).
 * Unicode now used consistently throughout the rendering process.
 
 TODO: complete the list of key changes.
