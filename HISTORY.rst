@@ -11,15 +11,15 @@ changes to the API have been made.
 
 Key Changes:
 
-* Pystache now passes all tests in version 1.0.3 of the Mustache spec. [pvande]
-* Removed View class: it is no longer necessary to subclass from the View class
-  or any class to create a view.
+* Pystache now passes all tests in version 1.0.3 of the `Mustache spec`_. [pvande]
+* Removed View class: it is no longer necessary to subclass from View or
+  any class to create a view.
 * Replaced Template with Renderer class: template rendering behavior can
   be modified via the Renderer constructor or by setting attributes on a Renderer instance.
 * Added TemplateSpec class: template rendering can be specified on a per-view
   basis by subclassing from TemplateSpec.
 * Removed circular dependencies between modules (e.g. between Template and View)
-  and introduced separation of concerns (cf. issue #13).
+  and introduced separation of concerns (cf. `issue #13`_).
 * Unicode now used consistently throughout the rendering process.
 
 TODO: complete the list of key changes.
@@ -102,3 +102,7 @@ Misc:
 ------------------
 
 * First release
+
+
+.. _issue #13: https://github.com/defunkt/pystache/issues/13
+.. _Mustache spec: https://github.com/mustache/spec
