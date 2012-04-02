@@ -40,7 +40,9 @@ class TestView(unittest.TestCase, AssertStringMixin):
         self._assert(Escaped(), u"<h1>Bear &gt; Shark</h1>")
 
     def test_literal(self):
-        self.assertEquals(Unescaped().render(), "<h1>Bear > Shark</h1>")
+        renderer = Renderer()
+        actual = renderer.render(Unescaped())
+        self.assertEquals(actual, "<h1>Bear > Shark</h1>")
 
     def test_template_partial(self):
         renderer = Renderer(search_dirs=EXAMPLES_DIR)
