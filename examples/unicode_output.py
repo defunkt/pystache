@@ -1,9 +1,6 @@
 # encoding: utf-8
 
-import pystache
-
-class UnicodeOutput(pystache.View):
-    template_path = 'examples'
+class UnicodeOutput(object):
 
     def name(self):
         return u'Henri Poincaré'

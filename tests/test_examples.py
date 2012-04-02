@@ -30,11 +30,14 @@ class TestView(unittest.TestCase, AssertStringMixin):
         self._assert(DoubleSection(), u"* first\n* second\n* third")
 
     def test_unicode_output(self):
-        self.assertEquals(UnicodeOutput().render(), u'<p>Name: Henri Poincaré</p>')
+        renderer = Renderer()
+        actual = renderer.render(UnicodeOutput())
+        self.assertString(actual, u'<p>Name: Henri Poincaré</p>')
 
     def test_unicode_input(self):
-        self.assertEquals(UnicodeInput().render(),
-            u'<p>If alive today, Henri Poincaré would be 156 years old.</p>')
+        renderer = Renderer()
+        actual = renderer.render(UnicodeInput())
+        self.assertString(actual, u'abcdé')
 
     def test_escaping(self):
         self._assert(Escaped(), u"<h1>Bear &gt; Shark</h1>")
@@ -42,7 +45,7 @@ class TestView(unittest.TestCase, AssertStringMixin):
     def test_literal(self):
         renderer = Renderer()
         actual = renderer.render(Unescaped())
-        self.assertEquals(actual, "<h1>Bear > Shark</h1>")
+        self.assertString(actual, u"<h1>Bear > Shark</h1>")
 
     def test_template_partial(self):
         renderer = Renderer(search_dirs=EXAMPLES_DIR)

@@ -1,7 +1,7 @@
-import pystache
+from pystache import TemplateSpec
 
-class UnicodeInput(pystache.View):
-    template_path = 'examples'
+class UnicodeInput(TemplateSpec):
+
     template_encoding = 'utf8'
 
     def age(self):
