@@ -1,8 +1,15 @@
 History
 =======
 
-Next Release (version TBD)
---------------------------
+0.5.0 (TBD)
+-----------
+
+This version represents a major rewrite and refactoring of the code base
+that also adds features and fixes many bugs.  All functionality and nearly
+all unit tests have been preserved.  However, some backwards incompatible
+changes have been made to the API.
+
+TODO: add a section describing key changes.
 
 Features:
 
