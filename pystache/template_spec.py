@@ -43,8 +43,6 @@ class TemplateSpec(object):
     """
 
     template = None
-    # TODO: remove template_path.
-    template_path = None
     template_rel_path = None
     template_rel_directory = None
     template_name = None
