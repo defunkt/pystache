@@ -138,8 +138,11 @@ class Renderer(object):
         Convert a basestring to unicode, preserving any unicode subclass.
 
         """
-        # Avoid the "double-decoding" TypeError.
-        return s if isinstance(s, unicode) else self.unicode(s)
+        # We type-check to avoid "TypeError: decoding Unicode is not supported".
+        # We avoid the Python ternary operator for Python 2.4 support.
+        if isinstance(s, unicode):
+            return s
+        return self.unicode(s)
 
     def _to_unicode_hard(self, s):
         """
