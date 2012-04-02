@@ -37,7 +37,11 @@ class ParsedTemplate(object):
         Returns: a string of type unicode.
 
         """
-        get_unicode = lambda val: val(context) if callable(val) else val
+        # We avoid use of the ternary operator for Python 2.4 support.
+        def get_unicode(val):
+            if callable(val):
+                return val(context)
+            return val
         parts = map(get_unicode, self._parse_tree)
         s = ''.join(parts)
 
