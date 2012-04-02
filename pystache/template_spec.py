@@ -52,8 +52,7 @@ class TemplateSpec(object):
     template_encoding = None
 
 
-# TODO: add test cases for this class, and then refactor while replacing the
-#   View class.
+# TODO: add test cases for this class.
 class SpecLoader(object):
 
     """

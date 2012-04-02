@@ -14,9 +14,8 @@ from examples.simple import Simple
 from examples.complex import Complex
 from examples.lambdas import Lambdas
 from examples.inverted import Inverted, InvertedLists
-from pystache import TemplateSpec as Template
+from pystache import TemplateSpec
 from pystache import Renderer
-from pystache import View
 from pystache.template_spec import SpecLoader
 from pystache.locator import Locator
 from pystache.loader import Loader
@@ -34,46 +33,38 @@ class Thing(object):
 
 class ViewTestCase(unittest.TestCase, AssertStringMixin):
 
-    def test_init(self):
+    def test_template_rel_directory(self):
         """
-        Test the constructor.
+        Test that View.template_rel_directory is respected.
 
         """
-        class TestView(View):
-            template = "foo"
-
-        view = TestView()
-        self.assertEquals(view.template, "foo")
-
-    def test_template_path(self):
-        """
-        Test that View.template_path is respected.
-
-        """
-        class Tagless(View):
+        class Tagless(TemplateSpec):
             pass
 
         view = Tagless()
-        self.assertRaises(IOError, view.render)
+        renderer = Renderer()
 
-        view = Tagless()
-        view.template_path = "examples"
-        self.assertEquals(view.render(), "No tags...")
+        self.assertRaises(IOError, renderer.render, view)
+
+        view.template_rel_directory = "../examples"
+        actual = renderer.render(view)
+        self.assertEquals(actual, "No tags...")
 
     def test_template_path_for_partials(self):
         """
         Test that View.template_rel_path is respected for partials.
 
         """
-        class TestView(View):
-            template = "Partial: {{>tagless}}"
+        spec = TemplateSpec()
+        spec.template = "Partial: {{>tagless}}"
 
-        view = TestView()
-        self.assertRaises(IOError, view.render)
+        renderer1 = Renderer()
+        renderer2 = Renderer(search_dirs=EXAMPLES_DIR)
 
-        view = TestView()
-        view.template_path = "examples"
-        self.assertEquals(view.render(), "Partial: No tags...")
+        self.assertRaises(IOError, renderer1.render, spec)
+
+        actual = renderer2.render(spec)
+        self.assertEquals(actual, "Partial: No tags...")
 
     def test_basic_method_calls(self):
         renderer = Renderer()
@@ -192,7 +183,7 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         Test the template attribute: str string.
 
         """
-        custom = Template()
+        custom = TemplateSpec()
         custom.template = "abc"
 
         self._assert_template(SpecLoader(), custom, u"abc")
@@ -202,7 +193,7 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         Test the template attribute: unicode string.
 
         """
-        custom = Template()
+        custom = TemplateSpec()
         custom.template = u"abc"
 
         self._assert_template(SpecLoader(), custom, u"abc")
@@ -212,7 +203,7 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         Test the template attribute: non-ascii unicode string.
 
         """
-        custom = Template()
+        custom = TemplateSpec()
         custom.template = u"é"
 
         self._assert_template(SpecLoader(), custom, u"é")
@@ -222,7 +213,7 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         Test the template attribute: with template encoding attribute.
 
         """
-        custom = Template()
+        custom = TemplateSpec()
         custom.template = u'é'.encode('utf-8')
 
         self.assertRaises(UnicodeDecodeError, self._assert_template, SpecLoader(), custom, u'é')
@@ -257,7 +248,7 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         custom_loader = SpecLoader()
         custom_loader.loader = loader
 
-        view = Template()
+        view = TemplateSpec()
         view.template = "template-foo"
         view.template_encoding = "encoding-foo"
 

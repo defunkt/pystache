@@ -7,10 +7,9 @@ This module contains the initialization logic called by __init__.py.
 
 from .renderer import Renderer
 from .template_spec import TemplateSpec
-from .view import View
 
 
-__all__ = ['render', 'Renderer', 'View', 'TemplateSpec']
+__all__ = ['render', 'Renderer', 'TemplateSpec']
 
 
 def render(template, context=None, **kwargs):
