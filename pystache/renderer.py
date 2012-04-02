@@ -9,7 +9,7 @@ from . import defaults
 from .context import Context
 from .loader import Loader
 from .renderengine import RenderEngine
-from .template_spec import SpecLoader
+from .spec_loader import SpecLoader
 from .template_spec import TemplateSpec
 
 

@@ -16,9 +16,10 @@ from examples.lambdas import Lambdas
 from examples.inverted import Inverted, InvertedLists
 from pystache import TemplateSpec
 from pystache import Renderer
-from pystache.template_spec import SpecLoader
+from pystache.spec_loader import SpecLoader
 from pystache.locator import Locator
 from pystache.loader import Loader
+from pystache.spec_loader import SpecLoader
 from .common import DATA_DIR
 from .common import EXAMPLES_DIR
 from .common import AssertIsMixin
