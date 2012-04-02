@@ -5,8 +5,6 @@ This module provides a Loader class for locating and reading templates.
 
 """
 
-from __future__ import with_statement
-
 import os
 import sys
 
@@ -108,8 +106,12 @@ class Loader(object):
         Read the template at the given path, and return it as a unicode string.
 
         """
-        with open(path, 'r') as f:
+        # We avoid use of the with keyword for Python 2.4 support.
+        f = open(path, 'r')
+        try:
             text = f.read()
+        finally:
+            f.close()
 
         if encoding is None:
             encoding = self.file_encoding
