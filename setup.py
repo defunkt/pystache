@@ -70,7 +70,7 @@ if sys.argv[-1] == 'publish':
 long_description = make_long_description()
 
 setup(name='pystache',
-      version='0.4.1',
+      version='0.5.0-rc',
       description='Mustache for Python',
       long_description=long_description,
       author='Chris Wanstrath',
