@@ -316,7 +316,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
 
     def test_get__default(self):
         """
-        Test that get() respects the default value .
+        Test that get() respects the default value.
 
         """
         context = Context()
