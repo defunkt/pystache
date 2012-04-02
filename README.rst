@@ -30,6 +30,9 @@ Pystache currently works using the following versions of Python:
 * Python 2.6
 * Python 2.7
 
+TODO: mention simplejson for earlier versions of Python and yaml.
+TODO: try to replace yaml with json.
+
 
 Install It
 ==========
