@@ -31,6 +31,7 @@ Pystache currently works using the following versions of Python:
 * Python 2.7
 
 TODO: mention simplejson for earlier versions of Python and yaml.
+
 TODO: try to replace yaml with json.
 
 
@@ -76,31 +77,33 @@ Pull it together::
     u'Hello, Pizza!'
 
 
-Unicode
-=======
+Unicode Handling
+================
 
-This section describes Pystache's handling of unicode, strings, and encodings.
-Pystache's template rendering methods output only unicode.  Moreover,
-internally Pystache uses only unicode strings.  For input, Pystache accepts
-both ``unicode`` and ``str`` strings.
+This section describes Pystache's handling of unicode (e.g. strings and
+encodings).
 
-The Renderer class supports a number of attributes that control how it
-converts ``str`` strings to unicode on input.  These attributes include
-the file_encoding, string_encoding, and decode_errors attributes.
+Internally Pystache uses only unicode strings.  For input, Pystache accepts
+both ``unicode`` and ``str`` strings.  For output, Pystache's template
+rendering methods return only unicode.
+
+The Renderer class supports a number of attributes that control how Pystache
+converts ``str`` strings to unicode on input.  These include the
+file_encoding, string_encoding, and decode_errors attributes.
 
 The file_encoding attribute is the encoding the renderer uses to convert
-to unicode any files read from the file system.  Similarly, string_encoding
+any files read from the file system to unicode.  Similarly, string_encoding
 is the encoding the renderer uses to convert any other strings of type str
 to unicode (e.g. context values of type ``str``).  The decode_errors
 attribute is what the renderer passes as the ``errors`` argument to
-Python's built-in `unicode()`_ function.  The valid values are 'strict',
-'ignore', or 'replace'.
+Python's built-in `unicode()`_ function when converting.  The valid values
+are 'strict', 'ignore', or 'replace'.
 
 Each of these attributes can be set via the Renderer class's constructor
 using a keyword argument of the same name.  In addition, the file_encoding
-attribute can be controlled on a per-view basis by subclassing the
-`TemplateSpec` class.  The attributes default to values set in Pystache's
-``defaults`` module.
+attribute can be controlled on a per-view basis by subclassing the class
+`TemplateSpec`.  When not specified explicitly, these attributes default
+to values set in Pystache's ``defaults`` module.
 
 
 Test It
