@@ -23,18 +23,17 @@ Logo: `David Phillips`_
 Requirements
 ============
 
-Pystache currently works with the following versions of Python.  JSON
-support is needed only for the command-line interface and to run the
-spec tests.
+Pystache currently works with the following versions of Python.
 
-* Python 2.4 (requires ``simplejson`` version 2.0.9 or earlier)
-* Python 2.5 (requires ``simplejson``)
+* Python 2.4 (requires simplejson version 2.0.9 or earlier)
+* Python 2.5 (requires simplejson)
 * Python 2.6
 * Python 2.7
 
-Python's simplejson_ is required for earlier versions of Python since
-Python's json_ module is new in Python 2.6.  Simplejson stopped officially
-supporting Python 2.4 as of version 2.1.0.
+JSON support is needed only for the command-line interface and to run the
+spec tests.  Since Python's json_ module is new as of Python 2.6, earlier
+versions of Python require simplejson_ to support JSON.  Moreover, simplejson
+stopped officially supporting Python 2.4 as of version 2.1.0.
 
 
 Install It
@@ -94,20 +93,22 @@ Pystache converts ``str`` strings to unicode on input.  These include the
 ``file_encoding``, ``string_encoding``, and ``decode_errors`` attributes.
 
 The ``file_encoding`` attribute is the encoding the renderer uses to convert
-any files read from the file system to unicode.  Similarly, ``string_encoding``
+to unicode any files read from the file system.  Similarly, ``string_encoding``
 is the encoding the renderer uses to convert to unicode any other strings of
 type ``str`` encountered during the rendering process (e.g. context values
 of type ``str``).
 
 The ``decode_errors`` attribute is what the renderer passes as the ``errors``
-argument to Python's `built-in unicode function`_ ``unicode()`` when converting.
-The valid values for this argument are ``strict``, ``ignore``, and ``replace``.
+argument to Python's `built-in unicode function`_ ``unicode()`` when
+converting.  The valid values for this argument are ``strict``, ``ignore``,
+and ``replace``.
 
 Each of these attributes can be set via the ``Renderer`` class's constructor
-using a keyword argument of the same name.  In addition, the ``file_encoding``
+using a keyword argument of the same name.  See the Renderer class's
+detailed docstrings for further details.  In addition, the ``file_encoding``
 attribute can be controlled on a per-view basis by subclassing the
-``TemplateSpec`` class.  When not specified explicitly, these attributes default
-to values set in Pystache's ``defaults`` module.
+``TemplateSpec`` class.  When not specified explicitly, these attributes
+default to values set in Pystache's ``defaults`` module.
 
 
 Test It
