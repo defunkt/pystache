@@ -23,16 +23,18 @@ Logo: `David Phillips`_
 Requirements
 ============
 
-Pystache currently works using the following versions of Python:
+Pystache currently works with the following versions of Python.  JSON
+support is needed only for the command-line interface and to run the
+spec tests.
 
-* Python 2.4
-* Python 2.5
+* Python 2.4 (requires ``simplejson`` version 2.0.9 or earlier)
+* Python 2.5 (requires ``simplejson``)
 * Python 2.6
 * Python 2.7
 
-TODO: mention simplejson for earlier versions of Python and yaml.
-
-TODO: try to replace yaml with json.
+Python's simplejson_ is required for earlier versions of Python since
+Python's json_ module is new in Python 2.6.  Simplejson stopped officially
+supporting Python 2.4 as of version 2.1.0.
 
 
 Install It
@@ -95,10 +97,11 @@ The ``file_encoding`` attribute is the encoding the renderer uses to convert
 any files read from the file system to unicode.  Similarly, ``string_encoding``
 is the encoding the renderer uses to convert to unicode any other strings of
 type ``str`` encountered during the rendering process (e.g. context values
-of type ``str``).  The ``decode_errors`` attribute is what the renderer
-passes as the ``errors`` argument to Python's `built-in unicode function`_
-``unicode()`` when converting.  The valid values for this argument are
-``strict``, ``ignore``, and ``replace``.
+of type ``str``).
+
+The ``decode_errors`` attribute is what the renderer passes as the ``errors``
+argument to Python's `built-in unicode function`_ ``unicode()`` when converting.
+The valid values for this argument are ``strict``, ``ignore``, and ``replace``.
 
 Each of these attributes can be set via the ``Renderer`` class's constructor
 using a keyword argument of the same name.  In addition, the ``file_encoding``
@@ -163,6 +166,7 @@ Author
 .. _ctemplate: http://code.google.com/p/google-ctemplate/
 .. _David Phillips: http://davidphillips.us/
 .. _et: http://www.ivan.fomichev.name/2008/05/erlang-template-engine-prototype.html
+.. _json: http://docs.python.org/library/json.html
 .. _Mustache: http://mustache.github.com/
 .. _Mustache spec: https://github.com/mustache/spec
 .. _mustache(5): http://mustache.github.com/mustache.5.html
@@ -170,5 +174,6 @@ Author
 .. _PyPI: http://pypi.python.org/pypi/pystache
 .. _Pystache: https://github.com/defunkt/pystache
 .. _semantically versioned: http://semver.org
+.. _simplejson: http://pypi.python.org/pypi/simplejson/
 .. _built-in unicode function: http://docs.python.org/library/functions.html#unicode
 .. _version 1.0.3: https://github.com/mustache/spec/tree/48c933b0bb780875acbfd15816297e263c53d6f7
