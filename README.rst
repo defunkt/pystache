@@ -23,7 +23,7 @@ Logo: `David Phillips`_
 Requirements
 ============
 
-Pystache currently works with the following versions of Python.
+Pystache is tested with the following versions of Python:
 
 * Python 2.4 (requires simplejson version 2.0.9 or earlier)
 * Python 2.5 (requires simplejson)
@@ -31,9 +31,10 @@ Pystache currently works with the following versions of Python.
 * Python 2.7
 
 JSON support is needed only for the command-line interface and to run the
-spec tests.  Since Python's json_ module is new as of Python 2.6, earlier
-versions of Python require simplejson_ to support JSON.  Moreover, simplejson
-stopped officially supporting Python 2.4 as of version 2.1.0.
+spec tests.  Python's json_ module is new as of Python 2.6.  Python's
+simplejson_ package works with earlier versions of Python.  Because
+simplejson stopped officially supporting Python 2.4 as of version 2.1.0,
+Python 2.4 requires an earlier version.
 
 
 Install It
@@ -105,7 +106,7 @@ and ``replace``.
 
 Each of these attributes can be set via the ``Renderer`` class's constructor
 using a keyword argument of the same name.  See the Renderer class's
-detailed docstrings for further details.  In addition, the ``file_encoding``
+docstrings for further details.  In addition, the ``file_encoding``
 attribute can be controlled on a per-view basis by subclassing the
 ``TemplateSpec`` class.  When not specified explicitly, these attributes
 default to values set in Pystache's ``defaults`` module.
