@@ -3,32 +3,28 @@
 """
 Creates a unittest.TestCase for the tests defined in the mustache spec.
 
-We did not call this file something like "test_spec.py" to avoid matching
-nosetests's default regular expression "(?:^|[\b_\./-])[Tt]est".
-This allows us to exclude the spec test cases by default when running
-nosetests.  To include the spec tests, one can use the following option,
-for example--
-
-    nosetests -i spec
-
 """
+
+# TODO: this module can be cleaned up somewhat.
+
+try:
+    # We deserialize the json form rather than the yaml form because
+    # json libraries are available for Python 2.4.
+    import json
+except:
+    # The json module is new in Python 2.6, whereas simplejson is
+    # compatible with earlier versions.
+    import simplejson as json
 
 import glob
 import os.path
 import unittest
-import yaml
 
 from pystache.renderer import Renderer
 
 
-def code_constructor(loader, node):
-    value = loader.construct_mapping(node)
-    return eval(value['python'], {})
-
-yaml.add_constructor(u'!code', code_constructor)
-
-specs = os.path.join(os.path.dirname(__file__), '..', 'ext', 'spec', 'specs')
-specs = glob.glob(os.path.join(specs, '*.yml'))
+root_path = os.path.join(os.path.dirname(__file__), '..', 'ext', 'spec', 'specs')
+spec_paths = glob.glob(os.path.join(root_path, '*.json'))
 
 class MustacheSpec(unittest.TestCase):
     pass
@@ -46,8 +42,16 @@ def buildTest(testData, spec_filename):
         expected = testData['expected']
         data     = testData['data']
 
+        # Convert code strings to functions.
+        # TODO: make this section of code easier to understand.
+        new_data = {}
+        for key, val in data.iteritems():
+            if isinstance(val, dict) and val.get('__tag__') == 'code':
+                val = eval(val['python'])
+            new_data[key] = val
+
         renderer = Renderer(partials=partials)
-        actual = renderer.render(template, data)
+        actual = renderer.render(template, new_data)
         actual = actual.encode('utf-8')
 
         message = """%s
@@ -64,14 +68,28 @@ def buildTest(testData, spec_filename):
         self.assertEquals(actual, expected, message)
 
     # The name must begin with "test" for nosetests test discovery to work.
-    test.__name__ = 'test: "%s"' % test_name
+    name =  'test: "%s"' % test_name
+
+    # If we don't convert unicode to str, we get the following error:
+    #   "TypeError: __name__ must be set to a string object"
+    test.__name__ = str(name)
 
     return test
 
-for spec in specs:
-    file_name  = os.path.basename(spec)
+for spec_path in spec_paths:
 
-    for test in yaml.load(open(spec))['tests']:
+    file_name  = os.path.basename(spec_path)
+
+    # We avoid use of the with keyword for Python 2.4 support.
+    f = open(spec_path, 'r')
+    try:
+        spec_data = json.load(f)
+    finally:
+        f.close()
+
+    tests = spec_data['tests']
+
+    for test in tests:
         test = buildTest(test, file_name)
         setattr(MustacheSpec, test.__name__, test)
         # Prevent this variable from being interpreted as another test.
