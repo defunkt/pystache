@@ -27,13 +27,17 @@ def _get_value(item, key):
     The Context.get() docstring documents this function's intended behavior.
 
     """
+    parts = key.split('.')
+    key = parts[0]
+    value = _NOT_FOUND
+
     if isinstance(item, dict):
         # Then we consider the argument a "hash" for the purposes of the spec.
         #
         # We do a membership test to avoid using exceptions for flow control
         # (e.g. catching KeyError).
         if key in item:
-            return item[key]
+            value = item[key]
     elif type(item).__module__ != '__builtin__':
         # Then we consider the argument an "object" for the purposes of
         # the spec.
@@ -45,10 +49,15 @@ def _get_value(item, key):
         if hasattr(item, key):
             attr = getattr(item, key)
             if _is_callable(attr):
-                return attr()
-            return attr
+                value = attr()
+            else:
+                value =  attr
 
-    return _NOT_FOUND
+    for part in parts[1:]:
+        if value is not _NOT_FOUND:
+            value = _get_value(value, part)
+
+    return value
 
 
 class Context(object):
