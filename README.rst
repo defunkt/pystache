@@ -83,26 +83,27 @@ Unicode Handling
 This section describes Pystache's handling of unicode (e.g. strings and
 encodings).
 
-Internally Pystache uses only unicode strings.  For input, Pystache accepts
+Internally, Pystache uses only unicode strings.  For input, Pystache accepts
 both ``unicode`` and ``str`` strings.  For output, Pystache's template
 rendering methods return only unicode.
 
-The Renderer class supports a number of attributes that control how Pystache
-converts ``str`` strings to unicode on input.  These include the
-file_encoding, string_encoding, and decode_errors attributes.
+Pystache's ``Renderer`` class supports a number of attributes that control how
+Pystache converts ``str`` strings to unicode on input.  These include the
+``file_encoding``, ``string_encoding``, and ``decode_errors`` attributes.
 
-The file_encoding attribute is the encoding the renderer uses to convert
-any files read from the file system to unicode.  Similarly, string_encoding
-is the encoding the renderer uses to convert any other strings of type str
-to unicode (e.g. context values of type ``str``).  The decode_errors
-attribute is what the renderer passes as the ``errors`` argument to
-Python's built-in `unicode()`_ function when converting.  The valid values
-are 'strict', 'ignore', or 'replace'.
+The ``file_encoding`` attribute is the encoding the renderer uses to convert
+any files read from the file system to unicode.  Similarly, ``string_encoding``
+is the encoding the renderer uses to convert to unicode any other strings of
+type ``str`` encountered during the rendering process (e.g. context values
+of type ``str``).  The ``decode_errors`` attribute is what the renderer
+passes as the ``errors`` argument to Python's `built-in unicode function`_
+``unicode()`` when converting.  The valid values for this argument are
+``strict``, ``ignore``, and ``replace``.
 
-Each of these attributes can be set via the Renderer class's constructor
-using a keyword argument of the same name.  In addition, the file_encoding
-attribute can be controlled on a per-view basis by subclassing the class
-`TemplateSpec`.  When not specified explicitly, these attributes default
+Each of these attributes can be set via the ``Renderer`` class's constructor
+using a keyword argument of the same name.  In addition, the ``file_encoding``
+attribute can be controlled on a per-view basis by subclassing the
+``TemplateSpec`` class.  When not specified explicitly, these attributes default
 to values set in Pystache's ``defaults`` module.
 
 
@@ -169,5 +170,5 @@ Author
 .. _PyPI: http://pypi.python.org/pypi/pystache
 .. _Pystache: https://github.com/defunkt/pystache
 .. _semantically versioned: http://semver.org
-.. _unicode(): http://docs.python.org/library/functions.html#unicode
+.. _built-in unicode function: http://docs.python.org/library/functions.html#unicode
 .. _version 1.0.3: https://github.com/mustache/spec/tree/48c933b0bb780875acbfd15816297e263c53d6f7
