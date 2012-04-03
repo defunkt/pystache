@@ -7,7 +7,7 @@ This module supports customized (aka special or specified) template loading.
 
 import os.path
 
-from .loader import Loader
+from pystache.loader import Loader
 
 
 # TODO: add test cases for this class.
@@ -36,12 +36,15 @@ class SpecLoader(object):
         """
         if spec.template_rel_path is not None:
             return os.path.split(spec.template_rel_path)
-
         # Otherwise, determine the file name separately.
+
         locator = self.loader._make_locator()
 
-        template_name = (spec.template_name if spec.template_name is not None else
-                         locator.make_template_name(spec))
+        # We do not use the ternary operator for Python 2.4 support.
+        if spec.template_name is not None:
+            template_name = spec.template_name
+        else:
+            template_name = locator.make_template_name(spec)
 
         file_name = locator.make_file_name(template_name, spec.template_extension)
 

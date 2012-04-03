@@ -5,12 +5,12 @@ This module provides a Renderer class to render templates.
 
 """
 
-from . import defaults
-from .context import Context
-from .loader import Loader
-from .renderengine import RenderEngine
-from .spec_loader import SpecLoader
-from .template_spec import TemplateSpec
+from pystache import defaults
+from pystache.context import Context
+from pystache.loader import Loader
+from pystache.renderengine import RenderEngine
+from pystache.spec_loader import SpecLoader
+from pystache.template_spec import TemplateSpec
 
 
 class Renderer(object):
@@ -138,8 +138,11 @@ class Renderer(object):
         Convert a basestring to unicode, preserving any unicode subclass.
 
         """
-        # Avoid the "double-decoding" TypeError.
-        return s if isinstance(s, unicode) else self.unicode(s)
+        # We type-check to avoid "TypeError: decoding Unicode is not supported".
+        # We avoid the Python ternary operator for Python 2.4 support.
+        if isinstance(s, unicode):
+            return s
+        return self.unicode(s)
 
     def _to_unicode_hard(self, s):
         """

@@ -14,7 +14,7 @@ import unittest
 from pystache.loader import Loader as Reader
 from pystache.locator import Locator
 
-from .common import DATA_DIR
+from tests.common import DATA_DIR
 from data.views import SayHello
 
 

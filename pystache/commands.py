@@ -7,7 +7,14 @@ Run this script using the -h option for command-line help.
 
 """
 
-import json
+
+try:
+    import json
+except:
+    # The json module is new in Python 2.6, whereas simplejson is
+    # compatible with earlier versions.
+    import simplejson as json
+
 # The optparse module is deprecated in Python 2.7 in favor of argparse.
 # However, argparse is not available in Python 2.6 and earlier.
 from optparse import OptionParser

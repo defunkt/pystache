@@ -8,8 +8,8 @@ from examples.lambdas import Lambdas
 from examples.template_partial import TemplatePartial
 from examples.simple import Simple
 
-from .common import EXAMPLES_DIR
-from .common import AssertStringMixin
+from tests.common import EXAMPLES_DIR
+from tests.common import AssertStringMixin
 
 
 class TestSimple(unittest.TestCase, AssertStringMixin):

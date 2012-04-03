@@ -5,8 +5,8 @@ This module contains the initialization logic called by __init__.py.
 
 """
 
-from .renderer import Renderer
-from .template_spec import TemplateSpec
+from pystache.renderer import Renderer
+from pystache.template_spec import TemplateSpec
 
 
 __all__ = ['render', 'Renderer', 'TemplateSpec']

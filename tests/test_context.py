@@ -157,6 +157,17 @@ class GetValueTests(unittest.TestCase, AssertIsMixin):
         item1 = MyInt(10)
         item2 = 10
 
+        try:
+            item2.real
+        except AttributeError:
+            # Then skip this unit test.  The numeric type hierarchy was
+            # added only in Python 2.6, in which case integers inherit
+            # from complex numbers the "real" attribute, etc:
+            #
+            #   http://docs.python.org/library/numbers.html
+            #
+            return
+
         self.assertEquals(item1.real, 10)
         self.assertEquals(item2.real, 10)
 
@@ -316,7 +327,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
 
     def test_get__default(self):
         """
-        Test that get() respects the default value .
+        Test that get() respects the default value.
 
         """
         context = Context()

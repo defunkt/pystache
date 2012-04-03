@@ -19,12 +19,12 @@ from pystache import TemplateSpec
 from pystache.locator import Locator
 from pystache.loader import Loader
 from pystache.spec_loader import SpecLoader
-from .common import DATA_DIR
-from .common import EXAMPLES_DIR
-from .common import AssertIsMixin
-from .common import AssertStringMixin
-from .data.views import SampleView
-from .data.views import NonAscii
+from tests.common import DATA_DIR
+from tests.common import EXAMPLES_DIR
+from tests.common import AssertIsMixin
+from tests.common import AssertStringMixin
+from tests.data.views import SampleView
+from tests.data.views import NonAscii
 
 
 class Thing(object):
