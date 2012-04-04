@@ -24,16 +24,16 @@ Highlights:
   between Template and View classes, cf. `issue #13`_).
 * Unicode now used consistently throughout the rendering process.
 * Expanded test coverage: nosetests now runs doctests and ~105 test cases
-  from the Mustache spec (increasing test count from 56 to ~315).
+  from the Mustache spec (increasing the number of tests from 56 to ~315).
 * Added a rudimentary benchmarking script to gauge performance while refactoring.
 * Extensive documentation added (e.g. docstrings).
 
 Other changes:
 
 * Added a command-line interface. [vrde]
-* Renderer now accepts a custom partial loader (e.g. a dictionary) and custom
-  escape function.
-* Rendering now supports non-ascii characters in str strings.
+* The main rendering class now accepts a custom partial loader (e.g. a dictionary)
+  and a custom escape function.
+* Non-ascii characters in str strings are now supported while rendering.
 * Added string encoding, file encoding, and errors options for decoding to unicode.
 * Removed the output encoding option.
 * Removed the use of markupsafe.
