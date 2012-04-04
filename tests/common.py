@@ -51,3 +51,20 @@ class AssertIsMixin:
     #   http://docs.python.org/library/unittest.html#unittest.TestCase.assertIsNone
     def assertIs(self, first, second):
         self.assertTrue(first is second, msg="%s is not %s" % (repr(first), repr(second)))
+
+
+class Attachable(object):
+    """A trivial object that attaches all constructor named parameters as attributes.
+    For instance,
+
+    >>> o = Attachable(foo=42, size="of the universe")
+    >>> o.foo
+    42
+    >>> o.size
+    of the universe
+    """
+    def __init__(self, **kwargs):
+        for arg, value in kwargs.iteritems():
+            setattr(self, arg, value)
+
+

@@ -60,26 +60,6 @@ class TestSimple(unittest.TestCase, AssertStringMixin):
         template = '{{not_set}} {{blank}}'
         self.assertEquals(pystache.Renderer().render(template), ' ')
 
-    def test_dot_notation_with_dict(self):
-        template = 'Name: {{person.name}}. Age: {{person.details.age}}. Intimate details (should be empty): {{person.details.intimate}}.'
-        renderer = Renderer()
-        context = {'person': {'name': 'Biggles', 'details': {'age': 42}}}
-        actual = renderer.render(template, context)
-        self.assertEquals(actual, 'Name: Biggles. Age: 42. Intimate details (should be empty): .')
-
-    def test_dot_notation_with_user_objects(self):
-        template = 'Name: {{person.name}}. Age: {{person.details.age}}. Intimate details (should be empty): {{person.details.intimate}}.'
-        renderer = Renderer()
-
-        class Person(object):
-            def __init__(self, name, details):
-                self.name = name
-                self.details = details
-
-        context = {'person': Person('Biggles', {'age': 42})}
-        actual = renderer.render(template, context)
-        self.assertEquals(actual, 'Name: Biggles. Age: 42. Intimate details (should be empty): .')
-
     def test_template_partial_extension(self):
         """
         Side note:

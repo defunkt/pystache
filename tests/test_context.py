@@ -11,7 +11,7 @@ import unittest
 from pystache.context import _NOT_FOUND
 from pystache.context import _get_value
 from pystache.context import Context
-from tests.common import AssertIsMixin
+from tests.common import AssertIsMixin, Attachable
 
 class SimpleObject(object):
 
@@ -397,4 +397,40 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
         self.assertEquals(new.get(key), "bar")
         # Confirm the original is unchanged.
         self.assertEquals(original.get(key), "buzz")
+
+    def test_dot_notation__dict(self):
+        key = "foo.bar"
+        original = Context({"foo": {"bar": "baz"}})
+        self.assertEquals(original.get(key), "baz")
+
+        # Works all the way down
+        key = "a.b.c.d.e.f.g"
+        original = Context({"a": {"b": {"c": {"d": {"e": {"f": {"g": "w00t!"}}}}}}})
+        self.assertEquals(original.get(key), "w00t!")
+
+    def test_dot_notation__user_object(self):
+        key = "foo.bar"
+        original = Context({"foo": Attachable(bar="baz")})
+        self.assertEquals(original.get(key), "baz")
+
+        # Works on multiple levels, too
+        key = "a.b.c.d.e.f.g"
+        Obj = Attachable
+        original = Context({"a": Obj(b=Obj(c=Obj(d=Obj(e=Obj(f=Obj(g="w00t!"))))))})
+        self.assertEquals(original.get(key), "w00t!")
+
+    def test_dot_notation__mixed_dict_and_obj(self):
+        key = "foo.bar.baz.bak"
+        original = Context({"foo": Attachable(bar={"baz": Attachable(bak=42)})})
+        self.assertEquals(original.get(key), 42)
+
+    def test_dot_notation__missing_attr_or_key(self):
+        key = "foo.bar.baz.bak"
+        original = Context({"foo": {"bar": {}}})
+        self.assertEquals(original.get(key), None)
+
+        original = Context({"foo": Attachable(bar=Attachable())})
+        self.assertEquals(original.get(key), None)
+
+
 
