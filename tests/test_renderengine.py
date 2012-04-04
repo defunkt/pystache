@@ -11,7 +11,7 @@ import unittest
 from pystache.context import Context
 from pystache.parser import ParsingError
 from pystache.renderengine import RenderEngine
-from tests.common import AssertStringMixin
+from tests.common import AssertStringMixin, Attachable
 
 
 class RenderEngineTestCase(unittest.TestCase):
@@ -453,3 +453,67 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         expected = u' {{foo}} '
         self._assert_render(expected, '{{=$ $=}} {{foo}} ')
         self._assert_render(expected, '{{=$ $=}} {{foo}} $={{ }}=$')  # was yielding u'  '.
+
+    def test_dot_notation(self):
+        """
+        Check that we can use dot notation when the variable is a dict
+        or a used-defined object (or a combination of both)
+        """
+        # With a dict:
+        template = 'Hello, {{person.name}}. I see you are {{person.details.age}}.'
+        context = {'person': {'name': 'Biggles', 'details': {'age': 42}}}
+        self._assert_render(u'Hello, Biggles. I see you are 42.', template, context)
+
+        # With a user-defined object:
+        details = Attachable(age=42)
+        person = Attachable(name='Biggles', details=details)
+        template = 'Hello, {{person.name}}. I see you are {{person.details.age}}.'
+        context = {'person': person}
+        self._assert_render(u'Hello, Biggles. I see you are 42.', template, context)
+
+        # All together now!
+        person = Attachable(name='Biggles', details={'age': 42})
+        template = 'Hello, {{person.name}}. I see you are {{person.details.age}}.'
+        context = {'person': person}
+        self._assert_render(u'Hello, Biggles. I see you are 42.', template, context)
+
+        # And the other way around:
+        details = Attachable(age=42)
+        person = {'name': 'Biggles', 'details': details}
+        template = 'Hello, {{person.name}}. I see you are {{person.details.age}}.'
+        context = {'person': person}
+        self._assert_render(u'Hello, Biggles. I see you are 42.', template, context)
+
+    def test_dot_notation__missing_attributes_or_keys(self):
+        """
+        Check that, when using dot notation, if the key or attribute does not
+        exist then its value is rendered as empty
+        """
+        template = """I cannot see {{person.name}}'s age: {{person.age}}.
+        Nor {{other_person.name}}'s: ."""
+        expected = u"""I cannot see Biggles's age: .
+        Nor Mr. Bradshaw's: ."""
+        context = {'person': {'name': 'Biggles'},
+                   'other_person': Attachable(name='Mr. Bradshaw')}
+        self._assert_render(expected, template, context)
+
+    def test_dot_notation__multiple_levels(self):
+        """
+        Check that using multiple levels of dot attributes works as expected
+        """
+        template = """Hello, Mr. {{person.name.lastname}}.
+        I see you're back from {{person.travels.last.country.city}}.
+        I'm missing some of your details: {{person.details.private.editor}}."""
+        expected = u"""Hello, Mr. Pither.
+        I see you're back from Cornwall.
+        I'm missing some of your details: ."""
+        context = {'person': {'name': {'firstname': 'unknown', 'lastname': 'Pither'},
+                            'travels': {'last': {'country': {'city': 'Cornwall'}}},
+                            'details': {'public': 'likes cycling'}}}
+        self._assert_render(expected, template, context)
+
+        # It should also work with user-defined objects
+        context = {'person': Attachable(name={'firstname': 'unknown', 'lastname': 'Pither'},
+                                        travels=Attachable(last=Attachable(country=Attachable(city='Cornwall'))),
+                                        details=Attachable())}
+        self._assert_render(expected, template, context)
