@@ -456,31 +456,11 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
 
     def test_dot_notation(self):
         """
-        Check that we can use dot notation when the variable is a dict
-        or a used-defined object (or a combination of both)
+        Check that we can use dot notation when the variable is a dict,
+        a used-defined object, or a combination of both
         """
-        # With a dict:
         template = 'Hello, {{person.name}}. I see you are {{person.details.age}}.'
-        context = {'person': {'name': 'Biggles', 'details': {'age': 42}}}
-        self._assert_render(u'Hello, Biggles. I see you are 42.', template, context)
-
-        # With a user-defined object:
-        details = Attachable(age=42)
-        person = Attachable(name='Biggles', details=details)
-        template = 'Hello, {{person.name}}. I see you are {{person.details.age}}.'
-        context = {'person': person}
-        self._assert_render(u'Hello, Biggles. I see you are 42.', template, context)
-
-        # All together now!
         person = Attachable(name='Biggles', details={'age': 42})
-        template = 'Hello, {{person.name}}. I see you are {{person.details.age}}.'
-        context = {'person': person}
-        self._assert_render(u'Hello, Biggles. I see you are 42.', template, context)
-
-        # And the other way around:
-        details = Attachable(age=42)
-        person = {'name': 'Biggles', 'details': details}
-        template = 'Hello, {{person.name}}. I see you are {{person.details.age}}.'
         context = {'person': person}
         self._assert_render(u'Hello, Biggles. I see you are 42.', template, context)
 
