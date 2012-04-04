@@ -29,6 +29,7 @@ def _get_value(item, key):
     """
     parts = key.split('.')
     key = parts[0]
+    rest = '.'.join(parts[1:])
     value = _NOT_FOUND
 
     if isinstance(item, dict):
@@ -50,16 +51,14 @@ def _get_value(item, key):
             attr = getattr(item, key)
             # If there are still parts to process (in a dot-notation key),
             # we do not automatically invoke the object, even if it's callable.
-            autocall = len(parts) > 1
+            autocall = len(rest) == 0
             if autocall and _is_callable(attr):
                 value = attr()
             else:
                 value =  attr
 
-    for part in parts[1:]:
-        if value is _NOT_FOUND:
-            break
-        value = _get_value(value, part)
+    if rest and value is not _NOT_FOUND:
+        value = _get_value(value, rest)
 
     return value
 
