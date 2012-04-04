@@ -54,8 +54,9 @@ def _get_value(item, key):
                 value =  attr
 
     for part in parts[1:]:
-        if value is not _NOT_FOUND:
-            value = _get_value(value, part)
+        if value is _NOT_FOUND:
+            break
+        value = _get_value(value, part)
 
     return value
 
