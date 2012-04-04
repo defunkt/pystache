@@ -1,8 +1,6 @@
-import pystache
 from examples.lambdas import rot
 
-class PartialsWithLambdas(pystache.View):
-    template_path = 'examples'
-    
+class PartialsWithLambdas(object):
+
     def rot(self):
         return rot

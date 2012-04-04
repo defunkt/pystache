@@ -1,6 +1,53 @@
 History
 =======
 
+0.5.0 (2012-04-03)
+------------------
+
+This version represents a major rewrite and refactoring of the code base
+that also adds features and fixes many bugs.  All functionality and nearly
+all unit tests have been preserved.  However, some backwards incompatible
+changes to the API have been made.
+
+Below is a selection of some of the changes (not exhaustive).
+
+Highlights:
+
+* Pystache now passes all tests in version 1.0.3 of the `Mustache spec`_. [pvande]
+* Removed View class: it is no longer necessary to subclass from View or
+  from any other class to create a view.
+* Replaced Template with Renderer class: template rendering behavior can be
+  modified via the Renderer constructor or by setting attributes on a Renderer instance.
+* Added TemplateSpec class: template rendering can be specified on a per-view
+  basis by subclassing from TemplateSpec.
+* Introduced separation of concerns and removed circular dependencies (e.g.
+  between Template and View classes, cf. `issue #13`_).
+* Unicode now used consistently throughout the rendering process.
+* Expanded test coverage: nosetests now runs doctests and ~105 test cases
+  from the Mustache spec (increasing the number of tests from 56 to ~315).
+* Added a rudimentary benchmarking script to gauge performance while refactoring.
+* Extensive documentation added (e.g. docstrings).
+
+Other changes:
+
+* Added a command-line interface. [vrde]
+* The main rendering class now accepts a custom partial loader (e.g. a dictionary)
+  and a custom escape function.
+* Non-ascii characters in str strings are now supported while rendering.
+* Added string encoding, file encoding, and errors options for decoding to unicode.
+* Removed the output encoding option.
+* Removed the use of markupsafe.
+
+Bug fixes:
+
+* Context values no longer processed as template strings. [jakearchibald]
+* Whitespace surrounding sections is no longer altered, per the spec. [heliodor]
+* Zeroes now render correctly when using PyPy. [alex]
+* Multline comments now permitted. [fczuardi]
+* Extensionless template files are now supported.
+* Passing ``**kwargs`` to ``Template()`` no longer modifies the context.
+* Passing ``**kwargs`` to ``Template()`` with no context no longer raises an exception.
+
 0.4.1 (2012-03-25)
 ------------------
 * Added support for Python 2.4. [wangtz, jvantuyl]
@@ -44,3 +91,7 @@ History
 ------------------
 
 * First release
+
+
+.. _issue #13: https://github.com/defunkt/pystache/issues/13
+.. _Mustache spec: https://github.com/mustache/spec

@@ -1,49 +1,83 @@
 import unittest
+
 import pystache
+from pystache import Renderer
 from examples.nested_context import NestedContext
-from examples.complex_view import ComplexView
+from examples.complex import Complex
 from examples.lambdas import Lambdas
 from examples.template_partial import TemplatePartial
 from examples.simple import Simple
 
-class TestSimple(unittest.TestCase):
-    
-    def test_simple_render(self):
-        self.assertEqual('herp', pystache.Template('{{derp}}', {'derp': 'herp'}).render())
-        
+from tests.common import EXAMPLES_DIR
+from tests.common import AssertStringMixin
+
+
+class TestSimple(unittest.TestCase, AssertStringMixin):
+
     def test_nested_context(self):
-        view = NestedContext()
-        self.assertEquals(pystache.Template('{{#foo}}{{thing1}} and {{thing2}} and {{outer_thing}}{{/foo}}{{^foo}}Not foo!{{/foo}}', view).render(), "one and foo and two")
-        
+        renderer = Renderer()
+        view = NestedContext(renderer)
+        view.template = '{{#foo}}{{thing1}} and {{thing2}} and {{outer_thing}}{{/foo}}{{^foo}}Not foo!{{/foo}}'
+
+        actual = renderer.render(view)
+        self.assertString(actual, u"one and foo and two")
+
     def test_looping_and_negation_context(self):
-        view = ComplexView()
-        self.assertEquals(pystache.Template('{{#item}}{{header}}: {{name}} {{/item}}{{^item}} Shouldnt see me{{/item}}', view).render(), "Colors: red Colors: green Colors: blue ")
+        template = '{{#item}}{{header}}: {{name}} {{/item}}{{^item}} Shouldnt see me{{/item}}'
+        context = Complex()
+
+        renderer = Renderer()
+        actual = renderer.render(template, context)
+        self.assertEquals(actual, "Colors: red Colors: green Colors: blue ")
 
     def test_empty_context(self):
-        view = ComplexView()
-        self.assertEquals(pystache.Template('{{#empty_list}}Shouldnt see me {{/empty_list}}{{^empty_list}}Should see me{{/empty_list}}', view).render(), "Should see me")
-        
+        template = '{{#empty_list}}Shouldnt see me {{/empty_list}}{{^empty_list}}Should see me{{/empty_list}}'
+        self.assertEquals(pystache.Renderer().render(template), "Should see me")
+
     def test_callables(self):
         view = Lambdas()
-        self.assertEquals(pystache.Template('{{#replace_foo_with_bar}}foo != bar. oh, it does!{{/replace_foo_with_bar}}', view).render(), 'bar != bar. oh, it does!')
-        
+        view.template = '{{#replace_foo_with_bar}}foo != bar. oh, it does!{{/replace_foo_with_bar}}'
+
+        renderer = Renderer()
+        actual = renderer.render(view)
+        self.assertString(actual, u'bar != bar. oh, it does!')
+
     def test_rendering_partial(self):
-        view = TemplatePartial()
-        self.assertEquals(pystache.Template('{{>inner_partial}}', view).render(), 'Again, Welcome!')
-        
-        self.assertEquals(pystache.Template('{{#looping}}{{>inner_partial}} {{/looping}}', view).render(), '''Again, Welcome! Again, Welcome! Again, Welcome! ''')
-        
+        renderer = Renderer(search_dirs=EXAMPLES_DIR)
+
+        view = TemplatePartial(renderer=renderer)
+        view.template = '{{>inner_partial}}'
+
+        actual = renderer.render(view)
+        self.assertString(actual, u'Again, Welcome!')
+
+        view.template = '{{#looping}}{{>inner_partial}} {{/looping}}'
+        actual = renderer.render(view)
+        self.assertString(actual, u"Again, Welcome! Again, Welcome! Again, Welcome! ")
+
     def test_non_existent_value_renders_blank(self):
         view = Simple()
-        
-        self.assertEquals(pystache.Template('{{not_set}} {{blank}}', view).render(), ' ')
-        
-        
+        template = '{{not_set}} {{blank}}'
+        self.assertEquals(pystache.Renderer().render(template), ' ')
+
+
     def test_template_partial_extension(self):
-        view = TemplatePartial()
-        view.template_extension = 'txt'
-        self.assertEquals(view.render(), """Welcome
+        """
+        Side note:
+
+        From the spec--
+
+            Partial tags SHOULD be treated as standalone when appropriate.
+
+        In particular, this means that trailing newlines should be removed.
+
+        """
+        renderer = Renderer(search_dirs=EXAMPLES_DIR, file_extension='txt')
+
+        view = TemplatePartial(renderer=renderer)
+
+        actual = renderer.render(view)
+        self.assertString(actual, u"""Welcome
 -------
 
-Again, Welcome!
-""")
+## Again, Welcome! ##""")

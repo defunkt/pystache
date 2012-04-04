@@ -1,7 +1,4 @@
-import pystache
-
-class ComplexView(pystache.View):
-    template_path = 'examples'
+class Complex(object):
 
     def header(self):
         return "Colors"
@@ -18,6 +15,6 @@ class ComplexView(pystache.View):
 
     def empty(self):
         return len(self.item()) == 0
-        
+
     def empty_list(self):
         return [];

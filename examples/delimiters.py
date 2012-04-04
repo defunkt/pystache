@@ -1,7 +1,4 @@
-import pystache
-
-class Delimiters(pystache.View):
-    template_path = 'examples'
+class Delimiters(object):
 
     def first(self):
         return "It worked the first time."

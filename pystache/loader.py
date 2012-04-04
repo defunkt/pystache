@@ -1,47 +1,155 @@
+# coding: utf-8
+
+"""
+This module provides a Loader class for locating and reading templates.
+
+"""
+
 import os
+import sys
+
+from pystache import defaults
+from pystache.locator import Locator
+
+
+def _to_unicode(s, encoding=None):
+    """
+    Raises a TypeError exception if the given string is already unicode.
+
+    """
+    if encoding is None:
+        encoding = defaults.STRING_ENCODING
+    return unicode(s, encoding, defaults.DECODE_ERRORS)
+
 
 class Loader(object):
-    
-    template_extension = 'mustache'
-    template_path = '.'
-    template_encoding = None
-    
-    def load_template(self, template_name, template_dirs=None, encoding=None, extension=None):
-        '''Returns the template string from a file or throws IOError if it non existent'''
-        if None == template_dirs:
-            template_dirs = self.template_path
-        
-        if encoding is not None:
-            self.template_encoding = encoding
-        
-        if extension is not None:
-            self.template_extension = extension
-        
-        file_name = template_name + '.' + self.template_extension
 
-        # Given a single directory we'll load from it
-        if isinstance(template_dirs, basestring):
-            file_path = os.path.join(template_dirs, file_name)
+    """
+    Loads the template associated to a name or user-defined object.
 
-            return self._load_template_file(file_path)
-            
-        # Given a list of directories we'll check each for our file
-        for path in template_dirs:
-            file_path = os.path.join(path, file_name)
-            if os.path.exists(file_path):
-                return self._load_template_file(file_path)
-                
-        raise IOError('"%s" not found in "%s"' % (template_name, ':'.join(template_dirs),))
-    
-    def _load_template_file(self, file_path):
-        '''Loads and returns the template file from disk'''
-        f = open(file_path, 'r')
-        
+    """
+
+    def __init__(self, file_encoding=None, extension=None, to_unicode=None,
+                 search_dirs=None):
+        """
+        Construct a template loader instance.
+
+        Arguments:
+
+          extension: the template file extension.  Pass False for no
+            extension (i.e. to use extensionless template files).
+            Defaults to the package default.
+
+          file_encoding: the name of the encoding to use when converting file
+            contents to unicode.  Defaults to the package default.
+
+          search_dirs: the list of directories in which to search when loading
+            a template by name or file name.  Defaults to the package default.
+
+          to_unicode: the function to use when converting strings of type
+            str to unicode.  The function should have the signature:
+
+              to_unicode(s, encoding=None)
+
+            It should accept a string of type str and an optional encoding
+            name and return a string of type unicode.  Defaults to calling
+            Python's built-in function unicode() using the package string
+            encoding and decode errors defaults.
+
+        """
+        if extension is None:
+            extension = defaults.TEMPLATE_EXTENSION
+
+        if file_encoding is None:
+            file_encoding = defaults.FILE_ENCODING
+
+        if search_dirs is None:
+            search_dirs = defaults.SEARCH_DIRS
+
+        if to_unicode is None:
+            to_unicode = _to_unicode
+
+        self.extension = extension
+        self.file_encoding = file_encoding
+        # TODO: unit test setting this attribute.
+        self.search_dirs = search_dirs
+        self.to_unicode = to_unicode
+
+    def _make_locator(self):
+        return Locator(extension=self.extension)
+
+    def unicode(self, s, encoding=None):
+        """
+        Convert a string to unicode using the given encoding, and return it.
+
+        This function uses the underlying to_unicode attribute.
+
+        Arguments:
+
+          s: a basestring instance to convert to unicode.  Unlike Python's
+            built-in unicode() function, it is okay to pass unicode strings
+            to this function.  (Passing a unicode string to Python's unicode()
+            with the encoding argument throws the error, "TypeError: decoding
+            Unicode is not supported.")
+
+          encoding: the encoding to pass to the to_unicode attribute.
+            Defaults to None.
+
+        """
+        if isinstance(s, unicode):
+            return unicode(s)
+
+        return self.to_unicode(s, encoding)
+
+    def read(self, path, encoding=None):
+        """
+        Read the template at the given path, and return it as a unicode string.
+
+        """
+        # We avoid use of the with keyword for Python 2.4 support.
+        f = open(path, 'r')
         try:
-            template = f.read()
-            if self.template_encoding:
-                template = unicode(template, self.template_encoding)
+            text = f.read()
         finally:
             f.close()
-        
-        return template
+
+        if encoding is None:
+            encoding = self.file_encoding
+
+        return self.unicode(text, encoding)
+
+    # TODO: unit-test this method.
+    def load_name(self, name):
+        """
+        Find and return the template with the given name.
+
+        Arguments:
+
+          name: the name of the template.
+
+          search_dirs: the list of directories in which to search.
+
+        """
+        locator = self._make_locator()
+
+        path = locator.find_name(name, self.search_dirs)
+
+        return self.read(path)
+
+    # TODO: unit-test this method.
+    def load_object(self, obj):
+        """
+        Find and return the template associated to the given object.
+
+        Arguments:
+
+          obj: an instance of a user-defined class.
+
+          search_dirs: the list of directories in which to search.
+
+        """
+        locator = self._make_locator()
+
+        path = locator.find_object(obj, self.search_dirs)
+
+        return self.read(path)

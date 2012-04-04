@@ -1,7 +1,6 @@
-import pystache
+from pystache import TemplateSpec
 
-class Simple(pystache.View):
-    template_path = 'examples'
+class Simple(TemplateSpec):
 
     def thing(self):
         return "pizza"

@@ -1,7 +1,4 @@
-import pystache
-
-class Escaped(pystache.View):
-    template_path = 'examples'
+class Escaped(object):
 
     def title(self):
         return "Bear > Shark"

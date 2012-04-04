@@ -1,7 +1,4 @@
-import pystache
-
-class Comments(pystache.View):
-    template_path = 'examples'
+class Comments(object):
 
     def title(self):
         return "A Comedy of Errors"

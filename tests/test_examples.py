@@ -1,7 +1,6 @@
 # encoding: utf-8
 
 import unittest
-import pystache
 
 from examples.comments import Comments
 from examples.double_section import DoubleSection
@@ -12,72 +11,91 @@ from examples.delimiters import Delimiters
 from examples.unicode_output import UnicodeOutput
 from examples.unicode_input import UnicodeInput
 from examples.nested_context import NestedContext
+from pystache import Renderer
+from tests.common import EXAMPLES_DIR
+from tests.common import AssertStringMixin
 
-class TestView(unittest.TestCase):
+
+class TestView(unittest.TestCase, AssertStringMixin):
+
+    def _assert(self, obj, expected):
+        renderer = Renderer()
+        actual = renderer.render(obj)
+        self.assertString(actual, expected)
+
     def test_comments(self):
-        self.assertEquals(Comments().render(), """<h1>A Comedy of Errors</h1>
-""")
+        self._assert(Comments(), u"<h1>A Comedy of Errors</h1>")
 
     def test_double_section(self):
-        self.assertEquals(DoubleSection().render(),"""* first\n* second\n* third""")
+        self._assert(DoubleSection(), u"* first\n* second\n* third")
 
     def test_unicode_output(self):
-        self.assertEquals(UnicodeOutput().render(), u'<p>Name: Henri Poincaré</p>')
-
-    def test_encoded_output(self):
-        self.assertEquals(UnicodeOutput().render('utf8'), '<p>Name: Henri Poincar\xc3\xa9</p>')
+        renderer = Renderer()
+        actual = renderer.render(UnicodeOutput())
+        self.assertString(actual, u'<p>Name: Henri Poincaré</p>')
 
     def test_unicode_input(self):
-        self.assertEquals(UnicodeInput().render(),
-            u'<p>If alive today, Henri Poincaré would be 156 years old.</p>')
+        renderer = Renderer()
+        actual = renderer.render(UnicodeInput())
+        self.assertString(actual, u'abcdé')
 
-    def test_escaped(self):
-        self.assertEquals(Escaped().render(), "<h1>Bear &gt; Shark</h1>")
+    def test_escaping(self):
+        self._assert(Escaped(), u"<h1>Bear &gt; Shark</h1>")
 
-    def test_unescaped(self):
-        self.assertEquals(Unescaped().render(), "<h1>Bear > Shark</h1>")
-
-    def test_unescaped_sigil(self):
-        view = Escaped(template="<h1>{{& thing}}</h1>", context={
-                'thing': 'Bear > Giraffe'
-                })
-        self.assertEquals(view.render(), "<h1>Bear > Giraffe</h1>")
+    def test_literal(self):
+        renderer = Renderer()
+        actual = renderer.render(Unescaped())
+        self.assertString(actual, u"<h1>Bear > Shark</h1>")
 
     def test_template_partial(self):
-        self.assertEquals(TemplatePartial().render(), """<h1>Welcome</h1>
+        renderer = Renderer(search_dirs=EXAMPLES_DIR)
+        actual = renderer.render(TemplatePartial(renderer=renderer))
+
+        self.assertString(actual, u"""<h1>Welcome</h1>
 Again, Welcome!""")
 
     def test_template_partial_extension(self):
-        view = TemplatePartial()
-        view.template_extension = 'txt'
-        self.assertEquals(view.render(), """Welcome
+        renderer = Renderer(search_dirs=EXAMPLES_DIR, file_extension='txt')
+
+        view = TemplatePartial(renderer=renderer)
+
+        actual = renderer.render(view)
+        self.assertString(actual, u"""Welcome
 -------
 
-Again, Welcome!
-""")
-
+## Again, Welcome! ##""")
 
     def test_delimiters(self):
-        self.assertEquals(Delimiters().render(), """
+        renderer = Renderer()
+        actual = renderer.render(Delimiters())
+        self.assertString(actual, u"""\
 * It worked the first time.
-
 * And it worked the second time.
-
 * Then, surprisingly, it worked the third time.
 """)
 
     def test_nested_context(self):
-        self.assertEquals(NestedContext().render(), "one and foo and two")
+        renderer = Renderer()
+        actual = renderer.render(NestedContext(renderer))
+        self.assertString(actual, u"one and foo and two")
 
     def test_nested_context_is_available_in_view(self):
-        view = NestedContext()
+        renderer = Renderer()
+
+        view = NestedContext(renderer)
         view.template = '{{#herp}}{{#derp}}{{nested_context_in_view}}{{/derp}}{{/herp}}'
-        self.assertEquals(view.render(), 'it works!')
+
+        actual = renderer.render(view)
+        self.assertString(actual, u'it works!')
 
     def test_partial_in_partial_has_access_to_grand_parent_context(self):
-        view = TemplatePartial(context = {'prop': 'derp'})
+        renderer = Renderer(search_dirs=EXAMPLES_DIR)
+
+        view = TemplatePartial(renderer=renderer)
         view.template = '''{{>partial_in_partial}}'''
-        self.assertEquals(view.render(), 'Hi derp!')
+
+        actual = renderer.render(view, {'prop': 'derp'})
+        self.assertEquals(actual, 'Hi derp!')
 
 if __name__ == '__main__':
     unittest.main()

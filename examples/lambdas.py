@@ -1,4 +1,4 @@
-import pystache
+from pystache import TemplateSpec
 
 def rot(s, n=13):
     r = ""
@@ -17,8 +17,10 @@ def rot(s, n=13):
 def replace(subject, this='foo', with_this='bar'):
     return subject.replace(this, with_this)
 
-class Lambdas(pystache.View):
-    template_path = 'examples'
+
+# This class subclasses TemplateSpec because at least one unit test
+# sets the template attribute.
+class Lambdas(TemplateSpec):
 
     def replace_foo_with_bar(self, text=None):
         return replace
