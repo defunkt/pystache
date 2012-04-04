@@ -1,13 +1,15 @@
 History
 =======
 
-0.5.0 (TBD)
------------
+0.5.0 (2012-04-03)
+------------------
 
 This version represents a major rewrite and refactoring of the code base
 that also adds features and fixes many bugs.  All functionality and nearly
 all unit tests have been preserved.  However, some backwards incompatible
 changes to the API have been made.
+
+Below is a selection of some of the changes (not exhaustive).
 
 Highlights:
 
@@ -21,43 +23,30 @@ Highlights:
 * Introduced separation of concerns and removed circular dependencies (e.g.
   between Template and View classes, cf. `issue #13`_).
 * Unicode now used consistently throughout the rendering process.
-* Expanded test coverage: nosetests now includes doctests and ~105 test cases
-  from the Mustache spec (for a total of ~315 unit tests up from 56).
-* Added rudimentary benchmarking script.
+* Expanded test coverage: nosetests now runs doctests and ~105 test cases
+  from the Mustache spec (increasing the number of tests from 56 to ~315).
+* Added a rudimentary benchmarking script to gauge performance while refactoring.
+* Extensive documentation added (e.g. docstrings).
 
-TODO: complete the list of key changes.
+Other changes:
 
-Features:
-
-* Views and Renderers accept a custom template loader.  Also, this loader
-  can be a dictionary of partials. [cjerdonek]
-* Added a command-line interface. [vrde, cjerdonek]
-* Custom escape function can now be passed to Template constructor. [cjerdonek]
-* Template class can now handle non-ascii characters in non-unicode strings.
-  Added default_encoding and decode_errors to Template constructor arguments.
-  [cjerdonek]
-* Loader supports a decode_errors argument. [cjerdonek]
-
-API changes:
-
-* Removed output_encoding options. [cjerdonek]
-* Removed automatic use of markupsafe, if available. [cjerdonek]
+* Added a command-line interface. [vrde]
+* The main rendering class now accepts a custom partial loader (e.g. a dictionary)
+  and a custom escape function.
+* Non-ascii characters in str strings are now supported while rendering.
+* Added string encoding, file encoding, and errors options for decoding to unicode.
+* Removed the output encoding option.
+* Removed the use of markupsafe.
 
 Bug fixes:
 
 * Context values no longer processed as template strings. [jakearchibald]
-* Passing ``**kwargs`` to ``Template()`` modified the context. [cjerdonek]
-* Passing ``**kwargs`` to ``Template()`` with no context raised an exception. [cjerdonek]
-* Whitespace surrounding sections is no longer altered, in accordance with
-  the mustache spec. [heliodor]
-* Fixed an issue that affected the rendering of zeroes when using certain
-  implementations of Python (i.e. PyPy). [alex]
-* Extensionless template files could not be loaded. [cjerdonek]
+* Whitespace surrounding sections is no longer altered, per the spec. [heliodor]
+* Zeroes now render correctly when using PyPy. [alex]
 * Multline comments now permitted. [fczuardi]
-
-Misc:
-
-* Added some docstrings. [kennethreitz]
+* Extensionless template files are now supported.
+* Passing ``**kwargs`` to ``Template()`` no longer modifies the context.
+* Passing ``**kwargs`` to ``Template()`` with no context no longer raises an exception.
 
 0.4.1 (2012-03-25)
 ------------------

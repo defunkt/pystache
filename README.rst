@@ -85,7 +85,7 @@ Unicode Handling
 This section describes Pystache's handling of unicode (e.g. strings and
 encodings).
 
-Internally, Pystache uses only unicode strings.  For input, Pystache accepts
+Internally, Pystache uses `only unicode strings`_.  For input, Pystache accepts
 both ``unicode`` and ``str`` strings.  For output, Pystache's template
 rendering methods return only unicode.
 
@@ -173,6 +173,7 @@ Author
 .. _Mustache spec: https://github.com/mustache/spec
 .. _mustache(5): http://mustache.github.com/mustache.5.html
 .. _nose: http://somethingaboutorange.com/mrl/projects/nose/0.11.1/testing.html
+.. _only unicode strings: http://docs.python.org/howto/unicode.html#tips-for-writing-unicode-aware-programs
 .. _PyPI: http://pypi.python.org/pypi/pystache
 .. _Pystache: https://github.com/defunkt/pystache
 .. _semantically versioned: http://semver.org
