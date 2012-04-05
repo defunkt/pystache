@@ -22,13 +22,21 @@ class AssertStringMixin:
 
     """A unittest.TestCase mixin to check string equality."""
 
-    def assertString(self, actual, expected):
+    def assertString(self, actual, expected, format=None):
         """
         Assert that the given strings are equal and have the same type.
 
+        Arguments:
+
+          format: a format string containing a single conversion specifier %s.
+            Defaults to "%s".
+
         """
+        if format is None:
+            format = "%s"
+
         # Show both friendly and literal versions.
-        message = """String mismatch: %%s\
+        details = """String mismatch: %%s\
 
 
         Expected: \"""%s\"""
@@ -37,10 +45,14 @@ class AssertStringMixin:
         Expected: %s
         Actual:   %s""" % (expected, actual, repr(expected), repr(actual))
 
-        self.assertEquals(actual, expected, message % "different characters")
+        def make_message(reason):
+            description = details % reason
+            return format % description
 
-        details = "types different: %s != %s" % (repr(type(expected)), repr(type(actual)))
-        self.assertEquals(type(expected), type(actual), message % details)
+        self.assertEquals(actual, expected, make_message("different characters"))
+
+        reason = "types different: %s != %s (actual)" % (repr(type(expected)), repr(type(actual)))
+        self.assertEquals(type(expected), type(actual), make_message(reason))
 
 
 class AssertIsMixin:
