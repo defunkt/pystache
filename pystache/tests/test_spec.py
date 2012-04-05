@@ -31,6 +31,7 @@ else:
     parser = yaml
 
 
+import codecs
 import glob
 import os.path
 import unittest
@@ -160,15 +161,33 @@ for spec_path in spec_paths:
 
     file_name  = os.path.basename(spec_path)
 
-    # We avoid use of the with keyword for Python 2.4 support.
+    # We use codecs.open() for pre Python 2.6 support and because it ports
+    # correctly to Python 3:
+    #
+    #   "If pre-2.6 compatibility is needed, then you should use codecs.open()
+    #    instead. This will make sure that you get back unicode strings in Python 2."
+    #
+    #   (from http://docs.python.org/py3k/howto/pyporting.html#text-files )
+    #
     # TODO: share code here with pystache's open() code.
-    f = open(spec_path, 'r')
+    f = codecs.open(spec_path, 'r', encoding=FILE_ENCODING)
     try:
-        s = f.read()
+        u = f.read()
     finally:
         f.close()
 
-    u = s.decode(FILE_ENCODING)
+    # The only way to get the simplejson module to return unicode strings
+    # is to pass it unicode.  See, for example--
+    #
+    #   http://code.google.com/p/simplejson/issues/detail?id=40
+    #
+    # and the documentation of simplejson.loads():
+    #
+    #   "If s is a str then decoded JSON strings that contain only ASCII
+    #    characters may be parsed as str for performance and memory reasons.
+    #    If your code expects only unicode the appropriate solution is
+    #    decode s to unicode prior to calling loads."
+    #
     spec_data = parse(u, file_extension)
 
     tests = spec_data['tests']
