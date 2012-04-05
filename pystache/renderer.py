@@ -64,10 +64,10 @@ class Renderer(object):
             this class will only pass it unicode strings.  The constructor
             assigns this function to the constructed instance's escape()
             method.
-                The argument defaults to `cgi.escape(s, quote=True)`.  To
-            disable escaping entirely, one can pass `lambda u: u` as the
-            escape function, for example.  One may also wish to consider
-            using markupsafe's escape function: markupsafe.escape().
+                To disable escaping entirely, one can pass `lambda u: u`
+            as the escape function, for example.  One may also wish to
+            consider using markupsafe's escape function: markupsafe.escape().
+            This argument defaults to the package default.
 
           file_encoding: the name of the default encoding to use when reading
             template files.  All templates are converted to unicode prior

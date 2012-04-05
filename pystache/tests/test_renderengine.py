@@ -5,10 +5,10 @@ Unit tests of renderengine.py.
 
 """
 
-import cgi
 import unittest
 
 from pystache.context import Context
+from pystache import defaults
 from pystache.parser import ParsingError
 from pystache.renderengine import RenderEngine
 from pystache.tests.common import AssertStringMixin
@@ -47,7 +47,7 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         Create and return a default RenderEngine for testing.
 
         """
-        escape = lambda s: unicode(cgi.escape(s))
+        escape = defaults.TAG_ESCAPE
         engine = RenderEngine(literal=unicode, escape=escape, load_partial=None)
         return engine
 
