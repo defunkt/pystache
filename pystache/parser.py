@@ -105,9 +105,9 @@ class Parser(object):
 
             # Normalize the matches dictionary.
             if matches['change'] is not None:
-                matches.update(tag='=', tag_key=matches['delims'])
+                matches.update({'tag': '=', 'tag_key': matches['delims']})
             elif matches['raw'] is not None:
-                matches.update(tag='&', tag_key=matches['raw_name'])
+                matches.update({'tag': '&', 'tag_key': matches['raw_name']})
 
             tag_type = matches['tag']
             tag_key = matches['tag_key']

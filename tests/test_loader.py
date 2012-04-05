@@ -5,6 +5,7 @@ Unit tests of reader.py.
 
 """
 
+from pystache.compat import *
 import os
 import sys
 import unittest

@@ -5,12 +5,19 @@ This module provides a Locator class for finding template files.
 
 """
 
+from pystache.compat import *
 import os
 import re
 import sys
 
 from pystache import defaults
 
+
+try:
+    os.path.extsep
+except AttributeError:
+    # monkey patch and guess, probably Python 2.2
+    os.path.extsep = '.'
 
 class Locator(object):
 

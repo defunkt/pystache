@@ -1,3 +1,4 @@
+from pystache.compat import *
 from pystache import TemplateSpec
 
 def rot(s, n=13):

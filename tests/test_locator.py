@@ -32,7 +32,7 @@ class LocatorTests(unittest.TestCase):
         self.assertEquals(locator.template_extension, 'txt')
 
         locator = Locator(extension=False)
-        self.assertTrue(locator.template_extension is False)
+        self.assert_(locator.template_extension is False)
 
     def test_get_object_directory(self):
         locator = Locator()
@@ -79,7 +79,7 @@ class LocatorTests(unittest.TestCase):
         locator = Locator()
         path = locator.find_name(search_dirs=['doesnt_exist', 'examples'], template_name='simple')
 
-        self.assertTrue(path)
+        self.assert_(path)
 
     def test_find_name__precedence(self):
         """
@@ -91,8 +91,8 @@ class LocatorTests(unittest.TestCase):
         dir1 = DATA_DIR
         dir2 = os.path.join(DATA_DIR, 'locator')
 
-        self.assertTrue(locator.find_name(search_dirs=[dir1], template_name='duplicate'))
-        self.assertTrue(locator.find_name(search_dirs=[dir2], template_name='duplicate'))
+        self.assert_(locator.find_name(search_dirs=[dir1], template_name='duplicate'))
+        self.assert_(locator.find_name(search_dirs=[dir2], template_name='duplicate'))
 
         path = locator.find_name(search_dirs=[dir2, dir1], template_name='duplicate')
         dirpath = os.path.dirname(path)

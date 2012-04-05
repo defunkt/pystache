@@ -5,6 +5,9 @@ Defines a Context class to represent mustache(5)'s notion of context.
 
 """
 
+from pystache.compat import *
+
+
 class NotFound(object): pass
 # We use this private global variable as a return value to represent a key
 # not being found on lookup.  This lets us distinguish between the case
@@ -102,7 +105,6 @@ class Context(object):
         """
         return "%s%s" % (self.__class__.__name__, tuple(self._stack))
 
-    @staticmethod
     def create(*context, **kwargs):
         """
         Build a Context instance from a sequence of context-like items.
@@ -157,6 +159,7 @@ class Context(object):
             context.push(kwargs)
 
         return context
+    create = staticmethod(create)
 
     def get(self, key, default=None):
         """

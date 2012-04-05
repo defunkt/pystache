@@ -5,6 +5,7 @@ This module provides a Renderer class to render templates.
 
 """
 
+from pystache.compat import *
 from pystache import defaults
 from pystache.context import Context
 from pystache.loader import Loader
@@ -125,13 +126,13 @@ class Renderer(object):
     #   but instead letting the caller pass the initial context to the
     #   main render() method by reference.  This approach would probably
     #   be less likely to be misused.
-    @property
     def context(self):
         """
         Return the current rendering context [experimental].
 
         """
         return self._context
+    context = property(context)
 
     def _to_unicode_soft(self, s):
         """

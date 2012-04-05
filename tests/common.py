@@ -49,5 +49,6 @@ class AssertIsMixin:
 
     # unittest.assertIs() is not available until Python 2.7:
     #   http://docs.python.org/library/unittest.html#unittest.TestCase.assertIsNone
+    # assertTrue not available until 2.4?
     def assertIs(self, first, second):
-        self.assertTrue(first is second, msg="%s is not %s" % (repr(first), repr(second)))
+        self.assert_(first is second, msg="%s is not %s" % (repr(first), repr(second)))

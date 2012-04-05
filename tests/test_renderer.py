@@ -5,6 +5,7 @@ Unit tests of template.py.
 
 """
 
+from pystache.compat import *
 import codecs
 import os
 import sys
@@ -33,7 +34,7 @@ class RendererInitTestCase(unittest.TestCase):
 
         """
         renderer = Renderer()
-        self.assertTrue(renderer.partials is None)
+        self.assert_(renderer.partials is None)
 
     def test_partials(self):
         """
@@ -482,7 +483,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
         s = MyUnicode("abc")
 
         self.assertEquals(type(s), MyUnicode)
-        self.assertTrue(isinstance(s, unicode))
+        self.assert_(isinstance(s, unicode))
         self.assertEquals(type(literal(s)), unicode)
 
     ## Test the engine's escape attribute.
@@ -551,7 +552,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
         s = MyUnicode("abc")
 
         self.assertEquals(type(s), MyUnicode)
-        self.assertTrue(isinstance(s, unicode))
+        self.assert_(isinstance(s, unicode))
         self.assertEquals(type(escape(s)), unicode)
 
 
