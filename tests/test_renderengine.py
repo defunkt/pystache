@@ -453,3 +453,6 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         expected = u' {{foo}} '
         self._assert_render(expected, '{{=$ $=}} {{foo}} ')
         self._assert_render(expected, '{{=$ $=}} {{foo}} $={{ }}=$')  # was yielding u'  '.
+
+if __name__ == '__main__':
+    unittest.main()

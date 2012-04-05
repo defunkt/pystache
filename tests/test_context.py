@@ -398,3 +398,6 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
         # Confirm the original is unchanged.
         self.assertEquals(original.get(key), "buzz")
 
+
+if __name__ == '__main__':
+    unittest.main()

@@ -43,3 +43,6 @@ class CommandsTestCase(unittest.TestCase):
 
     def tearDown(self):
         sys.stdout = ORIGINAL_STDOUT
+
+if __name__ == '__main__':
+    unittest.main()

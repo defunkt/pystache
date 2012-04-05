@@ -148,3 +148,6 @@ class LocatorTests(unittest.TestCase):
         foo = FooBar()
 
         self.assertEquals(locator.make_template_name(foo), 'foo_bar')
+
+if __name__ == '__main__':
+    unittest.main()

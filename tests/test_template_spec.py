@@ -386,3 +386,6 @@ class TemplateSpecTests(unittest.TestCase):
 
         view.template_encoding = 'utf-8'
         self._assert_get_template(view, u"non-ascii: é")
+
+if __name__ == '__main__':
+    unittest.main()

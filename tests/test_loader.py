@@ -196,3 +196,6 @@ class LoaderTests(unittest.TestCase, AssertStringMixin):
         #actual = reader.read(path)
         #self.assertString(actual, u'non-ascii: ')
 
+
+if __name__ == '__main__':
+    unittest.main()

@@ -554,3 +554,6 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
         self.assertTrue(isinstance(s, unicode))
         self.assertEquals(type(escape(s)), unicode)
 
+
+if __name__ == '__main__':
+    unittest.main()
