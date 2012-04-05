@@ -26,10 +26,10 @@ class LocatorTests(unittest.TestCase):
     def test_init__extension(self):
         # Test the default value.
         locator = Locator()
-        self.assertEquals(locator.template_extension, 'mustache')
+        self.assertEqual(locator.template_extension, 'mustache')
 
         locator = Locator(extension='txt')
-        self.assertEquals(locator.template_extension, 'txt')
+        self.assertEqual(locator.template_extension, 'txt')
 
         locator = Locator(extension=False)
         self.assertTrue(locator.template_extension is False)
@@ -40,40 +40,40 @@ class LocatorTests(unittest.TestCase):
         obj = SayHello()
         actual = locator.get_object_directory(obj)
 
-        self.assertEquals(actual, os.path.abspath(DATA_DIR))
+        self.assertEqual(actual, os.path.abspath(DATA_DIR))
 
     def test_get_object_directory__not_hasattr_module(self):
         locator = Locator()
 
         obj = datetime(2000, 1, 1)
         self.assertFalse(hasattr(obj, '__module__'))
-        self.assertEquals(locator.get_object_directory(obj), None)
+        self.assertEqual(locator.get_object_directory(obj), None)
 
         self.assertFalse(hasattr(None, '__module__'))
-        self.assertEquals(locator.get_object_directory(None), None)
+        self.assertEqual(locator.get_object_directory(None), None)
 
     def test_make_file_name(self):
         locator = Locator()
 
         locator.template_extension = 'bar'
-        self.assertEquals(locator.make_file_name('foo'), 'foo.bar')
+        self.assertEqual(locator.make_file_name('foo'), 'foo.bar')
 
         locator.template_extension = False
-        self.assertEquals(locator.make_file_name('foo'), 'foo')
+        self.assertEqual(locator.make_file_name('foo'), 'foo')
 
         locator.template_extension = ''
-        self.assertEquals(locator.make_file_name('foo'), 'foo.')
+        self.assertEqual(locator.make_file_name('foo'), 'foo.')
 
     def test_make_file_name__template_extension_argument(self):
         locator = Locator()
 
-        self.assertEquals(locator.make_file_name('foo', template_extension='bar'), 'foo.bar')
+        self.assertEqual(locator.make_file_name('foo', template_extension='bar'), 'foo.bar')
 
     def test_find_name(self):
         locator = Locator()
         path = locator.find_name(search_dirs=['examples'], template_name='simple')
 
-        self.assertEquals(os.path.basename(path), 'simple.mustache')
+        self.assertEqual(os.path.basename(path), 'simple.mustache')
 
     def test_find_name__using_list_of_paths(self):
         locator = Locator()
@@ -98,7 +98,7 @@ class LocatorTests(unittest.TestCase):
         dirpath = os.path.dirname(path)
         dirname = os.path.split(dirpath)[-1]
 
-        self.assertEquals(dirname, 'locator')
+        self.assertEqual(dirname, 'locator')
 
     def test_find_name__non_existent_template_fails(self):
         locator = Locator()
@@ -113,7 +113,7 @@ class LocatorTests(unittest.TestCase):
         actual = locator.find_object(search_dirs=[], obj=obj, file_name='sample_view.mustache')
         expected = os.path.abspath(os.path.join(DATA_DIR, 'sample_view.mustache'))
 
-        self.assertEquals(actual, expected)
+        self.assertEqual(actual, expected)
 
     def test_find_object__none_file_name(self):
         locator = Locator()
@@ -123,18 +123,18 @@ class LocatorTests(unittest.TestCase):
         actual = locator.find_object(search_dirs=[], obj=obj)
         expected = os.path.abspath(os.path.join(DATA_DIR, 'say_hello.mustache'))
 
-        self.assertEquals(actual, expected)
+        self.assertEqual(actual, expected)
 
     def test_find_object__none_object_directory(self):
         locator = Locator()
 
         obj = None
-        self.assertEquals(None, locator.get_object_directory(obj))
+        self.assertEqual(None, locator.get_object_directory(obj))
 
         actual = locator.find_object(search_dirs=[DATA_DIR], obj=obj, file_name='say_hello.mustache')
         expected = os.path.join(DATA_DIR, 'say_hello.mustache')
 
-        self.assertEquals(actual, expected)
+        self.assertEqual(actual, expected)
 
     def test_make_template_name(self):
         """
@@ -147,4 +147,4 @@ class LocatorTests(unittest.TestCase):
             pass
         foo = FooBar()
 
-        self.assertEquals(locator.make_template_name(foo), 'foo_bar')
+        self.assertEqual(locator.make_template_name(foo), 'foo_bar')

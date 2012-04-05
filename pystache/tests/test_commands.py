@@ -39,7 +39,7 @@ class CommandsTestCase(unittest.TestCase):
 
         """
         actual = self.callScript("Hi {{thing}}", '{"thing": "world"}')
-        self.assertEquals(actual, u"Hi world\n")
+        self.assertEqual(actual, u"Hi world\n")
 
     def tearDown(self):
         sys.stdout = ORIGINAL_STDOUT

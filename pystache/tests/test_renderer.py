@@ -41,20 +41,20 @@ class RendererInitTestCase(unittest.TestCase):
 
         """
         renderer = Renderer(partials={'foo': 'bar'})
-        self.assertEquals(renderer.partials, {'foo': 'bar'})
+        self.assertEqual(renderer.partials, {'foo': 'bar'})
 
     def test_escape__default(self):
         escape = Renderer().escape
 
-        self.assertEquals(escape(">"), "&gt;")
-        self.assertEquals(escape('"'), "&quot;")
+        self.assertEqual(escape(">"), "&gt;")
+        self.assertEqual(escape('"'), "&quot;")
         # Single quotes are not escaped.
-        self.assertEquals(escape("'"), "'")
+        self.assertEqual(escape("'"), "'")
 
     def test_escape(self):
         escape = lambda s: "**" + s
         renderer = Renderer(escape=escape)
-        self.assertEquals(renderer.escape("bar"), "**bar")
+        self.assertEqual(renderer.escape("bar"), "**bar")
 
     def test_decode_errors__default(self):
         """
@@ -62,7 +62,7 @@ class RendererInitTestCase(unittest.TestCase):
 
         """
         renderer = Renderer()
-        self.assertEquals(renderer.decode_errors, 'strict')
+        self.assertEqual(renderer.decode_errors, 'strict')
 
     def test_decode_errors(self):
         """
@@ -70,7 +70,7 @@ class RendererInitTestCase(unittest.TestCase):
 
         """
         renderer = Renderer(decode_errors="foo")
-        self.assertEquals(renderer.decode_errors, "foo")
+        self.assertEqual(renderer.decode_errors, "foo")
 
     def test_file_encoding__default(self):
         """
@@ -78,7 +78,7 @@ class RendererInitTestCase(unittest.TestCase):
 
         """
         renderer = Renderer()
-        self.assertEquals(renderer.file_encoding, renderer.string_encoding)
+        self.assertEqual(renderer.file_encoding, renderer.string_encoding)
 
     def test_file_encoding(self):
         """
@@ -86,7 +86,7 @@ class RendererInitTestCase(unittest.TestCase):
 
         """
         renderer = Renderer(file_encoding='foo')
-        self.assertEquals(renderer.file_encoding, 'foo')
+        self.assertEqual(renderer.file_encoding, 'foo')
 
     def test_file_extension__default(self):
         """
@@ -94,7 +94,7 @@ class RendererInitTestCase(unittest.TestCase):
 
         """
         renderer = Renderer()
-        self.assertEquals(renderer.file_extension, 'mustache')
+        self.assertEqual(renderer.file_extension, 'mustache')
 
     def test_file_extension(self):
         """
@@ -102,7 +102,7 @@ class RendererInitTestCase(unittest.TestCase):
 
         """
         renderer = Renderer(file_extension='foo')
-        self.assertEquals(renderer.file_extension, 'foo')
+        self.assertEqual(renderer.file_extension, 'foo')
 
     def test_search_dirs__default(self):
         """
@@ -110,7 +110,7 @@ class RendererInitTestCase(unittest.TestCase):
 
         """
         renderer = Renderer()
-        self.assertEquals(renderer.search_dirs, [os.curdir])
+        self.assertEqual(renderer.search_dirs, [os.curdir])
 
     def test_search_dirs__string(self):
         """
@@ -118,7 +118,7 @@ class RendererInitTestCase(unittest.TestCase):
 
         """
         renderer = Renderer(search_dirs='foo')
-        self.assertEquals(renderer.search_dirs, ['foo'])
+        self.assertEqual(renderer.search_dirs, ['foo'])
 
     def test_search_dirs__list(self):
         """
@@ -126,7 +126,7 @@ class RendererInitTestCase(unittest.TestCase):
 
         """
         renderer = Renderer(search_dirs=['foo'])
-        self.assertEquals(renderer.search_dirs, ['foo'])
+        self.assertEqual(renderer.search_dirs, ['foo'])
 
     def test_string_encoding__default(self):
         """
@@ -134,7 +134,7 @@ class RendererInitTestCase(unittest.TestCase):
 
         """
         renderer = Renderer()
-        self.assertEquals(renderer.string_encoding, sys.getdefaultencoding())
+        self.assertEqual(renderer.string_encoding, sys.getdefaultencoding())
 
     def test_string_encoding(self):
         """
@@ -142,7 +142,7 @@ class RendererInitTestCase(unittest.TestCase):
 
         """
         renderer = Renderer(string_encoding="foo")
-        self.assertEquals(renderer.string_encoding, "foo")
+        self.assertEqual(renderer.string_encoding, "foo")
 
 
 class RendererTests(unittest.TestCase, AssertStringMixin):
@@ -166,7 +166,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         self.assertRaises(UnicodeDecodeError, renderer.unicode, s)
 
         renderer.string_encoding = "utf-8"
-        self.assertEquals(renderer.unicode(s), u"é")
+        self.assertEqual(renderer.unicode(s), u"é")
 
     def test_unicode__decode_errors(self):
         """
@@ -178,11 +178,11 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         s = "déf"
 
         renderer.decode_errors = "ignore"
-        self.assertEquals(renderer.unicode(s), "df")
+        self.assertEqual(renderer.unicode(s), "df")
 
         renderer.decode_errors = "replace"
         # U+FFFD is the official Unicode replacement character.
-        self.assertEquals(renderer.unicode(s), u'd\ufffd\ufffdf')
+        self.assertEqual(renderer.unicode(s), u'd\ufffd\ufffdf')
 
     ## Test the _make_loader() method.
 
@@ -194,7 +194,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         renderer = Renderer()
         loader = renderer._make_loader()
 
-        self.assertEquals(type(loader), Loader)
+        self.assertEqual(type(loader), Loader)
 
     def test__make_loader__attributes(self):
         """
@@ -210,9 +210,9 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
 
         loader = renderer._make_loader()
 
-        self.assertEquals(loader.extension, 'ext')
-        self.assertEquals(loader.file_encoding, 'enc')
-        self.assertEquals(loader.to_unicode, unicode_)
+        self.assertEqual(loader.extension, 'ext')
+        self.assertEqual(loader.file_encoding, 'enc')
+        self.assertEqual(loader.to_unicode, unicode_)
 
     ## Test the render() method.
 
@@ -223,22 +223,22 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         """
         renderer = Renderer()
         rendered = renderer.render('foo')
-        self.assertEquals(type(rendered), unicode)
+        self.assertEqual(type(rendered), unicode)
 
     def test_render__unicode(self):
         renderer = Renderer()
         actual = renderer.render(u'foo')
-        self.assertEquals(actual, u'foo')
+        self.assertEqual(actual, u'foo')
 
     def test_render__str(self):
         renderer = Renderer()
         actual = renderer.render('foo')
-        self.assertEquals(actual, 'foo')
+        self.assertEqual(actual, 'foo')
 
     def test_render__non_ascii_character(self):
         renderer = Renderer()
         actual = renderer.render(u'Poincaré')
-        self.assertEquals(actual, u'Poincaré')
+        self.assertEqual(actual, u'Poincaré')
 
     def test_render__context(self):
         """
@@ -246,7 +246,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
 
         """
         renderer = Renderer()
-        self.assertEquals(renderer.render('Hi {{person}}', {'person': 'Mom'}), 'Hi Mom')
+        self.assertEqual(renderer.render('Hi {{person}}', {'person': 'Mom'}), 'Hi Mom')
 
     def test_render__context_and_kwargs(self):
         """
@@ -255,7 +255,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         """
         renderer = Renderer()
         template = 'Hi {{person1}} and {{person2}}'
-        self.assertEquals(renderer.render(template, {'person1': 'Mom'}, person2='Dad'), 'Hi Mom and Dad')
+        self.assertEqual(renderer.render(template, {'person1': 'Mom'}, person2='Dad'), 'Hi Mom and Dad')
 
     def test_render__kwargs_and_no_context(self):
         """
@@ -263,7 +263,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
 
         """
         renderer = Renderer()
-        self.assertEquals(renderer.render('Hi {{person}}', person='Mom'), 'Hi Mom')
+        self.assertEqual(renderer.render('Hi {{person}}', person='Mom'), 'Hi Mom')
 
     def test_render__context_and_kwargs__precedence(self):
         """
@@ -271,7 +271,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
 
         """
         renderer = Renderer()
-        self.assertEquals(renderer.render('Hi {{person}}', {'person': 'Mom'}, person='Dad'), 'Hi Dad')
+        self.assertEqual(renderer.render('Hi {{person}}', {'person': 'Mom'}, person='Dad'), 'Hi Dad')
 
     def test_render__kwargs_does_not_modify_context(self):
         """
@@ -281,7 +281,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         context = {}
         renderer = Renderer()
         renderer.render('Hi {{person}}', context=context, foo="bar")
-        self.assertEquals(context, {})
+        self.assertEqual(context, {})
 
     def test_render__nonascii_template(self):
         """
@@ -294,10 +294,10 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         # Check that decode_errors and string_encoding are both respected.
         renderer.decode_errors = 'ignore'
         renderer.string_encoding = 'ascii'
-        self.assertEquals(renderer.render(template), "df")
+        self.assertEqual(renderer.render(template), "df")
 
         renderer.string_encoding = 'utf_8'
-        self.assertEquals(renderer.render(template), u"déf")
+        self.assertEqual(renderer.render(template), u"déf")
 
     def test_make_load_partial(self):
         """
@@ -309,8 +309,8 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         load_partial = renderer._make_load_partial()
 
         actual = load_partial('foo')
-        self.assertEquals(actual, 'bar')
-        self.assertEquals(type(actual), unicode, "RenderEngine requires that "
+        self.assertEqual(actual, 'bar')
+        self.assertEqual(type(actual), unicode, "RenderEngine requires that "
             "load_partial return unicode strings.")
 
     def test_make_load_partial__unicode(self):
@@ -322,14 +322,14 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
 
         renderer.partials = {'partial': 'foo'}
         load_partial = renderer._make_load_partial()
-        self.assertEquals(load_partial("partial"), "foo")
+        self.assertEqual(load_partial("partial"), "foo")
 
         # Now with a value that is already unicode.
         renderer.partials = {'partial': u'foo'}
         load_partial = renderer._make_load_partial()
         # If the next line failed, we would get the following error:
         #   TypeError: decoding Unicode is not supported
-        self.assertEquals(load_partial("partial"), "foo")
+        self.assertEqual(load_partial("partial"), "foo")
 
     def test_render_path(self):
         """
@@ -339,7 +339,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         renderer = Renderer()
         path = get_data_path('say_hello.mustache')
         actual = renderer.render_path(path, to='foo')
-        self.assertEquals(actual, "Hello, foo")
+        self.assertEqual(actual, "Hello, foo")
 
     def test_render__object(self):
         """
@@ -350,10 +350,10 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
 
         say_hello = SayHello()
         actual = renderer.render(say_hello)
-        self.assertEquals('Hello, World', actual)
+        self.assertEqual('Hello, World', actual)
 
         actual = renderer.render(say_hello, to='Mars')
-        self.assertEquals('Hello, Mars', actual)
+        self.assertEqual('Hello, Mars', actual)
 
     def test_render__template_spec(self):
         """
@@ -379,7 +379,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
 
         view = Simple()
         actual = renderer.render(view)
-        self.assertEquals('Hi pizza!', actual)
+        self.assertEqual('Hi pizza!', actual)
 
 
 # By testing that Renderer.render() constructs the right RenderEngine,
@@ -410,13 +410,13 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
         engine = renderer._make_render_engine()
 
         actual = engine.load_partial('str')
-        self.assertEquals(actual, "foo")
-        self.assertEquals(type(actual), unicode)
+        self.assertEqual(actual, "foo")
+        self.assertEqual(type(actual), unicode)
 
         # Check that unicode subclasses are not preserved.
         actual = engine.load_partial('subclass')
-        self.assertEquals(actual, "abc")
-        self.assertEquals(type(actual), unicode)
+        self.assertEqual(actual, "abc")
+        self.assertEqual(type(actual), unicode)
 
     def test__load_partial__not_found(self):
         """
@@ -433,7 +433,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
             load_partial("foo")
             raise Exception("Shouldn't get here")
         except Exception, err:
-            self.assertEquals(str(err), "Partial not found with name: 'foo'")
+            self.assertEqual(str(err), "Partial not found with name: 'foo'")
 
     ## Test the engine's literal attribute.
 
@@ -448,7 +448,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
         engine = renderer._make_render_engine()
         literal = engine.literal
 
-        self.assertEquals(literal("foo"), "FOO")
+        self.assertEqual(literal("foo"), "FOO")
 
     def test__literal__handles_unicode(self):
         """
@@ -461,7 +461,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
         engine = renderer._make_render_engine()
         literal = engine.literal
 
-        self.assertEquals(literal(u"foo"), "foo")
+        self.assertEqual(literal(u"foo"), "foo")
 
     def test__literal__returns_unicode(self):
         """
@@ -474,16 +474,16 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
         engine = renderer._make_render_engine()
         literal = engine.literal
 
-        self.assertEquals(type(literal("foo")), unicode)
+        self.assertEqual(type(literal("foo")), unicode)
 
         class MyUnicode(unicode):
             pass
 
         s = MyUnicode("abc")
 
-        self.assertEquals(type(s), MyUnicode)
+        self.assertEqual(type(s), MyUnicode)
         self.assertTrue(isinstance(s, unicode))
-        self.assertEquals(type(literal(s)), unicode)
+        self.assertEqual(type(literal(s)), unicode)
 
     ## Test the engine's escape attribute.
 
@@ -498,7 +498,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
         engine = renderer._make_render_engine()
         escape = engine.escape
 
-        self.assertEquals(escape("foo"), "**foo")
+        self.assertEqual(escape("foo"), "**foo")
 
     def test__escape__uses_renderer_unicode(self):
         """
@@ -511,7 +511,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
         engine = renderer._make_render_engine()
         escape = engine.escape
 
-        self.assertEquals(escape("foo"), "FOO")
+        self.assertEqual(escape("foo"), "FOO")
 
     def test__escape__has_access_to_original_unicode_subclass(self):
         """
@@ -527,9 +527,9 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
         class MyUnicode(unicode):
             pass
 
-        self.assertEquals(escape("foo"), "unicode")
-        self.assertEquals(escape(u"foo"), "unicode")
-        self.assertEquals(escape(MyUnicode("foo")), "MyUnicode")
+        self.assertEqual(escape("foo"), "unicode")
+        self.assertEqual(escape(u"foo"), "unicode")
+        self.assertEqual(escape(MyUnicode("foo")), "MyUnicode")
 
     def test__escape__returns_unicode(self):
         """
@@ -542,7 +542,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
         engine = renderer._make_render_engine()
         escape = engine.escape
 
-        self.assertEquals(type(escape("foo")), unicode)
+        self.assertEqual(type(escape("foo")), unicode)
 
         # Check that literal doesn't preserve unicode subclasses.
         class MyUnicode(unicode):
@@ -550,7 +550,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
 
         s = MyUnicode("abc")
 
-        self.assertEquals(type(s), MyUnicode)
+        self.assertEqual(type(s), MyUnicode)
         self.assertTrue(isinstance(s, unicode))
-        self.assertEquals(type(escape(s)), unicode)
+        self.assertEqual(type(escape(s)), unicode)
 

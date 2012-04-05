@@ -58,7 +58,7 @@ class GetValueTests(unittest.TestCase, AssertIsMixin):
 
         """
         item = {"foo": "bar"}
-        self.assertEquals(_get_value(item, "foo"), "bar")
+        self.assertEqual(_get_value(item, "foo"), "bar")
 
     def test_dictionary__callable_not_called(self):
         """
@@ -87,7 +87,7 @@ class GetValueTests(unittest.TestCase, AssertIsMixin):
         """
         item = {}
         attr_name = "keys"
-        self.assertEquals(getattr(item, attr_name)(), [])
+        self.assertEqual(getattr(item, attr_name)(), [])
         self.assertNotFound(item, attr_name)
 
     def test_dictionary__dict_subclass(self):
@@ -100,7 +100,7 @@ class GetValueTests(unittest.TestCase, AssertIsMixin):
         item = DictSubclass()
         item["foo"] = "bar"
 
-        self.assertEquals(_get_value(item, "foo"), "bar")
+        self.assertEqual(_get_value(item, "foo"), "bar")
 
     ### Case: the item is an object.
 
@@ -110,7 +110,7 @@ class GetValueTests(unittest.TestCase, AssertIsMixin):
 
         """
         item = SimpleObject()
-        self.assertEquals(_get_value(item, "foo"), "bar")
+        self.assertEqual(_get_value(item, "foo"), "bar")
 
     def test_object__attribute_missing(self):
         """
@@ -126,7 +126,7 @@ class GetValueTests(unittest.TestCase, AssertIsMixin):
 
         """
         item = SimpleObject()
-        self.assertEquals(_get_value(item, "foo_callable"), "called...")
+        self.assertEqual(_get_value(item, "foo_callable"), "called...")
 
     def test_object__non_built_in_type(self):
         """
@@ -134,7 +134,7 @@ class GetValueTests(unittest.TestCase, AssertIsMixin):
 
         """
         item = datetime(2012, 1, 2)
-        self.assertEquals(_get_value(item, "day"), 2)
+        self.assertEqual(_get_value(item, "day"), 2)
 
     def test_object__dict_like(self):
         """
@@ -142,7 +142,7 @@ class GetValueTests(unittest.TestCase, AssertIsMixin):
 
         """
         item = DictLike()
-        self.assertEquals(item["foo"], "bar")
+        self.assertEqual(item["foo"], "bar")
         self.assertNotFound(item, "foo")
 
     ### Case: the item is an instance of a built-in type.
@@ -168,10 +168,10 @@ class GetValueTests(unittest.TestCase, AssertIsMixin):
             #
             return
 
-        self.assertEquals(item1.real, 10)
-        self.assertEquals(item2.real, 10)
+        self.assertEqual(item1.real, 10)
+        self.assertEqual(item2.real, 10)
 
-        self.assertEquals(_get_value(item1, 'real'), 10)
+        self.assertEqual(_get_value(item1, 'real'), 10)
         self.assertNotFound(item2, 'real')
 
     def test_built_in_type__string(self):
@@ -184,10 +184,10 @@ class GetValueTests(unittest.TestCase, AssertIsMixin):
         item1 = MyStr('abc')
         item2 = 'abc'
 
-        self.assertEquals(item1.upper(), 'ABC')
-        self.assertEquals(item2.upper(), 'ABC')
+        self.assertEqual(item1.upper(), 'ABC')
+        self.assertEqual(item2.upper(), 'ABC')
 
-        self.assertEquals(_get_value(item1, 'upper'), 'ABC')
+        self.assertEqual(_get_value(item1, 'upper'), 'ABC')
         self.assertNotFound(item2, 'upper')
 
     def test_built_in_type__list(self):
@@ -200,10 +200,10 @@ class GetValueTests(unittest.TestCase, AssertIsMixin):
         item1 = MyList([1, 2, 3])
         item2 = [1, 2, 3]
 
-        self.assertEquals(item1.pop(), 3)
-        self.assertEquals(item2.pop(), 3)
+        self.assertEqual(item1.pop(), 3)
+        self.assertEqual(item2.pop(), 3)
 
-        self.assertEquals(_get_value(item1, 'pop'), 2)
+        self.assertEqual(_get_value(item1, 'pop'), 2)
         self.assertNotFound(item2, 'pop')
 
 
@@ -230,23 +230,23 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
 
     def test__repr(self):
         context = Context()
-        self.assertEquals(repr(context), 'Context()')
+        self.assertEqual(repr(context), 'Context()')
 
         context = Context({'foo': 'bar'})
-        self.assertEquals(repr(context), "Context({'foo': 'bar'},)")
+        self.assertEqual(repr(context), "Context({'foo': 'bar'},)")
 
         context = Context({'foo': 'bar'}, {'abc': 123})
-        self.assertEquals(repr(context), "Context({'foo': 'bar'}, {'abc': 123})")
+        self.assertEqual(repr(context), "Context({'foo': 'bar'}, {'abc': 123})")
 
     def test__str(self):
         context = Context()
-        self.assertEquals(str(context), 'Context()')
+        self.assertEqual(str(context), 'Context()')
 
         context = Context({'foo': 'bar'})
-        self.assertEquals(str(context), "Context({'foo': 'bar'},)")
+        self.assertEqual(str(context), "Context({'foo': 'bar'},)")
 
         context = Context({'foo': 'bar'}, {'abc': 123})
-        self.assertEquals(str(context), "Context({'foo': 'bar'}, {'abc': 123})")
+        self.assertEqual(str(context), "Context({'foo': 'bar'}, {'abc': 123})")
 
     ## Test the static create() method.
 
@@ -256,7 +256,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
 
         """
         context = Context.create({'foo': 'bar'})
-        self.assertEquals(context.get('foo'), 'bar')
+        self.assertEqual(context.get('foo'), 'bar')
 
     def test_create__none(self):
         """
@@ -264,7 +264,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
 
         """
         context = Context.create({'foo': 'bar'}, None)
-        self.assertEquals(context.get('foo'), 'bar')
+        self.assertEqual(context.get('foo'), 'bar')
 
     def test_create__object(self):
         """
@@ -274,7 +274,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
         class Foo(object):
             foo = 'bar'
         context = Context.create(Foo())
-        self.assertEquals(context.get('foo'), 'bar')
+        self.assertEqual(context.get('foo'), 'bar')
 
     def test_create__context(self):
         """
@@ -283,7 +283,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
         """
         obj = Context({'foo': 'bar'})
         context = Context.create(obj)
-        self.assertEquals(context.get('foo'), 'bar')
+        self.assertEqual(context.get('foo'), 'bar')
 
     def test_create__kwarg(self):
         """
@@ -291,7 +291,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
 
         """
         context = Context.create(foo='bar')
-        self.assertEquals(context.get('foo'), 'bar')
+        self.assertEqual(context.get('foo'), 'bar')
 
     def test_create__precedence_positional(self):
         """
@@ -299,7 +299,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
 
         """
         context = Context.create({'foo': 'bar'}, {'foo': 'buzz'})
-        self.assertEquals(context.get('foo'), 'buzz')
+        self.assertEqual(context.get('foo'), 'buzz')
 
     def test_create__precedence_keyword(self):
         """
@@ -307,7 +307,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
 
         """
         context = Context.create({'foo': 'bar'}, foo='buzz')
-        self.assertEquals(context.get('foo'), 'buzz')
+        self.assertEqual(context.get('foo'), 'buzz')
 
     def test_get__key_present(self):
         """
@@ -315,7 +315,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
 
         """
         context = Context({"foo": "bar"})
-        self.assertEquals(context.get("foo"), "bar")
+        self.assertEqual(context.get("foo"), "bar")
 
     def test_get__key_missing(self):
         """
@@ -331,7 +331,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
 
         """
         context = Context()
-        self.assertEquals(context.get("foo", "bar"), "bar")
+        self.assertEqual(context.get("foo", "bar"), "bar")
 
     def test_get__precedence(self):
         """
@@ -339,7 +339,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
 
         """
         context = Context({"foo": "bar"}, {"foo": "buzz"})
-        self.assertEquals(context.get("foo"), "buzz")
+        self.assertEqual(context.get("foo"), "buzz")
 
     def test_get__fallback(self):
         """
@@ -347,7 +347,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
 
         """
         context = Context({"fuzz": "buzz"}, {"foo": "bar"})
-        self.assertEquals(context.get("fuzz"), "buzz")
+        self.assertEqual(context.get("fuzz"), "buzz")
 
     def test_push(self):
         """
@@ -356,10 +356,10 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
         """
         key = "foo"
         context = Context({key: "bar"})
-        self.assertEquals(context.get(key), "bar")
+        self.assertEqual(context.get(key), "bar")
 
         context.push({key: "buzz"})
-        self.assertEquals(context.get(key), "buzz")
+        self.assertEqual(context.get(key), "buzz")
 
     def test_pop(self):
         """
@@ -368,33 +368,33 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
         """
         key = "foo"
         context = Context({key: "bar"}, {key: "buzz"})
-        self.assertEquals(context.get(key), "buzz")
+        self.assertEqual(context.get(key), "buzz")
 
         item = context.pop()
-        self.assertEquals(item, {"foo": "buzz"})
-        self.assertEquals(context.get(key), "bar")
+        self.assertEqual(item, {"foo": "buzz"})
+        self.assertEqual(context.get(key), "bar")
 
     def test_top(self):
         key = "foo"
         context = Context({key: "bar"}, {key: "buzz"})
-        self.assertEquals(context.get(key), "buzz")
+        self.assertEqual(context.get(key), "buzz")
 
         top = context.top()
-        self.assertEquals(top, {"foo": "buzz"})
+        self.assertEqual(top, {"foo": "buzz"})
         # Make sure calling top() didn't remove the item from the stack.
-        self.assertEquals(context.get(key), "buzz")
+        self.assertEqual(context.get(key), "buzz")
 
     def test_copy(self):
         key = "foo"
         original = Context({key: "bar"}, {key: "buzz"})
-        self.assertEquals(original.get(key), "buzz")
+        self.assertEqual(original.get(key), "buzz")
 
         new = original.copy()
         # Confirm that the copy behaves the same.
-        self.assertEquals(new.get(key), "buzz")
+        self.assertEqual(new.get(key), "buzz")
         # Change the copy, and confirm it is changed.
         new.pop()
-        self.assertEquals(new.get(key), "bar")
+        self.assertEqual(new.get(key), "bar")
         # Confirm the original is unchanged.
-        self.assertEquals(original.get(key), "buzz")
+        self.assertEqual(original.get(key), "buzz")
 

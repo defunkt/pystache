@@ -18,30 +18,30 @@ class LoaderTests(unittest.TestCase, AssertStringMixin):
 
     def test_init__extension(self):
         loader = Loader(extension='foo')
-        self.assertEquals(loader.extension, 'foo')
+        self.assertEqual(loader.extension, 'foo')
 
     def test_init__extension__default(self):
         # Test the default value.
         loader = Loader()
-        self.assertEquals(loader.extension, 'mustache')
+        self.assertEqual(loader.extension, 'mustache')
 
     def test_init__file_encoding(self):
         loader = Loader(file_encoding='bar')
-        self.assertEquals(loader.file_encoding, 'bar')
+        self.assertEqual(loader.file_encoding, 'bar')
 
     def test_init__file_encoding__default(self):
         file_encoding = defaults.FILE_ENCODING
         try:
             defaults.FILE_ENCODING = 'foo'
             loader = Loader()
-            self.assertEquals(loader.file_encoding, 'foo')
+            self.assertEqual(loader.file_encoding, 'foo')
         finally:
             defaults.FILE_ENCODING = file_encoding
 
     def test_init__to_unicode(self):
         to_unicode = lambda x: x
         loader = Loader(to_unicode=to_unicode)
-        self.assertEquals(loader.to_unicode, to_unicode)
+        self.assertEqual(loader.to_unicode, to_unicode)
 
     def test_init__to_unicode__default(self):
         loader = Loader()

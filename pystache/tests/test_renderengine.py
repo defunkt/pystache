@@ -26,9 +26,9 @@ class RenderEngineTestCase(unittest.TestCase):
         # In real-life, these arguments would be functions
         engine = RenderEngine(load_partial="foo", literal="literal", escape="escape")
 
-        self.assertEquals(engine.escape, "escape")
-        self.assertEquals(engine.literal, "literal")
-        self.assertEquals(engine.load_partial, "foo")
+        self.assertEqual(engine.escape, "escape")
+        self.assertEqual(engine.literal, "literal")
+        self.assertEqual(engine.load_partial, "foo")
 
 
 class RenderTests(unittest.TestCase, AssertStringMixin):
@@ -315,7 +315,7 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         try:
             self._assert_render(None, template)
         except ParsingError, err:
-            self.assertEquals(str(err), "Section end tag mismatch: u'section' != None")
+            self.assertEqual(str(err), "Section end tag mismatch: u'section' != None")
 
     def test_section__end_tag_mismatch(self):
         """
@@ -326,7 +326,7 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         try:
             self._assert_render(None, template)
         except ParsingError, err:
-            self.assertEquals(str(err), "Section end tag mismatch: u'section_end' != u'section_start'")
+            self.assertEqual(str(err), "Section end tag mismatch: u'section_end' != u'section_start'")
 
     def test_section__context_values(self):
         """

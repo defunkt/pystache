@@ -55,10 +55,10 @@ class AssertStringMixin:
             description = details % reason
             return format % description
 
-        self.assertEquals(actual, expected, make_message("different characters"))
+        self.assertEqual(actual, expected, make_message("different characters"))
 
         reason = "types different: %s != %s (actual)" % (repr(type(expected)), repr(type(actual)))
-        self.assertEquals(type(expected), type(actual), make_message(reason))
+        self.assertEqual(type(expected), type(actual), make_message(reason))
 
 
 class AssertIsMixin:
