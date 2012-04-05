@@ -31,10 +31,10 @@ Pystache is tested with the following versions of Python:
 * Python 2.7
 
 JSON support is needed only for the command-line interface and to run the
-spec tests.  Python's json_ module is new as of Python 2.6.  Python's
-simplejson_ package works with earlier versions of Python.  Because
-simplejson stopped officially supporting Python 2.4 as of version 2.1.0,
-Python 2.4 requires an earlier version.
+spec tests.  We require simplejson_ for earlier versions of Python since
+Python's json_ module was added in Python 2.6.  Moreover, we require an
+earlier version of simplejson for Python 2.4 since simplejson stopped
+officially supporting Python 2.4 with version 2.1.0.
 
 
 Install It
