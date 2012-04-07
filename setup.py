@@ -40,7 +40,7 @@ import sys
 
 
 try:
-    from setuptools import setup
+    from setuptools import setup, find_packages
 except ImportError:
     from distutils.core import setup
 
@@ -68,18 +68,26 @@ if sys.argv[-1] == 'publish':
     sys.exit()
 
 long_description = make_long_description()
+template_files = ['*.mustache', '*.txt']
 
 setup(name='pystache',
       version='0.5.0-rc',
+      license='MIT',
       description='Mustache for Python',
       long_description=long_description,
       author='Chris Wanstrath',
       author_email='chris@ozmm.org',
       maintainer='Chris Jerdonek',
       url='http://github.com/defunkt/pystache',
-      packages=['pystache'],
-      license='MIT',
+      packages=find_packages(),
+      package_data = {
+          # Include template files so tests can be run.
+          'examples': template_files,
+          'pystache.tests.data': template_files,
+          'pystache.tests.data.locator': template_files,
+      },
       test_suite='pystache.tests',
+      use_2to3=True,
       entry_points = {
         'console_scripts': ['pystache=pystache.commands:main'],
       },
