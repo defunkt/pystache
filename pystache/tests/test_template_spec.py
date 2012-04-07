@@ -217,6 +217,9 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         custom = TemplateSpec()
         custom.template = u'é'.encode('utf-8')
 
+        # TODO: share code with other code that instantiates a SpecLoader.
+        # TODO: add test_spec_loader.py.
+        # TODO: rename spec_loader.py to specloader.py.
         self.assertRaises(UnicodeDecodeError, self._assert_template, SpecLoader(), custom, u'é')
 
         custom.template_encoding = 'utf-8'
