@@ -266,13 +266,12 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
 #   TemplateSpec attributes or something).
 class TemplateSpecTests(unittest.TestCase):
 
-    # TODO: rename this method to _make_loader().
-    def _make_locator(self):
+    def _make_loader(self):
         return SpecLoader()
 
     def _assert_template_location(self, view, expected):
-        locator = self._make_locator()
-        actual = locator._find_relative(view)
+        loader = self._make_loader()
+        actual = loader._find_relative(view)
         self.assertEqual(actual, expected)
 
     def test_find_relative(self):
@@ -334,13 +333,13 @@ class TemplateSpecTests(unittest.TestCase):
         Test _find() with a view that has a directory specified.
 
         """
-        locator = self._make_locator()
+        loader = self._make_loader()
 
         view = SampleView()
         view.template_rel_path = 'foo/bar.txt'
-        self.assertTrue(locator._find_relative(view)[0] is not None)
+        self.assertTrue(loader._find_relative(view)[0] is not None)
 
-        actual = locator._find(view)
+        actual = loader._find(view)
         expected = os.path.abspath(os.path.join(DATA_DIR, 'foo/bar.txt'))
 
         self.assertEqual(actual, expected)
@@ -350,19 +349,19 @@ class TemplateSpecTests(unittest.TestCase):
         Test _find() with a view that doesn't have a directory specified.
 
         """
-        locator = self._make_locator()
+        loader = self._make_loader()
 
         view = SampleView()
-        self.assertTrue(locator._find_relative(view)[0] is None)
+        self.assertTrue(loader._find_relative(view)[0] is None)
 
-        actual = locator._find(view)
+        actual = loader._find(view)
         expected = os.path.abspath(os.path.join(DATA_DIR, 'sample_view.mustache'))
 
         self.assertEqual(actual, expected)
 
     def _assert_get_template(self, custom, expected):
-        locator = self._make_locator()
-        actual = locator.load(custom)
+        loader = self._make_loader()
+        actual = loader.load(custom)
 
         self.assertEqual(type(actual), unicode)
         self.assertEqual(actual, expected)
