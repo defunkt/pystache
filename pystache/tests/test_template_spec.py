@@ -19,12 +19,12 @@ from pystache import TemplateSpec
 from pystache.locator import Locator
 from pystache.loader import Loader
 from pystache.spec_loader import SpecLoader
-from tests.common import DATA_DIR
-from tests.common import EXAMPLES_DIR
-from tests.common import AssertIsMixin
-from tests.common import AssertStringMixin
-from tests.data.views import SampleView
-from tests.data.views import NonAscii
+from pystache.tests.common import DATA_DIR
+from pystache.tests.common import EXAMPLES_DIR
+from pystache.tests.common import AssertIsMixin
+from pystache.tests.common import AssertStringMixin
+from pystache.tests.data.views import SampleView
+from pystache.tests.data.views import NonAscii
 
 
 class Thing(object):
@@ -46,7 +46,8 @@ class ViewTestCase(unittest.TestCase, AssertStringMixin):
 
         self.assertRaises(IOError, renderer.render, view)
 
-        view.template_rel_directory = "../examples"
+        # TODO: change this test to remove the following brittle line.
+        view.template_rel_directory = "../../examples"
         actual = renderer.render(view)
         self.assertEquals(actual, "No tags...")
 

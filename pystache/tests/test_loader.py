@@ -9,12 +9,9 @@ import os
 import sys
 import unittest
 
-from tests.common import AssertStringMixin
+from pystache.tests.common import AssertStringMixin, DATA_DIR
 from pystache import defaults
 from pystache.loader import Loader
-
-
-DATA_DIR = 'tests/data'
 
 
 class LoaderTests(unittest.TestCase, AssertStringMixin):

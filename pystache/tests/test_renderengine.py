@@ -11,7 +11,7 @@ import unittest
 from pystache.context import Context
 from pystache.parser import ParsingError
 from pystache.renderengine import RenderEngine
-from tests.common import AssertStringMixin
+from pystache.tests.common import AssertStringMixin
 
 
 class RenderEngineTestCase(unittest.TestCase):

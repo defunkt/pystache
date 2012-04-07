@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 """
-Contains locator.py unit tests.
+Unit tests for locator.py.
 
 """
 
@@ -14,7 +14,7 @@ import unittest
 from pystache.loader import Loader as Reader
 from pystache.locator import Locator
 
-from tests.common import DATA_DIR
+from pystache.tests.common import DATA_DIR
 from data.views import SayHello
 
 

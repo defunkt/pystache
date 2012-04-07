@@ -11,7 +11,7 @@ import unittest
 from pystache.context import _NOT_FOUND
 from pystache.context import _get_value
 from pystache.context import Context
-from tests.common import AssertIsMixin
+from pystache.tests.common import AssertIsMixin
 
 class SimpleObject(object):
 

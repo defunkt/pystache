@@ -24,12 +24,16 @@ import glob
 import os.path
 import unittest
 
+import pystache
 from pystache.renderer import Renderer
-from tests.common import AssertStringMixin
+from pystache.tests.common import AssertStringMixin, SPEC_TEST_DIR
 
 
-root_path = os.path.join(os.path.dirname(__file__), '..', 'ext', 'spec', 'specs')
-spec_paths = glob.glob(os.path.join(root_path, '*.json'))
+spec_paths = glob.glob(os.path.join(SPEC_TEST_DIR, '*.json'))
+
+if len(spec_paths) == 0:
+    raise Exception("""Spec tests not found in: %s
+    Consult the README file on how to add the spec tests.""" % repr(SPEC_TEST_DIR))
 
 
 # TODO: give this a name better than MustacheSpec.
@@ -91,6 +95,7 @@ def buildTest(testData, spec_filename):
     test.__name__ = str(name)
 
     return test
+
 
 for spec_path in spec_paths:
 
