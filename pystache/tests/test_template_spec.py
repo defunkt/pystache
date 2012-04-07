@@ -267,7 +267,11 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
 class TemplateSpecTests(unittest.TestCase):
 
     def _make_loader(self):
-        return SpecLoader()
+        # Python 2 and 3 have different default encodings, so we need
+        # to specify the encoding explicitly to have consistent test
+        # results across both versions.
+        loader = Loader(file_encoding='ascii')
+        return SpecLoader(loader=loader)
 
     def _assert_template_location(self, view, expected):
         loader = self._make_loader()
