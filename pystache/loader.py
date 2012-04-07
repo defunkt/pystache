@@ -12,7 +12,7 @@ from pystache import defaults
 from pystache.locator import Locator
 
 
-def _to_unicode(s, encoding=None):
+def _default_to_unicode(s, encoding=None):
     """
     Raises a TypeError exception if the given string is already unicode.
 
@@ -67,7 +67,7 @@ class Loader(object):
             search_dirs = defaults.SEARCH_DIRS
 
         if to_unicode is None:
-            to_unicode = _to_unicode
+            to_unicode = _default_to_unicode
 
         self.extension = extension
         self.file_encoding = file_encoding
