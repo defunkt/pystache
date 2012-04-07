@@ -24,10 +24,20 @@ from pystache.tests.common import PROJECT_DIR, SOURCE_DIR
 text_file_paths = ['README.rst']
 
 
-# Allowing load_tests() to be called is a hack to allow unit tests
-# to be run with nose's nosetests without error.  Otherwise, nose
-# interprets the following function as a test case, raising the
-# following error:
+# The following load_tests() function implements unittests's load_tests
+# protocol added in Python 2.7.  Using this protocol allows us to
+# include the doctests in test runs without the use of nose, for example
+# when using Distribute's test as in the following:
+#
+#     python setup.py test
+#
+# TODO: find a substitute for the load_tests protocol for Python versions
+#   before version 2.7.
+#
+# HACK: Allowing load_tests() to be called without arguments is a hack
+# to allow unit tests to be run with nose's nosetests without error.
+# Otherwise, nose interprets the following function as a test case,
+# raising the following error:
 #
 #   TypeError: load_tests() takes exactly 3 arguments (0 given)
 #
