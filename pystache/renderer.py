@@ -160,9 +160,9 @@ class Renderer(object):
         """
         return unicode(self.escape(self._to_unicode_soft(s)))
 
-    def unicode(self, s, encoding=None):
+    def unicode(self, b, encoding=None):
         """
-        Convert a string to unicode, using string_encoding and decode_errors.
+        Convert a byte string to unicode, using string_encoding and decode_errors.
 
         Raises:
 
@@ -178,7 +178,7 @@ class Renderer(object):
 
         # TODO: Wrap UnicodeDecodeErrors with a message about setting
         # the string_encoding and decode_errors attributes.
-        return unicode(s, encoding, self.decode_errors)
+        return unicode(b, encoding, self.decode_errors)
 
     def _make_loader(self):
         """

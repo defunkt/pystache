@@ -393,6 +393,14 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
 
     """
 
+    def _make_renderer(self):
+        """
+        Return a default Renderer instance for testing purposes.
+
+        """
+        renderer = Renderer(string_encoding='ascii', file_encoding='ascii')
+        return renderer
+
     ## Test the engine's load_partial attribute.
 
     def test__load_partial__returns_unicode(self):
@@ -442,13 +450,15 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
         Test that literal uses the renderer's unicode function.
 
         """
-        renderer = Renderer()
-        renderer.unicode = lambda s: s.upper()
+        renderer = self._make_renderer()
+        # This function
+        renderer.unicode = lambda b: unicode(b, encoding='ascii').upper()
 
         engine = renderer._make_render_engine()
         literal = engine.literal
 
-        self.assertEqual(literal("foo"), "FOO")
+        b = u"foo".encode("ascii")
+        self.assertEqual(literal(b), "FOO")
 
     def test__literal__handles_unicode(self):
         """
