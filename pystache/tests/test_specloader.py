@@ -185,10 +185,10 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         return _make_specloader()
 
     def test_init__defaults(self):
-        custom = self._make_specloader()
+        spec_loader = SpecLoader()
 
         # Check the loader attribute.
-        loader = custom.loader
+        loader = spec_loader.loader
         self.assertEqual(loader.extension, 'mustache')
         self.assertEqual(loader.file_encoding, sys.getdefaultencoding())
         # TODO: finish testing the other Loader attributes.
