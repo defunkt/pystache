@@ -37,6 +37,10 @@ text_file_paths = ['README.rst']
 # TODO: find a substitute for the load_tests protocol for Python versions
 #   before version 2.7.
 #
+# TODO: prevent the load_tests() function below from being interpreted as a
+#   unittest when running nosetests.  This is causing the test count to be
+#   different between `python setup.py test` and `python setup.py nosetests`.
+#
 # HACK: Allowing load_tests() to be called without arguments is a hack
 # to allow unit tests to be run with nose's nosetests without error.
 # Otherwise, nose interprets the following function as a test case,
