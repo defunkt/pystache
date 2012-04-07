@@ -8,8 +8,8 @@ from examples.lambdas import Lambdas
 from examples.template_partial import TemplatePartial
 from examples.simple import Simple
 
-from tests.common import EXAMPLES_DIR
-from tests.common import AssertStringMixin
+from pystache.tests.common import EXAMPLES_DIR
+from pystache.tests.common import AssertStringMixin
 
 
 class TestSimple(unittest.TestCase, AssertStringMixin):
