@@ -75,7 +75,7 @@ template_files = ['*.mustache', '*.txt']
 #
 #   http://packages.python.org/distribute/python3.html#note-on-compatibility-with-setuptools
 #
-if sys.version_info < (2, 7):
+if sys.version_info < (3, ):
     extra = {}
 else:
     # For testing purposes, we also use use_2to3 with Python 2.7.  This
