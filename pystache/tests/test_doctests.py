@@ -12,10 +12,11 @@ Creates unittest.TestSuite instances for the doctests in the project.
 
 import os
 import doctest
+import pkgutil
 import unittest
 
 import pystache
-from pystache.tests.common import PROJECT_DIR
+from pystache.tests.common import PROJECT_DIR, SOURCE_DIR
 
 
 # The paths to text files (i.e. non-module files) containing doctests.
@@ -34,4 +35,31 @@ def load_tests(loader, tests, ignore):
     paths = [os.path.join(PROJECT_DIR, path) for path in text_file_paths]
     tests.addTests(doctest.DocFileSuite(*paths, module_relative=False))
 
+    modules = get_module_doctests()
+    for module in modules:
+        suite = doctest.DocTestSuite(module)
+        tests.addTests(suite)
+
     return tests
+
+def get_module_doctests():
+    modules = []
+
+    for pkg in pkgutil.walk_packages([SOURCE_DIR]):
+        # The importer is a pkgutil.ImpImporter instance:
+        #
+        #   http://docs.python.org/library/pkgutil.html#pkgutil.ImpImporter
+        #
+        importer, module_name, is_package = pkg
+        if is_package:
+            # Otherwise, we will get the following error when adding tests:
+            #
+            #   ValueError: (<module 'tests' from '.../pystache/tests/__init__.pyc'>, 'has no tests')
+            #
+            continue
+        # The loader is a pkgutil.ImpLoader instance.
+        loader = importer.find_module(module_name)
+        module = loader.load_module(module_name)
+        modules.append(module)
+
+    return modules

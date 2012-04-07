@@ -35,7 +35,7 @@ spec_paths = glob.glob(os.path.join(SPEC_TEST_DIR, '*.json'))
 # This test case lets us alert the user that spec tests are missing.
 class CheckSpecTestsFound(unittest.TestCase):
 
-    def test_spec_tests_exist(self):
+    def test_spec_tests_found(self):
         if len(spec_paths) > 0:
             return
         raise Exception("Spec tests not found in: %s\n  "
