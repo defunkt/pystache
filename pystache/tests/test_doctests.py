@@ -25,9 +25,12 @@ text_file_paths = ['README.rst']
 
 
 # The following load_tests() function implements unittests's load_tests
-# protocol added in Python 2.7.  Using this protocol allows us to
-# include the doctests in test runs without the use of nose, for example
-# when using Distribute's test as in the following:
+# protocol added in Python 2.7:
+#
+#   http://docs.python.org/library/unittest.html#load-tests-protocol
+#
+# Using this protocol lets us include the doctests in test runs without
+# using nose, for example when using Distribute's test as in the following:
 #
 #     python setup.py test
 #
