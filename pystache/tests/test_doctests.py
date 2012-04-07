@@ -55,9 +55,11 @@ def load_tests(loader=None, tests=None, ignore=None):
     #   http://docs.python.org/library/doctest.html#doctest.DocFileSuite
     #
     paths = [os.path.join(PROJECT_DIR, path) for path in text_file_paths]
-    tests.addTests(doctest.DocFileSuite(*paths, module_relative=False))
+    for path in paths:
+        suite = doctest.DocFileSuite(path, module_relative=False)
+        tests.addTests(suite)
 
-    modules = get_module_doctests()
+    modules = _get_module_doctests()
     for module in modules:
         suite = doctest.DocTestSuite(module)
         tests.addTests(suite)
@@ -65,7 +67,7 @@ def load_tests(loader=None, tests=None, ignore=None):
     return tests
 
 
-def get_module_doctests():
+def _get_module_doctests():
     modules = []
 
     for pkg in pkgutil.walk_packages([SOURCE_DIR]):
