@@ -79,6 +79,7 @@ setup(name='pystache',
       url='http://github.com/defunkt/pystache',
       packages=['pystache'],
       license='MIT',
+      test_suite='pystache.tests',
       entry_points = {
         'console_scripts': ['pystache=pystache.commands:main'],
       },
