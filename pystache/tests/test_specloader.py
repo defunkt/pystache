@@ -152,6 +152,28 @@ class ViewTestCase(unittest.TestCase, AssertStringMixin):
         self.assertString(actual, u"""one, two, three, empty list""")
 
 
+def _make_specloader():
+    """
+    Return a default SpecLoader instance for testing purposes.
+
+    """
+    # Python 2 and 3 have different default encodings.  Thus, to have
+    # consistent test results across both versions, we need to specify
+    # the string and file encodings explicitly rather than relying on
+    # the defaults.
+    def to_unicode(s, encoding=None):
+        """
+        Raises a TypeError exception if the given string is already unicode.
+
+        """
+        if encoding is None:
+            encoding = 'ascii'
+        return unicode(s, encoding, 'strict')
+
+    loader = Loader(file_encoding='ascii', to_unicode=to_unicode)
+    return SpecLoader(loader=loader)
+
+
 class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
 
     """
@@ -159,8 +181,11 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
 
     """
 
+    def _make_specloader(self):
+        return _make_specloader()
+
     def test_init__defaults(self):
-        custom = SpecLoader()
+        custom = self._make_specloader()
 
         # Check the loader attribute.
         loader = custom.loader
@@ -187,7 +212,8 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         custom = TemplateSpec()
         custom.template = "abc"
 
-        self._assert_template(SpecLoader(), custom, u"abc")
+        spec_loader = self._make_specloader()
+        self._assert_template(spec_loader, custom, u"abc")
 
     def test_load__template__type_unicode(self):
         """
@@ -197,7 +223,8 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         custom = TemplateSpec()
         custom.template = u"abc"
 
-        self._assert_template(SpecLoader(), custom, u"abc")
+        spec_loader = self._make_specloader()
+        self._assert_template(spec_loader, custom, u"abc")
 
     def test_load__template__unicode_non_ascii(self):
         """
@@ -207,7 +234,8 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         custom = TemplateSpec()
         custom.template = u"é"
 
-        self._assert_template(SpecLoader(), custom, u"é")
+        spec_loader = self._make_specloader()
+        self._assert_template(spec_loader, custom, u"é")
 
     def test_load__template__with_template_encoding(self):
         """
@@ -217,12 +245,12 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         custom = TemplateSpec()
         custom.template = u'é'.encode('utf-8')
 
-        # TODO: share code with other code that instantiates a SpecLoader.
-        # TODO: add test_spec_loader.py.
-        self.assertRaises(UnicodeDecodeError, self._assert_template, SpecLoader(), custom, u'é')
+        spec_loader = self._make_specloader()
+
+        self.assertRaises(UnicodeDecodeError, self._assert_template, spec_loader, custom, u'é')
 
         custom.template_encoding = 'utf-8'
-        self._assert_template(SpecLoader(), custom, u'é')
+        self._assert_template(spec_loader, custom, u'é')
 
     # TODO: make this test complete.
     def test_load__template__correct_loader(self):
@@ -269,11 +297,7 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
 class TemplateSpecTests(unittest.TestCase):
 
     def _make_loader(self):
-        # Python 2 and 3 have different default encodings, so we need
-        # to specify the encoding explicitly to have consistent test
-        # results across both versions.
-        loader = Loader(file_encoding='ascii')
-        return SpecLoader(loader=loader)
+        return _make_specloader()
 
     def _assert_template_location(self, view, expected):
         loader = self._make_loader()
