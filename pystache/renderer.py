@@ -9,7 +9,7 @@ from pystache import defaults
 from pystache.context import Context
 from pystache.loader import Loader
 from pystache.renderengine import RenderEngine
-from pystache.spec_loader import SpecLoader
+from pystache.specloader import SpecLoader
 from pystache.template_spec import TemplateSpec
 
 

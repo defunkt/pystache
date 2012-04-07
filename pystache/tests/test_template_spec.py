@@ -18,7 +18,7 @@ from pystache import Renderer
 from pystache import TemplateSpec
 from pystache.locator import Locator
 from pystache.loader import Loader
-from pystache.spec_loader import SpecLoader
+from pystache.specloader import SpecLoader
 from pystache.tests.common import DATA_DIR
 from pystache.tests.common import EXAMPLES_DIR
 from pystache.tests.common import AssertIsMixin
@@ -219,7 +219,6 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
 
         # TODO: share code with other code that instantiates a SpecLoader.
         # TODO: add test_spec_loader.py.
-        # TODO: rename spec_loader.py to specloader.py.
         self.assertRaises(UnicodeDecodeError, self._assert_template, SpecLoader(), custom, u'é')
 
         custom.template_encoding = 'utf-8'
