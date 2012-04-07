@@ -24,7 +24,16 @@ from pystache.tests.common import PROJECT_DIR, SOURCE_DIR
 text_file_paths = ['README.rst']
 
 
-def load_tests(loader, tests, ignore):
+# Allowing load_tests() to be called is a hack to allow unit tests
+# to be run with nose's nosetests without error.  Otherwise, nose
+# interprets the following function as a test case, raising the
+# following error:
+#
+#   TypeError: load_tests() takes exactly 3 arguments (0 given)
+#
+def load_tests(loader=None, tests=None, ignore=None):
+    if loader is None:
+        return
     # Since module_relative is False in our calls to DocFileSuite below,
     # paths should be OS-specific.  Moreover, we choose absolute paths
     # so that the current working directory does not come into play.
@@ -41,6 +50,7 @@ def load_tests(loader, tests, ignore):
         tests.addTests(suite)
 
     return tests
+
 
 def get_module_doctests():
     modules = []
