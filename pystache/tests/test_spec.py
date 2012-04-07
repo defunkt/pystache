@@ -31,14 +31,21 @@ from pystache.tests.common import AssertStringMixin, SPEC_TEST_DIR
 
 spec_paths = glob.glob(os.path.join(SPEC_TEST_DIR, '*.json'))
 
-if len(spec_paths) == 0:
-    raise Exception("""Spec tests not found in: %s
-    Consult the README file on how to add the spec tests.""" % repr(SPEC_TEST_DIR))
+
+# This test case lets us alert the user that spec tests are missing.
+class CheckSpecTestsFound(unittest.TestCase):
+
+    def test_spec_tests_exist(self):
+        if len(spec_paths) > 0:
+            return
+        raise Exception("Spec tests not found in: %s\n  "
+            "Consult the README file on how to add the Mustache spec tests." % repr(SPEC_TEST_DIR))
 
 
 # TODO: give this a name better than MustacheSpec.
 class MustacheSpec(unittest.TestCase, AssertStringMixin):
     pass
+
 
 def buildTest(testData, spec_filename):
 
