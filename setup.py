@@ -40,7 +40,7 @@ import sys
 
 
 try:
-    from setuptools import setup
+    from setuptools import setup, find_packages
 except ImportError:
     from distutils.core import setup
 
@@ -68,17 +68,40 @@ if sys.argv[-1] == 'publish':
     sys.exit()
 
 long_description = make_long_description()
+template_files = ['*.mustache', '*.txt']
+
+# We follow the suggestion here for compatibility with earlier versions
+# of Python:
+#
+#   http://packages.python.org/distribute/python3.html#note-on-compatibility-with-setuptools
+#
+if sys.version_info < (3, ):
+    extra = {}
+else:
+    # For testing purposes, we also use use_2to3 with Python 2.7.  This
+    # lets us troubleshoot the absence of package resources in the build
+    # directory more easily (e.g. the absence of README.rst), since we can
+    # troubleshoot it while using Python 2.7 instead of Python 3.
+    extra = {
+        'use_2to3': True,
+    }
 
 setup(name='pystache',
       version='0.5.0-rc',
+      license='MIT',
       description='Mustache for Python',
       long_description=long_description,
       author='Chris Wanstrath',
       author_email='chris@ozmm.org',
       maintainer='Chris Jerdonek',
       url='http://github.com/defunkt/pystache',
-      packages=['pystache'],
-      license='MIT',
+      packages=find_packages(),
+      package_data = {
+          # Include template files so tests can be run.
+          'examples': template_files,
+          'pystache.tests.data': template_files,
+          'pystache.tests.data.locator': template_files,
+      },
       test_suite='pystache.tests',
       entry_points = {
         'console_scripts': ['pystache=pystache.commands:main'],
@@ -91,5 +114,6 @@ setup(name='pystache',
         'Programming Language :: Python :: 2.5',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
-      )
+      ),
+      **extra
 )
