@@ -11,16 +11,18 @@ FILE_ENCODING = 'utf-8'  # the encoding of the spec test files.
 
 
 try:
+    # We try yaml first since it is more convenient when adding and modifying
+    # test cases by hand (since the YAML is human-readable and is the master
+    # from which the JSON format is generated).
     import yaml
 except ImportError:
     try:
-        # We use the JSON files rather than the YAML files because json libraries
-        # are available for Python 2.4.
         import json
     except:
-        # The module json is not available prior to Python 2.6, whereas simplejson is.
-        # Note that simplejson dropped support for Python 2.4 in simplejson v2.1.0,
-        # so Python 2.4 requires a simplejson install older than the most recent.
+        # The module json is not available prior to Python 2.6, whereas
+        # simplejson is.  The simplejson package dropped support for Python 2.4
+        # in simplejson v2.1.0, so Python 2.4 requires a simplejson install
+        # older than the most recent version.
         import simplejson as json
     file_extension = 'json'
     parser = json
@@ -48,7 +50,7 @@ def parse(u, file_extension):
       u: a unicode string.
 
     """
-    # Find a cleaner mechanism for choosing between the two.
+    # TODO: find a cleaner mechanism for choosing between the two.
     if file_extension[0] == 'j':
         # Then json.
 
@@ -73,7 +75,6 @@ def parse(u, file_extension):
 
     yaml.add_constructor(u'!code', code_constructor)
     return yaml.load(u)
-
 
 
 # This test case lets us alert the user that spec tests are missing.
