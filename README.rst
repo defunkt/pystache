@@ -51,8 +51,8 @@ Use It
 ::
 
     >>> import pystache
-    >>> pystache.render('Hi {{person}}!', {'person': 'Mom'})
-    u'Hi Mom!'
+    >>> print pystache.render('Hi {{person}}!', {'person': 'Mom'})
+    Hi Mom!
 
 You can also create dedicated view classes to hold your view logic.
 
@@ -75,8 +75,8 @@ Then your template, say_hello.mustache::
 Pull it together::
 
     >>> renderer = pystache.Renderer()
-    >>> renderer.render(hello)
-    u'Hello, Pizza!'
+    >>> print renderer.render(hello)
+    Hello, Pizza!
 
 
 Unicode Handling
@@ -161,8 +161,8 @@ Author
 ::
 
     >>> context = { 'author': 'Chris Wanstrath', 'email': 'chris@ozmm.org' }
-    >>> pystache.render("{{author}} :: {{email}}", context)
-    u'Chris Wanstrath :: chris@ozmm.org'
+    >>> print pystache.render("{{author}} :: {{email}}", context)
+    Chris Wanstrath :: chris@ozmm.org
 
 
 .. _ctemplate: http://code.google.com/p/google-ctemplate/

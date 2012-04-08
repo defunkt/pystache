@@ -18,7 +18,7 @@ from pystache import Renderer
 from pystache import TemplateSpec
 from pystache.locator import Locator
 from pystache.loader import Loader
-from pystache.spec_loader import SpecLoader
+from pystache.specloader import SpecLoader
 from pystache.tests.common import DATA_DIR
 from pystache.tests.common import EXAMPLES_DIR
 from pystache.tests.common import AssertIsMixin
@@ -49,7 +49,7 @@ class ViewTestCase(unittest.TestCase, AssertStringMixin):
         # TODO: change this test to remove the following brittle line.
         view.template_rel_directory = "../../examples"
         actual = renderer.render(view)
-        self.assertEquals(actual, "No tags...")
+        self.assertEqual(actual, "No tags...")
 
     def test_template_path_for_partials(self):
         """
@@ -65,7 +65,7 @@ class ViewTestCase(unittest.TestCase, AssertStringMixin):
         self.assertRaises(IOError, renderer1.render, spec)
 
         actual = renderer2.render(spec)
-        self.assertEquals(actual, "Partial: No tags...")
+        self.assertEqual(actual, "Partial: No tags...")
 
     def test_basic_method_calls(self):
         renderer = Renderer()
@@ -79,7 +79,7 @@ class ViewTestCase(unittest.TestCase, AssertStringMixin):
 
         renderer = Renderer()
         actual = renderer.render(view)
-        self.assertEquals(actual, "Hi Chris!")
+        self.assertEqual(actual, "Hi Chris!")
 
     def test_complex(self):
         renderer = Renderer()
@@ -95,7 +95,7 @@ class ViewTestCase(unittest.TestCase, AssertStringMixin):
     def test_higher_order_replace(self):
         renderer = Renderer()
         actual = renderer.render(Lambdas())
-        self.assertEquals(actual, 'bar != bar. oh, it does!')
+        self.assertEqual(actual, 'bar != bar. oh, it does!')
 
     def test_higher_order_rot13(self):
         view = Lambdas()
@@ -119,7 +119,7 @@ class ViewTestCase(unittest.TestCase, AssertStringMixin):
 
         renderer = Renderer(search_dirs=EXAMPLES_DIR)
         actual = renderer.render(view)
-        self.assertEquals(actual, u'nopqrstuvwxyz')
+        self.assertEqual(actual, u'nopqrstuvwxyz')
 
     def test_hierarchical_partials_with_lambdas(self):
         view = Lambdas()
@@ -152,6 +152,28 @@ class ViewTestCase(unittest.TestCase, AssertStringMixin):
         self.assertString(actual, u"""one, two, three, empty list""")
 
 
+def _make_specloader():
+    """
+    Return a default SpecLoader instance for testing purposes.
+
+    """
+    # Python 2 and 3 have different default encodings.  Thus, to have
+    # consistent test results across both versions, we need to specify
+    # the string and file encodings explicitly rather than relying on
+    # the defaults.
+    def to_unicode(s, encoding=None):
+        """
+        Raises a TypeError exception if the given string is already unicode.
+
+        """
+        if encoding is None:
+            encoding = 'ascii'
+        return unicode(s, encoding, 'strict')
+
+    loader = Loader(file_encoding='ascii', to_unicode=to_unicode)
+    return SpecLoader(loader=loader)
+
+
 class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
 
     """
@@ -159,13 +181,16 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
 
     """
 
+    def _make_specloader(self):
+        return _make_specloader()
+
     def test_init__defaults(self):
-        custom = SpecLoader()
+        spec_loader = SpecLoader()
 
         # Check the loader attribute.
-        loader = custom.loader
-        self.assertEquals(loader.extension, 'mustache')
-        self.assertEquals(loader.file_encoding, sys.getdefaultencoding())
+        loader = spec_loader.loader
+        self.assertEqual(loader.extension, 'mustache')
+        self.assertEqual(loader.file_encoding, sys.getdefaultencoding())
         # TODO: finish testing the other Loader attributes.
         to_unicode = loader.to_unicode
 
@@ -187,7 +212,8 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         custom = TemplateSpec()
         custom.template = "abc"
 
-        self._assert_template(SpecLoader(), custom, u"abc")
+        spec_loader = self._make_specloader()
+        self._assert_template(spec_loader, custom, u"abc")
 
     def test_load__template__type_unicode(self):
         """
@@ -197,7 +223,8 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         custom = TemplateSpec()
         custom.template = u"abc"
 
-        self._assert_template(SpecLoader(), custom, u"abc")
+        spec_loader = self._make_specloader()
+        self._assert_template(spec_loader, custom, u"abc")
 
     def test_load__template__unicode_non_ascii(self):
         """
@@ -207,7 +234,8 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         custom = TemplateSpec()
         custom.template = u"é"
 
-        self._assert_template(SpecLoader(), custom, u"é")
+        spec_loader = self._make_specloader()
+        self._assert_template(spec_loader, custom, u"é")
 
     def test_load__template__with_template_encoding(self):
         """
@@ -217,10 +245,12 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         custom = TemplateSpec()
         custom.template = u'é'.encode('utf-8')
 
-        self.assertRaises(UnicodeDecodeError, self._assert_template, SpecLoader(), custom, u'é')
+        spec_loader = self._make_specloader()
+
+        self.assertRaises(UnicodeDecodeError, self._assert_template, spec_loader, custom, u'é')
 
         custom.template_encoding = 'utf-8'
-        self._assert_template(SpecLoader(), custom, u'é')
+        self._assert_template(spec_loader, custom, u'é')
 
     # TODO: make this test complete.
     def test_load__template__correct_loader(self):
@@ -255,8 +285,8 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
 
         # Check that our unicode() above was called.
         self._assert_template(custom_loader, view, u'foo')
-        self.assertEquals(loader.s, "template-foo")
-        self.assertEquals(loader.encoding, "encoding-foo")
+        self.assertEqual(loader.s, "template-foo")
+        self.assertEqual(loader.encoding, "encoding-foo")
 
 
 # TODO: migrate these tests into the SpecLoaderTests class.
@@ -266,14 +296,13 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
 #   TemplateSpec attributes or something).
 class TemplateSpecTests(unittest.TestCase):
 
-    # TODO: rename this method to _make_loader().
-    def _make_locator(self):
-        return SpecLoader()
+    def _make_loader(self):
+        return _make_specloader()
 
     def _assert_template_location(self, view, expected):
-        locator = self._make_locator()
-        actual = locator._find_relative(view)
-        self.assertEquals(actual, expected)
+        loader = self._make_loader()
+        actual = loader._find_relative(view)
+        self.assertEqual(actual, expected)
 
     def test_find_relative(self):
         """
@@ -334,38 +363,38 @@ class TemplateSpecTests(unittest.TestCase):
         Test _find() with a view that has a directory specified.
 
         """
-        locator = self._make_locator()
+        loader = self._make_loader()
 
         view = SampleView()
         view.template_rel_path = 'foo/bar.txt'
-        self.assertTrue(locator._find_relative(view)[0] is not None)
+        self.assertTrue(loader._find_relative(view)[0] is not None)
 
-        actual = locator._find(view)
+        actual = loader._find(view)
         expected = os.path.abspath(os.path.join(DATA_DIR, 'foo/bar.txt'))
 
-        self.assertEquals(actual, expected)
+        self.assertEqual(actual, expected)
 
     def test_find__without_directory(self):
         """
         Test _find() with a view that doesn't have a directory specified.
 
         """
-        locator = self._make_locator()
+        loader = self._make_loader()
 
         view = SampleView()
-        self.assertTrue(locator._find_relative(view)[0] is None)
+        self.assertTrue(loader._find_relative(view)[0] is None)
 
-        actual = locator._find(view)
+        actual = loader._find(view)
         expected = os.path.abspath(os.path.join(DATA_DIR, 'sample_view.mustache'))
 
-        self.assertEquals(actual, expected)
+        self.assertEqual(actual, expected)
 
     def _assert_get_template(self, custom, expected):
-        locator = self._make_locator()
-        actual = locator.load(custom)
+        loader = self._make_loader()
+        actual = loader.load(custom)
 
-        self.assertEquals(type(actual), unicode)
-        self.assertEquals(actual, expected)
+        self.assertEqual(type(actual), unicode)
+        self.assertEqual(actual, expected)
 
     def test_get_template(self):
         """

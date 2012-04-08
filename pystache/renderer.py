@@ -9,7 +9,7 @@ from pystache import defaults
 from pystache.context import Context
 from pystache.loader import Loader
 from pystache.renderengine import RenderEngine
-from pystache.spec_loader import SpecLoader
+from pystache.specloader import SpecLoader
 from pystache.template_spec import TemplateSpec
 
 
@@ -64,10 +64,10 @@ class Renderer(object):
             this class will only pass it unicode strings.  The constructor
             assigns this function to the constructed instance's escape()
             method.
-                The argument defaults to `cgi.escape(s, quote=True)`.  To
-            disable escaping entirely, one can pass `lambda u: u` as the
-            escape function, for example.  One may also wish to consider
-            using markupsafe's escape function: markupsafe.escape().
+                To disable escaping entirely, one can pass `lambda u: u`
+            as the escape function, for example.  One may also wish to
+            consider using markupsafe's escape function: markupsafe.escape().
+            This argument defaults to the package default.
 
           file_encoding: the name of the default encoding to use when reading
             template files.  All templates are converted to unicode prior
@@ -160,9 +160,16 @@ class Renderer(object):
         """
         return unicode(self.escape(self._to_unicode_soft(s)))
 
-    def unicode(self, s, encoding=None):
+    def unicode(self, b, encoding=None):
         """
-        Convert a string to unicode, using string_encoding and decode_errors.
+        Convert a byte string to unicode, using string_encoding and decode_errors.
+
+        Arguments:
+
+          b: a byte string.
+
+          encoding: the name of an encoding.  Defaults to the string_encoding
+            attribute for this instance.
 
         Raises:
 
@@ -178,7 +185,7 @@ class Renderer(object):
 
         # TODO: Wrap UnicodeDecodeErrors with a message about setting
         # the string_encoding and decode_errors attributes.
-        return unicode(s, encoding, self.decode_errors)
+        return unicode(b, encoding, self.decode_errors)
 
     def _make_loader(self):
         """

@@ -95,7 +95,7 @@ Again, Welcome!""")
         view.template = '''{{>partial_in_partial}}'''
 
         actual = renderer.render(view, {'prop': 'derp'})
-        self.assertEquals(actual, 'Hi derp!')
+        self.assertEqual(actual, 'Hi derp!')
 
 if __name__ == '__main__':
     unittest.main()

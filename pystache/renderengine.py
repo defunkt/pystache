@@ -55,7 +55,7 @@ class RenderEngine(object):
             this class will not pass tag values to literal prior to passing
             them to this function.  This allows for more flexibility,
             for example using a custom escape function that handles
-            incoming strings of type markupssafe.Markup differently
+            incoming strings of type markupsafe.Markup differently
             from plain unicode strings.
 
         """
@@ -167,9 +167,28 @@ class RenderEngine(object):
                 # TODO: should we check the arity?
                 template = data(template)
                 parsed_template = self._parse(template, delimiters=delims)
-                data = [ data ]
-            elif not hasattr(data, '__iter__') or isinstance(data, dict):
-                data = [ data ]
+                data = [data]
+            else:
+                # The cleanest, least brittle way of determining whether
+                # something supports iteration is by trying to call iter() on it:
+                #
+                #   http://docs.python.org/library/functions.html#iter
+                #
+                # It is not sufficient, for example, to check whether the item
+                # implements __iter__ () (the iteration protocol).  There is
+                # also __getitem__() (the sequence protocol).  In Python 2,
+                # strings do not implement __iter__(), but in Python 3 they do.
+                try:
+                    iter(data)
+                except TypeError:
+                    # Then the value does not support iteration.
+                    data = [data]
+                else:
+                    # We treat the value as a list (but do not treat strings
+                    # and dicts as lists).
+                    if isinstance(data, (basestring, dict)):
+                        data = [data]
+                    # Otherwise, leave it alone.
 
             parts = []
             for element in data:

@@ -9,6 +9,7 @@ Creates a unittest.TestCase for the tests defined in the mustache spec.
 
 FILE_ENCODING = 'utf-8'  # the encoding of the spec test files.
 
+yaml = None
 
 try:
     # We try yaml first since it is more convenient when adding and modifying
@@ -31,28 +32,28 @@ else:
     parser = yaml
 
 
+import codecs
 import glob
 import os.path
 import unittest
 
 import pystache
+from pystache import common
 from pystache.renderer import Renderer
 from pystache.tests.common import AssertStringMixin, SPEC_TEST_DIR
 
 
-spec_paths = glob.glob(os.path.join(SPEC_TEST_DIR, '*.%s' % file_extension))
-
-
-def parse(u, file_extension):
+def parse(u):
     """
+    Parse
     Arguments:
 
       u: a unicode string.
 
     """
     # TODO: find a cleaner mechanism for choosing between the two.
-    if file_extension[0] == 'j':
-        # Then json.
+    if yaml is None:
+        # Then use json.
 
         # The only way to get the simplejson module to return unicode strings
         # is to pass it unicode.  See, for example--
@@ -156,20 +157,14 @@ def buildTest(testData, spec_filename, parser):
     return test
 
 
-for spec_path in spec_paths:
+spec_paths = glob.glob(os.path.join(SPEC_TEST_DIR, '*.%s' % file_extension))
+for path in spec_paths:
 
-    file_name  = os.path.basename(spec_path)
+    file_name  = os.path.basename(path)
 
-    # We avoid use of the with keyword for Python 2.4 support.
-    # TODO: share code here with pystache's open() code.
-    f = open(spec_path, 'r')
-    try:
-        s = f.read()
-    finally:
-        f.close()
-
-    u = s.decode(FILE_ENCODING)
-    spec_data = parse(u, file_extension)
+    b = common.read(path)
+    u = unicode(b, encoding=FILE_ENCODING)
+    spec_data = parse(u)
 
     tests = spec_data['tests']
 

@@ -8,6 +8,7 @@ This module provides a Loader class for locating and reading templates.
 import os
 import sys
 
+from pystache import common
 from pystache import defaults
 from pystache.locator import Locator
 
@@ -106,17 +107,12 @@ class Loader(object):
         Read the template at the given path, and return it as a unicode string.
 
         """
-        # We avoid use of the with keyword for Python 2.4 support.
-        f = open(path, 'r')
-        try:
-            text = f.read()
-        finally:
-            f.close()
+        b = common.read(path)
 
         if encoding is None:
             encoding = self.file_encoding
 
-        return self.unicode(text, encoding)
+        return self.unicode(b, encoding)
 
     # TODO: unit-test this method.
     def load_name(self, name):

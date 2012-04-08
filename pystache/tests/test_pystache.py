@@ -9,15 +9,15 @@ class PystacheTests(unittest.TestCase):
 
     def _assert_rendered(self, expected, template, context):
         actual = pystache.render(template, context)
-        self.assertEquals(actual, expected)
+        self.assertEqual(actual, expected)
 
     def test_basic(self):
         ret = pystache.render("Hi {{thing}}!", { 'thing': 'world' })
-        self.assertEquals(ret, "Hi world!")
+        self.assertEqual(ret, "Hi world!")
 
     def test_kwargs(self):
         ret = pystache.render("Hi {{thing}}!", thing='world')
-        self.assertEquals(ret, "Hi world!")
+        self.assertEqual(ret, "Hi world!")
 
     def test_less_basic(self):
         template = "It's a nice day for {{beverage}}, right {{person}}?"
@@ -42,7 +42,7 @@ class PystacheTests(unittest.TestCase):
     def test_comments(self):
         template = "What {{! the }} what?"
         actual = pystache.render(template)
-        self.assertEquals("What  what?", actual)
+        self.assertEqual("What  what?", actual)
 
     def test_false_sections_are_hidden(self):
         template = "Ready {{#set}}set {{/set}}go!"

@@ -5,10 +5,10 @@ Unit tests of renderengine.py.
 
 """
 
-import cgi
 import unittest
 
 from pystache.context import Context
+from pystache import defaults
 from pystache.parser import ParsingError
 from pystache.renderengine import RenderEngine
 from pystache.tests.common import AssertStringMixin
@@ -26,9 +26,9 @@ class RenderEngineTestCase(unittest.TestCase):
         # In real-life, these arguments would be functions
         engine = RenderEngine(load_partial="foo", literal="literal", escape="escape")
 
-        self.assertEquals(engine.escape, "escape")
-        self.assertEquals(engine.literal, "literal")
-        self.assertEquals(engine.load_partial, "foo")
+        self.assertEqual(engine.escape, "escape")
+        self.assertEqual(engine.literal, "literal")
+        self.assertEqual(engine.load_partial, "foo")
 
 
 class RenderTests(unittest.TestCase, AssertStringMixin):
@@ -47,7 +47,7 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         Create and return a default RenderEngine for testing.
 
         """
-        escape = lambda s: unicode(cgi.escape(s))
+        escape = defaults.TAG_ESCAPE
         engine = RenderEngine(literal=unicode, escape=escape, load_partial=None)
         return engine
 
@@ -230,7 +230,7 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         #
         # we need to resort to built-in attributes (double-underscored) on
         # the integer type.
-        self._assert_builtin_type(15, '__hex__', '0xf', u'999')
+        self._assert_builtin_type(15, '__neg__', -15, u'999')
 
     def test_interpolation__built_in_type__list(self):
         """
@@ -315,7 +315,7 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         try:
             self._assert_render(None, template)
         except ParsingError, err:
-            self.assertEquals(str(err), "Section end tag mismatch: u'section' != None")
+            self.assertEqual(str(err), "Section end tag mismatch: section != None")
 
     def test_section__end_tag_mismatch(self):
         """
@@ -326,7 +326,7 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         try:
             self._assert_render(None, template)
         except ParsingError, err:
-            self.assertEquals(str(err), "Section end tag mismatch: u'section_end' != u'section_start'")
+            self.assertEqual(str(err), "Section end tag mismatch: section_end != section_start")
 
     def test_section__context_values(self):
         """
