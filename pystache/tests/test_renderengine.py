@@ -242,8 +242,8 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         # Make a copy to prevent changes to item[0].
         self._assert_builtin_attr(list(item[0]), attr_name, 3)
 
-        template = '{{#section}}{{pop}}{{/section}}'
-        context = {'section': item, 'pop': 7}
+        template = '{{#section}}{{%s}}{{/section}}' % attr_name
+        context = {'section': item, attr_name: 7}
         self._assert_render(u'7', template, context)
 
     def test_implicit_iterator__literal(self):
@@ -375,6 +375,17 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         template = '{{#section}}{{template}}{{/section}}: {{planet}}'
         context = {'section': True, 'template': '{{planet}}', 'planet': 'Earth'}
         self._assert_render(u'{{planet}}: Earth', template, context)
+
+    # TODO: have this test case added to the spec.
+    def test_section__string_values_not_lists(self):
+        """
+        Check that string section values are not interpreted as lists.
+
+        """
+        template = '{{#section}}foo{{/section}}'
+        context = {'section': '123'}
+        # If strings were interpreted as lists, this would give "foofoofoo".
+        self._assert_render(u'foo', template, context)
 
     def test_section__nested_truthy(self):
         """
