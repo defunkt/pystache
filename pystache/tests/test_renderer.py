@@ -20,6 +20,22 @@ from pystache.tests.common import AssertStringMixin
 from pystache.tests.data.views import SayHello
 
 
+def _make_renderer():
+    """
+    Return a default Renderer instance for testing purposes.
+
+    """
+    renderer = Renderer(string_encoding='ascii', file_encoding='ascii')
+    return renderer
+
+
+def mock_unicode(b, encoding=None):
+    if encoding is None:
+        encoding = 'ascii'
+    u = unicode(b, encoding=encoding)
+    return u.upper()
+
+
 class RendererInitTestCase(unittest.TestCase):
 
     """
@@ -48,8 +64,12 @@ class RendererInitTestCase(unittest.TestCase):
 
         self.assertEqual(escape(">"), "&gt;")
         self.assertEqual(escape('"'), "&quot;")
-        # Single quotes are not escaped.
-        self.assertEqual(escape("'"), "'")
+        # Single quotes are escaped in Python 3 but not Python 2.
+        if sys.version_info < (3, ):
+            expected = "'"
+        else:
+            expected = '&#x27;'
+        self.assertEqual(escape("'"), expected)
 
     def test_escape(self):
         escape = lambda s: "**" + s
@@ -288,8 +308,8 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         Test passing a non-unicode template with non-ascii characters.
 
         """
-        renderer = Renderer()
-        template = "déf"
+        renderer = _make_renderer()
+        template = u"déf".encode("utf-8")
 
         # Check that decode_errors and string_encoding are both respected.
         renderer.decode_errors = 'ignore'
@@ -398,8 +418,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
         Return a default Renderer instance for testing purposes.
 
         """
-        renderer = Renderer(string_encoding='ascii', file_encoding='ascii')
-        return renderer
+        return _make_renderer()
 
     ## Test the engine's load_partial attribute.
 
@@ -451,8 +470,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
 
         """
         renderer = self._make_renderer()
-        # This function
-        renderer.unicode = lambda b: unicode(b, encoding='ascii').upper()
+        renderer.unicode = mock_unicode
 
         engine = renderer._make_render_engine()
         literal = engine.literal
@@ -516,12 +534,13 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
 
         """
         renderer = Renderer()
-        renderer.unicode = lambda s: s.upper()
+        renderer.unicode = mock_unicode
 
         engine = renderer._make_render_engine()
         escape = engine.escape
 
-        self.assertEqual(escape("foo"), "FOO")
+        b = u"foo".encode('ascii')
+        self.assertEqual(escape(b), "FOO")
 
     def test__escape__has_access_to_original_unicode_subclass(self):
         """
@@ -529,7 +548,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
 
         """
         renderer = Renderer()
-        renderer.escape = lambda s: type(s).__name__
+        renderer.escape = lambda s: unicode(type(s).__name__)
 
         engine = renderer._make_render_engine()
         escape = engine.escape
@@ -537,9 +556,9 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
         class MyUnicode(unicode):
             pass
 
-        self.assertEqual(escape("foo"), "unicode")
-        self.assertEqual(escape(u"foo"), "unicode")
-        self.assertEqual(escape(MyUnicode("foo")), "MyUnicode")
+        self.assertEqual(escape(u"foo".encode('ascii')), unicode.__name__)
+        self.assertEqual(escape(u"foo"), unicode.__name__)
+        self.assertEqual(escape(MyUnicode("foo")), MyUnicode.__name__)
 
     def test__escape__returns_unicode(self):
         """

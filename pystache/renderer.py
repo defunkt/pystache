@@ -164,6 +164,13 @@ class Renderer(object):
         """
         Convert a byte string to unicode, using string_encoding and decode_errors.
 
+        Arguments:
+
+          b: a byte string.
+
+          encoding: the name of an encoding.  Defaults to the string_encoding
+            attribute for this instance.
+
         Raises:
 
           TypeError: Because this method calls Python's built-in unicode()

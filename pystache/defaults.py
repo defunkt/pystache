@@ -44,8 +44,9 @@ SEARCH_DIRS = [os.curdir]  # i.e. ['.']
 # rendering templates (e.g. for tags enclosed in double braces).
 # Only unicode strings will be passed to this function.
 #
-# The quote=True argument causes double quotes to be escaped,
-# but not single quotes:
+# The quote=True argument causes double quotes to be escaped in Python 2,
+# but not single quotes, and both double quotes and single quotes to be
+# escaped in Python 3:
 #
 #   http://docs.python.org/dev/library/html.html#html.escape
 #   http://docs.python.org/library/cgi.html#cgi.escape

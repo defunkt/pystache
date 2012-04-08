@@ -131,7 +131,7 @@ class Parser(object):
 
             if tag_type == '/':
                 if tag_key != section_key:
-                    raise ParsingError("Section end tag mismatch: %s != %s" % (repr(tag_key), repr(section_key)))
+                    raise ParsingError("Section end tag mismatch: %s != %s" % (tag_key, section_key))
 
                 return ParsedTemplate(parse_tree), template[start_index:match_index], end_index
 

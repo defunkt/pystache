@@ -55,7 +55,7 @@ class RenderEngine(object):
             this class will not pass tag values to literal prior to passing
             them to this function.  This allows for more flexibility,
             for example using a custom escape function that handles
-            incoming strings of type markupssafe.Markup differently
+            incoming strings of type markupsafe.Markup differently
             from plain unicode strings.
 
         """

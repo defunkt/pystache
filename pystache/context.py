@@ -5,11 +5,16 @@ Defines a Context class to represent mustache(5)'s notion of context.
 
 """
 
-class NotFound(object): pass
+# This equals '__builtin__' in Python 2 and 'builtins' in Python 3.
+_BUILTIN_MODULE = type(0).__module__
+
+
 # We use this private global variable as a return value to represent a key
 # not being found on lookup.  This lets us distinguish between the case
 # of a key's value being None with the case of a key not being found --
 # without having to rely on exceptions (e.g. KeyError) for flow control.
+class NotFound(object):
+    pass
 _NOT_FOUND = NotFound()
 
 
@@ -34,7 +39,7 @@ def _get_value(item, key):
         # (e.g. catching KeyError).
         if key in item:
             return item[key]
-    elif type(item).__module__ != '__builtin__':
+    elif type(item).__module__ != _BUILTIN_MODULE:
         # Then we consider the argument an "object" for the purposes of
         # the spec.
         #
