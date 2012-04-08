@@ -186,35 +186,62 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         context = {'test': '{{#hello}}'}
         self._assert_render(u'{{#hello}}', template, context)
 
+    # Built-in types:
+    #
+    #   Confirm that we not treat instances of built-in types as objects,
+    #   for example by calling a method on a built-in type instance when it
+    #   has a method whose name matches the current key.
+    #
+    #   Each test case puts an instance of a built-in type on top of the
+    #   context stack before interpolating a tag whose key matches an
+    #   attribute (method or property) of the instance.
+    #
+
+    def _assert_builtin_attr(self, item, attr_name, expected_attr):
+        self.assertTrue(hasattr(item, attr_name))
+        actual = getattr(item, attr_name)
+        if callable(actual):
+            actual = actual()
+        self.assertEqual(actual, expected_attr)
+
+    def _assert_builtin_type(self, item, attr_name, expected_attr, expected_template):
+        self._assert_builtin_attr(item, attr_name, expected_attr)
+
+        template = '{{#section}}{{%s}}{{/section}}' % attr_name
+        context = {'section': item, attr_name: expected_template}
+        self._assert_render(expected_template, template, context)
+
     def test_interpolation__built_in_type__string(self):
         """
-        Check tag interpolation with a string on the top of the context stack.
+        Check tag interpolation with a built-in type: string.
 
         """
-        item = 'abc'
-        # item.upper() == 'ABC'
-        template = '{{#section}}{{upper}}{{/section}}'
-        context = {'section': item, 'upper': 'XYZ'}
-        self._assert_render(u'XYZ', template, context)
+        self._assert_builtin_type('abc', 'upper', 'ABC', u'xyz')
 
     def test_interpolation__built_in_type__integer(self):
         """
-        Check tag interpolation with an integer on the top of the context stack.
+        Check tag interpolation with a built-in type: integer.
 
         """
-        item = 10
-        # item.real == 10
-        template = '{{#section}}{{real}}{{/section}}'
-        context = {'section': item, 'real': 1000}
-        self._assert_render(u'1000', template, context)
+        # Since public attributes weren't added to integers until Python 2.6
+        # (for example the "real" attribute of the numeric type hierarchy)--
+        #
+        #   http://docs.python.org/library/numbers.html
+        #
+        # we need to resort to built-in attributes (double-underscored) on
+        # the integer type.
+        self._assert_builtin_type(15, '__hex__', '0xf', u'999')
 
     def test_interpolation__built_in_type__list(self):
         """
-        Check tag interpolation with a list on the top of the context stack.
+        Check tag interpolation with a built-in type: list.
 
         """
         item = [[1, 2, 3]]
-        # item[0].pop() == 3
+        attr_name = 'pop'
+        # Make a copy to prevent changes to item[0].
+        self._assert_builtin_attr(list(item[0]), attr_name, 3)
+
         template = '{{#section}}{{pop}}{{/section}}'
         context = {'section': item, 'pop': 7}
         self._assert_render(u'7', template, context)
