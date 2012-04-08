@@ -230,7 +230,7 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         #
         # we need to resort to built-in attributes (double-underscored) on
         # the integer type.
-        self._assert_builtin_type(15, '__hex__', '0xf', u'999')
+        self._assert_builtin_type(15, '__neg__', -15, u'999')
 
     def test_interpolation__built_in_type__list(self):
         """
