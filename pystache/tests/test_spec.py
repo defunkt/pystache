@@ -11,14 +11,23 @@ FILE_ENCODING = 'utf-8'  # the encoding of the spec test files.
 
 
 try:
-    # We use the JSON files rather than the YAML files because json libraries
-    # are available for Python 2.4.
-    import json
-except:
-    # The module json is not available prior to Python 2.6, whereas simplejson is.
-    # Note that simplejson dropped support for Python 2.4 in simplejson v2.1.0,
-    # so Python 2.4 requires a simplejson install older than the most recent.
-    import simplejson as json
+    import yaml
+except ImportError:
+    try:
+        # We use the JSON files rather than the YAML files because json libraries
+        # are available for Python 2.4.
+        import json
+    except:
+        # The module json is not available prior to Python 2.6, whereas simplejson is.
+        # Note that simplejson dropped support for Python 2.4 in simplejson v2.1.0,
+        # so Python 2.4 requires a simplejson install older than the most recent.
+        import simplejson as json
+    file_extension = 'json'
+    parser = json
+else:
+    file_extension = 'yml'
+    parser = yaml
+
 
 import glob
 import os.path
@@ -29,7 +38,42 @@ from pystache.renderer import Renderer
 from pystache.tests.common import AssertStringMixin, SPEC_TEST_DIR
 
 
-spec_paths = glob.glob(os.path.join(SPEC_TEST_DIR, '*.json'))
+spec_paths = glob.glob(os.path.join(SPEC_TEST_DIR, '*.%s' % file_extension))
+
+
+def parse(u, file_extension):
+    """
+    Arguments:
+
+      u: a unicode string.
+
+    """
+    # Find a cleaner mechanism for choosing between the two.
+    if file_extension[0] == 'j':
+        # Then json.
+
+        # The only way to get the simplejson module to return unicode strings
+        # is to pass it unicode.  See, for example--
+        #
+        #   http://code.google.com/p/simplejson/issues/detail?id=40
+        #
+        # and the documentation of simplejson.loads():
+        #
+        #   "If s is a str then decoded JSON strings that contain only ASCII
+        #    characters may be parsed as str for performance and memory reasons.
+        #    If your code expects only unicode the appropriate solution is
+        #    decode s to unicode prior to calling loads."
+        #
+        return json.loads(u)
+    # Otherwise, yaml.
+
+    def code_constructor(loader, node):
+        value = loader.construct_mapping(node)
+        return eval(value['python'], {})
+
+    yaml.add_constructor(u'!code', code_constructor)
+    return yaml.load(u)
+
 
 
 # This test case lets us alert the user that spec tests are missing.
@@ -47,7 +91,13 @@ class MustacheSpec(unittest.TestCase, AssertStringMixin):
     pass
 
 
-def buildTest(testData, spec_filename):
+def buildTest(testData, spec_filename, parser):
+    """
+    Arguments:
+
+      parser: the module used for parsing (e.g. yaml or json).
+
+    """
 
     name = testData['name']
     description  = testData['desc']
@@ -57,7 +107,8 @@ def buildTest(testData, spec_filename):
     def test(self):
         template = testData['template']
         partials = testData.has_key('partials') and testData['partials'] or {}
-        expected = testData['expected']
+        # PyYAML seems to leave ASCII strings as byte strings.
+        expected = unicode(testData['expected'])
         data     = testData['data']
 
         # Convert code strings to functions.
@@ -79,10 +130,10 @@ def buildTest(testData, spec_filename):
         def escape(s):
             return s.replace("%", "%%")
 
-        subs = [description, template, json.__version__, str(json)]
+        subs = [description, template, parser.__version__, str(parser)]
         subs = tuple([escape(sub) for sub in subs])
-        # We include the json module version to help in troubleshooting
-        # json/simplejson issues.
+        # We include the parsing module version info to help with troubleshooting
+        # yaml/json/simplejson issues.
         message = """%s
 
   Template: \"""%s\"""
@@ -109,31 +160,20 @@ for spec_path in spec_paths:
     file_name  = os.path.basename(spec_path)
 
     # We avoid use of the with keyword for Python 2.4 support.
+    # TODO: share code here with pystache's open() code.
     f = open(spec_path, 'r')
     try:
         s = f.read()
     finally:
         f.close()
 
-    # The only way to get the simplejson module to return unicode strings
-    # is to pass it unicode.  See, for example--
-    #
-    #   http://code.google.com/p/simplejson/issues/detail?id=40
-    #
-    # and the documentation of simplejson.loads():
-    #
-    #   "If s is a str then decoded JSON strings that contain only ASCII
-    #    characters may be parsed as str for performance and memory reasons.
-    #    If your code expects only unicode the appropriate solution is
-    #    decode s to unicode prior to calling loads."
-    #
     u = s.decode(FILE_ENCODING)
-    spec_data = json.loads(u)
+    spec_data = parse(u, file_extension)
 
     tests = spec_data['tests']
 
     for test in tests:
-        test = buildTest(test, file_name)
+        test = buildTest(test, file_name, parser)
         setattr(MustacheSpec, test.__name__, test)
         # Prevent this variable from being interpreted as another test.
         del(test)

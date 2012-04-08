@@ -4,7 +4,7 @@ History
 TBD
 ---
 
-* TODO
+* Test runner now supports both yaml and json forms of Mustache spec.
 
 0.5.0 (2012-04-03)
 ------------------
