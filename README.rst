@@ -79,6 +79,22 @@ Pull it together::
     Hello, Pizza!
 
 
+Python 3
+========
+
+As of v0.5.1, Pystache fully supports Python 3.  There are slight differences
+in behavior between Pystache running under Python 2 and 3, as follows:
+
+* In Python 2, the default html-escape function ``cgi.escape()`` does not
+  escape single quotes; whereas in Python 3, the default escape function
+  ``html.escape()`` does escape single quotes.
+* In both Python 2 and 3, the string and file encodings default to
+  ``sys.getdefaultencoding()``.  However, this function can return different
+  values under Python 2 and 3, even when run from the same system.  Check
+  your own system for the behavior on your system, or do not rely on the
+  defaults by passing the encodings in explicitly (e.g. to the ``Renderer`` class).
+
+
 Unicode Handling
 ================
 
@@ -115,7 +131,26 @@ default to values set in Pystache's ``defaults`` module.
 Test It
 =======
 
-nose_ works great! ::
+Pystache can be tested using both Python 2 and 3 -- even from a single
+Python 2 install if using Distribute's ``test`` (see below).
+
+To include tests from the Mustache spec in your test runs: ::
+
+    git submodule init
+    git submodule update
+
+
+### Python 3
+
+For Python 3, we recommend installing and using [Distribute](http://pypi.python.org/pypi/distribute).
+Then one can invoke Distribute's [``test``](http://packages.python.org/distribute/setuptools.html#test) command:
+
+    python setup.py test
+
+
+### Python 2
+
+For Python 2, we recommend nose_ ::
 
     pip install nose
     cd pystache
@@ -125,11 +160,6 @@ Depending on your Python version and nose installation, you may need
 to type, for example ::
 
     nosetests-2.4
-
-To include tests from the Mustache spec in your test runs: ::
-
-    git submodule init
-    git submodule update
 
 To run all available tests (including doctests)::
 
