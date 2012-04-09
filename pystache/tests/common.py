@@ -88,3 +88,28 @@ class AssertIsMixin:
     #   http://docs.python.org/library/unittest.html#unittest.TestCase.assertIsNone
     def assertIs(self, first, second):
         self.assertTrue(first is second, msg="%s is not %s" % (repr(first), repr(second)))
+
+
+class SetupDefaults(object):
+
+    """
+    Mix this class in to a unittest.TestCase for standard defaults.
+
+    This class allows for consistent test results across Python 2/3.
+
+    """
+
+    def setup_defaults(self):
+        self.original_decode_errors = defaults.DECODE_ERRORS
+        self.original_file_encoding = defaults.FILE_ENCODING
+        self.original_string_encoding = defaults.STRING_ENCODING
+
+        defaults.DECODE_ERRORS = 'strict'
+        defaults.FILE_ENCODING = 'ascii'
+        defaults.STRING_ENCODING = 'ascii'
+
+    def teardown_defaults(self):
+        defaults.DECODE_ERRORS = self.original_decode_errors
+        defaults.FILE_ENCODING = self.original_file_encoding
+        defaults.STRING_ENCODING = self.original_string_encoding
+

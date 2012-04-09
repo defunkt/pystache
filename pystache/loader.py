@@ -13,14 +13,20 @@ from pystache import defaults
 from pystache.locator import Locator
 
 
-def _default_to_unicode(s, encoding=None):
-    """
-    Raises a TypeError exception if the given string is already unicode.
+# We make a function so that the current defaults take effect.
+# TODO: revisit whether this is necessary.
+# TODO: change assertNotEquals to assertNotEqual everywhere.
 
-    """
-    if encoding is None:
-        encoding = defaults.STRING_ENCODING
-    return unicode(s, encoding, defaults.DECODE_ERRORS)
+def _make_to_unicode():
+    def to_unicode(s, encoding=None):
+        """
+        Raises a TypeError exception if the given string is already unicode.
+
+        """
+        if encoding is None:
+            encoding = defaults.STRING_ENCODING
+        return unicode(s, encoding, defaults.DECODE_ERRORS)
+    return to_unicode
 
 
 class Loader(object):
@@ -68,7 +74,7 @@ class Loader(object):
             search_dirs = defaults.SEARCH_DIRS
 
         if to_unicode is None:
-            to_unicode = _default_to_unicode
+            to_unicode = _make_to_unicode()
 
         self.extension = extension
         self.file_encoding = file_encoding

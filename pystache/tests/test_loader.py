@@ -9,25 +9,18 @@ import os
 import sys
 import unittest
 
-from pystache.tests.common import AssertStringMixin, DATA_DIR
+from pystache.tests.common import AssertStringMixin, DATA_DIR, SetupDefaults
 from pystache import defaults
 from pystache.loader import Loader
 
 
-class LoaderTests(unittest.TestCase, AssertStringMixin):
+class LoaderTests(unittest.TestCase, AssertStringMixin, SetupDefaults):
 
-    # Switching to standard encodings allows for consistent test
-    # results across Python 2/3.
     def setUp(self):
-        self.original_string_encoding = defaults.STRING_ENCODING
-        self.original_file_encoding = defaults.FILE_ENCODING
-
-        defaults.STRING_ENCODING = 'ascii'
-        defaults.FILE_ENCODING = 'ascii'
+        self.setup_defaults()
 
     def tearDown(self):
-        defaults.STRING_ENCODING = self.original_string_encoding
-        defaults.FILE_ENCODING = self.original_file_encoding
+        self.teardown_defaults()
 
     def test_init__extension(self):
         loader = Loader(extension='foo')
@@ -63,25 +56,19 @@ class LoaderTests(unittest.TestCase, AssertStringMixin):
         decode_errors = defaults.DECODE_ERRORS
         string_encoding = defaults.STRING_ENCODING
 
-        nonascii = 'abcdé'
+        nonascii = u'abcdé'.encode('utf-8')
 
-        try:
-            defaults.DECODE_ERRORS = 'strict'
-            defaults.STRING_ENCODING = 'ascii'
-            loader = Loader()
-            self.assertRaises(UnicodeDecodeError, loader.to_unicode, nonascii)
+        loader = Loader()
+        self.assertRaises(UnicodeDecodeError, loader.to_unicode, nonascii)
 
-            defaults.DECODE_ERRORS = 'ignore'
-            loader = Loader()
-            self.assertString(loader.to_unicode(nonascii), u'abcd')
+        defaults.DECODE_ERRORS = 'ignore'
+        loader = Loader()
+        self.assertString(loader.to_unicode(nonascii), u'abcd')
 
-            defaults.STRING_ENCODING = 'utf-8'
-            loader = Loader()
-            self.assertString(loader.to_unicode(nonascii), u'abcdé')
+        defaults.STRING_ENCODING = 'utf-8'
+        loader = Loader()
+        self.assertString(loader.to_unicode(nonascii), u'abcdé')
 
-        finally:
-            defaults.DECODE_ERRORS = decode_errors
-            defaults.STRING_ENCODING = string_encoding
 
     def _get_path(self, filename):
         return os.path.join(DATA_DIR, filename)
@@ -126,10 +113,10 @@ class LoaderTests(unittest.TestCase, AssertStringMixin):
         Test unicode(): encoding attribute.
 
         """
+        # TODO: rename reader to loader everywhere in this module.
         reader = Loader()
 
         non_ascii = u'abcdé'.encode('utf-8')
-
         self.assertRaises(UnicodeDecodeError, reader.unicode, non_ascii)
 
         def to_unicode(s, encoding=None):

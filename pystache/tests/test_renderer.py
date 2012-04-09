@@ -15,8 +15,7 @@ from pystache import Renderer
 from pystache import TemplateSpec
 from pystache.loader import Loader
 
-from pystache.tests.common import get_data_path
-from pystache.tests.common import AssertStringMixin
+from pystache.tests.common import get_data_path, AssertStringMixin
 from pystache.tests.data.views import SayHello
 
 
@@ -179,7 +178,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         Test that the string_encoding attribute is respected.
 
         """
-        renderer = Renderer()
+        renderer = self._renderer()
         b = u"é".encode('utf-8')
 
         renderer.string_encoding = "ascii"
@@ -193,7 +192,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         Test that the decode_errors attribute is respected.
 
         """
-        renderer = Renderer()
+        renderer = self._renderer()
         renderer.string_encoding = "ascii"
         b = u"déf".encode('utf-8')
 
@@ -211,7 +210,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         Test that _make_loader() returns a Loader.
 
         """
-        renderer = Renderer()
+        renderer = self._renderer()
         loader = renderer._make_loader()
 
         self.assertEqual(type(loader), Loader)
@@ -223,7 +222,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         """
         unicode_ = lambda x: x
 
-        renderer = Renderer()
+        renderer = self._renderer()
         renderer.file_encoding = 'enc'
         renderer.file_extension = 'ext'
         renderer.unicode = unicode_
@@ -241,22 +240,22 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         Check that render() returns a string of type unicode.
 
         """
-        renderer = Renderer()
+        renderer = self._renderer()
         rendered = renderer.render('foo')
         self.assertEqual(type(rendered), unicode)
 
     def test_render__unicode(self):
-        renderer = Renderer()
+        renderer = self._renderer()
         actual = renderer.render(u'foo')
         self.assertEqual(actual, u'foo')
 
     def test_render__str(self):
-        renderer = Renderer()
+        renderer = self._renderer()
         actual = renderer.render('foo')
         self.assertEqual(actual, 'foo')
 
     def test_render__non_ascii_character(self):
-        renderer = Renderer()
+        renderer = self._renderer()
         actual = renderer.render(u'Poincaré')
         self.assertEqual(actual, u'Poincaré')
 
@@ -265,7 +264,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         Test render(): passing a context.
 
         """
-        renderer = Renderer()
+        renderer = self._renderer()
         self.assertEqual(renderer.render('Hi {{person}}', {'person': 'Mom'}), 'Hi Mom')
 
     def test_render__context_and_kwargs(self):
@@ -273,7 +272,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         Test render(): passing a context and **kwargs.
 
         """
-        renderer = Renderer()
+        renderer = self._renderer()
         template = 'Hi {{person1}} and {{person2}}'
         self.assertEqual(renderer.render(template, {'person1': 'Mom'}, person2='Dad'), 'Hi Mom and Dad')
 
@@ -282,7 +281,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         Test render(): passing **kwargs and no context.
 
         """
-        renderer = Renderer()
+        renderer = self._renderer()
         self.assertEqual(renderer.render('Hi {{person}}', person='Mom'), 'Hi Mom')
 
     def test_render__context_and_kwargs__precedence(self):
@@ -290,7 +289,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         Test render(): **kwargs takes precedence over context.
 
         """
-        renderer = Renderer()
+        renderer = self._renderer()
         self.assertEqual(renderer.render('Hi {{person}}', {'person': 'Mom'}, person='Dad'), 'Hi Dad')
 
     def test_render__kwargs_does_not_modify_context(self):
@@ -299,7 +298,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
 
         """
         context = {}
-        renderer = Renderer()
+        renderer = self._renderer()
         renderer.render('Hi {{person}}', context=context, foo="bar")
         self.assertEqual(context, {})
 
