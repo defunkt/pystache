@@ -1,11 +1,22 @@
 # encoding: utf-8
 
 import unittest
+
 import pystache
+from pystache import defaults
 from pystache import renderer
+from pystache.tests.common import html_escape
 
 
 class PystacheTests(unittest.TestCase):
+
+
+    def setUp(self):
+        self.original_escape = defaults.TAG_ESCAPE
+        defaults.TAG_ESCAPE = html_escape
+
+    def tearDown(self):
+        defaults.TAG_ESCAPE = self.original_escape
 
     def _assert_rendered(self, expected, template, context):
         actual = pystache.render(template, context)
@@ -54,7 +65,7 @@ class PystacheTests(unittest.TestCase):
         context = { 'set': True }
         self._assert_rendered("Ready set go!", template, context)
 
-    non_strings_expected = """(123 & ['something'])(chris & 0.9)"""
+    non_strings_expected = """(123 & [&#x27;something&#x27;])(chris & 0.9)"""
 
     def test_non_strings(self):
         template = "{{#stats}}({{key}} & {{value}}){{/stats}}"

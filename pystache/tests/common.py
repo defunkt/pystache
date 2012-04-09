@@ -9,8 +9,10 @@ import os
 
 import examples
 import pystache
+from pystache import defaults
 
 
+_DEFAULT_TAG_ESCAPE = defaults.TAG_ESCAPE
 _TESTS_DIR = os.path.dirname(pystache.tests.__file__)
 
 DATA_DIR = os.path.join(_TESTS_DIR, 'data')  # i.e. 'pystache/tests/data'.
@@ -18,6 +20,18 @@ EXAMPLES_DIR = os.path.dirname(examples.__file__)
 SOURCE_DIR = os.path.dirname(pystache.__file__)
 PROJECT_DIR = os.path.join(SOURCE_DIR, '..')
 SPEC_TEST_DIR = os.path.join(PROJECT_DIR, 'ext', 'spec', 'specs')
+
+
+def html_escape(u):
+    """
+    An html escape function that behaves the same in both Python 2 and 3.
+
+    This function is needed because single quotes are escaped in Python 3
+    (to '&#x27;'), but not in Python 2.
+
+    """
+    u = _DEFAULT_TAG_ESCAPE(u)
+    return u.replace("'", '&#x27;')
 
 
 def get_data_path(file_name):
