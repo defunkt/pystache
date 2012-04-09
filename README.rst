@@ -92,7 +92,7 @@ in behavior between Pystache running under Python 2 and 3, as follows:
   ``sys.getdefaultencoding()``.  However, this function can return different
   values under Python 2 and 3, even when run from the same system.  Check
   your own system for the behavior on your system, or do not rely on the
-  defaults by passing the encodings in explicitly (e.g. to the ``Renderer`` class).
+  defaults by passing in the encodings explicitly (e.g. to the ``Renderer`` class).
 
 
 Unicode Handling
@@ -101,24 +101,25 @@ Unicode Handling
 This section describes Pystache's handling of unicode (e.g. strings and
 encodings).
 
-Internally, Pystache uses `only unicode strings`_.  For input, Pystache accepts
-both ``unicode`` and ``str`` strings.  For output, Pystache's template
-rendering methods return only unicode.
+Internally, Pystache uses `only unicode strings`_ (type ``str`` in Python 3 and
+type ``unicode`` in Python 2).  For input, Pystache accepts both unicode strings
+and byte strings (``bytes`` in Python 3 and ``str`` in Python 2).  For output,
+Pystache's template rendering methods return only unicode.
 
-Pystache's ``Renderer`` class supports a number of attributes that control how
-Pystache converts ``str`` strings to unicode on input.  These include the
+Pystache's ``Renderer`` class supports a number of attributes to control how
+Pystache converts byte strings to unicode on input.  These include the
 ``file_encoding``, ``string_encoding``, and ``decode_errors`` attributes.
 
 The ``file_encoding`` attribute is the encoding the renderer uses to convert
 to unicode any files read from the file system.  Similarly, ``string_encoding``
-is the encoding the renderer uses to convert to unicode any other strings of
-type ``str`` encountered during the rendering process (e.g. context values
-of type ``str``).
+is the encoding the renderer uses to convert any other byte strings encountered
+during the rendering process into unicode (e.g. context values that are
+encoded byte strings).
 
 The ``decode_errors`` attribute is what the renderer passes as the ``errors``
-argument to Python's `built-in unicode function`_ ``unicode()`` when
-converting.  The valid values for this argument are ``strict``, ``ignore``,
-and ``replace``.
+argument to Python's built-in unicode-decoding function (``str()`` in Python 3
+and ``unicode()`` in Python 2).  The valid values for this argument are
+``strict``, ``ignore``, and ``replace``.
 
 Each of these attributes can be set via the ``Renderer`` class's constructor
 using a keyword argument of the same name.  See the Renderer class's
@@ -140,15 +141,17 @@ To include tests from the Mustache spec in your test runs: ::
     git submodule update
 
 
-### Python 3
+Python 3
+--------
 
-For Python 3, we recommend installing and using [Distribute](http://pypi.python.org/pypi/distribute).
-Then one can invoke Distribute's [``test``](http://packages.python.org/distribute/setuptools.html#test) command:
+For Python 3, we recommend installing and using Distribute_.
+Then one can invoke `Distribute's test`_ command:
 
     python setup.py test
 
 
-### Python 2
+Python 2
+--------
 
 For Python 2, we recommend nose_ ::
 
@@ -197,6 +200,8 @@ Author
 
 .. _ctemplate: http://code.google.com/p/google-ctemplate/
 .. _David Phillips: http://davidphillips.us/
+.. _Distribute: http://pypi.python.org/pypi/distribute
+.. _Distribute's test: http://packages.python.org/distribute/setuptools.html#test
 .. _et: http://www.ivan.fomichev.name/2008/05/erlang-template-engine-prototype.html
 .. _json: http://docs.python.org/library/json.html
 .. _Mustache: http://mustache.github.com/
