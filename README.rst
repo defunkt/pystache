@@ -29,6 +29,7 @@ Pystache is tested with the following versions of Python:
 * Python 2.5 (requires simplejson)
 * Python 2.6
 * Python 2.7
+* Python 3.2
 
 JSON support is needed only for the command-line interface and to run the
 spec tests.  We require simplejson_ for earlier versions of Python since
@@ -82,8 +83,9 @@ Pull it together::
 Python 3
 ========
 
-As of v0.5.1, Pystache fully supports Python 3.  There are slight differences
-in behavior between Pystache running under Python 2 and 3, as follows:
+As of version 0.5.1, Pystache fully supports Python 3.  There are slight
+differences in behavior between Pystache running under Python 2 and 3,
+as follows:
 
 * In Python 2, the default html-escape function ``cgi.escape()`` does not
   escape single quotes; whereas in Python 3, the default escape function

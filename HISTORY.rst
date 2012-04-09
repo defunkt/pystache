@@ -4,6 +4,7 @@ History
 0.5.1 (TBD)
 -----------
 
+* Added support for Python 3.2 (following conversion with 2to3_).
 * Test runner now supports both yaml and json forms of Mustache spec.
 
 0.5.0 (2012-04-03)
@@ -98,5 +99,6 @@ Bug fixes:
 * First release
 
 
+.. _2to3: http://docs.python.org/library/2to3.html
 .. _issue #13: https://github.com/defunkt/pystache/issues/13
 .. _Mustache spec: https://github.com/mustache/spec
