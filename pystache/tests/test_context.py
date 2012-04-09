@@ -85,9 +85,11 @@ class GetValueTests(unittest.TestCase, AssertIsMixin):
         Test that dictionary attributes are not checked.
 
         """
-        item = {}
-        attr_name = "keys"
-        self.assertEqual(getattr(item, attr_name)(), [])
+        item = {1: 2, 3: 4}
+        # I was not able to find a "public" attribute of dict that is
+        # the same across Python 2/3.
+        attr_name = "__len__"
+        self.assertEqual(getattr(item, attr_name)(), 2)
         self.assertNotFound(item, attr_name)
 
     def test_dictionary__dict_subclass(self):
@@ -154,25 +156,20 @@ class GetValueTests(unittest.TestCase, AssertIsMixin):
         """
         class MyInt(int): pass
 
-        item1 = MyInt(10)
-        item2 = 10
+        cust_int = MyInt(10)
+        pure_int = 10
 
-        try:
-            item2.real
-        except AttributeError:
-            # Then skip this unit test.  The numeric type hierarchy was
-            # added only in Python 2.6, in which case integers inherit
-            # from complex numbers the "real" attribute, etc:
-            #
-            #   http://docs.python.org/library/numbers.html
-            #
-            return
+        # We have to use a built-in method like __neg__ because "public"
+        # attributes like "real" were not added to Python until Python 2.6,
+        # when the numeric type hierarchy was added:
+        #
+        #   http://docs.python.org/library/numbers.html
+        #
+        self.assertEqual(cust_int.__neg__(), -10)
+        self.assertEqual(pure_int.__neg__(), -10)
 
-        self.assertEqual(item1.real, 10)
-        self.assertEqual(item2.real, 10)
-
-        self.assertEqual(_get_value(item1, 'real'), 10)
-        self.assertNotFound(item2, 'real')
+        self.assertEqual(_get_value(cust_int, '__neg__'), -10)
+        self.assertNotFound(pure_int, '__neg__')
 
     def test_built_in_type__string(self):
         """
