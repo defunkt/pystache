@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 """
-Unit tests of reader.py.
+Unit tests of loader.py.
 
 """
 
@@ -78,8 +78,8 @@ class LoaderTests(unittest.TestCase, AssertStringMixin, SetupDefaults):
         Test unicode(): default arguments with str input.
 
         """
-        reader = Loader()
-        actual = reader.unicode("foo")
+        loader = Loader()
+        actual = loader.unicode("foo")
 
         self.assertString(actual, u"foo")
 
@@ -88,8 +88,8 @@ class LoaderTests(unittest.TestCase, AssertStringMixin, SetupDefaults):
         Test unicode(): default arguments with unicode input.
 
         """
-        reader = Loader()
-        actual = reader.unicode(u"foo")
+        loader = Loader()
+        actual = loader.unicode(u"foo")
 
         self.assertString(actual, u"foo")
 
@@ -103,8 +103,8 @@ class LoaderTests(unittest.TestCase, AssertStringMixin, SetupDefaults):
 
         s = UnicodeSubclass(u"foo")
 
-        reader = Loader()
-        actual = reader.unicode(s)
+        loader = Loader()
+        actual = loader.unicode(s)
 
         self.assertString(actual, u"foo")
 
@@ -113,32 +113,31 @@ class LoaderTests(unittest.TestCase, AssertStringMixin, SetupDefaults):
         Test unicode(): encoding attribute.
 
         """
-        # TODO: rename reader to loader everywhere in this module.
-        reader = Loader()
+        loader = Loader()
 
         non_ascii = u'abcdé'.encode('utf-8')
-        self.assertRaises(UnicodeDecodeError, reader.unicode, non_ascii)
+        self.assertRaises(UnicodeDecodeError, loader.unicode, non_ascii)
 
         def to_unicode(s, encoding=None):
             if encoding is None:
                 encoding = 'utf-8'
             return unicode(s, encoding)
 
-        reader.to_unicode = to_unicode
-        self.assertString(reader.unicode(non_ascii), u"abcdé")
+        loader.to_unicode = to_unicode
+        self.assertString(loader.unicode(non_ascii), u"abcdé")
 
     def test_unicode__encoding_argument(self):
         """
         Test unicode(): encoding argument.
 
         """
-        reader = Loader()
+        loader = Loader()
 
         non_ascii = u'abcdé'.encode('utf-8')
 
-        self.assertRaises(UnicodeDecodeError, reader.unicode, non_ascii)
+        self.assertRaises(UnicodeDecodeError, loader.unicode, non_ascii)
 
-        actual = reader.unicode(non_ascii, encoding='utf-8')
+        actual = loader.unicode(non_ascii, encoding='utf-8')
         self.assertString(actual, u'abcdé')
 
     # TODO: check the read() unit tests.
@@ -147,9 +146,9 @@ class LoaderTests(unittest.TestCase, AssertStringMixin, SetupDefaults):
         Test read().
 
         """
-        reader = Loader()
+        loader = Loader()
         path = self._get_path('ascii.mustache')
-        actual = reader.read(path)
+        actual = loader.read(path)
         self.assertString(actual, u'ascii: abc')
 
     def test_read__file_encoding__attribute(self):
@@ -171,25 +170,25 @@ class LoaderTests(unittest.TestCase, AssertStringMixin, SetupDefaults):
         Test read(): encoding argument respected.
 
         """
-        reader = Loader()
+        loader = Loader()
         path = self._get_path('non_ascii.mustache')
 
-        self.assertRaises(UnicodeDecodeError, reader.read, path)
+        self.assertRaises(UnicodeDecodeError, loader.read, path)
 
-        actual = reader.read(path, encoding='utf-8')
+        actual = loader.read(path, encoding='utf-8')
         self.assertString(actual, u'non-ascii: é')
 
-    def test_reader__to_unicode__attribute(self):
+    def test_loader__to_unicode__attribute(self):
         """
         Test read(): to_unicode attribute respected.
 
         """
-        reader = Loader()
+        loader = Loader()
         path = self._get_path('non_ascii.mustache')
 
-        self.assertRaises(UnicodeDecodeError, reader.read, path)
+        self.assertRaises(UnicodeDecodeError, loader.read, path)
 
-        #reader.decode_errors = 'ignore'
-        #actual = reader.read(path)
+        #loader.decode_errors = 'ignore'
+        #actual = loader.read(path)
         #self.assertString(actual, u'non-ascii: ')
 
