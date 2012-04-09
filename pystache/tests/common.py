@@ -12,6 +12,7 @@ import pystache
 from pystache import defaults
 
 
+# Save a reference to the original function to avoid recursion.
 _DEFAULT_TAG_ESCAPE = defaults.TAG_ESCAPE
 _TESTS_DIR = os.path.dirname(pystache.tests.__file__)
 
@@ -28,6 +29,10 @@ def html_escape(u):
 
     This function is needed because single quotes are escaped in Python 3
     (to '&#x27;'), but not in Python 2.
+
+    The global defaults.TAG_ESCAPE can be set to this function in the
+    setUp() and tearDown() of unittest test cases, for example, for
+    consistent test results.
 
     """
     u = _DEFAULT_TAG_ESCAPE(u)

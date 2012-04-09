@@ -16,6 +16,19 @@ from pystache.loader import Loader
 
 class LoaderTests(unittest.TestCase, AssertStringMixin):
 
+    # Switching to standard encodings allows for consistent test
+    # results across Python 2/3.
+    def setUp(self):
+        self.original_string_encoding = defaults.STRING_ENCODING
+        self.original_file_encoding = defaults.FILE_ENCODING
+
+        defaults.STRING_ENCODING = 'ascii'
+        defaults.FILE_ENCODING = 'ascii'
+
+    def tearDown(self):
+        defaults.STRING_ENCODING = self.original_string_encoding
+        defaults.FILE_ENCODING = self.original_file_encoding
+
     def test_init__extension(self):
         loader = Loader(extension='foo')
         self.assertEqual(loader.extension, 'foo')
