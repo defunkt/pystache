@@ -9,7 +9,7 @@ This module is only meant for internal use by the renderengine module.
 
 import re
 
-from parsed import ParsedTemplate
+from pystache.parsed import ParsedTemplate
 
 
 DEFAULT_DELIMITERS = ('{{', '}}')

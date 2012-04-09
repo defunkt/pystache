@@ -14,6 +14,27 @@ from pystache.renderengine import RenderEngine
 from pystache.tests.common import AssertStringMixin
 
 
+def mock_literal(s):
+    """
+    For use as the literal keyword argument to the RenderEngine constructor.
+
+    Arguments:
+
+      s: a byte string or unicode string.
+
+    """
+    if isinstance(s, unicode):
+        # Strip off unicode super classes, if present.
+        u = unicode(s)
+    else:
+        u = unicode(s, encoding='ascii')
+
+    # We apply upper() to make sure we are actually using our custom
+    # function in the tests
+    return u.upper()
+
+
+
 class RenderEngineTestCase(unittest.TestCase):
 
     """Test the RenderEngine class."""
@@ -154,12 +175,9 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         Test a context value that is not a basestring instance.
 
         """
-        # We use include upper() to make sure we are actually using
-        # our custom function in the tests
-        to_unicode = lambda s: unicode(s, encoding='ascii').upper()
         engine = self._engine()
-        engine.escape = to_unicode
-        engine.literal = to_unicode
+        engine.escape = mock_literal
+        engine.literal = mock_literal
 
         self.assertRaises(TypeError, engine.literal, 100)
 

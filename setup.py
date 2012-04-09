@@ -84,6 +84,7 @@ else:
     # troubleshoot it while using Python 2.7 instead of Python 3.
     extra = {
         'use_2to3': True,
+        'convert_2to3_doctests': ['README.rst'],
     }
 
 setup(name='pystache',
@@ -97,6 +98,9 @@ setup(name='pystache',
       url='http://github.com/defunkt/pystache',
       packages=find_packages(),
       package_data = {
+          # Include the README so doctests can be run.
+          # TODO: is there a better way to include the README?
+          'pystache': ['../README.rst'],
           # Include template files so tests can be run.
           'examples': template_files,
           'pystache.tests.data': template_files,

@@ -7,7 +7,7 @@ Defines a class responsible for rendering logic.
 
 import re
 
-from parser import Parser
+from pystache.parser import Parser
 
 
 class RenderEngine(object):
