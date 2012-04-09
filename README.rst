@@ -145,7 +145,7 @@ Python 3
 --------
 
 For Python 3, we recommend installing and using Distribute_.
-Then one can invoke `Distribute's test`_ command:
+Then one can invoke `Distribute's test`_ command: ::
 
     python setup.py test
 
@@ -153,26 +153,26 @@ Then one can invoke `Distribute's test`_ command:
 Python 2
 --------
 
-For Python 2, we recommend nose_ ::
+For Python 2, we recommend nose_: ::
 
     pip install nose
     cd pystache
     nosetests
 
 Depending on your Python version and nose installation, you may need
-to type, for example ::
+to type, for example-- ::
 
     nosetests-2.4
 
-To run all available tests (including doctests)::
+To run all available tests (including doctests)-- ::
 
     nosetests --with-doctest --doctest-extension=rst
 
-or alternatively (using setup.cfg)::
+or alternatively (using setup.cfg)-- ::
 
     python setup.py nosetests
 
-To run a subset of the tests, you can use this pattern, for example: ::
+To run a subset of the tests, you can use this pattern, for example-- ::
 
     nosetests --tests tests/test_context.py:GetValueTests.test_dictionary__key_present
 
