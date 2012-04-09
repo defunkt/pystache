@@ -102,10 +102,11 @@ setup(name='pystache',
       package_data = {
           # Include the README so doctests can be run.
           # TODO: is there a better way to include the README?
-          # TODO: experiment with the data_files keyword argument.
-          'pystache': ['../README.rst',
-                       '../ext/spec/specs/*.json',
-                       '../ext/spec/specs/*.yml'],
+          'pystache': [
+              '../README.rst',
+              '../ext/spec/specs/*.json',
+              '../ext/spec/specs/*.yml',
+          ],
           # Include template files so tests can be run.
           'examples': template_files,
           'pystache.tests.data': template_files,
