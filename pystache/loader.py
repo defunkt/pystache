@@ -15,7 +15,6 @@ from pystache.locator import Locator
 
 # We make a function so that the current defaults take effect.
 # TODO: revisit whether this is necessary.
-# TODO: change assertNotEquals to assertNotEqual everywhere.
 
 def _make_to_unicode():
     def to_unicode(s, encoding=None):

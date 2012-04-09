@@ -69,7 +69,7 @@ class GetValueTests(unittest.TestCase, AssertIsMixin):
             return "bar"
 
         item = {"foo": foo_callable}
-        self.assertNotEquals(_get_value(item, "foo"), "bar")
+        self.assertNotEqual(_get_value(item, "foo"), "bar")
         self.assertTrue(_get_value(item, "foo") is foo_callable)
 
     def test_dictionary__key_missing(self):
