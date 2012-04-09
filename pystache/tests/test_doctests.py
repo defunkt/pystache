@@ -34,23 +34,17 @@ text_file_paths = ['README.rst']
 #
 #     python setup.py test
 #
+# Normally, nosetests would interpret this function as a test case (because
+# its name matches the test regular expression) and call it with zero arguments
+# as opposed to the required three.  However, we are able to exclude it with
+# an entry like the following in setup.cfg:
+#
+#   exclude=load_tests
+#
 # TODO: find a substitute for the load_tests protocol for Python versions
 #   before version 2.7.
 #
-# TODO: prevent the load_tests() function below from being interpreted as a
-#   unittest when running nosetests.  This is causing the test count to be
-#   different between `python setup.py test` and `python setup.py nosetests`.
-#
-# HACK: Allowing load_tests() to be called without arguments is a hack
-# to allow unit tests to be run with nose's nosetests without error.
-# Otherwise, nose interprets the following function as a test case,
-# raising the following error:
-#
-#   TypeError: load_tests() takes exactly 3 arguments (0 given)
-#
-def load_tests(loader=None, tests=None, ignore=None):
-    if loader is None:
-        return
+def load_tests(loader, tests, ignore):
     # Since module_relative is False in our calls to DocFileSuite below,
     # paths should be OS-specific.  Moreover, we choose absolute paths
     # so that the current working directory does not come into play.
