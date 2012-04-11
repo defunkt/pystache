@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-This script supports installing and distributing pystache.
+This script supports distributing pystache and testing it from a source distribution.
 
 Below are instructions to pystache maintainers on how to push a new
 version of pystache to PyPI--
@@ -126,46 +126,52 @@ PACKAGES = [
 ]
 
 
-setup(name='pystache',
-      version=VERSION,
-      license='MIT',
-      description='Mustache for Python',
-      long_description=long_description,
-      author='Chris Wanstrath',
-      author_email='chris@ozmm.org',
-      maintainer='Chris Jerdonek',
-      url='http://github.com/defunkt/pystache',
-      install_requires=INSTALL_REQUIRES,
-      packages=PACKAGES,
-      package_data = {
-          # Include the README so doctests can be run.
-          # TODO: is there a better way to include the README?
-          'pystache': [
-              '../README.rst',
-              '../ext/spec/specs/*.json',
-              '../ext/spec/specs/*.yml',
-          ],
-          # Include template files so tests can be run.
-          'examples': template_files,
-          'pystache.tests.data': template_files,
-          'pystache.tests.data.locator': template_files,
-      },
-      test_suite='pystache.tests',
-      entry_points = {
-        'console_scripts': ['pystache=pystache.commands:main'],
-      },
-      classifiers = (
-        'Development Status :: 4 - Beta',
-        'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.4',
-        'Programming Language :: Python :: 2.5',
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.1',
-        'Programming Language :: Python :: 3.2',
-      ),
-      **extra
-)
+def main(sys_argv):
+
+    setup(name='pystache',
+          version=VERSION,
+          license='MIT',
+          description='Mustache for Python',
+          long_description=long_description,
+          author='Chris Wanstrath',
+          author_email='chris@ozmm.org',
+          maintainer='Chris Jerdonek',
+          url='http://github.com/defunkt/pystache',
+          install_requires=INSTALL_REQUIRES,
+          packages=PACKAGES,
+          package_data = {
+              # Include the README so doctests can be run.
+              # TODO: is there a better way to include the README?
+              'pystache': [
+                  '../README.rst',
+                  '../ext/spec/specs/*.json',
+                  '../ext/spec/specs/*.yml',
+              ],
+              # Include template files so tests can be run.
+              'examples': template_files,
+              'pystache.tests.data': template_files,
+              'pystache.tests.data.locator': template_files,
+          },
+          test_suite='pystache.tests',
+          entry_points = {
+            'console_scripts': ['pystache=pystache.commands:main'],
+          },
+          classifiers = (
+            'Development Status :: 4 - Beta',
+            'License :: OSI Approved :: MIT License',
+            'Programming Language :: Python',
+            'Programming Language :: Python :: 2',
+            'Programming Language :: Python :: 2.4',
+            'Programming Language :: Python :: 2.5',
+            'Programming Language :: Python :: 2.6',
+            'Programming Language :: Python :: 2.7',
+            'Programming Language :: Python :: 3',
+            'Programming Language :: Python :: 3.1',
+            'Programming Language :: Python :: 3.2',
+          ),
+          **extra
+    )
+
+
+if __name__=='__main__':
+    main(sys.argv)
