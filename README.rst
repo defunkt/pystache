@@ -137,9 +137,11 @@ Test It
 Use tox_ to test Pystache with multiple versions of Python all at once! ::
 
     pip install tox
-    tox -e py26,py27  # for example
-    # Or, if you have all versions of Pythons in tox.ini, simply
     tox
+
+If you do not have all Python versions listed in ``tox.in``, then
+
+    tox -e py26,py27  # for example
 
 To include tests from the Mustache spec in your test runs: ::
 
@@ -147,7 +149,7 @@ To include tests from the Mustache spec in your test runs: ::
     git submodule update
 
 You can also test Pystache without tox (but with only a single version of
-Python at a time), as below.  First, install Distribute_ ::
+Python at a time), as below.  To do this, install Distribute_ ::
 
     pip install distribute
 
@@ -155,11 +157,11 @@ Python at a time), as below.  First, install Distribute_ ::
 Python 2.7 and Later
 --------------------
 
-Then run `Distribute's test`_: ::
+Then run Distribute's test_: ::
 
     python setup.py test
 
-When using Python 3, this runs 2to3_ on the source code automatically.
+This runs 2to3_ when using Python 3.
 
 
 Python 2.6 and Earlier
@@ -193,10 +195,10 @@ Author
 
 
 .. _2to3: http://docs.python.org/library/2to3.html
+.. _built-in unicode function: http://docs.python.org/library/functions.html#unicode
 .. _ctemplate: http://code.google.com/p/google-ctemplate/
 .. _David Phillips: http://davidphillips.us/
 .. _Distribute: http://pypi.python.org/pypi/distribute
-.. _Distribute's test: http://packages.python.org/distribute/setuptools.html#test
 .. _et: http://www.ivan.fomichev.name/2008/05/erlang-template-engine-prototype.html
 .. _json: http://docs.python.org/library/json.html
 .. _Mustache: http://mustache.github.com/
@@ -208,6 +210,6 @@ Author
 .. _Pystache: https://github.com/defunkt/pystache
 .. _semantically versioned: http://semver.org
 .. _simplejson: http://pypi.python.org/pypi/simplejson/
-.. _built-in unicode function: http://docs.python.org/library/functions.html#unicode
+.. _test: http://packages.python.org/distribute/setuptools.html#test
 .. _tox: http://pypi.python.org/pypi/tox
 .. _version 1.0.3: https://github.com/mustache/spec/tree/48c933b0bb780875acbfd15816297e263c53d6f7
