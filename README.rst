@@ -134,49 +134,41 @@ default to values set in Pystache's ``defaults`` module.
 Test It
 =======
 
-Pystache can be tested using both Python 2 and 3 -- even from a single
-Python 2 install if using Distribute's ``test`` (see below).
+Use tox_ to test Pystache with multiple versions of Python all at once! ::
+
+    pip install tox
+    tox -e py26,py27  # for example
+    # Or, if you have all versions of Pythons in tox.ini, simply
+    tox
 
 To include tests from the Mustache spec in your test runs: ::
 
     git submodule init
     git submodule update
 
+You can also test Pystache without tox (but with only a single version of
+Python at a time), as below.  First, install Distribute_ ::
 
-Python 3
---------
+    pip install distribute
 
-For Python 3, we recommend installing and using Distribute_.
-Then one can invoke `Distribute's test`_ command: ::
+
+Python 2.7 and Later
+--------------------
+
+Then run `Distribute's test`_: ::
 
     python setup.py test
 
+When using Python 3, this runs 2to3_ on the source code automatically.
 
-Python 2
---------
 
-For Python 2, we recommend nose_: ::
+Python 2.6 and Earlier
+----------------------
+
+For Python 2.6 and earlier, use nose_ instead of ``test``: ::
 
     pip install nose
-    cd pystache
-    nosetests
-
-Depending on your Python version and nose installation, you may need
-to type, for example-- ::
-
-    nosetests-2.4
-
-To run all available tests (including doctests)-- ::
-
-    nosetests --with-doctest --doctest-extension=rst
-
-or alternatively (using setup.cfg)-- ::
-
     python setup.py nosetests
-
-To run a subset of the tests, you can use this pattern, for example-- ::
-
-    nosetests --tests tests/test_context.py:GetValueTests.test_dictionary__key_present
 
 
 Mailing List
@@ -200,6 +192,7 @@ Author
     Chris Wanstrath :: chris@ozmm.org
 
 
+.. _2to3: http://docs.python.org/library/2to3.html
 .. _ctemplate: http://code.google.com/p/google-ctemplate/
 .. _David Phillips: http://davidphillips.us/
 .. _Distribute: http://pypi.python.org/pypi/distribute
@@ -216,4 +209,5 @@ Author
 .. _semantically versioned: http://semver.org
 .. _simplejson: http://pypi.python.org/pypi/simplejson/
 .. _built-in unicode function: http://docs.python.org/library/functions.html#unicode
+.. _tox: http://pypi.python.org/pypi/tox
 .. _version 1.0.3: https://github.com/mustache/spec/tree/48c933b0bb780875acbfd15816297e263c53d6f7

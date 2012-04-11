@@ -43,6 +43,7 @@ py_version = sys.version_info
 # Distribute works with Python 2.3.5 and above:
 #   http://packages.python.org/distribute/setuptools.html#building-and-distributing-packages-with-distribute
 if py_version < (2, 3, 5):
+    # TODO: this might not work yet.
     import distutils as dist
     from distutils import core
     setup = core.setup
