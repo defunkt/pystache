@@ -9,8 +9,9 @@ from pystache.renderer import Renderer
 from pystache.template_spec import TemplateSpec
 
 
-__all__ = ['render', 'Renderer', 'TemplateSpec']
+__all__ = ['__version__', 'render', 'Renderer', 'TemplateSpec']
 
+__version__ = '0.5.0-rc'  # Also change in setup.py.
 
 def render(template, context=None, **kwargs):
     """
