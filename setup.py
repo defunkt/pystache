@@ -61,6 +61,20 @@ HISTORY_PATH = 'HISTORY.rst'
 LICENSE_PATH = 'LICENSE'
 README_PATH = 'README.rst'
 
+CLASSIFIERS = (
+    'Development Status :: 4 - Beta',
+    'License :: OSI Approved :: MIT License',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 2',
+    'Programming Language :: Python :: 2.4',
+    'Programming Language :: Python :: 2.5',
+    'Programming Language :: Python :: 2.6',
+    'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.1',
+    'Programming Language :: Python :: 3.2',
+)
+
 
 def read(path):
     """
@@ -182,19 +196,7 @@ def main(sys_argv):
           entry_points = {
             'console_scripts': ['pystache=pystache.commands:main'],
           },
-          classifiers = (
-            'Development Status :: 4 - Beta',
-            'License :: OSI Approved :: MIT License',
-            'Programming Language :: Python',
-            'Programming Language :: Python :: 2',
-            'Programming Language :: Python :: 2.4',
-            'Programming Language :: Python :: 2.5',
-            'Programming Language :: Python :: 2.6',
-            'Programming Language :: Python :: 2.7',
-            'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.1',
-            'Programming Language :: Python :: 3.2',
-          ),
+          classifiers = CLASSIFIERS,
           **extra
     )
 
