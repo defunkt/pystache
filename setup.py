@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-This script supports distributing pystache and testing it from a source distribution.
+This script supports distributing Pystache and testing it from a source distribution.
 
 Below are instructions to pystache maintainers on how to push a new
 version of pystache to PyPI--
@@ -54,7 +54,28 @@ else:
 # TODO: use the logging module instead of printing.
 print("Using: version %s of %s" % (repr(dist.__version__), repr(dist)))
 
+
 VERSION = '0.5.1-alpha'  # Also change in pystache/init.py.
+
+HISTORY_PATH = 'HISTORY.rst'
+LICENSE_PATH = 'LICENSE'
+README_PATH = 'README.rst'
+
+
+def read(path):
+    """
+    Read and return the contents of a text file as a unicode string.
+
+    """
+    # This function implementation was chosen to be compatible across Python 2/3.
+    f = open(path, 'rb')
+    # We avoid use of the with keyword for Python 2.4 support.
+    try:
+        b = f.read()
+    finally:
+        f.close()
+
+    return b.decode('utf-8')
 
 
 def publish():
@@ -70,9 +91,14 @@ def make_long_description():
     Return the long description for the package.
 
     """
-    long_description = open('README.rst').read() + '\n\n' + open('HISTORY.rst').read()
+    license = """\
+License
+=======
 
-    return long_description
+""" + read(LICENSE_PATH)
+
+    sections = [read(README_PATH), read(HISTORY_PATH), license]
+    return '\n\n'.join(sections)
 
 
 if sys.argv[-1] == 'publish':
@@ -94,7 +120,7 @@ else:
     extra = {
         # Causes 2to3 to be run during the build step.
         'use_2to3': True,
-        'convert_2to3_doctests': ['README.rst'],
+        'convert_2to3_doctests': [README_PATH],
     }
 
 # We use the package simplejson for older Python versions since Python
