@@ -5,6 +5,7 @@ Unit tests for template_spec.py.
 
 """
 
+from pystache.compat import *
 import os.path
 import sys
 import unittest
@@ -337,7 +338,7 @@ class TemplateSpecTests(unittest.TestCase):
 
         view = SampleView()
         view.template_rel_path = 'foo/bar.txt'
-        self.assertTrue(locator._find_relative(view)[0] is not None)
+        self.assert_(locator._find_relative(view)[0] is not None)
 
         actual = locator._find(view)
         expected = os.path.abspath(os.path.join(DATA_DIR, 'foo/bar.txt'))
@@ -352,7 +353,7 @@ class TemplateSpecTests(unittest.TestCase):
         locator = self._make_locator()
 
         view = SampleView()
-        self.assertTrue(locator._find_relative(view)[0] is None)
+        self.assert_(locator._find_relative(view)[0] is None)
 
         actual = locator._find(view)
         expected = os.path.abspath(os.path.join(DATA_DIR, 'sample_view.mustache'))
@@ -386,3 +387,6 @@ class TemplateSpecTests(unittest.TestCase):
 
         view.template_encoding = 'utf-8'
         self._assert_get_template(view, u"non-ascii: é")
+
+if __name__ == '__main__':
+    unittest.main()

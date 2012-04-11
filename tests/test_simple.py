@@ -81,3 +81,6 @@ class TestSimple(unittest.TestCase, AssertStringMixin):
 -------
 
 ## Again, Welcome! ##""")
+
+if __name__ == '__main__':
+    unittest.main()

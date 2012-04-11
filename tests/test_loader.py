@@ -5,6 +5,7 @@ Unit tests of reader.py.
 
 """
 
+from pystache.compat import *
 import os
 import sys
 import unittest
@@ -196,3 +197,6 @@ class LoaderTests(unittest.TestCase, AssertStringMixin):
         #actual = reader.read(path)
         #self.assertString(actual, u'non-ascii: ')
 
+
+if __name__ == '__main__':
+    unittest.main()

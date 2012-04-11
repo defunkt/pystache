@@ -70,7 +70,7 @@ class GetValueTests(unittest.TestCase, AssertIsMixin):
 
         item = {"foo": foo_callable}
         self.assertNotEquals(_get_value(item, "foo"), "bar")
-        self.assertTrue(_get_value(item, "foo") is foo_callable)
+        self.assert_(_get_value(item, "foo") is foo_callable)
 
     def test_dictionary__key_missing(self):
         """
@@ -323,7 +323,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
 
         """
         context = Context()
-        self.assertTrue(context.get("foo") is None)
+        self.assert_(context.get("foo") is None)
 
     def test_get__default(self):
         """
@@ -398,3 +398,6 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
         # Confirm the original is unchanged.
         self.assertEquals(original.get(key), "buzz")
 
+
+if __name__ == '__main__':
+    unittest.main()

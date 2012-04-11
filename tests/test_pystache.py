@@ -114,3 +114,6 @@ class PystacheTests(unittest.TestCase):
         template = """{{#s1}}foo{{/s1}} {{#s2}}<{{/s2}}"""
         context = {'s1': True, 's2': [True]}
         self._assert_rendered("foo <", template, context)
+
+if __name__ == '__main__':
+    unittest.main()

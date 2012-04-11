@@ -5,6 +5,7 @@ Defines a class responsible for rendering logic.
 
 """
 
+from pystache.compat import *
 import re
 
 from parser import Parser

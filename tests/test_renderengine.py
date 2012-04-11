@@ -387,11 +387,11 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
     def test_section__iterable(self):
         """
         Check that objects supporting iteration (aside from dicts) behave like lists.
-
         """
+        
         template = '{{#iterable}}{{.}}{{/iterable}}'
 
-        context = {'iterable': (i for i in range(3))}  # type 'generator'
+        context = {'iterable': xrange(3)}  # type 'generator'
         self._assert_render(u'012', template, context)
 
         context = {'iterable': xrange(4)}  # type 'xrange'
@@ -453,3 +453,6 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         expected = u' {{foo}} '
         self._assert_render(expected, '{{=$ $=}} {{foo}} ')
         self._assert_render(expected, '{{=$ $=}} {{foo}} $={{ }}=$')  # was yielding u'  '.
+
+if __name__ == '__main__':
+    unittest.main()
