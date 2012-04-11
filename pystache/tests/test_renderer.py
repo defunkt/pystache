@@ -63,8 +63,8 @@ class RendererInitTestCase(unittest.TestCase):
 
         self.assertEqual(escape(">"), "&gt;")
         self.assertEqual(escape('"'), "&quot;")
-        # Single quotes are escaped in Python 3 but not Python 2.
-        if sys.version_info < (3, ):
+        # Single quotes are escaped only in Python 3.2 and later.
+        if sys.version_info < (3, 2):
             expected = "'"
         else:
             expected = '&#x27;'
