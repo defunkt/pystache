@@ -6,6 +6,7 @@ History
 
 * Added support for Python 3.2 (following conversion with 2to3_).
 * Test runner now supports both yaml and json forms of Mustache spec.
+* Added tox support to test multiple Python versions.
 
 0.5.0 (2012-04-03)
 ------------------

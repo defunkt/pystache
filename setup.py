@@ -38,15 +38,23 @@ as described here, for example:
 import os
 import sys
 
+py_version = sys.version_info
 
-try:
+# Distribute works with Python 2.3.5 and above:
+#   http://packages.python.org/distribute/setuptools.html#building-and-distributing-packages-with-distribute
+if py_version < (2, 3, 5):
+    # TODO: this might not work yet.
+    import distutils as dist
+    from distutils import core
+    setup = core.setup
+else:
     import setuptools as dist
-except ImportError:
-    from distutils import core as dist
+    setup = dist.setup
 
-# TODO: use the logging module instead.
+# TODO: use the logging module instead of printing.
 print("Using: version %s of %s" % (repr(dist.__version__), repr(dist)))
-setup = dist.setup
+
+VERSION = '0.5.0-rc'  # Also change in pystache/init.py.
 
 
 def publish():
@@ -80,7 +88,7 @@ template_files = ['*.mustache', '*.txt']
 #
 #   http://packages.python.org/distribute/python3.html#note-on-compatibility-with-setuptools
 #
-if sys.version_info < (3, ):
+if py_version < (3, ):
     extra = {}
 else:
     extra = {
@@ -88,6 +96,35 @@ else:
         'use_2to3': True,
         'convert_2to3_doctests': ['README.rst'],
     }
+
+# We use the package simplejson for older Python versions since Python
+# does not contain the module json before 2.6:
+#
+#   http://docs.python.org/library/json.html
+#
+# Moreover, simplejson stopped officially support for Python 2.4 in version 2.1.0:
+#
+#   https://github.com/simplejson/simplejson/blob/master/CHANGES.txt
+#
+requires = []
+if py_version < (2, 5):
+    requires.append('simplejson<2.1')
+elif py_version < (2, 6):
+    requires.append('simplejson')
+else:
+    requires.append('pyyaml')
+
+INSTALL_REQUIRES = requires
+
+PACKAGES = [
+    'pystache',
+    # The following packages are only for testing.
+    'examples',
+    'pystache.tests',
+    'pystache.tests.data',
+    'pystache.tests.data.locator'
+]
+
 
 setup(name='pystache',
       version='0.5.0-rc',
@@ -98,7 +135,8 @@ setup(name='pystache',
       author_email='chris@ozmm.org',
       maintainer='Chris Jerdonek',
       url='http://github.com/defunkt/pystache',
-      packages=dist.find_packages(),
+      install_requires=INSTALL_REQUIRES,
+      packages=PACKAGES,
       package_data = {
           # Include the README so doctests can be run.
           # TODO: is there a better way to include the README?

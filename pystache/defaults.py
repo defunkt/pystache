@@ -11,6 +11,13 @@ does not otherwise specify a value.
 try:
     # Python 3.2 deprecates cgi.escape() and adds the html module as a replacement.
     import html
+    try:
+        # We also need to verify the existence of the escape() method
+        # due to the following issue:
+        #   http://bugs.python.org/issue14545
+        html.escape
+    except AttributeError:
+        raise ImportError("html.escape does not exist")
 except ImportError:
     import cgi as html
 
