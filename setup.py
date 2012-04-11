@@ -54,7 +54,7 @@ else:
 # TODO: use the logging module instead of printing.
 print("Using: version %s of %s" % (repr(dist.__version__), repr(dist)))
 
-VERSION = '0.5.0-rc'  # Also change in pystache/init.py.
+VERSION = '0.5.1-alpha'  # Also change in pystache/init.py.
 
 
 def publish():
@@ -127,7 +127,7 @@ PACKAGES = [
 
 
 setup(name='pystache',
-      version='0.5.0-rc',
+      version=VERSION,
       license='MIT',
       description='Mustache for Python',
       long_description=long_description,
