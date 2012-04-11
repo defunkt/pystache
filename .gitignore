@@ -1,4 +1,5 @@
 *.pyc
+.tox
 build
 MANIFEST
 dist
