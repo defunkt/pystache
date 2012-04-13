@@ -194,7 +194,7 @@ def main(sys_argv):
           },
           test_suite='pystache.tests',
           entry_points = {
-            'console_scripts': ['pystache=pystache.commands:main'],
+            'console_scripts': ['pystache=pystache.commands.render:main'],
           },
           classifiers = CLASSIFIERS,
           **extra

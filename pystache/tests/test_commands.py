@@ -8,7 +8,7 @@ Unit tests of commands.py.
 import sys
 import unittest
 
-from pystache.commands import main
+from pystache.commands.render import main
 
 
 ORIGINAL_STDOUT = sys.stdout
