@@ -13,6 +13,7 @@ Creates unittest.TestSuite instances for the doctests in the project.
 import os
 import doctest
 import pkgutil
+import traceback
 import unittest
 
 import pystache
@@ -82,7 +83,15 @@ def _get_module_doctests():
             continue
         # The loader is a pkgutil.ImpLoader instance.
         loader = importer.find_module(module_name)
-        module = loader.load_module(module_name)
+        try:
+            module = loader.load_module(module_name)
+        except ImportError, e:
+            # In some situations, the test harness was swallowing and/or
+            # suppressing the display of the stack trace when errors
+            # occurred here.  The following code makes errors occurring here
+            # easier to troubleshoot.
+            details = "".join(traceback.format_exception(*sys.exc_info()))
+            raise ImportError(details)
         modules.append(module)
 
     return modules
