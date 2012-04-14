@@ -54,7 +54,12 @@ def parse_args(sys_argv, usage):
     return template, context
 
 
-def main(sys_argv):
+# TODO: verify whether the setup() method's entry_points argument
+# supports passing arguments to main:
+#
+#     http://packages.python.org/distribute/setuptools.html#automatic-script-creation
+#
+def main(sys_argv=sys.argv):
     template, context = parse_args(sys_argv, USAGE)
 
     if template.endswith('.mustache'):
@@ -77,4 +82,4 @@ def main(sys_argv):
 
 
 if __name__=='__main__':
-    main(sys.argv)
+    main()
