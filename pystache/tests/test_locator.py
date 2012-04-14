@@ -34,13 +34,20 @@ class LocatorTests(unittest.TestCase):
         locator = Locator(extension=False)
         self.assertTrue(locator.template_extension is False)
 
+    def _assert_paths(self, actual, expected):
+        """
+        Assert that two paths are the same.
+
+        """
+        self.assertEqual(actual, expected)
+
     def test_get_object_directory(self):
         locator = Locator()
 
         obj = SayHello()
         actual = locator.get_object_directory(obj)
 
-        self.assertEqual(actual, os.path.abspath(DATA_DIR))
+        self._assert_paths(actual, DATA_DIR)
 
     def test_get_object_directory__not_hasattr_module(self):
         locator = Locator()
@@ -111,9 +118,9 @@ class LocatorTests(unittest.TestCase):
         obj = SayHello()
 
         actual = locator.find_object(search_dirs=[], obj=obj, file_name='sample_view.mustache')
-        expected = os.path.abspath(os.path.join(DATA_DIR, 'sample_view.mustache'))
+        expected = os.path.join(DATA_DIR, 'sample_view.mustache')
 
-        self.assertEqual(actual, expected)
+        self._assert_paths(actual, expected)
 
     def test_find_object__none_file_name(self):
         locator = Locator()
@@ -121,7 +128,7 @@ class LocatorTests(unittest.TestCase):
         obj = SayHello()
 
         actual = locator.find_object(search_dirs=[], obj=obj)
-        expected = os.path.abspath(os.path.join(DATA_DIR, 'say_hello.mustache'))
+        expected = os.path.join(DATA_DIR, 'say_hello.mustache')
 
         self.assertEqual(actual, expected)
 
