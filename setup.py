@@ -156,8 +156,11 @@ else:
 
 INSTALL_REQUIRES = requires
 
+# TODO: decide whether to use find_packages() instead.  I'm not sure that
+#   find_packages() is available with distutils, for example.
 PACKAGES = [
     'pystache',
+    'pystache.commands',
     # The following packages are only for testing.
     'examples',
     'pystache.tests',
@@ -194,7 +197,10 @@ def main(sys_argv):
           },
           test_suite='pystache.tests',
           entry_points = {
-            'console_scripts': ['pystache=pystache.commands.render:main'],
+            'console_scripts': [
+                'pystache=pystache.commands.render:main',
+                'pystache-test=pystache.commands.test:main',
+            ],
           },
           classifiers = CLASSIFIERS,
           **extra
