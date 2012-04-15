@@ -45,7 +45,7 @@ class ViewTestCase(unittest.TestCase, AssertStringMixin):
         self.assertRaises(IOError, renderer.render, view)
 
         # TODO: change this test to remove the following brittle line.
-        view.template_rel_directory = "../../examples"
+        view.template_rel_directory = "examples"
         actual = renderer.render(view)
         self.assertEqual(actual, "No tags...")
 

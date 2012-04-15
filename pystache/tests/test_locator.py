@@ -14,7 +14,7 @@ import unittest
 from pystache.loader import Loader as Reader
 from pystache.locator import Locator
 
-from pystache.tests.common import DATA_DIR
+from pystache.tests.common import DATA_DIR, EXAMPLES_DIR
 from pystache.tests.data.views import SayHello
 
 
@@ -78,13 +78,13 @@ class LocatorTests(unittest.TestCase):
 
     def test_find_name(self):
         locator = Locator()
-        path = locator.find_name(search_dirs=['examples'], template_name='simple')
+        path = locator.find_name(search_dirs=[EXAMPLES_DIR], template_name='simple')
 
         self.assertEqual(os.path.basename(path), 'simple.mustache')
 
     def test_find_name__using_list_of_paths(self):
         locator = Locator()
-        path = locator.find_name(search_dirs=['doesnt_exist', 'examples'], template_name='simple')
+        path = locator.find_name(search_dirs=[EXAMPLES_DIR, 'doesnt_exist'], template_name='simple')
 
         self.assertTrue(path)
 

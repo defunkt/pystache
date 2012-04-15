@@ -7,10 +7,9 @@ Provides test-related code that can be used by all tests.
 
 import os
 
-import examples
 import pystache
 from pystache import defaults
-
+from pystache.tests import examples
 
 # Save a reference to the original function to avoid recursion.
 _DEFAULT_TAG_ESCAPE = defaults.TAG_ESCAPE
