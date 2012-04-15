@@ -66,7 +66,7 @@ Here's your view class (in examples/readme.py)::
 
 Like so::
 
-    >>> from examples.readme import SayHello
+    >>> from pystache.tests.examples.readme import SayHello
     >>> hello = SayHello()
 
 Then your template, say_hello.mustache::
