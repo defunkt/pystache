@@ -1,4 +1,4 @@
-from examples.lambdas import rot
+from pystache.tests.examples.lambdas import rot
 
 class PartialsWithLambdas(object):
 
