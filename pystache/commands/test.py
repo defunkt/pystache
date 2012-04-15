@@ -17,6 +17,8 @@ def main(sys_argv):
     # This does not work with the --with-doctest flag yet because of the
     # following issue:
     #   https://github.com/nose-devs/nose/issues/383
+    # TODO: change module keyword argument to defaultTest keyword argument:
+    #   http://readthedocs.org/docs/nose/en/latest/api/core.html#module-nose.core
     nose.main(module=pystache)
 
 
