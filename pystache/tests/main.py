@@ -73,6 +73,7 @@ class Tester(object):
 
         return module_names
 
+    # TODO: consider replacing the package argument with a package_dir argument.
     def run_tests(self, package, sys_argv):
         """
         Run all unit tests inside the given package.
