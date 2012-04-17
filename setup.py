@@ -162,7 +162,6 @@ PACKAGES = [
     'pystache',
     'pystache.commands',
     # The following packages are only for testing.
-    'examples',
     'pystache.tests',
     'pystache.tests.data',
     'pystache.tests.data.locator'
