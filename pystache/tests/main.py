@@ -94,6 +94,22 @@ def _get_test_module_names(package_dir):
 
     return modules
 
+def _discover_test_modules(package):
+    """
+    Discover and return a sorted list of the names of unit-test modules.
+
+    """
+    package_dir = os.path.dirname(package.__file__)
+    modules = _get_test_module_names(package_dir)
+    modules.sort()
+
+    # This is a sanity check to ensure that the unit-test discovery
+    # methods are working.
+    if len(modules) < 1:
+        raise Exception("No unit-test modules found.")
+
+    return modules
+
 
 class _PystacheTestProgram(TestProgram):
     pass
@@ -118,23 +134,11 @@ class Tester(object):
           sys_argv: a reference to sys.argv.
 
         """
-        if len(sys_argv) > 1 and not sys_argv[-1].startswith("-"):
-            # Then explicit modules or test names were provided, which
-            # the unittest module is equipped to handle.
-            unittest.main(argv=sys_argv, module=None)
-            # No need to return since unitttest.main() exits.
-        # Otherwise, auto-detect all unit tests.
-
-        package_dir = os.path.dirname(package.__file__)
-        modules = _get_test_module_names(package_dir)
-        modules.sort()
-
-        # This is a sanity check to ensure that the unit-test discovery
-        # methods are working.
-        if len(modules) < 1:
-            raise Exception("No unit-test modules found.")
-
-        sys_argv.extend(modules)
+        if len(sys_argv) <= 1 or sys_argv[-1].startswith("-"):
+            # Then no explicit module or test names were provided, so
+            # auto-detect all unit tests.
+            module_names = _discover_test_modules(package)
+            sys_argv.extend(module_names)
 
         # We pass None for the module because we do not want the unittest
         # module to resolve module names relative to a given module.
@@ -142,3 +146,4 @@ class Tester(object):
         # this module.)  See the loadTestsFromName() method of the
         # unittest.TestLoader class for more details on this parameter.
         unittest.main(argv=sys_argv, module=None)
+        # No need to return since unitttest.main() exits.
