@@ -9,7 +9,6 @@ This module is for our test console script.
 
 import os
 import sys
-import unittest
 from unittest import TestProgram
 
 
@@ -111,8 +110,17 @@ def _discover_test_modules(package):
     return modules
 
 
+
 class _PystacheTestProgram(TestProgram):
-    pass
+
+    """
+    Instantiating an instance of this class runs all tests.
+
+    """
+
+    def runTests(self):
+        # TODO: add doctests, etc. to the self.test TestSuite.
+        TestProgram.runTests(self)
 
 
 class Tester(object):
@@ -145,5 +153,5 @@ class Tester(object):
         # (This would require importing all of the unittest modules from
         # this module.)  See the loadTestsFromName() method of the
         # unittest.TestLoader class for more details on this parameter.
-        unittest.main(argv=sys_argv, module=None)
+        _PystacheTestProgram(argv=sys_argv, module=None)
         # No need to return since unitttest.main() exits.
