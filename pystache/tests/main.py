@@ -16,6 +16,21 @@ UNITTEST_FILE_PREFIX = "test_"
 
 # TODO: enhance this to work with doctests (instead of using the load_tests
 #   protocol), etc.
+
+# Notes for TODO:
+#
+# The function unittest.main() is an alias for unittest.TestProgram's
+# constructor.  The constructor calls self.runTests() as its final step, which
+# expects self.test to be set.  The constructor sets the self.test attribute
+# by calling one of self.testLoader's "loadTests" methods.  These methods
+# return a unittest.TestSuite instance.  Thus, self.test is set to a TestSuite
+# instance prior to calling runTests().
+#
+# Our strategy is to subclass unittest.TestProgram and override its runTests()
+# method.  Our implementation of runTests() will add to self.test additional
+# TestCase or TestSuite instances (e.g. doctests and spec tests), and then
+# call the base class's runTests().
+
 class Tester(object):
 
     """
