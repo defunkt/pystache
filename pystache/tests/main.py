@@ -11,7 +11,7 @@ import os
 import sys
 from unittest import TestProgram
 
-from pystache.tests.common import PACKAGE_DIR
+from pystache.tests.common import PACKAGE_DIR, PROJECT_DIR
 from pystache.tests.doctesting import get_module_doctests
 
 
@@ -27,11 +27,20 @@ def run_tests(sys_argv):
       sys_argv: a reference to sys.argv.
 
     """
+    try:
+        # TODO: use optparse command options instead.
+        project_dir = sys_argv[1]
+        sys_argv.pop()
+    except IndexError:
+        project_dir = PROJECT_DIR
+
     if len(sys_argv) <= 1 or sys_argv[-1].startswith("-"):
         # Then no explicit module or test names were provided, so
         # auto-detect all unit tests.
         module_names = _discover_test_modules(PACKAGE_DIR)
         sys_argv.extend(module_names)
+
+    _PystacheTestProgram._project_dir = project_dir
 
     # We pass None for the module because we do not want the unittest
     # module to resolve module names relative to a given module.
@@ -136,7 +145,7 @@ class _PystacheTestProgram(TestProgram):
     """
 
     def runTests(self):
-        doctest_suites = get_module_doctests()
+        doctest_suites = get_module_doctests(self._project_dir)
         # self.test is a unittest.TestSuite instance:
         #   http://docs.python.org/library/unittest.html#unittest.TestSuite
         self.test.addTests(doctest_suites)

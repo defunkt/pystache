@@ -10,14 +10,14 @@ import pkgutil
 import doctest
 import traceback
 
-from pystache.tests.common import PACKAGE_DIR, PROJECT_DIR, TEXT_DOCTEST_PATHS
+from pystache.tests.common import PACKAGE_DIR, TEXT_DOCTEST_PATHS
 
 # This module follows the guidance documented here:
 #
 #   http://docs.python.org/library/doctest.html#unittest-api
 #
 
-def get_module_doctests():
+def get_module_doctests(project_dir):
     """
     Return a list of TestSuite instances for all doctests in the pacakqge.
 
@@ -25,13 +25,11 @@ def get_module_doctests():
     suites = []
 
     # Since module_relative is False in our calls to DocFileSuite below,
-    # paths should be OS-specific.  Moreover, we choose absolute paths
-    # so that the current working directory does not come into play.
-    # See the following for more info--
+    # paths should be OS-specific.  See the following for more info--
     #
     #   http://docs.python.org/library/doctest.html#doctest.DocFileSuite
     #
-    paths = [os.path.join(PROJECT_DIR, path) for path in TEXT_DOCTEST_PATHS]
+    paths = [os.path.normpath(os.path.join(project_dir, path)) for path in TEXT_DOCTEST_PATHS]
     for path in paths:
         suite = doctest.DocFileSuite(path, module_relative=False)
         suites.append(suite)
