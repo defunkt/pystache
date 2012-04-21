@@ -37,6 +37,10 @@ Python's json_ module was added in Python 2.6.  Moreover, we require an
 earlier version of simplejson for Python 2.4 since simplejson stopped
 officially supporting Python 2.4 with version 2.1.0.
 
+An earlier version of simplejson can be installed manually, as follows: ::
+
+    pip install 'simplejson<2.1.0'
+
 
 Install It
 ==========
