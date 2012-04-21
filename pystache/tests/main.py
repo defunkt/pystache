@@ -104,6 +104,7 @@ def _get_test_module_names(package_dir):
 
     return modules
 
+
 def _discover_test_modules(package_dir):
     """
     Discover and return a sorted list of the names of unit-test modules.
