@@ -11,8 +11,10 @@ import os
 import sys
 from unittest import TestProgram
 
-from pystache.tests.common import PACKAGE_DIR, PROJECT_DIR
+from pystache.tests.common import PACKAGE_DIR, PROJECT_DIR, SPEC_TEST_DIR
 from pystache.tests.doctesting import get_doctests
+# TODO: change this to pystache.tests.spectesting.
+from pystache.tests.test_mustachespec import get_spec_tests
 
 
 UNITTEST_FILE_PREFIX = "test_"
@@ -40,7 +42,8 @@ def run_tests(sys_argv):
         module_names = _discover_test_modules(PACKAGE_DIR)
         sys_argv.extend(module_names)
 
-    _PystacheTestProgram._project_dir = project_dir
+    _PystacheTestProgram._text_doctest_dir = project_dir
+    _PystacheTestProgram._spec_test_dir = SPEC_TEST_DIR
 
     # We pass None for the module because we do not want the unittest
     # module to resolve module names relative to a given module.
@@ -145,9 +148,14 @@ class _PystacheTestProgram(TestProgram):
     """
 
     def runTests(self):
-        doctest_suites = get_doctests(self._project_dir)
         # self.test is a unittest.TestSuite instance:
         #   http://docs.python.org/library/unittest.html#unittest.TestSuite
-        self.test.addTests(doctest_suites)
+        tests = self.test
+
+        doctest_suites = get_doctests(self._text_doctest_dir)
+        tests.addTests(doctest_suites)
+
+        spec_testcases = get_spec_tests(self._spec_test_dir)
+        tests.addTests(spec_testcases)
 
         TestProgram.runTests(self)

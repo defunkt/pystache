@@ -1,11 +1,15 @@
 # coding: utf-8
 
 """
+Exposes a get_spec_tests() function for the project's test harness.
+
 Creates a unittest.TestCase for the tests defined in the mustache spec.
 
 """
 
 # TODO: this module can be cleaned up somewhat.
+# TODO: move all of this code to pystache/tests/spectesting.py and
+#   have it expose a get_spec_tests(spec_test_dir) function.
 
 FILE_ENCODING = 'utf-8'  # the encoding of the spec test files.
 
@@ -49,12 +53,114 @@ import unittest
 import pystache
 from pystache import common
 from pystache.renderer import Renderer
-from pystache.tests.common import AssertStringMixin, SPEC_TEST_DIR
+from pystache.tests.common import AssertStringMixin
+
+
+def get_spec_tests(spec_test_dir):
+    """
+    Return a list of unittest.TestCase instances.
+
+    """
+    cases = []
+
+    # Make this absolute for easier diagnosis in case of error.
+    spec_test_dir = os.path.abspath(spec_test_dir)
+    spec_paths = glob.glob(os.path.join(spec_test_dir, '*.%s' % file_extension))
+
+    for path in spec_paths:
+        b = common.read(path)
+        u = unicode(b, encoding=FILE_ENCODING)
+        spec_data = parse(u)
+        tests = spec_data['tests']
+
+        for data in tests:
+            case = _deserialize_spec_test(data, path)
+            cases.append(case)
+
+    # This test case lets us alert the user that spec tests are missing.
+    class CheckSpecTestsFound(unittest.TestCase):
+
+        def runTest(self):
+            if len(cases) > 0:
+                return
+            raise Exception("Spec tests not found in: %s\n  "
+                "Consult the README file on how to add the Mustache spec tests." % repr(spec_test_dir))
+
+    case = CheckSpecTestsFound()
+    cases.append(case)
+
+    return cases
+
+
+def _deserialize_spec_test(data, file_path):
+    """
+    Return a unittest.TestCase instance representing a spec test.
+
+    Arguments:
+
+      data: the dictionary of attributes for a single test.
+
+    """
+    context = data['data']
+    description = data['desc']
+    # PyYAML seems to leave ASCII strings as byte strings.
+    expected = unicode(data['expected'])
+    # TODO: switch to using dict.get().
+    partials = data.has_key('partials') and data['partials'] or {}
+    template = data['template']
+    test_name = data['name']
+
+    # Convert code strings to functions.
+    # TODO: make this section of code easier to understand.
+    new_context = {}
+    for key, val in context.iteritems():
+        if isinstance(val, dict) and val.get('__tag__') == 'code':
+            val = eval(val['python'])
+        new_context[key] = val
+
+    test_case = _make_spec_test(expected, template, context, partials, description, test_name, file_path)
+
+    return test_case
+
+
+def _make_spec_test(expected, template, context, partials, description, test_name, file_path):
+    """
+    Return a unittest.TestCase instance representing a spec test.
+
+    """
+    file_name  = os.path.basename(file_path)
+    test_method_name = "Mustache spec (%s): %s" % (file_name, repr(test_name))
+
+    # We subclass SpecTestBase in order to control the test method name (for
+    # the purposes of improved reporting).
+    class SpecTest(SpecTestBase):
+        pass
+
+    def run_test(self):
+        self._runTest()
+
+    # TODO: should we restore this logic somewhere?
+    # If we don't convert unicode to str, we get the following error:
+    #   "TypeError: __name__ must be set to a string object"
+    # test.__name__ = str(name)
+    setattr(SpecTest, test_method_name, run_test)
+    case = SpecTest(test_method_name)
+
+    case._context = context
+    case._description = description
+    case._expected = expected
+    case._file_path = file_path
+    case._partials = partials
+    case._template = template
+    case._test_name = test_name
+
+    return case
 
 
 def parse(u):
     """
-    Parse
+    Parse the contents of a spec test file, and return a dict.
+
     Arguments:
 
       u: a unicode string.
@@ -87,51 +193,19 @@ def parse(u):
     return yaml.load(u)
 
 
-# This test case lets us alert the user that spec tests are missing.
-class CheckSpecTestsFound(unittest.TestCase):
+class SpecTestBase(unittest.TestCase, AssertStringMixin):
 
-    def test_spec_tests_found(self):
-        if len(spec_paths) > 0:
-            return
-        raise Exception("Spec tests not found in: %s\n  "
-            "Consult the README file on how to add the Mustache spec tests." % repr(SPEC_TEST_DIR))
-
-
-# TODO: give this a name better than MustacheSpec.
-class MustacheSpec(unittest.TestCase, AssertStringMixin):
-    pass
-
-
-def buildTest(testData, spec_filename, parser):
-    """
-    Arguments:
-
-      parser: the module used for parsing (e.g. yaml or json).
-
-    """
-
-    name = testData['name']
-    description  = testData['desc']
-
-    test_name = "%s (%s)" % (name, spec_filename)
-
-    def test(self):
-        template = testData['template']
-        partials = testData.has_key('partials') and testData['partials'] or {}
-        # PyYAML seems to leave ASCII strings as byte strings.
-        expected = unicode(testData['expected'])
-        data     = testData['data']
-
-        # Convert code strings to functions.
-        # TODO: make this section of code easier to understand.
-        new_data = {}
-        for key, val in data.iteritems():
-            if isinstance(val, dict) and val.get('__tag__') == 'code':
-                val = eval(val['python'])
-            new_data[key] = val
+    def _runTest(self):
+        context = self._context
+        description = self._description
+        expected = self._expected
+        file_path = self._file_path
+        partials = self._partials
+        template = self._template
+        test_name = self._test_name
 
         renderer = Renderer(partials=partials)
-        actual = renderer.render(template, new_data)
+        actual = renderer.render(template, context)
 
         # We need to escape the strings that occur in our format string because
         # they can contain % symbols, for example (in delimiters.yml)--
@@ -141,11 +215,13 @@ def buildTest(testData, spec_filename, parser):
         def escape(s):
             return s.replace("%", "%%")
 
-        subs = [description, template, parser.__version__, str(parser)]
+        subs = [repr(test_name), description, os.path.abspath(file_path), template, parser.__version__, str(parser)]
         subs = tuple([escape(sub) for sub in subs])
         # We include the parsing module version info to help with troubleshooting
         # yaml/json/simplejson issues.
-        message = """%s
+        message = """%s: %s
+
+  File: %s
 
   Template: \"""%s\"""
 
@@ -155,33 +231,3 @@ def buildTest(testData, spec_filename, parser):
   """ % subs
 
         self.assertString(actual, expected, format=message)
-
-    # The name must begin with "test" for nosetests test discovery to work.
-    name =  'test: "%s"' % test_name
-
-    # If we don't convert unicode to str, we get the following error:
-    #   "TypeError: __name__ must be set to a string object"
-    test.__name__ = str(name)
-
-    return test
-
-
-spec_paths = glob.glob(os.path.join(SPEC_TEST_DIR, '*.%s' % file_extension))
-for path in spec_paths:
-
-    file_name  = os.path.basename(path)
-
-    b = common.read(path)
-    u = unicode(b, encoding=FILE_ENCODING)
-    spec_data = parse(u)
-
-    tests = spec_data['tests']
-
-    for test in tests:
-        test = buildTest(test, file_name, parser)
-        setattr(MustacheSpec, test.__name__, test)
-        # Prevent this variable from being interpreted as another test.
-        del(test)
-
-if __name__ == '__main__':
-    unittest.main()
