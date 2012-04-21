@@ -5,12 +5,16 @@ Exposes a get_doctests() function for the project's test harness.
 
 """
 
+from lib2to3.main import main as lib2to3main
+import doctest
 import os
 import pkgutil
-import doctest
+from shutil import copyfile
+import sys
 import traceback
 
 from pystache.tests.common import PACKAGE_DIR, TEXT_DOCTEST_PATHS
+
 
 # This module follows the guidance documented here:
 #
@@ -27,14 +31,19 @@ def get_doctests(text_file_dir):
         (i.e. non-module files) containing doctests.
 
     """
-    suites = []
-
     # Since module_relative is False in our calls to DocFileSuite below,
     # paths should be OS-specific.  See the following for more info--
     #
     #   http://docs.python.org/library/doctest.html#doctest.DocFileSuite
     #
     paths = [os.path.normpath(os.path.join(text_file_dir, path)) for path in TEXT_DOCTEST_PATHS]
+
+    py_version = sys.version_info
+    if py_version >= (3,):
+        paths = _convert_paths(paths)
+
+    suites = []
+
     for path in paths:
         suite = doctest.DocFileSuite(path, module_relative=False)
         suites.append(suite)
@@ -45,6 +54,36 @@ def get_doctests(text_file_dir):
         suites.append(suite)
 
     return suites
+
+
+def _convert_2to3(path):
+    """
+    Convert the given file, and return the path to the converted files.
+
+    """
+    base, ext = os.path.splitext(path)
+    # For example, "README.temp2to3.rst".
+    new_path = "%s.temp2to3%s" % (base, ext)
+
+    copyfile(path, new_path)
+
+    args = ['--doctests_only', '--no-diffs', '--write', '--nobackups', new_path]
+    lib2to3main("lib2to3.fixes", args=args)
+
+    return new_path
+
+
+def _convert_paths(paths):
+    """
+    Convert the given files, and return the paths to the converted files.
+
+    """
+    new_paths = []
+    for path in paths:
+        new_path = _convert_2to3(path)
+        new_paths.append(new_path)
+
+    return new_paths
 
 
 def _get_module_doctests(package_dir):

@@ -1,5 +1,6 @@
 *.pyc
 .tox
+*.temp2to3.rst
 .DS_Store
 # TODO: are comments allowed in .gitignore files?
 # TextMate project file
