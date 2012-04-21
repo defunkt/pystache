@@ -13,8 +13,7 @@ from unittest import TestProgram
 
 from pystache.tests.common import PACKAGE_DIR, PROJECT_DIR, SPEC_TEST_DIR
 from pystache.tests.doctesting import get_doctests
-# TODO: change this to pystache.tests.spectesting.
-from pystache.tests.test_mustachespec import get_spec_tests
+from pystache.tests.spectesting import get_spec_tests
 
 
 UNITTEST_FILE_PREFIX = "test_"
