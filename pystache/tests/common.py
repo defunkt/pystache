@@ -17,6 +17,7 @@ _TESTS_DIR = os.path.dirname(pystache.tests.__file__)
 
 DATA_DIR = os.path.join(_TESTS_DIR, 'data')  # i.e. 'pystache/tests/data'.
 EXAMPLES_DIR = os.path.dirname(examples.__file__)
+# TODO: change SOURCE_DIR to PACKAGE_DIR.
 SOURCE_DIR = os.path.dirname(pystache.__file__)
 PROJECT_DIR = os.path.join(SOURCE_DIR, '..')
 SPEC_TEST_DIR = os.path.join(PROJECT_DIR, 'ext', 'spec', 'specs')
