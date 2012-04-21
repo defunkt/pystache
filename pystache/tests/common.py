@@ -21,8 +21,7 @@ PACKAGE_DIR = os.path.dirname(pystache.__file__)
 PROJECT_DIR = os.path.join(PACKAGE_DIR, '..')
 SPEC_TEST_DIR = os.path.join(PROJECT_DIR, 'ext', 'spec', 'specs')
 # TEXT_DOCTEST_PATHS: the paths to text files (i.e. non-module files)
-# containing doctests.  These paths should be OS-specific and relative
-# to the project directory.
+# containing doctests.  The paths should be relative to the project directory.
 TEXT_DOCTEST_PATHS = ['README.rst']
 
 
