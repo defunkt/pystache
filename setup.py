@@ -164,7 +164,8 @@ PACKAGES = [
     # The following packages are only for testing.
     'pystache.tests',
     'pystache.tests.data',
-    'pystache.tests.data.locator'
+    'pystache.tests.data.locator',
+    'pystache.tests.examples',
 ]
 
 
@@ -193,6 +194,7 @@ def main(sys_argv):
               'examples': template_files,
               'pystache.tests.data': template_files,
               'pystache.tests.data.locator': template_files,
+              'pystache.tests.examples': template_files,
           },
           test_suite='pystache.tests',
           entry_points = {
