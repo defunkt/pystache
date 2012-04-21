@@ -32,9 +32,16 @@ def run_tests(sys_argv):
     try:
         # TODO: use optparse command options instead.
         project_dir = sys_argv[1]
-        sys_argv.pop()
+        sys_argv.pop(1)
     except IndexError:
         project_dir = PROJECT_DIR
+
+    try:
+        # TODO: use optparse command options instead.
+        spec_test_dir = sys_argv[1]
+        sys_argv.pop(1)
+    except IndexError:
+        spec_test_dir = SPEC_TEST_DIR
 
     if len(sys_argv) <= 1 or sys_argv[-1].startswith("-"):
         # Then no explicit module or test names were provided, so
@@ -43,7 +50,7 @@ def run_tests(sys_argv):
         sys_argv.extend(module_names)
 
     _PystacheTestProgram._text_doctest_dir = project_dir
-    _PystacheTestProgram._spec_test_dir = SPEC_TEST_DIR
+    _PystacheTestProgram._spec_test_dir = spec_test_dir
 
     # We pass None for the module because we do not want the unittest
     # module to resolve module names relative to a given module.

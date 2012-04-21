@@ -77,14 +77,18 @@ def get_spec_tests(spec_test_dir):
             case = _deserialize_spec_test(data, path)
             cases.append(case)
 
+    # Store this as a value so that CheckSpecTestsFound is not checking
+    # a reference to cases that contains itself.
+    spec_test_count = len(cases)
+
     # This test case lets us alert the user that spec tests are missing.
     class CheckSpecTestsFound(unittest.TestCase):
 
         def runTest(self):
-            if len(cases) > 0:
+            if spec_test_count > 0:
                 return
-            raise Exception("Spec tests not found in: %s\n  "
-                "Consult the README file on how to add the Mustache spec tests." % repr(spec_test_dir))
+            raise Exception("Spec tests not found--\n  in %s\n"
+                " Consult the README file on how to add the Mustache spec tests." % repr(spec_test_dir))
 
     case = CheckSpecTestsFound()
     cases.append(case)
