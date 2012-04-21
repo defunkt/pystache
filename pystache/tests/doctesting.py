@@ -10,15 +10,12 @@ import pkgutil
 import doctest
 import traceback
 
+from pystache.tests.common import PACKAGE_DIR, PROJECT_DIR, TEXT_DOCTEST_PATHS
 
-from pystache.tests.common import PROJECT_DIR, SOURCE_DIR
-
-
-# The paths to text files (i.e. non-module files) containing doctests.
-# Paths should be OS-specific and relative to the project directory.
-TEXT_DOCTEST_PATHS = ['README.rst']
-
-
+# This module follows the guidance documented here:
+#
+#   http://docs.python.org/library/doctest.html#unittest-api
+#
 
 def get_module_doctests():
     """
@@ -39,7 +36,7 @@ def get_module_doctests():
         suite = doctest.DocFileSuite(path, module_relative=False)
         suites.append(suite)
 
-    modules = _get_module_doctests(SOURCE_DIR)
+    modules = _get_module_doctests(PACKAGE_DIR)
     for module in modules:
         suite = doctest.DocTestSuite(module)
         suites.append(suite)

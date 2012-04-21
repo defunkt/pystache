@@ -5,11 +5,6 @@ Creates unittest.TestSuite instances for the doctests in the project.
 
 """
 
-# This module follows the guidance documented here:
-#
-#   http://docs.python.org/library/doctest.html#unittest-api
-#
-
 from pystache.tests.doctesting import get_module_doctests
 
 
