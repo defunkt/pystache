@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-Allows all tests to be run.
+Exposes a run_tests() function that runs all tests in the project.
 
 This module is for our test console script.
 
@@ -33,6 +33,30 @@ UNITTEST_FILE_PREFIX = "test_"
 # method.  Our implementation of runTests() will add to self.test additional
 # TestCase or TestSuite instances (e.g. doctests and spec tests), and then
 # call the base class's runTests().
+
+def run_tests(sys_argv):
+    """
+    Run all tests in the project.
+
+    Arguments:
+
+      sys_argv: a reference to sys.argv.
+
+    """
+    if len(sys_argv) <= 1 or sys_argv[-1].startswith("-"):
+        # Then no explicit module or test names were provided, so
+        # auto-detect all unit tests.
+        module_names = _discover_test_modules(PACKAGE_DIR)
+        sys_argv.extend(module_names)
+
+    # We pass None for the module because we do not want the unittest
+    # module to resolve module names relative to a given module.
+    # (This would require importing all of the unittest modules from
+    # this module.)  See the loadTestsFromName() method of the
+    # unittest.TestLoader class for more details on this parameter.
+    _PystacheTestProgram(argv=sys_argv, module=None)
+    # No need to return since unitttest.main() exits.
+
 
 def _find_unittest_files(package_dir):
     """
@@ -125,34 +149,3 @@ class _PystacheTestProgram(TestProgram):
         self.test.addTests(doctest_suites)
 
         TestProgram.runTests(self)
-
-
-class TestHarness(object):
-
-    """
-    Discovers and runs unit tests.
-
-    """
-
-    def run_tests(self, sys_argv):
-        """
-        Run all unit tests inside the given package.
-
-        Arguments:
-
-          sys_argv: a reference to sys.argv.
-
-        """
-        if len(sys_argv) <= 1 or sys_argv[-1].startswith("-"):
-            # Then no explicit module or test names were provided, so
-            # auto-detect all unit tests.
-            module_names = _discover_test_modules(PACKAGE_DIR)
-            sys_argv.extend(module_names)
-
-        # We pass None for the module because we do not want the unittest
-        # module to resolve module names relative to a given module.
-        # (This would require importing all of the unittest modules from
-        # this module.)  See the loadTestsFromName() method of the
-        # unittest.TestLoader class for more details on this parameter.
-        _PystacheTestProgram(argv=sys_argv, module=None)
-        # No need to return since unitttest.main() exits.
