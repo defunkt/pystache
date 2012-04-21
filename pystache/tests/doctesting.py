@@ -5,13 +5,17 @@ Exposes a get_doctests() function for the project's test harness.
 
 """
 
-from lib2to3.main import main as lib2to3main
 import doctest
 import os
 import pkgutil
-from shutil import copyfile
 import sys
 import traceback
+
+if sys.version_info >= (3,):
+    # Then pull in modules needed for 2to3 conversion.  The modules
+    # below are not necessarily available in older versions of Python.
+    from lib2to3.main import main as lib2to3main  # new in Python 2.6?
+    from shutil import copyfile
 
 from pystache.tests.common import PACKAGE_DIR, TEXT_DOCTEST_PATHS
 
@@ -38,8 +42,7 @@ def get_doctests(text_file_dir):
     #
     paths = [os.path.normpath(os.path.join(text_file_dir, path)) for path in TEXT_DOCTEST_PATHS]
 
-    py_version = sys.version_info
-    if py_version >= (3,):
+    if sys.version_info >= (3,):
         paths = _convert_paths(paths)
 
     suites = []
