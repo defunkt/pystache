@@ -68,14 +68,8 @@ def get_spec_tests(spec_test_dir):
     spec_paths = glob.glob(os.path.join(spec_test_dir, '*.%s' % file_extension))
 
     for path in spec_paths:
-        b = common.read(path)
-        u = unicode(b, encoding=FILE_ENCODING)
-        spec_data = parse(u)
-        tests = spec_data['tests']
-
-        for data in tests:
-            case = _deserialize_spec_test(data, path)
-            cases.append(case)
+        new_cases = _read_spec_tests(path)
+        cases.extend(new_cases)
 
     # Store this as a value so that CheckSpecTestsFound is not checking
     # a reference to cases that contains itself.
@@ -96,6 +90,24 @@ def get_spec_tests(spec_test_dir):
     return cases
 
 
+def _read_spec_tests(path):
+    """
+    Return a list of unittest.TestCase instances.
+
+    """
+    b = common.read(path)
+    u = unicode(b, encoding=FILE_ENCODING)
+    spec_data = parse(u)
+    tests = spec_data['tests']
+
+    cases = []
+    for data in tests:
+        case = _deserialize_spec_test(data, path)
+        cases.append(case)
+
+    return cases
+
+
 def _deserialize_spec_test(data, file_path):
     """
     Return a unittest.TestCase instance representing a spec test.
@@ -105,7 +117,7 @@ def _deserialize_spec_test(data, file_path):
       data: the dictionary of attributes for a single test.
 
     """
-    context = data['data']
+    unconverted_context = data['data']
     description = data['desc']
     # PyYAML seems to leave ASCII strings as byte strings.
     expected = unicode(data['expected'])
@@ -116,11 +128,11 @@ def _deserialize_spec_test(data, file_path):
 
     # Convert code strings to functions.
     # TODO: make this section of code easier to understand.
-    new_context = {}
-    for key, val in context.iteritems():
+    context = {}
+    for key, val in unconverted_context.iteritems():
         if isinstance(val, dict) and val.get('__tag__') == 'code':
             val = eval(val['python'])
-        new_context[key] = val
+        context[key] = val
 
     test_case = _make_spec_test(expected, template, context, partials, description, test_name, file_path)
 
@@ -219,7 +231,8 @@ class SpecTestBase(unittest.TestCase, AssertStringMixin):
         def escape(s):
             return s.replace("%", "%%")
 
-        subs = [repr(test_name), description, os.path.abspath(file_path), template, parser.__version__, str(parser)]
+        subs = [repr(test_name), description, os.path.abspath(file_path),
+                template, repr(context), parser.__version__, str(parser)]
         subs = tuple([escape(sub) for sub in subs])
         # We include the parsing module version info to help with troubleshooting
         # yaml/json/simplejson issues.
@@ -228,6 +241,8 @@ class SpecTestBase(unittest.TestCase, AssertStringMixin):
   File: %s
 
   Template: \"""%s\"""
+
+  Context: %s
 
   %%s
 
