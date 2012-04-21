@@ -12,7 +12,7 @@ import sys
 from unittest import TestProgram
 
 from pystache.tests.common import PACKAGE_DIR, PROJECT_DIR
-from pystache.tests.doctesting import get_module_doctests
+from pystache.tests.doctesting import get_doctests
 
 
 UNITTEST_FILE_PREFIX = "test_"
@@ -145,7 +145,7 @@ class _PystacheTestProgram(TestProgram):
     """
 
     def runTests(self):
-        doctest_suites = get_module_doctests(self._project_dir)
+        doctest_suites = get_doctests(self._project_dir)
         # self.test is a unittest.TestSuite instance:
         #   http://docs.python.org/library/unittest.html#unittest.TestSuite
         self.test.addTests(doctest_suites)

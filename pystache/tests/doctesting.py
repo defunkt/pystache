@@ -17,9 +17,14 @@ from pystache.tests.common import PACKAGE_DIR, TEXT_DOCTEST_PATHS
 #   http://docs.python.org/library/doctest.html#unittest-api
 #
 
-def get_module_doctests(project_dir):
+def get_doctests(text_file_dir):
     """
-    Return a list of TestSuite instances for all doctests in the pacakqge.
+    Return a list of TestSuite instances for all doctests in the project.
+
+    Arguments:
+
+      text_file_dir: the directory in which to search for all text files
+        (i.e. non-module files) containing doctests.
 
     """
     suites = []
@@ -29,7 +34,7 @@ def get_module_doctests(project_dir):
     #
     #   http://docs.python.org/library/doctest.html#doctest.DocFileSuite
     #
-    paths = [os.path.normpath(os.path.join(project_dir, path)) for path in TEXT_DOCTEST_PATHS]
+    paths = [os.path.normpath(os.path.join(text_file_dir, path)) for path in TEXT_DOCTEST_PATHS]
     for path in paths:
         suite = doctest.DocFileSuite(path, module_relative=False)
         suites.append(suite)
