@@ -17,23 +17,7 @@ from pystache.tests.doctesting import get_module_doctests
 
 UNITTEST_FILE_PREFIX = "test_"
 
-# TODO: enhance this to work with doctests (instead of using the load_tests
-#   protocol), etc.
-
-# Notes for TODO:
-#
-# The function unittest.main() is an alias for unittest.TestProgram's
-# constructor.  The constructor calls self.runTests() as its final step, which
-# expects self.test to be set.  The constructor sets the self.test attribute
-# by calling one of self.testLoader's "loadTests" methods.  These methods
-# return a unittest.TestSuite instance.  Thus, self.test is set to a TestSuite
-# instance prior to calling runTests().
-#
-# Our strategy is to subclass unittest.TestProgram and override its runTests()
-# method.  Our implementation of runTests() will add to self.test additional
-# TestCase or TestSuite instances (e.g. doctests and spec tests), and then
-# call the base class's runTests().
-
+# TODO: enhance this function to create spec-test tests.
 def run_tests(sys_argv):
     """
     Run all tests in the project.
@@ -136,7 +120,13 @@ def _discover_test_modules(package_dir):
     return modules
 
 
-
+# The function unittest.main() is an alias for unittest.TestProgram's
+# constructor.  TestProgram's constructor calls self.runTests() as its
+# final step, which expects self.test to be set.  The constructor sets
+# the self.test attribute by calling one of self.testLoader's "loadTests"
+# methods prior to callint self.runTests().  Each loadTest method returns
+# a unittest.TestSuite instance.  Thus, self.test is set to a TestSuite
+# instance prior to calling runTests().
 class _PystacheTestProgram(TestProgram):
 
     """
@@ -146,6 +136,8 @@ class _PystacheTestProgram(TestProgram):
 
     def runTests(self):
         doctest_suites = get_module_doctests()
+        # self.test is a unittest.TestSuite instance:
+        #   http://docs.python.org/library/unittest.html#unittest.TestSuite
         self.test.addTests(doctest_suites)
 
         TestProgram.runTests(self)
