@@ -11,6 +11,9 @@ import os
 import sys
 from unittest import TestProgram
 
+from pystache.tests.common import PACKAGE_DIR
+from pystache.tests.doctesting import get_module_doctests
+
 
 UNITTEST_FILE_PREFIX = "test_"
 
@@ -93,12 +96,11 @@ def _get_test_module_names(package_dir):
 
     return modules
 
-def _discover_test_modules(package):
+def _discover_test_modules(package_dir):
     """
     Discover and return a sorted list of the names of unit-test modules.
 
     """
-    package_dir = os.path.dirname(package.__file__)
     modules = _get_test_module_names(package_dir)
     modules.sort()
 
@@ -119,25 +121,24 @@ class _PystacheTestProgram(TestProgram):
     """
 
     def runTests(self):
-        # TODO: add doctests, etc. to the self.test TestSuite.
+        doctest_suites = get_module_doctests()
+        self.test.addTests(doctest_suites)
+
         TestProgram.runTests(self)
 
 
-class Tester(object):
+class TestHarness(object):
 
     """
     Discovers and runs unit tests.
 
     """
 
-    # TODO: consider replacing the package argument with a package_dir argument.
-    def run_tests(self, package, sys_argv):
+    def run_tests(self, sys_argv):
         """
         Run all unit tests inside the given package.
 
         Arguments:
-
-          package: a module instance corresponding to the package.
 
           sys_argv: a reference to sys.argv.
 
@@ -145,7 +146,7 @@ class Tester(object):
         if len(sys_argv) <= 1 or sys_argv[-1].startswith("-"):
             # Then no explicit module or test names were provided, so
             # auto-detect all unit tests.
-            module_names = _discover_test_modules(package)
+            module_names = _discover_test_modules(PACKAGE_DIR)
             sys_argv.extend(module_names)
 
         # We pass None for the module because we do not want the unittest

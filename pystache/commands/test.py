@@ -7,13 +7,12 @@ This module provides a command to test pystache (unit tests, doctests, etc).
 
 import sys
 
-import pystache
-from pystache.tests.main import Tester
+from pystache.tests.main import TestHarness
 
 
 def main(sys_argv=sys.argv):
-    tester = Tester()
-    tester.run_tests(package=pystache, sys_argv=sys_argv)
+    harness = TestHarness()
+    harness.run_tests(sys_argv=sys_argv)
 
 
 if __name__=='__main__':
