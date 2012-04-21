@@ -24,7 +24,16 @@ except ImportError:
         # simplejson is.  The simplejson package dropped support for Python 2.4
         # in simplejson v2.1.0, so Python 2.4 requires a simplejson install
         # older than the most recent version.
-        import simplejson as json
+        try:
+            import simplejson as json
+        except ImportError:
+            # Raise an error with a type different from ImportError as a hack around
+            # this issue:
+            #   http://bugs.python.org/issue7559
+            from sys import exc_info
+            ex_type, ex_value, tb = exc_info()
+            new_ex = Exception("%s: %s" % (ex_type.__name__, ex_value))
+            raise new_ex.__class__, new_ex, tb
     file_extension = 'json'
     parser = json
 else:

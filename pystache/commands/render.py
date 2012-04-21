@@ -13,7 +13,16 @@ try:
 except:
     # The json module is new in Python 2.6, whereas simplejson is
     # compatible with earlier versions.
-    import simplejson as json
+    try:
+        import simplejson as json
+    except ImportError:
+        # Raise an error with a type different from ImportError as a hack around
+        # this issue:
+        #   http://bugs.python.org/issue7559
+        from sys import exc_info
+        ex_type, ex_value, tb = exc_info()
+        new_ex = Exception("%s: %s" % (ex_type.__name__, ex_value))
+        raise new_ex.__class__, new_ex, tb
 
 # The optparse module is deprecated in Python 2.7 in favor of argparse.
 # However, argparse is not available in Python 2.6 and earlier.
