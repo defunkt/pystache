@@ -183,15 +183,7 @@ def main(sys_argv):
           install_requires=INSTALL_REQUIRES,
           packages=PACKAGES,
           package_data = {
-              # Include the README so doctests can be run.
-              # TODO: is there a better way to include the README?
-              'pystache': [
-                  '../README.rst',
-                  '../ext/spec/specs/*.json',
-                  '../ext/spec/specs/*.yml',
-              ],
               # Include template files so tests can be run.
-              'examples': template_files,
               'pystache.tests.data': template_files,
               'pystache.tests.data.locator': template_files,
               'pystache.tests.examples': template_files,
