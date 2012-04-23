@@ -11,12 +11,11 @@ import os
 import sys
 from unittest import TestProgram
 
-from pystache.tests.common import PACKAGE_DIR, PROJECT_DIR, SPEC_TEST_DIR
+from pystache.tests.common import PACKAGE_DIR, PROJECT_DIR, SPEC_TEST_DIR, UNITTEST_FILE_PREFIX
+from pystache.tests.common import get_module_names
 from pystache.tests.doctesting import get_doctests
 from pystache.tests.spectesting import get_spec_tests
 
-
-UNITTEST_FILE_PREFIX = "test_"
 
 # TODO: enhance this function to create spec-test tests.
 def run_tests(sys_argv):
@@ -60,83 +59,24 @@ def run_tests(sys_argv):
     # No need to return since unitttest.main() exits.
 
 
-def _find_unittest_files(package_dir):
-    """
-    Return a list of paths to all unit-test files in the given package directory.
-
-    """
-    paths = []  # Return value.
-
-    def is_unittest(file_name):
-        return file_name.startswith(UNITTEST_FILE_PREFIX) and file_name.endswith('.py')
-
-    # os.walk() is new in Python 2.3
-    #   http://docs.python.org/library/os.html#os.walk
-    for dir_path, dir_names, file_names in os.walk(package_dir):
-        file_names = filter(is_unittest, file_names)
-
-        for file_name in file_names:
-            path = os.path.join(dir_path, file_name)
-            paths.append(path)
-
-    return paths
-
-
-def _get_module_names(package_dir, paths):
-    """
-    Return a list of fully-qualified test module names given a list of module paths.
-
-    """
-    package_dir = os.path.abspath(package_dir)
-    package_name = os.path.split(package_dir)[1]
-
-    prefix_length = len(package_dir)
-
-    module_names = []
-    for path in paths:
-        path = os.path.abspath(path)  # for example <path_to_package>/subpackage/module.py
-        rel_path = path[prefix_length:]  # for example /subpackage/module.py
-        rel_path = os.path.splitext(rel_path)[0]  # for example /subpackage/module
-
-        parts = []
-        while True:
-            (rel_path, tail) = os.path.split(rel_path)
-            if not tail:
-                break
-            parts.insert(0, tail)
-        # We now have, for example, ['subpackage', 'module'].
-        parts.insert(0, package_name)
-        module = ".".join(parts)
-        module_names.append(module)
-
-    return module_names
-
-
-def _get_test_module_names(package_dir):
-    """
-    Return a list of fully-qualified module names given a list of module paths.
-
-    """
-    paths = _find_unittest_files(package_dir)
-    modules = _get_module_names(package_dir, paths)
-
-    return modules
-
-
 def _discover_test_modules(package_dir):
     """
     Discover and return a sorted list of the names of unit-test modules.
 
     """
-    modules = _get_test_module_names(package_dir)
-    modules.sort()
+    def is_unittest_module(path):
+        file_name = os.path.basename(path)
+        return file_name.startswith(UNITTEST_FILE_PREFIX) and file_name.endswith('.py')
+
+    names = get_module_names(package_dir, is_unittest_module)
+    names.sort()
 
     # This is a sanity check to ensure that the unit-test discovery
     # methods are working.
-    if len(modules) < 1:
-        raise Exception("No unit-test modules found.")
+    if len(names) < 1:
+        raise Exception("No unit-test modules found--\n  in %s" % package_dir)
 
-    return modules
+    return names
 
 
 # The function unittest.main() is an alias for unittest.TestProgram's

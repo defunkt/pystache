@@ -24,6 +24,8 @@ SPEC_TEST_DIR = os.path.join(PROJECT_DIR, 'ext', 'spec', 'specs')
 # containing doctests.  The paths should be relative to the project directory.
 TEXT_DOCTEST_PATHS = ['README.rst']
 
+UNITTEST_FILE_PREFIX = "test_"
+
 
 def html_escape(u):
     """
@@ -43,6 +45,70 @@ def html_escape(u):
 
 def get_data_path(file_name):
     return os.path.join(DATA_DIR, file_name)
+
+
+# Functions related to get_module_names().
+
+def _find_files(root_dir, should_include):
+    """
+    Return a list of paths to all files in the given directory.
+
+    Arguments:
+
+      should_include: a function that accepts a file path and returns True or False.
+
+    """
+    paths = []  # Return value.
+
+    # os.walk() is new in Python 2.3
+    #   http://docs.python.org/library/os.html#os.walk
+    for dir_path, dir_names, file_names in os.walk(root_dir):
+        new_paths = [os.path.join(dir_path, file_name) for file_name in file_names]
+        new_paths = filter(should_include, new_paths)
+        paths.extend(new_paths)
+
+    return paths
+
+
+def _make_module_names(package_dir, paths):
+    """
+    Return a list of fully-qualified module names given a list of module paths.
+
+    """
+    package_dir = os.path.abspath(package_dir)
+    package_name = os.path.split(package_dir)[1]
+
+    prefix_length = len(package_dir)
+
+    module_names = []
+    for path in paths:
+        path = os.path.abspath(path)  # for example <path_to_package>/subpackage/module.py
+        rel_path = path[prefix_length:]  # for example /subpackage/module.py
+        rel_path = os.path.splitext(rel_path)[0]  # for example /subpackage/module
+
+        parts = []
+        while True:
+            (rel_path, tail) = os.path.split(rel_path)
+            if not tail:
+                break
+            parts.insert(0, tail)
+        # We now have, for example, ['subpackage', 'module'].
+        parts.insert(0, package_name)
+        module = ".".join(parts)
+        module_names.append(module)
+
+    return module_names
+
+
+def get_module_names(package_dir, should_include):
+    """
+    Return a list of fully-qualified module names in the given package.
+
+    """
+    paths = _find_files(package_dir, should_include)
+    names = _make_module_names(package_dir, paths)
+
+    return names
 
 
 class AssertStringMixin:
