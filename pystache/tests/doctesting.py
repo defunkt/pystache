@@ -17,7 +17,8 @@ if sys.version_info >= (3,):
     from lib2to3.main import main as lib2to3main  # new in Python 2.6?
     from shutil import copyfile
 
-from pystache.tests.common import PACKAGE_DIR, TEXT_DOCTEST_PATHS
+from pystache.tests.common import TEXT_DOCTEST_PATHS
+from pystache.tests.common import get_module_names
 
 
 # This module follows the guidance documented here:
@@ -51,7 +52,7 @@ def get_doctests(text_file_dir):
         suite = doctest.DocFileSuite(path, module_relative=False)
         suites.append(suite)
 
-    modules = _get_module_doctests(PACKAGE_DIR)
+    modules = get_module_names()
     for module in modules:
         suite = doctest.DocTestSuite(module)
         suites.append(suite)
@@ -87,34 +88,3 @@ def _convert_paths(paths):
         new_paths.append(new_path)
 
     return new_paths
-
-
-def _get_module_doctests(package_dir):
-    modules = []
-
-    for pkg in pkgutil.walk_packages([package_dir]):
-        # The importer is a pkgutil.ImpImporter instance:
-        #
-        #   http://docs.python.org/library/pkgutil.html#pkgutil.ImpImporter
-        #
-        importer, module_name, is_package = pkg
-        if is_package:
-            # Otherwise, we will get the following error when adding tests:
-            #
-            #   ValueError: (<module 'tests' from '.../pystache/tests/__init__.pyc'>, 'has no tests')
-            #
-            continue
-        # The loader is a pkgutil.ImpLoader instance.
-        loader = importer.find_module(module_name)
-        try:
-            module = loader.load_module(module_name)
-        except ImportError, e:
-            # In some situations, the test harness was swallowing and/or
-            # suppressing the display of the stack trace when errors
-            # occurred here.  The following code makes errors occurring here
-            # easier to troubleshoot.
-            details = "".join(traceback.format_exception(*sys.exc_info()))
-            raise ImportError(details)
-        modules.append(module)
-
-    return modules

@@ -51,7 +51,7 @@ def get_data_path(file_name):
 
 def _find_files(root_dir, should_include):
     """
-    Return a list of paths to all files in the given directory.
+    Return a list of paths to all modules below the given directory.
 
     Arguments:
 
@@ -60,10 +60,13 @@ def _find_files(root_dir, should_include):
     """
     paths = []  # Return value.
 
+    is_module = lambda path: path.endswith(".py")
+
     # os.walk() is new in Python 2.3
     #   http://docs.python.org/library/os.html#os.walk
     for dir_path, dir_names, file_names in os.walk(root_dir):
         new_paths = [os.path.join(dir_path, file_name) for file_name in file_names]
+        new_paths = filter(is_module, new_paths)
         new_paths = filter(should_include, new_paths)
         paths.extend(new_paths)
 
@@ -100,13 +103,20 @@ def _make_module_names(package_dir, paths):
     return module_names
 
 
-def get_module_names(package_dir, should_include):
+def get_module_names(package_dir=None, should_include=None):
     """
     Return a list of fully-qualified module names in the given package.
 
     """
+    if package_dir is None:
+        package_dir = PACKAGE_DIR
+
+    if should_include is None:
+        should_include = lambda path: True
+
     paths = _find_files(package_dir, should_include)
     names = _make_module_names(package_dir, paths)
+    names.sort()
 
     return names
 

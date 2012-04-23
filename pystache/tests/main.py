@@ -66,10 +66,9 @@ def _discover_test_modules(package_dir):
     """
     def is_unittest_module(path):
         file_name = os.path.basename(path)
-        return file_name.startswith(UNITTEST_FILE_PREFIX) and file_name.endswith('.py')
+        return file_name.startswith(UNITTEST_FILE_PREFIX)
 
-    names = get_module_names(package_dir, is_unittest_module)
-    names.sort()
+    names = get_module_names(package_dir=package_dir, should_include=is_unittest_module)
 
     # This is a sanity check to ensure that the unit-test discovery
     # methods are working.
