@@ -1,7 +1,12 @@
 *.pyc
 .tox
-build
-MANIFEST
-dist
-
+*.temp2to3.rst
 .DS_Store
+# TODO: are comments allowed in .gitignore files?
+# TextMate project file
+*.tmproj
+# Distribution-related folders and files.
+build
+dist
+MANIFEST
+pystache.egg-info

@@ -156,13 +156,16 @@ else:
 
 INSTALL_REQUIRES = requires
 
+# TODO: decide whether to use find_packages() instead.  I'm not sure that
+#   find_packages() is available with distutils, for example.
 PACKAGES = [
     'pystache',
+    'pystache.commands',
     # The following packages are only for testing.
-    'examples',
     'pystache.tests',
     'pystache.tests.data',
-    'pystache.tests.data.locator'
+    'pystache.tests.data.locator',
+    'pystache.tests.examples',
 ]
 
 
@@ -180,21 +183,17 @@ def main(sys_argv):
           install_requires=INSTALL_REQUIRES,
           packages=PACKAGES,
           package_data = {
-              # Include the README so doctests can be run.
-              # TODO: is there a better way to include the README?
-              'pystache': [
-                  '../README.rst',
-                  '../ext/spec/specs/*.json',
-                  '../ext/spec/specs/*.yml',
-              ],
               # Include template files so tests can be run.
-              'examples': template_files,
               'pystache.tests.data': template_files,
               'pystache.tests.data.locator': template_files,
+              'pystache.tests.examples': template_files,
           },
           test_suite='pystache.tests',
           entry_points = {
-            'console_scripts': ['pystache=pystache.commands.render:main'],
+            'console_scripts': [
+                'pystache=pystache.commands.render:main',
+                'pystache-test=pystache.commands.test:main',
+            ],
           },
           classifiers = CLASSIFIERS,
           **extra

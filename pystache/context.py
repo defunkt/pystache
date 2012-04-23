@@ -13,6 +13,10 @@ _BUILTIN_MODULE = type(0).__module__
 # not being found on lookup.  This lets us distinguish between the case
 # of a key's value being None with the case of a key not being found --
 # without having to rely on exceptions (e.g. KeyError) for flow control.
+#
+# TODO: eliminate the need for a private global variable, e.g. by using the
+#   preferred Python approach of "easier to ask for forgiveness than permission":
+#     http://docs.python.org/glossary.html#term-eafp
 class NotFound(object):
     pass
 _NOT_FOUND = NotFound()

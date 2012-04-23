@@ -37,6 +37,10 @@ Python's json_ module was added in Python 2.6.  Moreover, we require an
 earlier version of simplejson for Python 2.4 since simplejson stopped
 officially supporting Python 2.4 with version 2.1.0.
 
+An earlier version of simplejson can be installed manually, as follows: ::
+
+    pip install 'simplejson<2.1.0'
+
 
 Install It
 ==========
@@ -66,7 +70,7 @@ Here's your view class (in examples/readme.py)::
 
 Like so::
 
-    >>> from examples.readme import SayHello
+    >>> from pystache.tests.examples.readme import SayHello
     >>> hello = SayHello()
 
 Then your template, say_hello.mustache::
@@ -134,43 +138,33 @@ default to values set in Pystache's ``defaults`` module.
 Test It
 =======
 
-Use tox_ to test Pystache with multiple versions of Python all at once! ::
+From an install-- ::
+
+    pystache-test
+
+From a source distribution-- ::
+
+    python test_pystache.py
+
+To test Pystache source under multiple versions of Python all at once, you
+can use tox_: ::
 
     pip install tox
     tox
 
-If you do not have all Python versions listed in ``tox.in``, then
+If you do not have all Python versions listed in ``tox.ini``, then
 
     tox -e py26,py27  # for example
 
-To include tests from the Mustache spec in your test runs: ::
+The source distribution tests also include doctests and tests from the
+Mustache spec.  To include tests from the Mustache spec in your test runs: ::
 
     git submodule init
     git submodule update
 
-You can also test Pystache without tox (but with only a single version of
-Python at a time), as below.  To do this, install Distribute_ ::
-
-    pip install distribute
-
-
-Python 2.7 and Later
---------------------
-
-Then run Distribute's test_: ::
-
-    python setup.py test
-
-This runs 2to3_ when using Python 3.
-
-
-Python 2.6 and Earlier
-----------------------
-
-For Python 2.6 and earlier, use nose_ instead of ``test``: ::
-
-    pip install nose
-    python setup.py nosetests
+To test a source distribution of Pystache with Python 3.x, you must use tox.
+This is because the raw source is not Python 3 compatible and must be first
+be run through 2to3_.
 
 
 Mailing List

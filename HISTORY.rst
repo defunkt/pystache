@@ -4,9 +4,10 @@ History
 0.5.1 (TBD)
 -----------
 
-* Added support for Python 3.2 (following conversion with 2to3_).
-* Test runner now supports both yaml and json forms of Mustache spec.
+* Added support for Python 3.1 and 3.2.
 * Added tox support to test multiple Python versions.
+* Test harness now supports both YAML and JSON forms of Mustache spec.
+* Test harness no longer requires nose.
 
 0.5.0 (2012-04-03)
 ------------------

@@ -19,10 +19,8 @@ from pystache import TemplateSpec
 from pystache.locator import Locator
 from pystache.loader import Loader
 from pystache.specloader import SpecLoader
-from pystache.tests.common import DATA_DIR
-from pystache.tests.common import EXAMPLES_DIR
-from pystache.tests.common import AssertIsMixin
-from pystache.tests.common import AssertStringMixin
+from pystache.tests.common import DATA_DIR, EXAMPLES_DIR
+from pystache.tests.common import AssertIsMixin, AssertStringMixin
 from pystache.tests.data.views import SampleView
 from pystache.tests.data.views import NonAscii
 
@@ -47,7 +45,7 @@ class ViewTestCase(unittest.TestCase, AssertStringMixin):
         self.assertRaises(IOError, renderer.render, view)
 
         # TODO: change this test to remove the following brittle line.
-        view.template_rel_directory = "../../examples"
+        view.template_rel_directory = "examples"
         actual = renderer.render(view)
         self.assertEqual(actual, "No tags...")
 
@@ -358,6 +356,13 @@ class TemplateSpecTests(unittest.TestCase):
         view.template_extension = 'txt'
         self._assert_template_location(view, (None, 'sample_view.txt'))
 
+    def _assert_paths(self, actual, expected):
+        """
+        Assert that two paths are the same.
+
+        """
+        self.assertEqual(actual, expected)
+
     def test_find__with_directory(self):
         """
         Test _find() with a view that has a directory specified.
@@ -370,9 +375,9 @@ class TemplateSpecTests(unittest.TestCase):
         self.assertTrue(loader._find_relative(view)[0] is not None)
 
         actual = loader._find(view)
-        expected = os.path.abspath(os.path.join(DATA_DIR, 'foo/bar.txt'))
+        expected = os.path.join(DATA_DIR, 'foo/bar.txt')
 
-        self.assertEqual(actual, expected)
+        self._assert_paths(actual, expected)
 
     def test_find__without_directory(self):
         """
@@ -385,9 +390,9 @@ class TemplateSpecTests(unittest.TestCase):
         self.assertTrue(loader._find_relative(view)[0] is None)
 
         actual = loader._find(view)
-        expected = os.path.abspath(os.path.join(DATA_DIR, 'sample_view.mustache'))
+        expected = os.path.join(DATA_DIR, 'sample_view.mustache')
 
-        self.assertEqual(actual, expected)
+        self._assert_paths(actual, expected)
 
     def _assert_get_template(self, custom, expected):
         loader = self._make_loader()

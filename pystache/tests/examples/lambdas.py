@@ -1,3 +1,9 @@
+
+"""
+TODO: add a docstring.
+
+"""
+
 from pystache import TemplateSpec
 
 def rot(s, n=13):

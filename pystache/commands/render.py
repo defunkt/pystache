@@ -13,7 +13,16 @@ try:
 except:
     # The json module is new in Python 2.6, whereas simplejson is
     # compatible with earlier versions.
-    import simplejson as json
+    try:
+        import simplejson as json
+    except ImportError:
+        # Raise an error with a type different from ImportError as a hack around
+        # this issue:
+        #   http://bugs.python.org/issue7559
+        from sys import exc_info
+        ex_type, ex_value, tb = exc_info()
+        new_ex = Exception("%s: %s" % (ex_type.__name__, ex_value))
+        raise new_ex.__class__, new_ex, tb
 
 # The optparse module is deprecated in Python 2.7 in favor of argparse.
 # However, argparse is not available in Python 2.6 and earlier.
@@ -54,7 +63,12 @@ def parse_args(sys_argv, usage):
     return template, context
 
 
-def main(sys_argv):
+# TODO: verify whether the setup() method's entry_points argument
+# supports passing arguments to main:
+#
+#     http://packages.python.org/distribute/setuptools.html#automatic-script-creation
+#
+def main(sys_argv=sys.argv):
     template, context = parse_args(sys_argv, USAGE)
 
     if template.endswith('.mustache'):
@@ -77,4 +91,4 @@ def main(sys_argv):
 
 
 if __name__=='__main__':
-    main(sys.argv)
+    main()

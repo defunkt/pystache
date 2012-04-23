@@ -1,3 +1,9 @@
+
+"""
+TODO: add a docstring.
+
+"""
+
 class DoubleSection(object):
 
     def t(self):
