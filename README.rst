@@ -146,8 +146,8 @@ From a source distribution-- ::
 
     python test_pystache.py
 
-From source you can even test Pystache under several versions of Python
-with a single command (using tox_)! ::
+To test Pystache source under multiple versions of Python all at once, you
+can use tox_: ::
 
     pip install tox
     tox
@@ -162,9 +162,9 @@ Mustache spec.  To include tests from the Mustache spec in your test runs: ::
     git submodule init
     git submodule update
 
-To test Pystache under Python 3.x from a source distribution, you must
-use tox.  This is because the source is Python 2 and must be first be
-converted with 2to3_.
+To test a source distribution of Pystache with Python 3.x, you must use tox.
+This is because the raw source is not Python 3 compatible and must be first
+be run through 2to3_.
 
 
 Mailing List
