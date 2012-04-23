@@ -138,24 +138,29 @@ default to values set in Pystache's ``defaults`` module.
 Test It
 =======
 
-Use tox_ to test Pystache with multiple versions of Python all at once! ::
+From an install-- ::
+
+    pystache-test
+
+From a source distribution-- ::
+
+    python test_pystache.py
+
+You can also use tox_ to test Pystache under multiple versions of Python
+using a single command! ::
 
     pip install tox
     tox
 
-If you do not have all Python versions listed in ``tox.in``, then
+If you do not have all Python versions listed in ``tox.ini``, then
 
     tox -e py26,py27  # for example
 
-To include tests from the Mustache spec in your test runs: ::
+The source distribution tests also include doctests and tests from the
+Mustache spec.  To include tests from the Mustache spec in your test runs: ::
 
     git submodule init
     git submodule update
-
-You can also test Pystache without tox (but with only a single version of
-Python at a time), as below.  To do this, install Distribute_ ::
-
-    pip install distribute
 
 
 Python 2.7 and Later
