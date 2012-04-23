@@ -7,3 +7,4 @@ TODO
 * Make sure doctest text files can be converted for Python 3 when using tox.
 * Make sure command parsing to pystache-test doesn't break with Python 2.4 and earlier.
 * Combine pystache-test with the main command.
+* Add a unittest that pystache.__version__ matches the version in setup.py.
