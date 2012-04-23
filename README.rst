@@ -152,7 +152,7 @@ can use tox_: ::
     pip install tox
     tox
 
-If you do not have all Python versions listed in ``tox.ini``, then
+If you do not have all Python versions listed in ``tox.ini``-- ::
 
     tox -e py26,py27  # for example
 
