@@ -162,9 +162,9 @@ Mustache spec.  To include tests from the Mustache spec in your test runs: ::
     git submodule init
     git submodule update
 
-To test a source distribution of Pystache with Python 3.x, you must use tox.
-This is because the raw source is not Python 3 compatible and must be first
-be run through 2to3_.
+To test Pystache from a source distribution with Python 3.x, you must use tox.
+This is because the raw source is not Python 3 compatible and must first be
+run through 2to3_.
 
 
 Mailing List
