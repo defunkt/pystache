@@ -1,8 +1,10 @@
 *.pyc
-.tox
-*.temp2to3.rst
 .DS_Store
-# TODO: are comments allowed in .gitignore files?
+# Tox support.  See: http://pypi.python.org/pypi/tox
+.tox
+# Our tox runs convert the doctests in *.rst files to Python 3 prior to
+# running tests.  Ignore these temporary files.
+*.temp2to3.rst
 # TextMate project file
 *.tmproj
 # Distribution-related folders and files.
