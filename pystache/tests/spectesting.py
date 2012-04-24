@@ -61,6 +61,9 @@ def get_spec_tests(spec_test_dir):
     Return a list of unittest.TestCase instances.
 
     """
+    # TODO: use logging module instead.
+    print "pystache: spec tests: using %s" % _get_parser_info()
+
     cases = []
 
     # Make this absolute for easier diagnosis in case of error.
@@ -88,6 +91,10 @@ def get_spec_tests(spec_test_dir):
     cases.append(case)
 
     return cases
+
+
+def _get_parser_info():
+    return "%s (version %s)" % (parser.__name__, parser.__version__)
 
 
 def _read_spec_tests(path):
@@ -231,8 +238,9 @@ class SpecTestBase(unittest.TestCase, AssertStringMixin):
         def escape(s):
             return s.replace("%", "%%")
 
+        parser_info = _get_parser_info()
         subs = [repr(test_name), description, os.path.abspath(file_path),
-                template, repr(context), parser.__version__, str(parser)]
+                template, repr(context), parser_info]
         subs = tuple([escape(sub) for sub in subs])
         # We include the parsing module version info to help with troubleshooting
         # yaml/json/simplejson issues.
@@ -246,7 +254,7 @@ class SpecTestBase(unittest.TestCase, AssertStringMixin):
 
   %%s
 
-  (using version %s of %s)
+  [using %s]
   """ % subs
 
         self.assertString(actual, expected, format=message)

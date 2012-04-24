@@ -52,10 +52,11 @@ else:
     setup = dist.setup
 
 # TODO: use the logging module instead of printing.
-print("Using: version %s of %s" % (repr(dist.__version__), repr(dist)))
+# TODO: include the following in a verbose mode.
+# print("Using: version %s of %s" % (repr(dist.__version__), repr(dist)))
 
 
-VERSION = '0.5.1-alpha'  # Also change in pystache/init.py.
+VERSION = '0.5.1-alpha'  # Also change in pystache/__init__.py.
 
 HISTORY_PATH = 'HISTORY.rst'
 LICENSE_PATH = 'LICENSE'
@@ -134,7 +135,6 @@ else:
     extra = {
         # Causes 2to3 to be run during the build step.
         'use_2to3': True,
-        'convert_2to3_doctests': [README_PATH],
     }
 
 # We use the package simplejson for older Python versions since Python
@@ -151,8 +151,6 @@ if py_version < (2, 5):
     requires.append('simplejson<2.1')
 elif py_version < (2, 6):
     requires.append('simplejson')
-else:
-    requires.append('pyyaml')
 
 INSTALL_REQUIRES = requires
 
@@ -188,7 +186,6 @@ def main(sys_argv):
               'pystache.tests.data.locator': template_files,
               'pystache.tests.examples': template_files,
           },
-          test_suite='pystache.tests',
           entry_points = {
             'console_scripts': [
                 'pystache=pystache.commands.render:main',

@@ -9,15 +9,16 @@ This module is for our test console script.
 
 import os
 import sys
+import unittest
 from unittest import TestProgram
 
+import pystache
 from pystache.tests.common import PACKAGE_DIR, PROJECT_DIR, SPEC_TEST_DIR, UNITTEST_FILE_PREFIX
 from pystache.tests.common import get_module_names
 from pystache.tests.doctesting import get_doctests
 from pystache.tests.spectesting import get_spec_tests
 
 
-# TODO: enhance this function to create spec-test tests.
 def run_tests(sys_argv):
     """
     Run all tests in the project.
@@ -46,6 +47,8 @@ def run_tests(sys_argv):
         # auto-detect all unit tests.
         module_names = _discover_test_modules(PACKAGE_DIR)
         sys_argv.extend(module_names)
+        # Add the current module for unit tests contained here.
+        sys_argv.append(__name__)
 
     _PystacheTestProgram._text_doctest_dir = project_dir
     _PystacheTestProgram._spec_test_dir = spec_test_dir
@@ -76,6 +79,19 @@ def _discover_test_modules(package_dir):
         raise Exception("No unit-test modules found--\n  in %s" % package_dir)
 
     return names
+
+
+class SetupTests(unittest.TestCase):
+
+    """Tests about setup.py."""
+
+    def test_version(self):
+        """
+        Test that setup.py's version matches the package's version.
+
+        """
+        from setup import VERSION
+        self.assertEqual(VERSION, pystache.__version__)
 
 
 # The function unittest.main() is an alias for unittest.TestProgram's

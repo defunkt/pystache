@@ -25,19 +25,20 @@ Requirements
 
 Pystache is tested with the following versions of Python:
 
-* Python 2.4 (requires simplejson version 2.0.9 or earlier)
-* Python 2.5 (requires simplejson)
+* Python 2.4 (requires `simplejson version 2.0.9`_ or earlier)
+* Python 2.5 (requires simplejson_)
 * Python 2.6
 * Python 2.7
+* Python 3.1
 * Python 3.2
 
 JSON support is needed only for the command-line interface and to run the
-spec tests.  We require simplejson_ for earlier versions of Python since
-Python's json_ module was added in Python 2.6.  Moreover, we require an
-earlier version of simplejson for Python 2.4 since simplejson stopped
-officially supporting Python 2.4 with version 2.1.0.
+spec tests.  We require simplejson for earlier versions of Python since
+Python's json_ module was added in Python 2.6.
 
-An earlier version of simplejson can be installed manually, as follows: ::
+For Python 2.4 we require an earlier version of simplejson since simplejson
+stopped officially supporting Python 2.4 in simplejson version 2.1.0.
+Earlier versions of simplejson can be installed manually, as follows: ::
 
     pip install 'simplejson<2.1.0'
 
@@ -162,9 +163,11 @@ Mustache spec.  To include tests from the Mustache spec in your test runs: ::
     git submodule init
     git submodule update
 
+The test harness parses the spec's yaml files if PyYAML_ is present.
+Otherwise, it parses the json files.
+
 To test Pystache from a source distribution with Python 3.x, you must use tox.
-This is because the raw source is not Python 3 compatible and must first be
-run through 2to3_.
+This is because the source code must first be run through 2to3_.
 
 
 Mailing List
@@ -183,9 +186,9 @@ Author
 
 ::
 
-    >>> context = { 'author': 'Chris Wanstrath', 'email': 'chris@ozmm.org' }
-    >>> print pystache.render("{{author}} :: {{email}}", context)
-    Chris Wanstrath :: chris@ozmm.org
+    >>> context = { 'author': 'Chris Wanstrath', 'maintainer': 'Chris Jerdonek' }
+    >>> print pystache.render("{{author}} :: {{maintainer}}", context)
+    Chris Wanstrath :: Chris Jerdonek
 
 
 .. _2to3: http://docs.python.org/library/2to3.html
@@ -202,8 +205,10 @@ Author
 .. _only unicode strings: http://docs.python.org/howto/unicode.html#tips-for-writing-unicode-aware-programs
 .. _PyPI: http://pypi.python.org/pypi/pystache
 .. _Pystache: https://github.com/defunkt/pystache
+.. _PyYAML: http://pypi.python.org/pypi/PyYAML
 .. _semantically versioned: http://semver.org
 .. _simplejson: http://pypi.python.org/pypi/simplejson/
+.. _simplejson version 2.0.9: http://pypi.python.org/pypi/simplejson/2.0.9
 .. _test: http://packages.python.org/distribute/setuptools.html#test
 .. _tox: http://pypi.python.org/pypi/tox
 .. _version 1.0.3: https://github.com/mustache/spec/tree/48c933b0bb780875acbfd15816297e263c53d6f7
