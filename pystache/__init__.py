@@ -1,2 +1,13 @@
+
+"""
+TODO: add a docstring.
+
+"""
+
 # We keep all initialization code in a separate module.
-from init import *
+
+from pystache.init import render, Renderer, TemplateSpec
+
+__all__ = ['render', 'Renderer', 'TemplateSpec']
+
+__version__ = '0.5.1-rc'  # Also change in setup.py.

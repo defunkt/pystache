@@ -1,7 +1,11 @@
 # coding: utf-8
 
 """
-This module supports customized (aka special or specified) template loading.
+Provides a class to customize template information on a per-view basis.
+
+To customize template properties for a particular view, create that view
+from a class that subclasses TemplateSpec.  The "Spec" in TemplateSpec
+stands for template information that is "special" or "specified".
 
 """
 

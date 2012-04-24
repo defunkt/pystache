@@ -8,18 +8,24 @@ This module provides a Loader class for locating and reading templates.
 import os
 import sys
 
+from pystache import common
 from pystache import defaults
 from pystache.locator import Locator
 
 
-def _to_unicode(s, encoding=None):
-    """
-    Raises a TypeError exception if the given string is already unicode.
+# We make a function so that the current defaults take effect.
+# TODO: revisit whether this is necessary.
 
-    """
-    if encoding is None:
-        encoding = defaults.STRING_ENCODING
-    return unicode(s, encoding, defaults.DECODE_ERRORS)
+def _make_to_unicode():
+    def to_unicode(s, encoding=None):
+        """
+        Raises a TypeError exception if the given string is already unicode.
+
+        """
+        if encoding is None:
+            encoding = defaults.STRING_ENCODING
+        return unicode(s, encoding, defaults.DECODE_ERRORS)
+    return to_unicode
 
 
 class Loader(object):
@@ -67,7 +73,7 @@ class Loader(object):
             search_dirs = defaults.SEARCH_DIRS
 
         if to_unicode is None:
-            to_unicode = _to_unicode
+            to_unicode = _make_to_unicode()
 
         self.extension = extension
         self.file_encoding = file_encoding
@@ -106,17 +112,12 @@ class Loader(object):
         Read the template at the given path, and return it as a unicode string.
 
         """
-        # We avoid use of the with keyword for Python 2.4 support.
-        f = open(path, 'r')
-        try:
-            text = f.read()
-        finally:
-            f.close()
+        b = common.read(path)
 
         if encoding is None:
             encoding = self.file_encoding
 
-        return self.unicode(text, encoding)
+        return self.unicode(b, encoding)
 
     # TODO: unit-test this method.
     def load_name(self, name):
