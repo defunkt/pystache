@@ -15,7 +15,16 @@ in Python 2.4:
 
 """
 
-from pystache.commands.test import main
+import sys
+
+from pystache.commands import test
+from pystache.tests.main import FROM_SOURCE_OPTION
+
+
+def main(sys_argv=sys.argv):
+    sys.argv.insert(1, FROM_SOURCE_OPTION)
+    test.main()
+
 
 if __name__=='__main__':
     main()

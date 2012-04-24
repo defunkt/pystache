@@ -2,6 +2,7 @@ include LICENSE
 include HISTORY.rst
 include README.rst
 include tox.ini
+include test_pystache.py
 # You cannot use package_data, for example, to include data files in a
 # source distribution when using Distribute.
 recursive-include pystache/tests *.mustache *.txt

@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-This script supports distributing Pystache and testing it from a source distribution.
+This script supports publishing Pystache to PyPI.
 
 Below are instructions to pystache maintainers on how to push a new
 version of pystache to PyPI--

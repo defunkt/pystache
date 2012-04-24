@@ -19,6 +19,11 @@ from pystache.tests.doctesting import get_doctests
 from pystache.tests.spectesting import get_spec_tests
 
 
+# If this command option is present, then the spec test and doctest directories
+# will be inserted if not provided.
+FROM_SOURCE_OPTION = "--from-source"
+
+
 def run_tests(sys_argv):
     """
     Run all tests in the project.
@@ -28,27 +33,41 @@ def run_tests(sys_argv):
       sys_argv: a reference to sys.argv.
 
     """
-    try:
-        # TODO: use optparse command options instead.
-        project_dir = sys_argv[1]
+    should_source_exist = False
+    spec_test_dir = None
+    project_dir = None
+
+    if len(sys_argv) > 1 and sys_argv[1] == FROM_SOURCE_OPTION:
+        should_source_exist = True
         sys_argv.pop(1)
-    except IndexError:
-        project_dir = PROJECT_DIR
+
+    # TODO: use logging module
+    print "pystache: running tests: expecting source: %s" % should_source_exist
 
     try:
         # TODO: use optparse command options instead.
         spec_test_dir = sys_argv[1]
         sys_argv.pop(1)
     except IndexError:
-        spec_test_dir = SPEC_TEST_DIR
+        if should_source_exist:
+            spec_test_dir = SPEC_TEST_DIR
+
+    try:
+        # TODO: use optparse command options instead.
+        project_dir = sys_argv[1]
+        sys_argv.pop(1)
+    except IndexError:
+        if should_source_exist:
+            project_dir = PROJECT_DIR
 
     if len(sys_argv) <= 1 or sys_argv[-1].startswith("-"):
         # Then no explicit module or test names were provided, so
         # auto-detect all unit tests.
         module_names = _discover_test_modules(PACKAGE_DIR)
         sys_argv.extend(module_names)
-        # Add the current module for unit tests contained here.
-        sys_argv.append(__name__)
+        if project_dir is not None:
+            # Add the current module for unit tests contained here.
+            sys_argv.append(__name__)
 
     _PystacheTestProgram._text_doctest_dir = project_dir
     _PystacheTestProgram._spec_test_dir = spec_test_dir
@@ -123,10 +142,12 @@ class _PystacheTestProgram(TestProgram):
         #   http://docs.python.org/library/unittest.html#unittest.TestSuite
         tests = self.test
 
-        doctest_suites = get_doctests(self._text_doctest_dir)
-        tests.addTests(doctest_suites)
+        if self._text_doctest_dir is not None:
+            doctest_suites = get_doctests(self._text_doctest_dir)
+            tests.addTests(doctest_suites)
 
-        spec_testcases = get_spec_tests(self._spec_test_dir)
-        tests.addTests(spec_testcases)
+        if self._spec_test_dir is not None:
+            spec_testcases = get_spec_tests(self._spec_test_dir)
+            tests.addTests(spec_testcases)
 
         TestProgram.runTests(self)
