@@ -211,7 +211,6 @@ Author
 .. _Mustache: http://mustache.github.com/
 .. _Mustache spec: https://github.com/mustache/spec
 .. _mustache(5): http://mustache.github.com/mustache.5.html
-.. _nose: http://readthedocs.org/docs/nose/en/latest/
 .. _only unicode strings: http://docs.python.org/howto/unicode.html#tips-for-writing-unicode-aware-programs
 .. _PyPI: http://pypi.python.org/pypi/pystache
 .. _Pystache: https://github.com/defunkt/pystache
