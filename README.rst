@@ -164,7 +164,9 @@ Mustache spec.  To include tests from the Mustache spec in your test runs: ::
     git submodule update
 
 The test harness parses the spec's (more human-readable) yaml files if PyYAML_
-is present.  Otherwise, it parses the json files.
+is present.  Otherwise, it parses the json files.  To install PyYAML-- ::
+
+    pip install pyyaml
 
 To test Pystache from a source distribution with Python 3.x, you must use tox.
 This is because the source code must first be run through 2to3_.
