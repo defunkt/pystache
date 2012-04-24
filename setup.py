@@ -120,9 +120,6 @@ if sys.argv[-1] == 'publish':
     publish()
     sys.exit()
 
-long_description = make_long_description()
-template_files = ['*.mustache', '*.txt']
-
 # We follow the guidance here for compatibility with using setuptools instead
 # of Distribute under Python 2 (on the subject of new, unrecognized keyword
 # arguments to setup()):
@@ -168,6 +165,9 @@ PACKAGES = [
 
 
 def main(sys_argv):
+
+    long_description = make_long_description()
+    template_files = ['*.mustache', '*.txt']
 
     setup(name='pystache',
           version=VERSION,

@@ -52,6 +52,7 @@ def run_tests(sys_argv):
 
     _PystacheTestProgram._text_doctest_dir = project_dir
     _PystacheTestProgram._spec_test_dir = spec_test_dir
+    SetupTests.project_dir = project_dir
 
     # We pass None for the module because we do not want the unittest
     # module to resolve module names relative to a given module.
@@ -85,13 +86,22 @@ class SetupTests(unittest.TestCase):
 
     """Tests about setup.py."""
 
+    project_dir = None
+
     def test_version(self):
         """
         Test that setup.py's version matches the package's version.
 
         """
-        from setup import VERSION
-        self.assertEqual(VERSION, pystache.__version__)
+        original_path = list(sys.path)
+
+        sys.path.insert(0, self.project_dir)
+
+        try:
+            from setup import VERSION
+            self.assertEqual(VERSION, pystache.__version__)
+        finally:
+            sys.path = original_path
 
 
 # The function unittest.main() is an alias for unittest.TestProgram's
