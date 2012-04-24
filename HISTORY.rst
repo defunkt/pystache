@@ -1,11 +1,13 @@
 History
 =======
 
-0.5.1 (TBD)
+0.5.1 (2012-04-03)
 -----------
 
 * Added support for Python 3.1 and 3.2.
 * Added tox support to test multiple Python versions.
+* Added test script entry point: pystache-test.
+* Added __version__ package attribute.
 * Test harness now supports both YAML and JSON forms of Mustache spec.
 * Test harness no longer requires nose.
 
