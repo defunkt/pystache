@@ -25,7 +25,7 @@ Requirements
 
 Pystache is tested with the following versions of Python:
 
-* Python 2.4 (requires `simplejson version 2.0.9`_ or earlier)
+* Python 2.4 (requires simplejson `version 2.0.9`_ or earlier)
 * Python 2.5 (requires simplejson_)
 * Python 2.6
 * Python 2.7
@@ -163,8 +163,8 @@ Mustache spec.  To include tests from the Mustache spec in your test runs: ::
     git submodule init
     git submodule update
 
-The test harness parses the spec's yaml files if PyYAML_ is present.
-Otherwise, it parses the json files.
+The test harness parses the spec's (more human-readable) yaml files if PyYAML_
+is present.  Otherwise, it parses the json files.
 
 To test Pystache from a source distribution with Python 3.x, you must use tox.
 This is because the source code must first be run through 2to3_.
@@ -187,8 +187,9 @@ Author
 ::
 
     >>> context = { 'author': 'Chris Wanstrath', 'maintainer': 'Chris Jerdonek' }
-    >>> print pystache.render("{{author}} :: {{maintainer}}", context)
-    Chris Wanstrath :: Chris Jerdonek
+    >>> print pystache.render("Author: {{author}}\nMaintainer: {{maintainer}}", context)
+    Author: Chris Wanstrath
+    Maintainer: Chris Jerdonek
 
 
 .. _2to3: http://docs.python.org/library/2to3.html
@@ -208,7 +209,7 @@ Author
 .. _PyYAML: http://pypi.python.org/pypi/PyYAML
 .. _semantically versioned: http://semver.org
 .. _simplejson: http://pypi.python.org/pypi/simplejson/
-.. _simplejson version 2.0.9: http://pypi.python.org/pypi/simplejson/2.0.9
 .. _test: http://packages.python.org/distribute/setuptools.html#test
 .. _tox: http://pypi.python.org/pypi/tox
 .. _version 1.0.3: https://github.com/mustache/spec/tree/48c933b0bb780875acbfd15816297e263c53d6f7
+.. _version 2.0.9: http://pypi.python.org/pypi/simplejson/2.0.9
