@@ -74,7 +74,7 @@ Like so::
     >>> from pystache.tests.examples.readme import SayHello
     >>> hello = SayHello()
 
-Then your template, say_hello.mustache::
+Then your template, say_hello.mustache (by default in the same directory)::
 
     Hello, {{to}}!
 
@@ -83,6 +83,13 @@ Pull it together::
     >>> renderer = pystache.Renderer()
     >>> print renderer.render(hello)
     Hello, Pizza!
+
+For greater control over rendering (e.g. to specify a custom template directory),
+use the ``Renderer`` class directly.  One can pass attributes to the class's
+constructor or set them on an instance.
+To customize template loading on a per-view basis, subclass ``TemplateSpec``.
+See the docstrings of the Renderer_ class and TemplateSpec_ class for
+more information.
 
 
 Python 3
@@ -209,8 +216,10 @@ Author
 .. _PyPI: http://pypi.python.org/pypi/pystache
 .. _Pystache: https://github.com/defunkt/pystache
 .. _PyYAML: http://pypi.python.org/pypi/PyYAML
+.. _Renderer: https://github.com/defunkt/pystache/blob/master/pystache/renderer.py
 .. _semantically versioned: http://semver.org
 .. _simplejson: http://pypi.python.org/pypi/simplejson/
+.. _TemplateSpec: https://github.com/defunkt/pystache/blob/master/pystache/template_spec.py
 .. _test: http://packages.python.org/distribute/setuptools.html#test
 .. _tox: http://pypi.python.org/pypi/tox
 .. _version 1.0.3: https://github.com/mustache/spec/tree/48c933b0bb780875acbfd15816297e263c53d6f7
