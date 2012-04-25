@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-Defines a Context class to represent mustache(5)'s notion of context.
+Exposes a context class and functions to retrieve names from context.
 
 """
 
@@ -58,6 +58,25 @@ def _get_value(item, key):
             return attr
 
     return _NOT_FOUND
+
+
+# TODO: add some unit tests for this.
+def resolve(context, name):
+    """
+    Resolve the given name against the given context stack.
+
+    This function follows the rules outlined in the section of the spec
+    regarding tag interpolation.
+
+    This function does not coerce the return value to a string.
+
+    """
+    if name == '.':
+        return context.top()
+
+    # The spec says that if the name fails resolution, the result should be
+    # considered falsey, and should interpolate as the empty string.
+    return context.get(name, '')
 
 
 class Context(object):

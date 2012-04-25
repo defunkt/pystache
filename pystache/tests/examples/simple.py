@@ -12,4 +12,4 @@ class Simple(TemplateSpec):
         return "pizza"
 
     def blank(self):
-        pass
+        return ''

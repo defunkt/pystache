@@ -7,6 +7,7 @@ Defines a class responsible for rendering logic.
 
 import re
 
+from pystache.context import resolve
 from pystache.parser import Parser
 
 
@@ -68,16 +69,7 @@ class RenderEngine(object):
         Get a value from the given context as a basestring instance.
 
         """
-        val = context.get(tag_name)
-
-        # We use "==" rather than "is" to compare integers, as using "is"
-        # relies on an implementation detail of CPython.  The test about
-        # rendering zeroes failed while using PyPy when using "is".
-        # See issue #34: https://github.com/defunkt/pystache/issues/34
-        if not val and val != 0:
-            if tag_name != '.':
-                return ''
-            val = context.top()
+        val = resolve(context, tag_name)
 
         if callable(val):
             # According to the spec:
@@ -142,6 +134,8 @@ class RenderEngine(object):
             Returns a string with type unicode.
 
             """
+            # TODO: is there a bug because we are not using the same
+            #   logic as in _get_string_value()?
             data = context.get(name)
             if data:
                 return u''

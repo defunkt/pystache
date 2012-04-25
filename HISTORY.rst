@@ -1,6 +1,11 @@
 History
 =======
 
+0.6.0 (TBD)
+-----------
+
+* Falsey values now coerced to a string using str().
+
 0.5.1 (2012-04-03)
 -----------
 
