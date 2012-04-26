@@ -6,8 +6,8 @@ History
 
 * Falsey values now coerced to strings using str().
 
-0.5.1 (2012-04-03)
------------
+0.5.1 (2012-04-24)
+------------------
 
 * Added support for Python 3.1 and 3.2.
 * Added tox support to test multiple Python versions.
