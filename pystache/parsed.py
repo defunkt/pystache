@@ -17,7 +17,7 @@ class ParsedTemplate(object):
           parse_tree: a list, each element of which is either--
 
             (1) a unicode string, or
-            (2) a "rendering" callable that accepts a Context instance
+            (2) a "rendering" callable that accepts a ContextStack instance
                 and returns a unicode string.
 
         The possible rendering callables are the return values of the

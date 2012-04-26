@@ -7,7 +7,7 @@ Unit tests of renderengine.py.
 
 import unittest
 
-from pystache.context import Context
+from pystache.context import ContextStack
 from pystache import defaults
 from pystache.parser import ParsingError
 from pystache.renderengine import RenderEngine
@@ -83,7 +83,7 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         if partials is not None:
             engine.load_partial = lambda key: unicode(partials[key])
 
-        context = Context(*context)
+        context = ContextStack(*context)
 
         actual = engine.render(template, context)
 

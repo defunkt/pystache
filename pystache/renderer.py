@@ -8,7 +8,7 @@ This module provides a Renderer class to render templates.
 import sys
 
 from pystache import defaults
-from pystache.context import Context
+from pystache.context import ContextStack
 from pystache.loader import Loader
 from pystache.renderengine import RenderEngine
 from pystache.specloader import SpecLoader
@@ -277,7 +277,7 @@ class Renderer(object):
         # RenderEngine.render() requires that the template string be unicode.
         template = self._to_unicode_hard(template)
 
-        context = Context.create(*context, **kwargs)
+        context = ContextStack.create(*context, **kwargs)
         self._context = context
 
         engine = self._make_render_engine()
@@ -338,7 +338,7 @@ class Renderer(object):
             uses the passed object as the first element of the context stack
             when rendering.
 
-          *context: zero or more dictionaries, Context instances, or objects
+          *context: zero or more dictionaries, ContextStack instances, or objects
             with which to populate the initial context stack.  None
             arguments are skipped.  Items in the *context list are added to
             the context stack in order so that later items in the argument

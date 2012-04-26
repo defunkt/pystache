@@ -10,7 +10,7 @@ import unittest
 
 from pystache.context import _NOT_FOUND
 from pystache.context import _get_value
-from pystache.context import Context
+from pystache.context import ContextStack
 from pystache.tests.common import AssertIsMixin
 
 class SimpleObject(object):
@@ -204,10 +204,10 @@ class GetValueTests(unittest.TestCase, AssertIsMixin):
         self.assertNotFound(item2, 'pop')
 
 
-class ContextTests(unittest.TestCase, AssertIsMixin):
+class ContextStackTests(unittest.TestCase, AssertIsMixin):
 
     """
-    Test the Context class.
+    Test the ContextStack class.
 
     """
 
@@ -216,34 +216,34 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
         Check that passing nothing to __init__() raises no exception.
 
         """
-        context = Context()
+        context = ContextStack()
 
     def test_init__many_elements(self):
         """
         Check that passing more than two items to __init__() raises no exception.
 
         """
-        context = Context({}, {}, {})
+        context = ContextStack({}, {}, {})
 
     def test__repr(self):
-        context = Context()
-        self.assertEqual(repr(context), 'Context()')
+        context = ContextStack()
+        self.assertEqual(repr(context), 'ContextStack()')
 
-        context = Context({'foo': 'bar'})
-        self.assertEqual(repr(context), "Context({'foo': 'bar'},)")
+        context = ContextStack({'foo': 'bar'})
+        self.assertEqual(repr(context), "ContextStack({'foo': 'bar'},)")
 
-        context = Context({'foo': 'bar'}, {'abc': 123})
-        self.assertEqual(repr(context), "Context({'foo': 'bar'}, {'abc': 123})")
+        context = ContextStack({'foo': 'bar'}, {'abc': 123})
+        self.assertEqual(repr(context), "ContextStack({'foo': 'bar'}, {'abc': 123})")
 
     def test__str(self):
-        context = Context()
-        self.assertEqual(str(context), 'Context()')
+        context = ContextStack()
+        self.assertEqual(str(context), 'ContextStack()')
 
-        context = Context({'foo': 'bar'})
-        self.assertEqual(str(context), "Context({'foo': 'bar'},)")
+        context = ContextStack({'foo': 'bar'})
+        self.assertEqual(str(context), "ContextStack({'foo': 'bar'},)")
 
-        context = Context({'foo': 'bar'}, {'abc': 123})
-        self.assertEqual(str(context), "Context({'foo': 'bar'}, {'abc': 123})")
+        context = ContextStack({'foo': 'bar'}, {'abc': 123})
+        self.assertEqual(str(context), "ContextStack({'foo': 'bar'}, {'abc': 123})")
 
     ## Test the static create() method.
 
@@ -252,7 +252,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
         Test passing a dictionary.
 
         """
-        context = Context.create({'foo': 'bar'})
+        context = ContextStack.create({'foo': 'bar'})
         self.assertEqual(context.get('foo'), 'bar')
 
     def test_create__none(self):
@@ -260,7 +260,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
         Test passing None.
 
         """
-        context = Context.create({'foo': 'bar'}, None)
+        context = ContextStack.create({'foo': 'bar'}, None)
         self.assertEqual(context.get('foo'), 'bar')
 
     def test_create__object(self):
@@ -270,16 +270,16 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
         """
         class Foo(object):
             foo = 'bar'
-        context = Context.create(Foo())
+        context = ContextStack.create(Foo())
         self.assertEqual(context.get('foo'), 'bar')
 
     def test_create__context(self):
         """
-        Test passing a Context instance.
+        Test passing a ContextStack instance.
 
         """
-        obj = Context({'foo': 'bar'})
-        context = Context.create(obj)
+        obj = ContextStack({'foo': 'bar'})
+        context = ContextStack.create(obj)
         self.assertEqual(context.get('foo'), 'bar')
 
     def test_create__kwarg(self):
@@ -287,7 +287,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
         Test passing a keyword argument.
 
         """
-        context = Context.create(foo='bar')
+        context = ContextStack.create(foo='bar')
         self.assertEqual(context.get('foo'), 'bar')
 
     def test_create__precedence_positional(self):
@@ -295,7 +295,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
         Test precedence of positional arguments.
 
         """
-        context = Context.create({'foo': 'bar'}, {'foo': 'buzz'})
+        context = ContextStack.create({'foo': 'bar'}, {'foo': 'buzz'})
         self.assertEqual(context.get('foo'), 'buzz')
 
     def test_create__precedence_keyword(self):
@@ -303,7 +303,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
         Test precedence of keyword arguments.
 
         """
-        context = Context.create({'foo': 'bar'}, foo='buzz')
+        context = ContextStack.create({'foo': 'bar'}, foo='buzz')
         self.assertEqual(context.get('foo'), 'buzz')
 
     def test_get__key_present(self):
@@ -311,7 +311,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
         Test getting a key.
 
         """
-        context = Context({"foo": "bar"})
+        context = ContextStack({"foo": "bar"})
         self.assertEqual(context.get("foo"), "bar")
 
     def test_get__key_missing(self):
@@ -319,7 +319,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
         Test getting a missing key.
 
         """
-        context = Context()
+        context = ContextStack()
         self.assertTrue(context.get("foo") is None)
 
     def test_get__default(self):
@@ -327,7 +327,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
         Test that get() respects the default value.
 
         """
-        context = Context()
+        context = ContextStack()
         self.assertEqual(context.get("foo", "bar"), "bar")
 
     def test_get__precedence(self):
@@ -335,7 +335,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
         Test that get() respects the order of precedence (later items first).
 
         """
-        context = Context({"foo": "bar"}, {"foo": "buzz"})
+        context = ContextStack({"foo": "bar"}, {"foo": "buzz"})
         self.assertEqual(context.get("foo"), "buzz")
 
     def test_get__fallback(self):
@@ -343,7 +343,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
         Check that first-added stack items are queried on context misses.
 
         """
-        context = Context({"fuzz": "buzz"}, {"foo": "bar"})
+        context = ContextStack({"fuzz": "buzz"}, {"foo": "bar"})
         self.assertEqual(context.get("fuzz"), "buzz")
 
     def test_push(self):
@@ -352,7 +352,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
 
         """
         key = "foo"
-        context = Context({key: "bar"})
+        context = ContextStack({key: "bar"})
         self.assertEqual(context.get(key), "bar")
 
         context.push({key: "buzz"})
@@ -364,7 +364,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
 
         """
         key = "foo"
-        context = Context({key: "bar"}, {key: "buzz"})
+        context = ContextStack({key: "bar"}, {key: "buzz"})
         self.assertEqual(context.get(key), "buzz")
 
         item = context.pop()
@@ -373,7 +373,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
 
     def test_top(self):
         key = "foo"
-        context = Context({key: "bar"}, {key: "buzz"})
+        context = ContextStack({key: "bar"}, {key: "buzz"})
         self.assertEqual(context.get(key), "buzz")
 
         top = context.top()
@@ -383,7 +383,7 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
 
     def test_copy(self):
         key = "foo"
-        original = Context({key: "bar"}, {key: "buzz"})
+        original = ContextStack({key: "bar"}, {key: "buzz"})
         self.assertEqual(original.get(key), "buzz")
 
         new = original.copy()

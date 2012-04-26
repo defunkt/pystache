@@ -215,7 +215,7 @@ class RenderEngine(object):
         Arguments:
 
           template: a template string of type unicode.
-          context: a Context instance.
+          context: a ContextStack instance.
 
         """
         # We keep this type-check as an added check because this method is
@@ -238,7 +238,7 @@ class RenderEngine(object):
           template: a template string of type unicode (but not a proper
             subclass of unicode).
 
-          context: a Context instance.
+          context: a ContextStack instance.
 
         """
         # Be strict but not too strict.  In other words, accept str instead
