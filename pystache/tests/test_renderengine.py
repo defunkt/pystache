@@ -204,6 +204,27 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         context = {'test': '{{#hello}}'}
         self._assert_render(u'{{#hello}}', template, context)
 
+    ## Test interpolation with "falsey" values
+    #
+    # In these test cases, we test the part of the spec that says that
+    # "data should be coerced into a string (and escaped, if appropriate)
+    # before interpolation."  We test this for data that is "falsey."
+
+    def test_interpolation__falsey__zero(self):
+        template = '{{.}}'
+        context = 0
+        self._assert_render(u'0', template, context)
+
+    def test_interpolation__falsey__none(self):
+        template = '{{.}}'
+        context = None
+        self._assert_render(u'None', template, context)
+
+    def test_interpolation__falsey__zero(self):
+        template = '{{.}}'
+        context = False
+        self._assert_render(u'False', template, context)
+
     # Built-in types:
     #
     #   Confirm that we not treat instances of built-in types as objects,
