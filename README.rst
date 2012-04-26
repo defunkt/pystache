@@ -51,7 +51,7 @@ Install It
     pip install pystache
     pystache-test
 
-To install and test from source (e.g. GitHub), see the Develop section.
+To install and test from source (e.g. from GitHub), see the Develop section.
 
 
 Use It
@@ -77,7 +77,8 @@ Like so::
     >>> from pystache.tests.examples.readme import SayHello
     >>> hello = SayHello()
 
-Then your template, say_hello.mustache (by default in the same directory)::
+Then your template, say_hello.mustache (in the same directory by default
+as your class definition)::
 
     Hello, {{to}}!
 
