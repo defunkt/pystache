@@ -61,22 +61,40 @@ def _get_value(item, key):
 
 
 # TODO: add some unit tests for this.
-def resolve(context, name):
+def resolve(context_stack, name):
     """
-    Resolve the given name against the given context stack.
+    Resolve a name against a context stack.
 
     This function follows the rules outlined in the section of the spec
     regarding tag interpolation.
+
+    Arguments:
+
+      context_stack: a ContextStack instance.
 
     This function does not coerce the return value to a string.
 
     """
     if name == '.':
-        return context.top()
+        return context_stack.top()
 
-    # The spec says that if the name fails resolution, the result should be
-    # considered falsey, and should interpolate as the empty string.
-    return context.get(name, '')
+    parts = name.split('.')
+
+    value = context_stack.get(parts[0], _NOT_FOUND)
+
+    for part in parts[1:]:
+        # TODO: use EAFP here instead.
+        #   http://docs.python.org/glossary.html#term-eafp
+        if value is _NOT_FOUND:
+            break
+        value = _get_value(value, part)
+
+    # The spec says that if name resolution fails at any point, the result
+    # should be considered falsey, and should interpolate as the empty string.
+    if value is _NOT_FOUND:
+        return ''
+
+    return value
 
 
 class ContextStack(object):
