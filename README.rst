@@ -23,7 +23,7 @@ Logo: `David Phillips`_
 Requirements
 ============
 
-Pystache is tested with the following versions of Python:
+Pystache is tested with--
 
 * Python 2.4 (requires simplejson `version 2.0.9`_ or earlier)
 * Python 2.5 (requires simplejson_)
@@ -49,6 +49,9 @@ Install It
 ::
 
     pip install pystache
+    pystache-test
+
+To install and test from source (e.g. GitHub), see the Develop section.
 
 
 Use It
@@ -95,9 +98,8 @@ more information.
 Python 3
 ========
 
-As of version 0.5.1, Pystache fully supports Python 3.  There are slight
-differences in behavior between Pystache running under Python 2 and 3,
-as follows:
+Pystache has supported Python 3 since version 0.5.1.  Pystache behaves
+slightly differently between Python 2 and 3, as follows:
 
 * In Python 2, the default html-escape function ``cgi.escape()`` does not
   escape single quotes; whereas in Python 3, the default escape function
@@ -109,14 +111,13 @@ as follows:
   defaults by passing in the encodings explicitly (e.g. to the ``Renderer`` class).
 
 
-Unicode Handling
-================
+Unicode
+=======
 
-This section describes Pystache's handling of unicode (e.g. strings and
-encodings).
+This section describes how Pystache handles unicode, strings, and encodings.
 
-Internally, Pystache uses `only unicode strings`_ (type ``str`` in Python 3 and
-type ``unicode`` in Python 2).  For input, Pystache accepts both unicode strings
+Internally, Pystache uses `only unicode strings`_ (``str`` in Python 3 and
+``unicode`` in Python 2).  For input, Pystache accepts both unicode strings
 and byte strings (``bytes`` in Python 3 and ``str`` in Python 2).  For output,
 Pystache's template rendering methods return only unicode.
 
@@ -143,26 +144,22 @@ attribute can be controlled on a per-view basis by subclassing the
 default to values set in Pystache's ``defaults`` module.
 
 
-Test It
+Develop
 =======
 
-From an install-- ::
-
-    pystache-test
-
-From a source distribution-- ::
+To test from a source distribution (without installing)-- ::
 
     python test_pystache.py
 
-To test Pystache source under multiple versions of Python all at once, you
-can use tox_: ::
+To test Pystache with multiple versions of Python (with a single command!),
+you can use tox_: ::
 
     pip install tox
     tox
 
 If you do not have all Python versions listed in ``tox.ini``-- ::
 
-    tox -e py26,py27  # for example
+    tox -e py26,py32  # for example
 
 The source distribution tests also include doctests and tests from the
 Mustache spec.  To include tests from the Mustache spec in your test runs: ::
@@ -175,23 +172,27 @@ is present.  Otherwise, it parses the json files.  To install PyYAML-- ::
 
     pip install pyyaml
 
-To test Pystache from a source distribution with Python 3.x, you must use tox.
-This is because the source code must first be run through 2to3_.
+**Running Pystache from source with Python 3.**  Pystache is written in
+Python 2 and must be converted with 2to3_ prior to running under Python 3.
+The installation process (and tox) do this conversion automatically.
+
+To ``import pystache`` from a source distribution while using Python 3,
+be sure that you are importing from a directory containing a converted
+version (e.g. from your site-packages directory after manually installing)
+and not from the original source directory.  Otherwise, you will get a
+syntax error.  You can help ensure this by not running the Python IDE
+from the project directory when importing Pystache.
 
 
 Mailing List
 ============
 
-As of November 2011, there's a mailing list, pystache@librelist.com.
-
-Archive: http://librelist.com/browser/pystache/
-
-Note: There's a bit of a delay in seeing the latest emails appear
-in the archive.
+There is a `mailing list`_.  Note that there is a bit of a delay between
+posting a message and seeing it appear in the mailing list archive.
 
 
-Author
-======
+Authors
+=======
 
 ::
 
@@ -208,6 +209,7 @@ Author
 .. _Distribute: http://pypi.python.org/pypi/distribute
 .. _et: http://www.ivan.fomichev.name/2008/05/erlang-template-engine-prototype.html
 .. _json: http://docs.python.org/library/json.html
+.. _mailing list: http://librelist.com/browser/pystache/
 .. _Mustache: http://mustache.github.com/
 .. _Mustache spec: https://github.com/mustache/spec
 .. _mustache(5): http://mustache.github.com/mustache.5.html
