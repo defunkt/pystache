@@ -60,43 +60,6 @@ def _get_value(item, key):
     return _NOT_FOUND
 
 
-# TODO: add some unit tests for this.
-def resolve(context_stack, name):
-    """
-    Resolve a name against a context stack.
-
-    This function follows the rules outlined in the section of the spec
-    regarding tag interpolation.
-
-    Arguments:
-
-      context_stack: a ContextStack instance.
-
-    This function does not coerce the return value to a string.
-
-    """
-    if name == '.':
-        return context_stack.top()
-
-    parts = name.split('.')
-
-    value = context_stack.get(parts[0], _NOT_FOUND)
-
-    for part in parts[1:]:
-        # TODO: use EAFP here instead.
-        #   http://docs.python.org/glossary.html#term-eafp
-        if value is _NOT_FOUND:
-            break
-        value = _get_value(value, part)
-
-    # The spec says that if name resolution fails at any point, the result
-    # should be considered falsey, and should interpolate as the empty string.
-    if value is _NOT_FOUND:
-        return ''
-
-    return value
-
-
 class ContextStack(object):
 
     """
@@ -203,6 +166,42 @@ class ContextStack(object):
             context.push(kwargs)
 
         return context
+
+    # TODO: add some unit tests for this.
+    def resolve(self, name):
+        """
+        Resolve a name against a context stack.
+
+        This function follows the rules outlined in the section of the spec
+        regarding tag interpolation.
+
+        Arguments:
+
+          context_stack: a ContextStack instance.
+
+        This function does not coerce the return value to a string.
+
+        """
+        if name == '.':
+            return self.top()
+
+        parts = name.split('.')
+
+        value = self.get(parts[0], _NOT_FOUND)
+
+        for part in parts[1:]:
+            # TODO: use EAFP here instead.
+            #   http://docs.python.org/glossary.html#term-eafp
+            if value is _NOT_FOUND:
+                break
+            value = _get_value(value, part)
+
+        # The spec says that if name resolution fails at any point, the result
+        # should be considered falsey, and should interpolate as the empty string.
+        if value is _NOT_FOUND:
+            return ''
+
+        return value
 
     def get(self, key, default=None):
         """
