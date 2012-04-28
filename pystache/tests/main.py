@@ -24,7 +24,9 @@ from pystache.tests.spectesting import get_spec_tests
 FROM_SOURCE_OPTION = "--from-source"
 
 
-def run_tests(sys_argv):
+# Do not include "test" in this function's name to avoid it getting
+# picked up by nosetests.
+def main(sys_argv):
     """
     Run all tests in the project.
 

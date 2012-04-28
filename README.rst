@@ -173,6 +173,11 @@ is present.  Otherwise, it parses the json files.  To install PyYAML-- ::
 
     pip install pyyaml
 
+To run a subset of the tests, you can use nose_: ::
+
+    pip install nose
+    nosetests --tests pystache/tests/test_context.py:GetValueTests.test_dictionary__key_present
+
 **Running Pystache from source with Python 3.**  Pystache is written in
 Python 2 and must be converted with 2to3_ prior to running under Python 3.
 The installation process (and tox) do this conversion automatically.
@@ -214,6 +219,7 @@ Authors
 .. _Mustache: http://mustache.github.com/
 .. _Mustache spec: https://github.com/mustache/spec
 .. _mustache(5): http://mustache.github.com/mustache.5.html
+.. _nose: http://somethingaboutorange.com/mrl/projects/nose/0.11.1/testing.html
 .. _only unicode strings: http://docs.python.org/howto/unicode.html#tips-for-writing-unicode-aware-programs
 .. _PyPI: http://pypi.python.org/pypi/pystache
 .. _Pystache: https://github.com/defunkt/pystache
