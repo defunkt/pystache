@@ -17,7 +17,13 @@ END_OF_LINE_CHARACTERS = ['\r', '\n']
 NON_BLANK_RE = re.compile(r'^(.)', re.M)
 
 
-def _compile_template_re(delimiters):
+def _compile_template_re(delimiters=None):
+    """
+    Return a regular expresssion object (re.RegexObject) instance.
+
+    """
+    if delimiters is None:
+        delimiters = DEFAULT_DELIMITERS
 
     # The possible tag type characters following the opening tag,
     # excluding "=" and "{".
@@ -74,19 +80,25 @@ class Parser(object):
         self._delimiters = delimiters
         self.compile_template_re()
 
-    def parse(self, template, index=0, section_key=None):
+    def parse(self, template, start_index=0, section_key=None):
         """
-        Parse a template string into a ParsedTemplate instance.
+        Parse a template string starting at some index.
 
         This method uses the current tag delimiter.
 
         Arguments:
 
-          template: a template string of type unicode.
+          template: a unicode string that is the template to parse.
+
+          index: the index at which to start parsing.
+
+        Returns:
+
+          a ParsedTemplate instance.
 
         """
         parse_tree = []
-        start_index = index
+        index = start_index
 
         while True:
             match = self._template_re.search(template, index)
@@ -142,10 +154,33 @@ class Parser(object):
 
         return ParsedTemplate(parse_tree)
 
-    def _parse_section(self, template, index_start, section_key):
-        parsed_template, template, index_end = self.parse(template=template, index=index_start, section_key=section_key)
+    def _parse_section(self, template, start_index, section_key):
+        """
+        Parse the contents of a template section.
 
-        return parsed_template, template, index_end
+        Arguments:
+
+          template: a unicode template string.
+
+          start_index: the string index at which the section contents begin.
+
+          section_key: the tag key of the section.
+
+        Returns: a 3-tuple:
+
+          parsed_section: the section contents parsed as a ParsedTemplate
+            instance.
+
+          section_contents: the unparsed section contents.
+
+          end_index: the string index after the closing section tag (and
+            including any trailing newlines).
+
+        """
+        parsed_section, section_contents, end_index = \
+            self.parse(template=template, start_index=start_index, section_key=section_key)
+
+        return parsed_section, section_contents, end_index
 
     def _handle_tag_type(self, template, parse_tree, tag_type, tag_key, leading_whitespace, end_index):
 
@@ -170,12 +205,12 @@ class Parser(object):
 
         elif tag_type == '#':
 
-            parsed_section, template, end_index = self._parse_section(template, end_index, tag_key)
-            func = engine._make_get_section(tag_key, parsed_section, template, self._delimiters)
+            parsed_section, section_contents, end_index = self._parse_section(template, end_index, tag_key)
+            func = engine._make_get_section(tag_key, parsed_section, section_contents, self._delimiters)
 
         elif tag_type == '^':
 
-            parsed_section, template, end_index = self._parse_section(template, end_index, tag_key)
+            parsed_section, section_contents, end_index = self._parse_section(template, end_index, tag_key)
             func = engine._make_get_inverse(tag_key, parsed_section)
 
         elif tag_type == '>':

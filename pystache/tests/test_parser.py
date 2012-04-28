@@ -20,7 +20,7 @@ class RegularExpressionTestCase(unittest.TestCase):
 
         """
         re = make_re()
-        match = re.search("{{test}}")
+        match = re.search("b  {{test}}")
 
-        self.assertEqual(match.start(), 0)
+        self.assertEqual(match.start(), 1)
 
