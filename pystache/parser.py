@@ -145,7 +145,7 @@ class Parser(object):
                 if tag_key != section_key:
                     raise ParsingError("Section end tag mismatch: %s != %s" % (tag_key, section_key))
 
-                return ParsedTemplate(parse_tree), template[start_index:match_index], end_index
+                return ParsedTemplate(parse_tree), match_index, end_index
 
             index = self._handle_tag_type(template, parse_tree, tag_type, tag_key, leading_whitespace, end_index)
 
@@ -171,16 +171,16 @@ class Parser(object):
           parsed_section: the section contents parsed as a ParsedTemplate
             instance.
 
-          section_contents: the unparsed section contents.
+          content_end_index: the string index after the section contents.
 
           end_index: the string index after the closing section tag (and
             including any trailing newlines).
 
         """
-        parsed_section, section_contents, end_index = \
+        parsed_section, content_end_index, end_index = \
             self.parse(template=template, start_index=start_index, section_key=section_key)
 
-        return parsed_section, section_contents, end_index
+        return parsed_section, template[start_index:content_end_index], end_index
 
     def _handle_tag_type(self, template, parse_tree, tag_type, tag_key, leading_whitespace, end_index):
 
