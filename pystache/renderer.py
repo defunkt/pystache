@@ -5,12 +5,25 @@ This module provides a Renderer class to render templates.
 
 """
 
+import sys
+
 from pystache import defaults
-from pystache.context import Context
+from pystache.context import ContextStack
 from pystache.loader import Loader
 from pystache.renderengine import RenderEngine
-from pystache.spec_loader import SpecLoader
+from pystache.specloader import SpecLoader
 from pystache.template_spec import TemplateSpec
+
+
+# TODO: come up with a better solution for this.  One of the issues here
+#   is that in Python 3 there is no common base class for unicode strings
+#   and byte strings, and 2to3 seems to convert all of "str", "unicode",
+#   and "basestring" to Python 3's "str".
+if sys.version_info < (3, ):
+    _STRING_TYPES = basestring
+else:
+    # The latter evaluates to "bytes" in Python 3 -- even after conversion by 2to3.
+    _STRING_TYPES = (unicode, type(u"a".encode('utf-8')))
 
 
 class Renderer(object):
@@ -27,8 +40,9 @@ class Renderer(object):
 
     >>> partials = {'partial': 'Hello, {{thing}}!'}
     >>> renderer = Renderer(partials=partials)
-    >>> renderer.render('{{>partial}}', {'thing': 'world'})
-    u'Hello, world!'
+    >>> # We apply print to make the test work in Python 3 after 2to3.
+    >>> print renderer.render('{{>partial}}', {'thing': 'world'})
+    Hello, world!
 
     """
 
@@ -64,10 +78,10 @@ class Renderer(object):
             this class will only pass it unicode strings.  The constructor
             assigns this function to the constructed instance's escape()
             method.
-                The argument defaults to `cgi.escape(s, quote=True)`.  To
-            disable escaping entirely, one can pass `lambda u: u` as the
-            escape function, for example.  One may also wish to consider
-            using markupsafe's escape function: markupsafe.escape().
+                To disable escaping entirely, one can pass `lambda u: u`
+            as the escape function, for example.  One may also wish to
+            consider using markupsafe's escape function: markupsafe.escape().
+            This argument defaults to the package default.
 
           file_encoding: the name of the default encoding to use when reading
             template files.  All templates are converted to unicode prior
@@ -160,9 +174,16 @@ class Renderer(object):
         """
         return unicode(self.escape(self._to_unicode_soft(s)))
 
-    def unicode(self, s, encoding=None):
+    def unicode(self, b, encoding=None):
         """
-        Convert a string to unicode, using string_encoding and decode_errors.
+        Convert a byte string to unicode, using string_encoding and decode_errors.
+
+        Arguments:
+
+          b: a byte string.
+
+          encoding: the name of an encoding.  Defaults to the string_encoding
+            attribute for this instance.
 
         Raises:
 
@@ -178,7 +199,7 @@ class Renderer(object):
 
         # TODO: Wrap UnicodeDecodeErrors with a message about setting
         # the string_encoding and decode_errors attributes.
-        return unicode(s, encoding, self.decode_errors)
+        return unicode(b, encoding, self.decode_errors)
 
     def _make_loader(self):
         """
@@ -256,7 +277,7 @@ class Renderer(object):
         # RenderEngine.render() requires that the template string be unicode.
         template = self._to_unicode_hard(template)
 
-        context = Context.create(*context, **kwargs)
+        context = ContextStack.create(*context, **kwargs)
         self._context = context
 
         engine = self._make_render_engine()
@@ -317,7 +338,7 @@ class Renderer(object):
             uses the passed object as the first element of the context stack
             when rendering.
 
-          *context: zero or more dictionaries, Context instances, or objects
+          *context: zero or more dictionaries, ContextStack instances, or objects
             with which to populate the initial context stack.  None
             arguments are skipped.  Items in the *context list are added to
             the context stack in order so that later items in the argument
@@ -329,7 +350,7 @@ class Renderer(object):
             all items in the *context list.
 
         """
-        if isinstance(template, basestring):
+        if isinstance(template, _STRING_TYPES):
             return self._render_string(template, *context, **kwargs)
         # Otherwise, we assume the template is an object.
 

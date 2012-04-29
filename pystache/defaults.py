@@ -8,7 +8,12 @@ does not otherwise specify a value.
 
 """
 
-import cgi
+try:
+    # Python 3.2 adds html.escape() and deprecates cgi.escape().
+    from html import escape
+except ImportError:
+    from cgi import escape
+
 import os
 import sys
 
@@ -39,12 +44,14 @@ SEARCH_DIRS = [os.curdir]  # i.e. ['.']
 # rendering templates (e.g. for tags enclosed in double braces).
 # Only unicode strings will be passed to this function.
 #
-# The quote=True argument causes double quotes to be escaped,
-# but not single quotes:
+# The quote=True argument causes double but not single quotes to be escaped
+# in Python 3.1 and earlier, and both double and single quotes to be
+# escaped in Python 3.2 and later:
 #
 #   http://docs.python.org/library/cgi.html#cgi.escape
+#   http://docs.python.org/dev/library/html.html#html.escape
 #
-TAG_ESCAPE = lambda u: cgi.escape(u, quote=True)
+TAG_ESCAPE = lambda u: escape(u, quote=True)
 
 # The default template extension.
 TEMPLATE_EXTENSION = 'mustache'

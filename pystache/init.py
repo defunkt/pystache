@@ -9,9 +9,6 @@ from pystache.renderer import Renderer
 from pystache.template_spec import TemplateSpec
 
 
-__all__ = ['render', 'Renderer', 'TemplateSpec']
-
-
 def render(template, context=None, **kwargs):
     """
     Return the given template string rendered using the given context.

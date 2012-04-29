@@ -1,15 +1,24 @@
 # coding: utf-8
 
 """
-Defines a Context class to represent mustache(5)'s notion of context.
+Exposes a ContextStack class and functions to retrieve names from context.
 
 """
 
-class NotFound(object): pass
+# This equals '__builtin__' in Python 2 and 'builtins' in Python 3.
+_BUILTIN_MODULE = type(0).__module__
+
+
 # We use this private global variable as a return value to represent a key
 # not being found on lookup.  This lets us distinguish between the case
 # of a key's value being None with the case of a key not being found --
 # without having to rely on exceptions (e.g. KeyError) for flow control.
+#
+# TODO: eliminate the need for a private global variable, e.g. by using the
+#   preferred Python approach of "easier to ask for forgiveness than permission":
+#     http://docs.python.org/glossary.html#term-eafp
+class NotFound(object):
+    pass
 _NOT_FOUND = NotFound()
 
 
@@ -24,7 +33,7 @@ def _get_value(item, key):
 
     Returns _NOT_FOUND if the key does not exist.
 
-    The Context.get() docstring documents this function's intended behavior.
+    The ContextStack.get() docstring documents this function's intended behavior.
 
     """
     parts = key.split('.')
@@ -39,7 +48,7 @@ def _get_value(item, key):
         # (e.g. catching KeyError).
         if key in item:
             value = item[key]
-    elif type(item).__module__ != '__builtin__':
+    elif type(item).__module__ != _BUILTIN_MODULE:
         # Then we consider the argument an "object" for the purposes of
         # the spec.
         #
@@ -60,7 +69,26 @@ def _get_value(item, key):
     return value
 
 
-class Context(object):
+# TODO: add some unit tests for this.
+def resolve(context, name):
+    """
+    Resolve the given name against the given context stack.
+
+    This function follows the rules outlined in the section of the spec
+    regarding tag interpolation.
+
+    This function does not coerce the return value to a string.
+
+    """
+    if name == '.':
+        return context.top()
+
+    # The spec says that if the name fails resolution, the result should be
+    # considered falsey, and should interpolate as the empty string.
+    return context.get(name, '')
+
+
+class ContextStack(object):
 
     """
     Provides dictionary-like access to a stack of zero or more items.
@@ -75,7 +103,7 @@ class Context(object):
     (last in, first out).
 
     Caution: this class does not currently support recursive nesting in
-    that items in the stack cannot themselves be Context instances.
+    that items in the stack cannot themselves be ContextStack instances.
 
     See the docstrings of the methods of this class for more details.
 
@@ -92,7 +120,7 @@ class Context(object):
         stack in order so that, in particular, items at the end of
         the argument list are queried first when querying the stack.
 
-        Caution: items should not themselves be Context instances, as
+        Caution: items should not themselves be ContextStack instances, as
         recursive nesting does not behave as one might expect.
 
         """
@@ -104,9 +132,9 @@ class Context(object):
 
         For example--
 
-        >>> context = Context({'alpha': 'abc'}, {'numeric': 123})
+        >>> context = ContextStack({'alpha': 'abc'}, {'numeric': 123})
         >>> repr(context)
-        "Context({'alpha': 'abc'}, {'numeric': 123})"
+        "ContextStack({'alpha': 'abc'}, {'numeric': 123})"
 
         """
         return "%s%s" % (self.__class__.__name__, tuple(self._stack))
@@ -114,18 +142,18 @@ class Context(object):
     @staticmethod
     def create(*context, **kwargs):
         """
-        Build a Context instance from a sequence of context-like items.
+        Build a ContextStack instance from a sequence of context-like items.
 
-        This factory-style method is more general than the Context class's
+        This factory-style method is more general than the ContextStack class's
         constructor in that, unlike the constructor, the argument list
-        can itself contain Context instances.
+        can itself contain ContextStack instances.
 
         Here is an example illustrating various aspects of this method:
 
         >>> obj1 = {'animal': 'cat', 'vegetable': 'carrot', 'mineral': 'copper'}
-        >>> obj2 = Context({'vegetable': 'spinach', 'mineral': 'silver'})
+        >>> obj2 = ContextStack({'vegetable': 'spinach', 'mineral': 'silver'})
         >>>
-        >>> context = Context.create(obj1, None, obj2, mineral='gold')
+        >>> context = ContextStack.create(obj1, None, obj2, mineral='gold')
         >>>
         >>> context.get('animal')
         'cat'
@@ -136,7 +164,7 @@ class Context(object):
 
         Arguments:
 
-          *context: zero or more dictionaries, Context instances, or objects
+          *context: zero or more dictionaries, ContextStack instances, or objects
             with which to populate the initial context stack.  None
             arguments will be skipped.  Items in the *context list are
             added to the stack in order so that later items in the argument
@@ -152,12 +180,12 @@ class Context(object):
         """
         items = context
 
-        context = Context()
+        context = ContextStack()
 
         for item in items:
             if item is None:
                 continue
-            if isinstance(item, Context):
+            if isinstance(item, ContextStack):
                 context._stack.extend(item._stack)
             else:
                 context.push(item)
@@ -226,9 +254,9 @@ class Context(object):
           >>>
           >>> dct['greet'] is obj.greet
           True
-          >>> Context(dct).get('greet')  #doctest: +ELLIPSIS
+          >>> ContextStack(dct).get('greet')  #doctest: +ELLIPSIS
           <function greet at 0x...>
-          >>> Context(obj).get('greet')
+          >>> ContextStack(obj).get('greet')
           'Hi Bob!'
 
           TODO: explain the rationale for this difference in treatment.
@@ -270,4 +298,4 @@ class Context(object):
         Return a copy of this instance.
 
         """
-        return Context(*self._stack)
+        return ContextStack(*self._stack)

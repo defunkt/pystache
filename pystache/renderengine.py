@@ -7,7 +7,8 @@ Defines a class responsible for rendering logic.
 
 import re
 
-from parser import Parser
+from pystache.context import resolve
+from pystache.parser import Parser
 
 
 class RenderEngine(object):
@@ -55,7 +56,7 @@ class RenderEngine(object):
             this class will not pass tag values to literal prior to passing
             them to this function.  This allows for more flexibility,
             for example using a custom escape function that handles
-            incoming strings of type markupssafe.Markup differently
+            incoming strings of type markupsafe.Markup differently
             from plain unicode strings.
 
         """
@@ -68,16 +69,7 @@ class RenderEngine(object):
         Get a value from the given context as a basestring instance.
 
         """
-        val = context.get(tag_name)
-
-        # We use "==" rather than "is" to compare integers, as using "is"
-        # relies on an implementation detail of CPython.  The test about
-        # rendering zeroes failed while using PyPy when using "is".
-        # See issue #34: https://github.com/defunkt/pystache/issues/34
-        if not val and val != 0:
-            if tag_name != '.':
-                return ''
-            val = context.top()
+        val = resolve(context, tag_name)
 
         if callable(val):
             # According to the spec:
@@ -142,6 +134,8 @@ class RenderEngine(object):
             Returns a string with type unicode.
 
             """
+            # TODO: is there a bug because we are not using the same
+            #   logic as in _get_string_value()?
             data = context.get(name)
             if data:
                 return u''
@@ -167,9 +161,33 @@ class RenderEngine(object):
                 # TODO: should we check the arity?
                 template = data(template)
                 parsed_template = self._parse(template, delimiters=delims)
-                data = [ data ]
-            elif not hasattr(data, '__iter__') or isinstance(data, dict):
-                data = [ data ]
+                # Lambdas special case section rendering and bypass pushing
+                # the data value onto the context stack.  Also see--
+                #
+                #   https://github.com/defunkt/pystache/issues/113
+                #
+                return parsed_template.render(context)
+            else:
+                # The cleanest, least brittle way of determining whether
+                # something supports iteration is by trying to call iter() on it:
+                #
+                #   http://docs.python.org/library/functions.html#iter
+                #
+                # It is not sufficient, for example, to check whether the item
+                # implements __iter__ () (the iteration protocol).  There is
+                # also __getitem__() (the sequence protocol).  In Python 2,
+                # strings do not implement __iter__(), but in Python 3 they do.
+                try:
+                    iter(data)
+                except TypeError:
+                    # Then the value does not support iteration.
+                    data = [data]
+                else:
+                    # We treat the value as a list (but do not treat strings
+                    # and dicts as lists).
+                    if isinstance(data, (basestring, dict)):
+                        data = [data]
+                    # Otherwise, leave it alone.
 
             parts = []
             for element in data:
@@ -202,7 +220,7 @@ class RenderEngine(object):
         Arguments:
 
           template: a template string of type unicode.
-          context: a Context instance.
+          context: a ContextStack instance.
 
         """
         # We keep this type-check as an added check because this method is
@@ -225,7 +243,7 @@ class RenderEngine(object):
           template: a template string of type unicode (but not a proper
             subclass of unicode).
 
-          context: a Context instance.
+          context: a ContextStack instance.
 
         """
         # Be strict but not too strict.  In other words, accept str instead
