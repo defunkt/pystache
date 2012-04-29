@@ -4,7 +4,8 @@ History
 0.6.0 (TBD)
 -----------
 
-* Falsey values now coerced to strings using str().
+* Bugfix: falsey values now coerced to strings using str().
+* Bugfix: section-lambda return values no longer pushed onto context stack.
 
 0.5.1 (2012-04-24)
 ------------------

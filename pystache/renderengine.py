@@ -161,7 +161,12 @@ class RenderEngine(object):
                 # TODO: should we check the arity?
                 template = data(template)
                 parsed_template = self._parse(template, delimiters=delims)
-                data = [data]
+                # Lambdas special case section rendering and bypass pushing
+                # the data value onto the context stack.  Also see--
+                #
+                #   https://github.com/defunkt/pystache/issues/113
+                #
+                return parsed_template.render(context)
             else:
                 # The cleanest, least brittle way of determining whether
                 # something supports iteration is by trying to call iter() on it:

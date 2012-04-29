@@ -501,6 +501,40 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         context = {'person': 'Mom', 'test': (lambda text: text + " :)")}
         self._assert_render(u'Hi Mom :)', template, context)
 
+    def test_section__lambda__not_on_context_stack(self):
+        """
+        Check that section lambdas are not pushed onto the context stack.
+
+        Even though the sections spec says that section data values should be
+        pushed onto the context stack prior to rendering, this does not apply
+        to lambdas.  Lambdas obey their own special case.
+
+        This test case is equivalent to a test submitted to the Mustache spec here:
+
+          https://github.com/mustache/spec/pull/47 .
+
+        """
+        context = {'foo': 'bar', 'lambda': (lambda text: "{{.}}")}
+        template = '{{#foo}}{{#lambda}}blah{{/lambda}}{{/foo}}'
+        self._assert_render(u'bar', template, context)
+
+    def test_section__lambda__no_reinterpolation(self):
+        """
+        Check that section lambda return values are not re-interpolated.
+
+        This test is a sanity check that the rendered lambda return value
+        is not re-interpolated as could be construed by reading the
+        section part of the Mustache spec.
+
+        This test case is equivalent to a test submitted to the Mustache spec here:
+
+          https://github.com/mustache/spec/pull/47 .
+
+        """
+        template = '{{#planet}}{{#lambda}}dot{{/lambda}}{{/planet}}'
+        context = {'planet': 'Earth', 'dot': '~{{.}}~', 'lambda': (lambda text: "#{{%s}}#" % text)}
+        self._assert_render(u'#~{{.}}~#', template, context)
+
     def test_comment__multiline(self):
         """
         Check that multiline comments are permitted.
