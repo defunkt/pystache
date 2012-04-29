@@ -5,7 +5,9 @@ History
 -----------
 
 * Bugfix: falsey values now coerced to strings using str().
-* Bugfix: section-lambda return values no longer pushed onto context stack.
+* Bugfix: issue #113: lambda return values for sections no longer pushed
+  onto context stack.
+* Bugfix: issue #114: lists of lambdas for sections were not rendered.
 
 0.5.1 (2012-04-24)
 ------------------

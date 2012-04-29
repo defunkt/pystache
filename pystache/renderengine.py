@@ -137,6 +137,7 @@ class RenderEngine(object):
             # TODO: is there a bug because we are not using the same
             #   logic as in _get_string_value()?
             data = context.get(name)
+            # Per the spec, lambdas in inverted sections are considered truthy.
             if data:
                 return u''
             return parsed_template.render(context)
@@ -155,21 +156,19 @@ class RenderEngine(object):
             template = template_
             parsed_template = parsed_template_
             data = context.get(name)
+
+            # From the spec:
+            #
+            #   If the data is not of a list type, it is coerced into a list
+            #   as follows: if the data is truthy (e.g. `!!data == true`),
+            #   use a single-element list containing the data, otherwise use
+            #   an empty list.
+            #
             if not data:
                 data = []
-            elif callable(data):
-                # TODO: should we check the arity?
-                template = data(template)
-                parsed_template = self._parse(template, delimiters=delims)
-                # Lambdas special case section rendering and bypass pushing
-                # the data value onto the context stack.  Also see--
-                #
-                #   https://github.com/defunkt/pystache/issues/113
-                #
-                return parsed_template.render(context)
             else:
-                # The cleanest, least brittle way of determining whether
-                # something supports iteration is by trying to call iter() on it:
+                # The least brittle way to determine whether something
+                # supports iteration is by trying to call iter() on it:
                 #
                 #   http://docs.python.org/library/functions.html#iter
                 #
@@ -183,14 +182,34 @@ class RenderEngine(object):
                     # Then the value does not support iteration.
                     data = [data]
                 else:
-                    # We treat the value as a list (but do not treat strings
-                    # and dicts as lists).
                     if isinstance(data, (basestring, dict)):
+                        # Do not treat strings and dicts (which are iterable) as lists.
                         data = [data]
-                    # Otherwise, leave it alone.
+                    # Otherwise, treat the value as a list.
 
             parts = []
             for element in data:
+                if callable(element):
+                    # Lambdas special case section rendering and bypass pushing
+                    # the data value onto the context stack.  From the spec--
+                    #
+                    #   When used as the data value for a Section tag, the
+                    #   lambda MUST be treatable as an arity 1 function, and
+                    #   invoked as such (passing a String containing the
+                    #   unprocessed section contents).  The returned value
+                    #   MUST be rendered against the current delimiters, then
+                    #   interpolated in place of the section.
+                    #
+                    #  Also see--
+                    #
+                    #   https://github.com/defunkt/pystache/issues/113
+                    #
+                    # TODO: should we check the arity?
+                    new_template = element(template)
+                    parsed_template = self._parse(new_template, delimiters=delims)
+                    parts.append(parsed_template.render(context))
+                    continue
+
                 context.push(element)
                 parts.append(parsed_template.render(context))
                 context.pop()
