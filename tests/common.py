@@ -64,7 +64,10 @@ class Attachable(object):
     of the universe
     """
     def __init__(self, **kwargs):
+        self.__args__ = kwargs
         for arg, value in kwargs.iteritems():
             setattr(self, arg, value)
 
-
+    def __repr__(self):
+        return "A(%s)" % (", ".join("%s=%s" % (k, v)
+                                    for k, v in self.__args__.iteritems()))

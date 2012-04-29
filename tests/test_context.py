@@ -435,14 +435,13 @@ class ContextTests(unittest.TestCase, AssertIsMixin):
     def test_dot_notattion__autocall(self):
         key = "foo.bar.baz"
 
-        # When the last element is callable, it should be automatically invoked
+        # When any element in the path is callable, it should be automatically invoked
         original = Context({"foo": Attachable(bar=Attachable(baz=lambda: "Called!"))})
         self.assertEquals(original.get(key), "Called!")
 
-        # An element in the middle of the dotted path should NOT be invoked,
-        # even if it is callable
-        class Callable(Attachable):
-            def __call__(self):
-                return 'Called!'
-        original = Context({"foo": Callable(bar=Callable(baz='Not called!'))})
-        self.assertEquals(original.get(key), "Not called!")
+        class Foo(object):
+            def bar(self):
+                return Attachable(baz='Baz')
+
+        original = Context({"foo": Foo()})
+        self.assertEquals(original.get(key), "Baz")
