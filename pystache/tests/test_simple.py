@@ -60,7 +60,6 @@ class TestSimple(unittest.TestCase, AssertStringMixin):
         template = '{{not_set}} {{blank}}'
         self.assertEqual(pystache.Renderer().render(template), ' ')
 
-
     def test_template_partial_extension(self):
         """
         Side note:

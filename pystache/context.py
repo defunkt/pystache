@@ -36,13 +36,18 @@ def _get_value(item, key):
     The ContextStack.get() docstring documents this function's intended behavior.
 
     """
+    parts = key.split('.')
+    key = parts[0]
+    rest = '.'.join(parts[1:])
+    value = _NOT_FOUND
+
     if isinstance(item, dict):
         # Then we consider the argument a "hash" for the purposes of the spec.
         #
         # We do a membership test to avoid using exceptions for flow control
         # (e.g. catching KeyError).
         if key in item:
-            return item[key]
+            value = item[key]
     elif type(item).__module__ != _BUILTIN_MODULE:
         # Then we consider the argument an "object" for the purposes of
         # the spec.
@@ -53,11 +58,15 @@ def _get_value(item, key):
         # are considered objects by the test above.
         if hasattr(item, key):
             attr = getattr(item, key)
-            if _is_callable(attr):
-                return attr()
-            return attr
+            if  _is_callable(attr):
+                value = attr()
+            else:
+                value =  attr
 
-    return _NOT_FOUND
+    if rest and value is not _NOT_FOUND:
+        value = _get_value(value, rest)
+
+    return value
 
 
 # TODO: add some unit tests for this.

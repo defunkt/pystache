@@ -15,7 +15,7 @@ syntax.  For a more complete (and more current) description of Mustache's
 behavior, see the official `Mustache spec`_.
 
 Pystache is `semantically versioned`_ and can be found on PyPI_.  This
-version of Pystache passes all tests in `version 1.0.3`_ of the spec.
+version of Pystache passes all tests in `version 1.1.2`_ of the spec.
 
 Logo: `David Phillips`_
 
