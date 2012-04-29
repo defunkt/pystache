@@ -49,10 +49,7 @@ def _get_value(item, key):
         # are considered objects by the test above.
         if hasattr(item, key):
             attr = getattr(item, key)
-            # If there are still parts to process (in a dot-notation key),
-            # we do not automatically invoke the object, even if it's callable.
-            autocall = len(rest) == 0
-            if autocall and _is_callable(attr):
+            if  _is_callable(attr):
                 value = attr()
             else:
                 value =  attr
