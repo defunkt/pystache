@@ -501,6 +501,22 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         context = {'person': 'Mom', 'test': (lambda text: text + " :)")}
         self._assert_render(u'Hi Mom :)', template, context)
 
+    def test_section__lambda__list(self):
+        """
+        Check that lists of lambdas are processed correctly for sections.
+
+        This test case is equivalent to a test submitted to the Mustache spec here:
+
+          https://github.com/mustache/spec/pull/47 .
+
+        """
+        template = '<{{#lambdas}}foo{{/lambdas}}>'
+        context = {'foo': 'bar',
+                   'lambdas': [lambda text: "~{{%s}}~" % text,
+                               lambda text: "#{{%s}}#" % text]}
+
+        self._assert_render(u'<~bar~#bar#>', template, context)
+
     def test_section__lambda__not_on_context_stack(self):
         """
         Check that section lambdas are not pushed onto the context stack.
