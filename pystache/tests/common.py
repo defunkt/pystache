@@ -191,3 +191,22 @@ class SetupDefaults(object):
         defaults.FILE_ENCODING = self.original_file_encoding
         defaults.STRING_ENCODING = self.original_string_encoding
 
+
+class Attachable(object):
+    """A trivial object that attaches all constructor named parameters as attributes.
+    For instance,
+
+    >>> o = Attachable(foo=42, size="of the universe")
+    >>> o.foo
+    42
+    >>> o.size
+    of the universe
+    """
+    def __init__(self, **kwargs):
+        self.__args__ = kwargs
+        for arg, value in kwargs.iteritems():
+            setattr(self, arg, value)
+
+    def __repr__(self):
+        return "A(%s)" % (", ".join("%s=%s" % (k, v)
+                                    for k, v in self.__args__.iteritems()))
