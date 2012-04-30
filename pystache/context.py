@@ -189,8 +189,15 @@ class ContextStack(object):
 
         value = self.get(parts[0], _NOT_FOUND)
 
+        # The full context stack is not used to resolve the remaining parts.
+        # From the spec--
+        #
+        #   If any name parts were retained in step 1, each should be resolved
+        #   against a context stack containing only the result from the former
+        #   resolution.
+        #
         for part in parts[1:]:
-            # TODO: use EAFP here instead.
+            # TODO: consider using EAFP here instead.
             #   http://docs.python.org/glossary.html#term-eafp
             if value is _NOT_FOUND:
                 break
@@ -203,6 +210,7 @@ class ContextStack(object):
 
         return value
 
+    # TODO: rename this method _get_part().
     def get(self, key, default=None):
         """
         Query the stack for the given key, and return the resulting value.

@@ -135,7 +135,7 @@ class RenderEngine(object):
             """
             # TODO: is there a bug because we are not using the same
             #   logic as in _get_string_value()?
-            data = context.get(name)
+            data = context.resolve(name)
             # Per the spec, lambdas in inverted sections are considered truthy.
             if data:
                 return u''
@@ -154,7 +154,7 @@ class RenderEngine(object):
             """
             template = template_
             parsed_template = parsed_template_
-            data = context.get(name)
+            data = context.resolve(name)
 
             # From the spec:
             #
