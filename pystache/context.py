@@ -189,6 +189,8 @@ class ContextStack(object):
 
         value = self.get(parts[0], _NOT_FOUND)
 
+        # TODO: make sure we have a test case for the following point.
+        #
         # The full context stack is not used to resolve the remaining parts.
         # From the spec--
         #
