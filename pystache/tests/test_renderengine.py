@@ -580,3 +580,16 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         expected = u' {{foo}} '
         self._assert_render(expected, '{{=$ $=}} {{foo}} ')
         self._assert_render(expected, '{{=$ $=}} {{foo}} $={{ }}=$')  # was yielding u'  '.
+
+    def test_dot_notation__forward_progress(self):
+        """
+        Test that dotted name resolution makes "forward-only" progress.
+
+        This is equivalent to the test case in the following pull request:
+
+          https://github.com/mustache/spec/pull/48
+
+        """
+        template = '{{a.b}} :: {{#c}}{{a}} :: {{a.b}}{{/c}}'
+        context = {'a': {'b': 'a.b found'}, 'c': {'a': 'a.b not found'} }
+        self._assert_render(u'a.b found :: a.b not found :: ', template, context)
