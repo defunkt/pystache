@@ -68,7 +68,7 @@ class RenderEngine(object):
         Get a value from the given context as a basestring instance.
 
         """
-        val = context.resolve(tag_name)
+        val = context.get(tag_name)
 
         if callable(val):
             # According to the spec:
@@ -135,7 +135,7 @@ class RenderEngine(object):
             """
             # TODO: is there a bug because we are not using the same
             #   logic as in _get_string_value()?
-            data = context.resolve(name)
+            data = context.get(name)
             # Per the spec, lambdas in inverted sections are considered truthy.
             if data:
                 return u''
@@ -154,7 +154,7 @@ class RenderEngine(object):
             """
             template = template_
             parsed_template = parsed_template_
-            data = context.resolve(name)
+            data = context.get(name)
 
             # From the spec:
             #

@@ -11,7 +11,7 @@ import unittest
 from pystache.context import _NOT_FOUND
 from pystache.context import _get_value
 from pystache.context import ContextStack
-from pystache.tests.common import AssertIsMixin
+from pystache.tests.common import AssertIsMixin, AssertStringMixin
 
 class SimpleObject(object):
 
@@ -204,7 +204,7 @@ class GetValueTests(unittest.TestCase, AssertIsMixin):
         self.assertNotFound(item2, 'pop')
 
 
-class ContextStackTests(unittest.TestCase, AssertIsMixin):
+class ContextStackTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
 
     """
     Test the ContextStack class.
@@ -320,7 +320,7 @@ class ContextStackTests(unittest.TestCase, AssertIsMixin):
 
         """
         context = ContextStack()
-        self.assertTrue(context.get("foo") is None)
+        self.assertString(context.get("foo"), u'')
 
     def test_get__default(self):
         """
