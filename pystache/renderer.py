@@ -8,6 +8,7 @@ This module provides a Renderer class to render templates.
 import sys
 
 from pystache import defaults
+from pystache.common import TemplateNotFoundError
 from pystache.context import ContextStack
 from pystache.loader import Loader
 from pystache.renderengine import RenderEngine
@@ -239,9 +240,8 @@ class Renderer(object):
             template = partials.get(name)
 
             if template is None:
-                # TODO: make a TemplateNotFoundException type that provides
-                # the original partials as an attribute.
-                raise Exception("Partial not found with name: %s" % repr(name))
+                raise TemplateNotFoundError("Name %s not found in partials: %s" %
+                                            (repr(name), type(partials)))
 
             # RenderEngine requires that the return value be unicode.
             return self._to_unicode_hard(template)

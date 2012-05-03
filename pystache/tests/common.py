@@ -168,6 +168,20 @@ class AssertIsMixin:
         self.assertTrue(first is second, msg="%s is not %s" % (repr(first), repr(second)))
 
 
+class AssertExceptionMixin:
+
+    """A unittest.TestCase mixin adding assertException()."""
+
+    # unittest.assertRaisesRegexp() is not available until Python 2.7:
+    #   http://docs.python.org/library/unittest.html#unittest.TestCase.assertRaisesRegexp
+    def assertException(self, exception_type, msg, callable, *args, **kwds):
+        try:
+            callable(*args, **kwds)
+            raise Exception("Expected exception: %s: %s" % (exception_type, repr(msg)))
+        except exception_type, err:
+            self.assertEqual(str(err), msg)
+
+
 class SetupDefaults(object):
 
     """

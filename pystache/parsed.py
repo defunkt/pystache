@@ -32,6 +32,9 @@ class ParsedTemplate(object):
         """
         self._parse_tree = parse_tree
 
+    def __repr__(self):
+        return "[%s]" % (", ".join([repr(part) for part in self._parse_tree]))
+
     def render(self, context):
         """
         Returns: a string of type unicode.

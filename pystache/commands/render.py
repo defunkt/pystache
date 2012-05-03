@@ -35,6 +35,7 @@ import sys
 #
 #   ValueError: Attempted relative import in non-package
 #
+from pystache.common import TemplateNotFoundError
 from pystache.renderer import Renderer
 
 
@@ -78,7 +79,7 @@ def main(sys_argv=sys.argv):
 
     try:
         template = renderer.load_template(template)
-    except IOError:
+    except TemplateNotFoundError:
         pass
 
     try:

@@ -9,12 +9,13 @@ This module is only meant for internal use by the renderengine module.
 
 import re
 
+from pystache.common import TemplateNotFoundError
 from pystache.parsed import ParsedTemplate
 
 
-DEFAULT_DELIMITERS = ('{{', '}}')
-END_OF_LINE_CHARACTERS = ['\r', '\n']
-NON_BLANK_RE = re.compile(r'^(.)', re.M)
+DEFAULT_DELIMITERS = (u'{{', u'}}')
+END_OF_LINE_CHARACTERS = [u'\r', u'\n']
+NON_BLANK_RE = re.compile(ur'^(.)', re.M)
 
 
 def _compile_template_re(delimiters=None):
@@ -215,10 +216,14 @@ class Parser(object):
 
         elif tag_type == '>':
 
-            template = engine.load_partial(tag_key)
+            try:
+                # TODO: make engine.load() and test it separately.
+                template = engine.load_partial(tag_key)
+            except TemplateNotFoundError:
+                template = u''
 
             # Indent before rendering.
-            template = re.sub(NON_BLANK_RE, leading_whitespace + r'\1', template)
+            template = re.sub(NON_BLANK_RE, leading_whitespace + ur'\1', template)
 
             func = engine._make_get_partial(template)
 

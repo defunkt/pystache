@@ -35,7 +35,8 @@ class RenderEngine(object):
 
           load_partial: the function to call when loading a partial.  The
             function should accept a string template name and return a
-            template string of type unicode (not a subclass).
+            template string of type unicode (not a subclass).  If the
+            template is not found, it should raise a TemplateNotFoundError.
 
           literal: the function used to convert unescaped variable tag
             values to unicode, e.g. the value corresponding to a tag
