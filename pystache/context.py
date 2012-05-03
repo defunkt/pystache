@@ -191,12 +191,12 @@ class ContextStack(object):
 
         parts = name.split('.')
 
-        value = self._get_simple(parts[0])
+        result = self._get_simple(parts[0])
 
         for part in parts[1:]:
             # TODO: consider using EAFP here instead.
             #   http://docs.python.org/glossary.html#term-eafp
-            if value is _NOT_FOUND:
+            if result is _NOT_FOUND:
                 break
             # The full context stack is not used to resolve the remaining parts.
             # From the spec--
@@ -208,12 +208,12 @@ class ContextStack(object):
             #   the empty string.
             #
             # TODO: make sure we have a test case for the above point.
-            value = _get_value(value, part)
+            result = _get_value(result, part)
 
-        if value is _NOT_FOUND:
+        if result is _NOT_FOUND:
             return default
 
-        return value
+        return result
 
     # TODO: combine the docstring for this method with the docstring for
     #   the get() method.
