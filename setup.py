@@ -72,7 +72,7 @@ else:
 # print("Using: version %s of %s" % (repr(dist.__version__), repr(dist)))
 
 
-VERSION = '0.5.1'  # Also change in pystache/__init__.py.
+VERSION = '0.5.2-rc'  # Also change in pystache/__init__.py.
 
 HISTORY_PATH = 'HISTORY.rst'
 LICENSE_PATH = 'LICENSE'

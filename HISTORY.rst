@@ -1,8 +1,8 @@
 History
 =======
 
-0.6.0 (TBD)
------------
+0.5.2 (2012-05-03)
+------------------
 
 * Added support for dot notation and version 1.1.2 of the spec (issue #99). [rbp]
 * Missing partials now render as empty string per latest version of spec (issue #115).
