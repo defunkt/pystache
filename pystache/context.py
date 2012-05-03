@@ -27,25 +27,24 @@ def _is_callable(obj):
     return hasattr(obj, '__call__')
 
 
-# TODO: rename item to context (now that we have a separate notion of context stack).
 # TODO: document what a "context" is as opposed to a context stack.
-def _get_value(item, key):
+def _get_value(context, key):
     """
-    Retrieve a key's value from an item.
+    Retrieve a key's value from a context item.
 
     Returns _NOT_FOUND if the key does not exist.
 
     The ContextStack.get() docstring documents this function's intended behavior.
 
     """
-    if isinstance(item, dict):
+    if isinstance(context, dict):
         # Then we consider the argument a "hash" for the purposes of the spec.
         #
         # We do a membership test to avoid using exceptions for flow control
         # (e.g. catching KeyError).
-        if key in item:
-            return item[key]
-    elif type(item).__module__ != _BUILTIN_MODULE:
+        if key in context:
+            return context[key]
+    elif type(context).__module__ != _BUILTIN_MODULE:
         # Then we consider the argument an "object" for the purposes of
         # the spec.
         #
@@ -53,8 +52,8 @@ def _get_value(item, key):
         # types like integers and strings as objects (cf. issue #81).
         # Instances of user-defined classes on the other hand, for example,
         # are considered objects by the test above.
-        if hasattr(item, key):
-            attr = getattr(item, key)
+        if hasattr(context, key):
+            attr = getattr(context, key)
             if _is_callable(attr):
                 return attr()
             return attr
