@@ -17,7 +17,7 @@ class ParsedTemplate(object):
           parse_tree: a list, each element of which is either--
 
             (1) a unicode string, or
-            (2) a "rendering" callable that accepts a Context instance
+            (2) a "rendering" callable that accepts a ContextStack instance
                 and returns a unicode string.
 
         The possible rendering callables are the return values of the
@@ -31,6 +31,9 @@ class ParsedTemplate(object):
 
         """
         self._parse_tree = parse_tree
+
+    def __repr__(self):
+        return "[%s]" % (", ".join([repr(part) for part in self._parse_tree]))
 
     def render(self, context):
         """

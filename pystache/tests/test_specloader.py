@@ -16,6 +16,7 @@ from examples.lambdas import Lambdas
 from examples.inverted import Inverted, InvertedLists
 from pystache import Renderer
 from pystache import TemplateSpec
+from pystache.common import TemplateNotFoundError
 from pystache.locator import Locator
 from pystache.loader import Loader
 from pystache.specloader import SpecLoader
@@ -42,7 +43,7 @@ class ViewTestCase(unittest.TestCase, AssertStringMixin):
         view = Tagless()
         renderer = Renderer()
 
-        self.assertRaises(IOError, renderer.render, view)
+        self.assertRaises(TemplateNotFoundError, renderer.render, view)
 
         # TODO: change this test to remove the following brittle line.
         view.template_rel_directory = "examples"
@@ -60,7 +61,8 @@ class ViewTestCase(unittest.TestCase, AssertStringMixin):
         renderer1 = Renderer()
         renderer2 = Renderer(search_dirs=EXAMPLES_DIR)
 
-        self.assertRaises(IOError, renderer1.render, spec)
+        actual = renderer1.render(spec)
+        self.assertString(actual, u"Partial: ")
 
         actual = renderer2.render(spec)
         self.assertEqual(actual, "Partial: No tags...")

@@ -1,6 +1,15 @@
 History
 =======
 
+0.5.2 (2012-05-03)
+------------------
+
+* Added support for dot notation and version 1.1.2 of the spec (issue #99). [rbp]
+* Missing partials now render as empty string per latest version of spec (issue #115).
+* Bugfix: falsey values now coerced to strings using str().
+* Bugfix: lambda return values for sections no longer pushed onto context stack (issue #113).
+* Bugfix: lists of lambdas for sections were not rendered (issue #114).
+
 0.5.1 (2012-04-24)
 ------------------
 

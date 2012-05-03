@@ -7,7 +7,7 @@ This module provides a command to test pystache (unit tests, doctests, etc).
 
 import sys
 
-from pystache.tests.main import run_tests
+from pystache.tests.main import main as run_tests
 
 
 def main(sys_argv=sys.argv):

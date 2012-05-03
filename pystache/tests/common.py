@@ -168,6 +168,20 @@ class AssertIsMixin:
         self.assertTrue(first is second, msg="%s is not %s" % (repr(first), repr(second)))
 
 
+class AssertExceptionMixin:
+
+    """A unittest.TestCase mixin adding assertException()."""
+
+    # unittest.assertRaisesRegexp() is not available until Python 2.7:
+    #   http://docs.python.org/library/unittest.html#unittest.TestCase.assertRaisesRegexp
+    def assertException(self, exception_type, msg, callable, *args, **kwds):
+        try:
+            callable(*args, **kwds)
+            raise Exception("Expected exception: %s: %s" % (exception_type, repr(msg)))
+        except exception_type, err:
+            self.assertEqual(str(err), msg)
+
+
 class SetupDefaults(object):
 
     """
@@ -191,3 +205,28 @@ class SetupDefaults(object):
         defaults.FILE_ENCODING = self.original_file_encoding
         defaults.STRING_ENCODING = self.original_string_encoding
 
+
+class Attachable(object):
+    """
+    A class that attaches all constructor named parameters as attributes.
+
+    For example--
+
+    >>> obj = Attachable(foo=42, size="of the universe")
+    >>> repr(obj)
+    "Attachable(foo=42, size='of the universe')"
+    >>> obj.foo
+    42
+    >>> obj.size
+    'of the universe'
+
+    """
+    def __init__(self, **kwargs):
+        self.__args__ = kwargs
+        for arg, value in kwargs.iteritems():
+            setattr(self, arg, value)
+
+    def __repr__(self):
+        return "%s(%s)" % (self.__class__.__name__,
+                           ", ".join("%s=%s" % (k, repr(v))
+                                     for k, v in self.__args__.iteritems()))

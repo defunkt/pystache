@@ -35,7 +35,8 @@ class RenderEngine(object):
 
           load_partial: the function to call when loading a partial.  The
             function should accept a string template name and return a
-            template string of type unicode (not a subclass).
+            template string of type unicode (not a subclass).  If the
+            template is not found, it should raise a TemplateNotFoundError.
 
           literal: the function used to convert unescaped variable tag
             values to unicode, e.g. the value corresponding to a tag
@@ -63,21 +64,13 @@ class RenderEngine(object):
         self.literal = literal
         self.load_partial = load_partial
 
+    # TODO: rename context to stack throughout this module.
     def _get_string_value(self, context, tag_name):
         """
         Get a value from the given context as a basestring instance.
 
         """
         val = context.get(tag_name)
-
-        # We use "==" rather than "is" to compare integers, as using "is"
-        # relies on an implementation detail of CPython.  The test about
-        # rendering zeroes failed while using PyPy when using "is".
-        # See issue #34: https://github.com/defunkt/pystache/issues/34
-        if not val and val != 0:
-            if tag_name != '.':
-                return ''
-            val = context.top()
 
         if callable(val):
             # According to the spec:
@@ -132,6 +125,7 @@ class RenderEngine(object):
             Returns: a string of type unicode.
 
             """
+            # TODO: the parsing should be done before calling this function.
             return self._render(template, context)
 
         return get_partial
@@ -142,7 +136,10 @@ class RenderEngine(object):
             Returns a string with type unicode.
 
             """
+            # TODO: is there a bug because we are not using the same
+            #   logic as in _get_string_value()?
             data = context.get(name)
+            # Per the spec, lambdas in inverted sections are considered truthy.
             if data:
                 return u''
             return parsed_template.render(context)
@@ -161,16 +158,19 @@ class RenderEngine(object):
             template = template_
             parsed_template = parsed_template_
             data = context.get(name)
+
+            # From the spec:
+            #
+            #   If the data is not of a list type, it is coerced into a list
+            #   as follows: if the data is truthy (e.g. `!!data == true`),
+            #   use a single-element list containing the data, otherwise use
+            #   an empty list.
+            #
             if not data:
                 data = []
-            elif callable(data):
-                # TODO: should we check the arity?
-                template = data(template)
-                parsed_template = self._parse(template, delimiters=delims)
-                data = [data]
             else:
-                # The cleanest, least brittle way of determining whether
-                # something supports iteration is by trying to call iter() on it:
+                # The least brittle way to determine whether something
+                # supports iteration is by trying to call iter() on it:
                 #
                 #   http://docs.python.org/library/functions.html#iter
                 #
@@ -184,14 +184,34 @@ class RenderEngine(object):
                     # Then the value does not support iteration.
                     data = [data]
                 else:
-                    # We treat the value as a list (but do not treat strings
-                    # and dicts as lists).
                     if isinstance(data, (basestring, dict)):
+                        # Do not treat strings and dicts (which are iterable) as lists.
                         data = [data]
-                    # Otherwise, leave it alone.
+                    # Otherwise, treat the value as a list.
 
             parts = []
             for element in data:
+                if callable(element):
+                    # Lambdas special case section rendering and bypass pushing
+                    # the data value onto the context stack.  From the spec--
+                    #
+                    #   When used as the data value for a Section tag, the
+                    #   lambda MUST be treatable as an arity 1 function, and
+                    #   invoked as such (passing a String containing the
+                    #   unprocessed section contents).  The returned value
+                    #   MUST be rendered against the current delimiters, then
+                    #   interpolated in place of the section.
+                    #
+                    #  Also see--
+                    #
+                    #   https://github.com/defunkt/pystache/issues/113
+                    #
+                    # TODO: should we check the arity?
+                    new_template = element(template)
+                    parsed_template = self._parse(new_template, delimiters=delims)
+                    parts.append(parsed_template.render(context))
+                    continue
+
                 context.push(element)
                 parts.append(parsed_template.render(context))
                 context.pop()
@@ -221,7 +241,7 @@ class RenderEngine(object):
         Arguments:
 
           template: a template string of type unicode.
-          context: a Context instance.
+          context: a ContextStack instance.
 
         """
         # We keep this type-check as an added check because this method is
@@ -244,7 +264,7 @@ class RenderEngine(object):
           template: a template string of type unicode (but not a proper
             subclass of unicode).
 
-          context: a Context instance.
+          context: a ContextStack instance.
 
         """
         # Be strict but not too strict.  In other words, accept str instead

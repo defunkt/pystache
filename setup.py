@@ -4,19 +4,21 @@
 """
 This script supports publishing Pystache to PyPI.
 
-Below are instructions to pystache maintainers on how to push a new
-version of pystache to PyPI--
+This docstring contains instructions to Pystache maintainers on how
+to release a new version of Pystache.
+
+(1) Push to PyPI.  To release a new version of Pystache to PyPI--
 
     http://pypi.python.org/pypi/pystache
 
-Create a PyPI user account.  The user account will need permissions to push
-to PyPI.  A current "Package Index Owner" of pystache can grant you those
-permissions.
+create a PyPI user account if you do not already have one.  The user account
+will need permissions to push to PyPI.  A current "Package Index Owner" of
+Pystache can grant you those permissions.
 
 When you have permissions, run the following (after preparing the release,
-bumping the version number in setup.py, etc):
+merging to master, bumping the version number in setup.py, etc):
 
-    > python setup.py publish
+    python setup.py publish
 
 If you get an error like the following--
 
@@ -32,6 +34,20 @@ contents:
 as described here, for example:
 
     http://docs.python.org/release/2.5.2/dist/pypirc.html
+
+(2) Tag the release on GitHub.  Here are some commands for tagging.
+
+List current tags:
+
+    git tag -l -n3
+
+Create an annotated tag:
+
+    git tag -a -m "Version 0.5.1" "v0.5.1"
+
+Push a tag to GitHub:
+
+    git push --tags defunkt v0.5.1
 
 """
 
@@ -56,7 +72,7 @@ else:
 # print("Using: version %s of %s" % (repr(dist.__version__), repr(dist)))
 
 
-VERSION = '0.5.1'  # Also change in pystache/__init__.py.
+VERSION = '0.5.2-rc'  # Also change in pystache/__init__.py.
 
 HISTORY_PATH = 'HISTORY.rst'
 LICENSE_PATH = 'LICENSE'

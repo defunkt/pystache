@@ -1,7 +1,16 @@
 # coding: utf-8
 
 """
-Defines a Context class to represent mustache(5)'s notion of context.
+Exposes a ContextStack class.
+
+The Mustache spec makes a special distinction between two types of context
+stack elements: hashes and objects.  For the purposes of interpreting the
+spec, we define these categories mutually exclusively as follows:
+
+ (1) Hash: an item whose type is a subclass of dict.
+
+ (2) Object: an item that is neither a hash nor an instance of a
+     built-in type.
 
 """
 
@@ -22,28 +31,23 @@ class NotFound(object):
 _NOT_FOUND = NotFound()
 
 
-# TODO: share code with template.check_callable().
-def _is_callable(obj):
-    return hasattr(obj, '__call__')
-
-
-def _get_value(item, key):
+def _get_value(context, key):
     """
-    Retrieve a key's value from an item.
+    Retrieve a key's value from a context item.
 
     Returns _NOT_FOUND if the key does not exist.
 
-    The Context.get() docstring documents this function's intended behavior.
+    The ContextStack.get() docstring documents this function's intended behavior.
 
     """
-    if isinstance(item, dict):
+    if isinstance(context, dict):
         # Then we consider the argument a "hash" for the purposes of the spec.
         #
         # We do a membership test to avoid using exceptions for flow control
         # (e.g. catching KeyError).
-        if key in item:
-            return item[key]
-    elif type(item).__module__ != _BUILTIN_MODULE:
+        if key in context:
+            return context[key]
+    elif type(context).__module__ != _BUILTIN_MODULE:
         # Then we consider the argument an "object" for the purposes of
         # the spec.
         #
@@ -51,16 +55,18 @@ def _get_value(item, key):
         # types like integers and strings as objects (cf. issue #81).
         # Instances of user-defined classes on the other hand, for example,
         # are considered objects by the test above.
-        if hasattr(item, key):
-            attr = getattr(item, key)
-            if _is_callable(attr):
+        if hasattr(context, key):
+            attr = getattr(context, key)
+            # TODO: consider using EAFP here instead.
+            #   http://docs.python.org/glossary.html#term-eafp
+            if callable(attr):
                 return attr()
             return attr
 
     return _NOT_FOUND
 
 
-class Context(object):
+class ContextStack(object):
 
     """
     Provides dictionary-like access to a stack of zero or more items.
@@ -75,7 +81,7 @@ class Context(object):
     (last in, first out).
 
     Caution: this class does not currently support recursive nesting in
-    that items in the stack cannot themselves be Context instances.
+    that items in the stack cannot themselves be ContextStack instances.
 
     See the docstrings of the methods of this class for more details.
 
@@ -92,7 +98,7 @@ class Context(object):
         stack in order so that, in particular, items at the end of
         the argument list are queried first when querying the stack.
 
-        Caution: items should not themselves be Context instances, as
+        Caution: items should not themselves be ContextStack instances, as
         recursive nesting does not behave as one might expect.
 
         """
@@ -104,9 +110,9 @@ class Context(object):
 
         For example--
 
-        >>> context = Context({'alpha': 'abc'}, {'numeric': 123})
+        >>> context = ContextStack({'alpha': 'abc'}, {'numeric': 123})
         >>> repr(context)
-        "Context({'alpha': 'abc'}, {'numeric': 123})"
+        "ContextStack({'alpha': 'abc'}, {'numeric': 123})"
 
         """
         return "%s%s" % (self.__class__.__name__, tuple(self._stack))
@@ -114,18 +120,18 @@ class Context(object):
     @staticmethod
     def create(*context, **kwargs):
         """
-        Build a Context instance from a sequence of context-like items.
+        Build a ContextStack instance from a sequence of context-like items.
 
-        This factory-style method is more general than the Context class's
+        This factory-style method is more general than the ContextStack class's
         constructor in that, unlike the constructor, the argument list
-        can itself contain Context instances.
+        can itself contain ContextStack instances.
 
         Here is an example illustrating various aspects of this method:
 
         >>> obj1 = {'animal': 'cat', 'vegetable': 'carrot', 'mineral': 'copper'}
-        >>> obj2 = Context({'vegetable': 'spinach', 'mineral': 'silver'})
+        >>> obj2 = ContextStack({'vegetable': 'spinach', 'mineral': 'silver'})
         >>>
-        >>> context = Context.create(obj1, None, obj2, mineral='gold')
+        >>> context = ContextStack.create(obj1, None, obj2, mineral='gold')
         >>>
         >>> context.get('animal')
         'cat'
@@ -136,7 +142,7 @@ class Context(object):
 
         Arguments:
 
-          *context: zero or more dictionaries, Context instances, or objects
+          *context: zero or more dictionaries, ContextStack instances, or objects
             with which to populate the initial context stack.  None
             arguments will be skipped.  Items in the *context list are
             added to the stack in order so that later items in the argument
@@ -152,12 +158,12 @@ class Context(object):
         """
         items = context
 
-        context = Context()
+        context = ContextStack()
 
         for item in items:
             if item is None:
                 continue
-            if isinstance(item, Context):
+            if isinstance(item, ContextStack):
                 context._stack.extend(item._stack)
             else:
                 context.push(item)
@@ -167,9 +173,22 @@ class Context(object):
 
         return context
 
-    def get(self, key, default=None):
+    # TODO: add more unit tests for this.
+    # TODO: update the docstring for dotted names.
+    def get(self, name, default=u''):
         """
-        Query the stack for the given key, and return the resulting value.
+        Resolve a dotted name against the current context stack.
+
+        This function follows the rules outlined in the section of the
+        spec regarding tag interpolation.  This function returns the value
+        as is and does not coerce the return value to a string.
+
+        Arguments:
+
+          name: a dotted or non-dotted name.
+
+          default: the value to return if name resolution fails at any point.
+            Defaults to the empty string per the Mustache spec.
 
         This method queries items in the stack in order from last-added
         objects to first (last in, first out).  The value returned is
@@ -177,30 +196,21 @@ class Context(object):
         If the key is not found in any item in the stack, then the default
         value is returned.  The default value defaults to None.
 
-        When speaking about returning values from a context, the Mustache
-        spec distinguishes between two types of context stack elements:
-        hashes and objects.
-
         In accordance with the spec, this method queries items in the
-        stack for a key in the following way.  For the purposes of querying,
-        each item is classified into one of the following three mutually
-        exclusive categories: a hash, an object, or neither:
+        stack for a key differently depending on whether the item is a
+        hash, object, or neither (as defined in the module docstring):
 
-        (1) Hash: if the item's type is a subclass of dict, then the item
-            is considered a hash (in the terminology of the spec), and
-            the key's value is the dictionary value of the key.  If the
-            dictionary doesn't contain the key, the key is not found.
+        (1) Hash: if the item is a hash, then the key's value is the
+            dictionary value of the key.  If the dictionary doesn't contain
+            the key, then the key is considered not found.
 
-        (2) Object: if the item isn't a hash and isn't an instance of a
-            built-in type, then the item is considered an object (again
-            using the language of the spec).  In this case, the method
-            looks for an attribute with the same name as the key.  If an
-            attribute with that name exists, the value of the attribute is
-            returned.  If the attribute is callable, however (i.e. if the
-            attribute is a method), then the attribute is called with no
-            arguments and instead that value returned.  If there is no
-            attribute with the same name as the key, then the key is
-            considered not found.
+        (2) Object: if the item is an an object, then the method looks for
+            an attribute with the same name as the key.  If an attribute
+            with that name exists, the value of the attribute is returned.
+            If the attribute is callable, however (i.e. if the attribute
+            is a method), then the attribute is called with no arguments
+            and that value is returned.  If there is no attribute with
+            the same name as the key, then the key is considered not found.
 
         (3) Neither: if the item is neither a hash nor an object, then
             the key is considered not found.
@@ -226,23 +236,59 @@ class Context(object):
           >>>
           >>> dct['greet'] is obj.greet
           True
-          >>> Context(dct).get('greet')  #doctest: +ELLIPSIS
+          >>> ContextStack(dct).get('greet')  #doctest: +ELLIPSIS
           <function greet at 0x...>
-          >>> Context(obj).get('greet')
+          >>> ContextStack(obj).get('greet')
           'Hi Bob!'
 
           TODO: explain the rationale for this difference in treatment.
 
         """
-        for obj in reversed(self._stack):
-            val = _get_value(obj, key)
-            if val is _NOT_FOUND:
+        if name == '.':
+            # TODO: should we add a test case for an empty context stack?
+            return self.top()
+
+        parts = name.split('.')
+
+        result = self._get_simple(parts[0])
+
+        for part in parts[1:]:
+            # TODO: consider using EAFP here instead.
+            #   http://docs.python.org/glossary.html#term-eafp
+            if result is _NOT_FOUND:
+                break
+            # The full context stack is not used to resolve the remaining parts.
+            # From the spec--
+            #
+            #   5) If any name parts were retained in step 1, each should be
+            #   resolved against a context stack containing only the result
+            #   from the former resolution.  If any part fails resolution, the
+            #   result should be considered falsey, and should interpolate as
+            #   the empty string.
+            #
+            # TODO: make sure we have a test case for the above point.
+            result = _get_value(result, part)
+
+        if result is _NOT_FOUND:
+            return default
+
+        return result
+
+    def _get_simple(self, name):
+        """
+        Query the stack for a non-dotted name.
+
+        """
+        result = _NOT_FOUND
+
+        for item in reversed(self._stack):
+            result = _get_value(item, name)
+            if result is _NOT_FOUND:
                 continue
             # Otherwise, the key was found.
-            return val
-        # Otherwise, no item in the stack contained the key.
+            break
 
-        return default
+        return result
 
     def push(self, item):
         """
@@ -270,4 +316,4 @@ class Context(object):
         Return a copy of this instance.
 
         """
-        return Context(*self._stack)
+        return ContextStack(*self._stack)

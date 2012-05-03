@@ -9,6 +9,7 @@ import os
 import re
 import sys
 
+from pystache.common import TemplateNotFoundError
 from pystache import defaults
 
 
@@ -117,9 +118,8 @@ class Locator(object):
         path = self._find_path(search_dirs, file_name)
 
         if path is None:
-            # TODO: we should probably raise an exception of our own type.
-            raise IOError('Template file %s not found in directories: %s' %
-                          (repr(file_name), repr(search_dirs)))
+            raise TemplateNotFoundError('File %s not found in dirs: %s' %
+                                        (repr(file_name), repr(search_dirs)))
 
         return path
 

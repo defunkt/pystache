@@ -115,6 +115,37 @@ def _read_spec_tests(path):
     return cases
 
 
+# TODO: simplify the implementation of this function.
+def _convert_children(node):
+    """
+    Recursively convert to functions all "code strings" below the node.
+
+    This function is needed only for the json format.
+
+    """
+    if not isinstance(node, (list, dict)):
+        # Then there is nothing to iterate over and recurse.
+        return
+
+    if isinstance(node, list):
+        for child in node:
+            _convert_children(child)
+        return
+    # Otherwise, node is a dict, so attempt the conversion.
+
+    for key in node.keys():
+        val = node[key]
+
+        if not isinstance(val, dict) or val.get('__tag__') != 'code':
+            _convert_children(val)
+            continue
+        # Otherwise, we are at a "leaf" node.
+
+        val = eval(val['python'])
+        node[key] = val
+        continue
+
+
 def _deserialize_spec_test(data, file_path):
     """
     Return a unittest.TestCase instance representing a spec test.
@@ -124,7 +155,7 @@ def _deserialize_spec_test(data, file_path):
       data: the dictionary of attributes for a single test.
 
     """
-    unconverted_context = data['data']
+    context = data['data']
     description = data['desc']
     # PyYAML seems to leave ASCII strings as byte strings.
     expected = unicode(data['expected'])
@@ -133,13 +164,7 @@ def _deserialize_spec_test(data, file_path):
     template = data['template']
     test_name = data['name']
 
-    # Convert code strings to functions.
-    # TODO: make this section of code easier to understand.
-    context = {}
-    for key, val in unconverted_context.iteritems():
-        if isinstance(val, dict) and val.get('__tag__') == 'code':
-            val = eval(val['python'])
-        context[key] = val
+    _convert_children(context)
 
     test_case = _make_spec_test(expected, template, context, partials, description, test_name, file_path)
 

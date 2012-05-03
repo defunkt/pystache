@@ -7,11 +7,11 @@ Unit tests of renderengine.py.
 
 import unittest
 
-from pystache.context import Context
+from pystache.context import ContextStack
 from pystache import defaults
 from pystache.parser import ParsingError
 from pystache.renderengine import RenderEngine
-from pystache.tests.common import AssertStringMixin
+from pystache.tests.common import AssertStringMixin, Attachable
 
 
 def mock_literal(s):
@@ -83,7 +83,7 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         if partials is not None:
             engine.load_partial = lambda key: unicode(partials[key])
 
-        context = Context(*context)
+        context = ContextStack(*context)
 
         actual = engine.render(template, context)
 
@@ -203,6 +203,27 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         template = '{{test}}'
         context = {'test': '{{#hello}}'}
         self._assert_render(u'{{#hello}}', template, context)
+
+    ## Test interpolation with "falsey" values
+    #
+    # In these test cases, we test the part of the spec that says that
+    # "data should be coerced into a string (and escaped, if appropriate)
+    # before interpolation."  We test this for data that is "falsey."
+
+    def test_interpolation__falsey__zero(self):
+        template = '{{.}}'
+        context = 0
+        self._assert_render(u'0', template, context)
+
+    def test_interpolation__falsey__none(self):
+        template = '{{.}}'
+        context = None
+        self._assert_render(u'None', template, context)
+
+    def test_interpolation__falsey__zero(self):
+        template = '{{.}}'
+        context = False
+        self._assert_render(u'False', template, context)
 
     # Built-in types:
     #
@@ -480,6 +501,56 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         context = {'person': 'Mom', 'test': (lambda text: text + " :)")}
         self._assert_render(u'Hi Mom :)', template, context)
 
+    def test_section__lambda__list(self):
+        """
+        Check that lists of lambdas are processed correctly for sections.
+
+        This test case is equivalent to a test submitted to the Mustache spec here:
+
+          https://github.com/mustache/spec/pull/47 .
+
+        """
+        template = '<{{#lambdas}}foo{{/lambdas}}>'
+        context = {'foo': 'bar',
+                   'lambdas': [lambda text: "~{{%s}}~" % text,
+                               lambda text: "#{{%s}}#" % text]}
+
+        self._assert_render(u'<~bar~#bar#>', template, context)
+
+    def test_section__lambda__not_on_context_stack(self):
+        """
+        Check that section lambdas are not pushed onto the context stack.
+
+        Even though the sections spec says that section data values should be
+        pushed onto the context stack prior to rendering, this does not apply
+        to lambdas.  Lambdas obey their own special case.
+
+        This test case is equivalent to a test submitted to the Mustache spec here:
+
+          https://github.com/mustache/spec/pull/47 .
+
+        """
+        context = {'foo': 'bar', 'lambda': (lambda text: "{{.}}")}
+        template = '{{#foo}}{{#lambda}}blah{{/lambda}}{{/foo}}'
+        self._assert_render(u'bar', template, context)
+
+    def test_section__lambda__no_reinterpolation(self):
+        """
+        Check that section lambda return values are not re-interpolated.
+
+        This test is a sanity check that the rendered lambda return value
+        is not re-interpolated as could be construed by reading the
+        section part of the Mustache spec.
+
+        This test case is equivalent to a test submitted to the Mustache spec here:
+
+          https://github.com/mustache/spec/pull/47 .
+
+        """
+        template = '{{#planet}}{{#lambda}}dot{{/lambda}}{{/planet}}'
+        context = {'planet': 'Earth', 'dot': '~{{.}}~', 'lambda': (lambda text: "#{{%s}}#" % text)}
+        self._assert_render(u'#~{{.}}~#', template, context)
+
     def test_comment__multiline(self):
         """
         Check that multiline comments are permitted.
@@ -509,3 +580,78 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         expected = u' {{foo}} '
         self._assert_render(expected, '{{=$ $=}} {{foo}} ')
         self._assert_render(expected, '{{=$ $=}} {{foo}} $={{ }}=$')  # was yielding u'  '.
+
+    def test_dot_notation(self):
+        """
+        Test simple dot notation cases.
+
+        Check that we can use dot notation when the variable is a dict,
+        user-defined object, or combination of both.
+
+        """
+        template = 'Hello, {{person.name}}. I see you are {{person.details.age}}.'
+        person = Attachable(name='Biggles', details={'age': 42})
+        context = {'person': person}
+        self._assert_render(u'Hello, Biggles. I see you are 42.', template, context)
+
+    def test_dot_notation__missing_attributes_or_keys(self):
+        """
+        Test dot notation with missing keys or attributes.
+
+        Check that if a key or attribute in a dotted name does not exist, then
+        the tag renders as the empty string.
+
+        """
+        template = """I cannot see {{person.name}}'s age: {{person.age}}.
+        Nor {{other_person.name}}'s: ."""
+        expected = u"""I cannot see Biggles's age: .
+        Nor Mr. Bradshaw's: ."""
+        context = {'person': {'name': 'Biggles'},
+                   'other_person': Attachable(name='Mr. Bradshaw')}
+        self._assert_render(expected, template, context)
+
+    def test_dot_notation__multiple_levels(self):
+        """
+        Test dot notation with multiple levels.
+
+        """
+        template = """Hello, Mr. {{person.name.lastname}}.
+        I see you're back from {{person.travels.last.country.city}}.
+        I'm missing some of your details: {{person.details.private.editor}}."""
+        expected = u"""Hello, Mr. Pither.
+        I see you're back from Cornwall.
+        I'm missing some of your details: ."""
+        context = {'person': {'name': {'firstname': 'unknown', 'lastname': 'Pither'},
+                            'travels': {'last': {'country': {'city': 'Cornwall'}}},
+                            'details': {'public': 'likes cycling'}}}
+        self._assert_render(expected, template, context)
+
+        # It should also work with user-defined objects
+        context = {'person': Attachable(name={'firstname': 'unknown', 'lastname': 'Pither'},
+                                        travels=Attachable(last=Attachable(country=Attachable(city='Cornwall'))),
+                                        details=Attachable())}
+        self._assert_render(expected, template, context)
+
+    def test_dot_notation__missing_part_terminates_search(self):
+        """
+        Test that dotted name resolution terminates on a later part not found.
+
+        Check that if a later dotted name part is not found in the result from
+        the former resolution, then name resolution terminates rather than
+        starting the search over with the next element of the context stack.
+        From the spec (interpolation section)--
+
+          5) If any name parts were retained in step 1, each should be resolved
+          against a context stack containing only the result from the former
+          resolution.  If any part fails resolution, the result should be considered
+          falsey, and should interpolate as the empty string.
+
+        This test case is equivalent to the test case in the following pull
+        request:
+
+          https://github.com/mustache/spec/pull/48
+
+        """
+        template = '{{a.b}} :: ({{#c}}{{a}} :: {{a.b}}{{/c}})'
+        context = {'a': {'b': 'A.B'}, 'c': {'a': 'A'} }
+        self._assert_render(u'A.B :: (A :: )', template, context)

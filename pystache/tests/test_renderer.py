@@ -13,9 +13,10 @@ import unittest
 from examples.simple import Simple
 from pystache import Renderer
 from pystache import TemplateSpec
+from pystache.common import TemplateNotFoundError
 from pystache.loader import Loader
 
-from pystache.tests.common import get_data_path, AssertStringMixin
+from pystache.tests.common import get_data_path, AssertStringMixin, AssertExceptionMixin
 from pystache.tests.data.views import SayHello
 
 
@@ -405,7 +406,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
 # we no longer need to exercise all rendering code paths through
 # the Renderer.  It suffices to test rendering paths through the
 # RenderEngine for the same amount of code coverage.
-class Renderer_MakeRenderEngineTests(unittest.TestCase):
+class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertExceptionMixin):
 
     """
     Check the RenderEngine returned by Renderer._make_render_engine().
@@ -444,7 +445,20 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
         self.assertEqual(actual, "abc")
         self.assertEqual(type(actual), unicode)
 
-    def test__load_partial__not_found(self):
+    def test__load_partial__not_found__default(self):
+        """
+        Check that load_partial provides a nice message when a template is not found.
+
+        """
+        renderer = Renderer()
+
+        engine = renderer._make_render_engine()
+        load_partial = engine.load_partial
+
+        self.assertException(TemplateNotFoundError, "File 'foo.mustache' not found in dirs: ['.']",
+                             load_partial, "foo")
+
+    def test__load_partial__not_found__dict(self):
         """
         Check that load_partial provides a nice message when a template is not found.
 
@@ -455,11 +469,10 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase):
         engine = renderer._make_render_engine()
         load_partial = engine.load_partial
 
-        try:
-            load_partial("foo")
-            raise Exception("Shouldn't get here")
-        except Exception, err:
-            self.assertEqual(str(err), "Partial not found with name: 'foo'")
+        # Include dict directly since str(dict) is different in Python 2 and 3:
+        #   <type 'dict'> versus <class 'dict'>, respectively.
+        self.assertException(TemplateNotFoundError, "Name 'foo' not found in partials: %s" % dict,
+                             load_partial, "foo")
 
     ## Test the engine's literal attribute.
 
