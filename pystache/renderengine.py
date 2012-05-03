@@ -7,7 +7,6 @@ Defines a class responsible for rendering logic.
 
 import re
 
-from pystache.context import resolve
 from pystache.parser import Parser
 
 
@@ -69,7 +68,7 @@ class RenderEngine(object):
         Get a value from the given context as a basestring instance.
 
         """
-        val = resolve(context, tag_name)
+        val = context.get(tag_name)
 
         if callable(val):
             # According to the spec:

@@ -11,7 +11,7 @@ import unittest
 from pystache.context import _NOT_FOUND
 from pystache.context import _get_value
 from pystache.context import ContextStack
-from pystache.tests.common import AssertIsMixin
+from pystache.tests.common import AssertIsMixin, AssertStringMixin, Attachable
 
 class SimpleObject(object):
 
@@ -204,7 +204,7 @@ class GetValueTests(unittest.TestCase, AssertIsMixin):
         self.assertNotFound(item2, 'pop')
 
 
-class ContextStackTests(unittest.TestCase, AssertIsMixin):
+class ContextStackTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
 
     """
     Test the ContextStack class.
@@ -320,7 +320,7 @@ class ContextStackTests(unittest.TestCase, AssertIsMixin):
 
         """
         context = ContextStack()
-        self.assertTrue(context.get("foo") is None)
+        self.assertString(context.get("foo"), u'')
 
     def test_get__default(self):
         """
@@ -395,3 +395,76 @@ class ContextStackTests(unittest.TestCase, AssertIsMixin):
         # Confirm the original is unchanged.
         self.assertEqual(original.get(key), "buzz")
 
+    def test_dot_notation__dict(self):
+        name = "foo.bar"
+        stack = ContextStack({"foo": {"bar": "baz"}})
+        self.assertEqual(stack.get(name), "baz")
+
+        # Works all the way down
+        name = "a.b.c.d.e.f.g"
+        stack = ContextStack({"a": {"b": {"c": {"d": {"e": {"f": {"g": "w00t!"}}}}}}})
+        self.assertEqual(stack.get(name), "w00t!")
+
+    def test_dot_notation__user_object(self):
+        name = "foo.bar"
+        stack = ContextStack({"foo": Attachable(bar="baz")})
+        self.assertEquals(stack.get(name), "baz")
+
+        # Works on multiple levels, too
+        name = "a.b.c.d.e.f.g"
+        A = Attachable
+        stack = ContextStack({"a": A(b=A(c=A(d=A(e=A(f=A(g="w00t!"))))))})
+        self.assertEquals(stack.get(name), "w00t!")
+
+    def test_dot_notation__mixed_dict_and_obj(self):
+        name = "foo.bar.baz.bak"
+        stack = ContextStack({"foo": Attachable(bar={"baz": Attachable(bak=42)})})
+        self.assertEquals(stack.get(name), 42)
+
+    def test_dot_notation__missing_attr_or_key(self):
+        name = "foo.bar.baz.bak"
+        stack = ContextStack({"foo": {"bar": {}}})
+        self.assertString(stack.get(name), u'')
+
+        stack = ContextStack({"foo": Attachable(bar=Attachable())})
+        self.assertString(stack.get(name), u'')
+
+    def test_dot_notation__missing_part_terminates_search(self):
+        """
+        Test that dotted name resolution terminates on a later part not found.
+
+        Check that if a later dotted name part is not found in the result from
+        the former resolution, then name resolution terminates rather than
+        starting the search over with the next element of the context stack.
+        From the spec (interpolation section)--
+
+          5) If any name parts were retained in step 1, each should be resolved
+          against a context stack containing only the result from the former
+          resolution.  If any part fails resolution, the result should be considered
+          falsey, and should interpolate as the empty string.
+
+        This test case is equivalent to the test case in the following pull
+        request:
+
+          https://github.com/mustache/spec/pull/48
+
+        """
+        stack = ContextStack({'a': {'b': 'A.B'}}, {'a': 'A'})
+        self.assertEqual(stack.get('a'), 'A')
+        self.assertString(stack.get('a.b'), u'')
+        stack.pop()
+        self.assertEqual(stack.get('a.b'), 'A.B')
+
+    def test_dot_notation__autocall(self):
+        name = "foo.bar.baz"
+
+        # When any element in the path is callable, it should be automatically invoked
+        stack = ContextStack({"foo": Attachable(bar=Attachable(baz=lambda: "Called!"))})
+        self.assertEquals(stack.get(name), "Called!")
+
+        class Foo(object):
+            def bar(self):
+                return Attachable(baz='Baz')
+
+        stack = ContextStack({"foo": Foo()})
+        self.assertEquals(stack.get(name), "Baz")

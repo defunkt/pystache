@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-Exposes a ContextStack class and functions to retrieve names from context.
+Exposes a ContextStack class.
 
 """
 
@@ -27,6 +27,8 @@ def _is_callable(obj):
     return hasattr(obj, '__call__')
 
 
+# TODO: rename item to context (now that we have a separate notion of context stack).
+# TODO: document what a "context" is as opposed to a context stack.
 def _get_value(item, key):
     """
     Retrieve a key's value from an item.
@@ -58,25 +60,6 @@ def _get_value(item, key):
             return attr
 
     return _NOT_FOUND
-
-
-# TODO: add some unit tests for this.
-def resolve(context, name):
-    """
-    Resolve the given name against the given context stack.
-
-    This function follows the rules outlined in the section of the spec
-    regarding tag interpolation.
-
-    This function does not coerce the return value to a string.
-
-    """
-    if name == '.':
-        return context.top()
-
-    # The spec says that if the name fails resolution, the result should be
-    # considered falsey, and should interpolate as the empty string.
-    return context.get(name, '')
 
 
 class ContextStack(object):
@@ -186,9 +169,65 @@ class ContextStack(object):
 
         return context
 
-    def get(self, key, default=None):
+    # TODO: add some unit tests for this.
+    def get(self, name, default=u''):
         """
-        Query the stack for the given key, and return the resulting value.
+        Resolve a dotted name against the current context stack.
+
+        This function follows the rules outlined in the section of the spec
+        regarding tag interpolation.
+
+        Arguments:
+
+          name: a dotted or non-dotted name.
+
+          default: the value to return if name resolution fails at any point.
+            Defaults to the empty string since the Mustache spec says that if
+            name resolution fails at any point, the result should be considered
+            falsey, and should interpolate as the empty string.
+
+        This function does not coerce the return value to a string.
+
+        """
+        if name == '.':
+            # TODO: should we add a test case for an empty context stack?
+            return self.top()
+
+        parts = name.split('.')
+
+        value = self._get_simple(parts[0])
+
+        for part in parts[1:]:
+            # TODO: consider using EAFP here instead.
+            #   http://docs.python.org/glossary.html#term-eafp
+            if value is _NOT_FOUND:
+                break
+            # The full context stack is not used to resolve the remaining parts.
+            # From the spec--
+            #
+            #   5) If any name parts were retained in step 1, each should be
+            #   resolved against a context stack containing only the result
+            #   from the former resolution.  If any part fails resolution, the
+            #   result should be considered falsey, and should interpolate as
+            #   the empty string.
+            #
+            # TODO: make sure we have a test case for the above point.
+            value = _get_value(value, part)
+
+        if value is _NOT_FOUND:
+            return default
+
+        return value
+
+    # TODO: combine the docstring for this method with the docstring for
+    #   the get() method.
+    def _get_simple(self, key):
+        """
+        Query the stack for a non-dotted key, and return the resulting value.
+
+        Arguments:
+
+          key: a non-dotted name.
 
         This method queries items in the stack in order from last-added
         objects to first (last in, first out).  The value returned is
@@ -253,15 +292,16 @@ class ContextStack(object):
           TODO: explain the rationale for this difference in treatment.
 
         """
-        for obj in reversed(self._stack):
-            val = _get_value(obj, key)
+        val = _NOT_FOUND
+
+        for item in reversed(self._stack):
+            val = _get_value(item, key)
             if val is _NOT_FOUND:
                 continue
             # Otherwise, the key was found.
-            return val
-        # Otherwise, no item in the stack contained the key.
+            break
 
-        return default
+        return val
 
     def push(self, item):
         """
