@@ -64,6 +64,7 @@ class RenderEngine(object):
         self.literal = literal
         self.load_partial = load_partial
 
+    # TODO: rename context to stack throughout this module.
     def _get_string_value(self, context, tag_name):
         """
         Get a value from the given context as a basestring instance.
