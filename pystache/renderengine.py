@@ -65,8 +65,10 @@ class RenderEngine(object):
         self.literal = literal
         self.load_partial = load_partial
 
-    # TODO: rename context to stack throughout this module.
-    def read_partial(self, key):
+    def resolve_context(self, stack, name):
+        return stack.get(name)
+
+    def resolve_partial(self, key):
         try:
             return self.load_partial(key)
         except TemplateNotFoundError:
@@ -77,7 +79,7 @@ class RenderEngine(object):
         Get a value from the given context as a basestring instance.
 
         """
-        val = context.get(tag_name)
+        val = self.resolve_context(context, tag_name)
 
         if callable(val):
             # According to the spec:
@@ -145,7 +147,7 @@ class RenderEngine(object):
             """
             # TODO: is there a bug because we are not using the same
             #   logic as in _get_string_value()?
-            data = context.get(name)
+            data = self.resolve_context(context, name)
             # Per the spec, lambdas in inverted sections are considered truthy.
             if data:
                 return u''
@@ -164,7 +166,7 @@ class RenderEngine(object):
             """
             template = template_
             parsed_template = parsed_template_
-            data = context.get(name)
+            data = self.resolve_context(context, name)
 
             # From the spec:
             #

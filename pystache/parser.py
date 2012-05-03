@@ -215,7 +215,7 @@ class Parser(object):
 
         elif tag_type == '>':
 
-            template = engine.read_partial(tag_key)
+            template = engine.resolve_partial(tag_key)
             # Indent before rendering.
             template = re.sub(NON_BLANK_RE, leading_whitespace + ur'\1', template)
             func = engine._make_get_partial(template)
