@@ -3,6 +3,15 @@
 """
 Exposes a ContextStack class.
 
+The Mustache spec makes a special distinction between two types of context
+stack elements: hashes and objects.  For the purposes of interpreting the
+spec, we define these categories mutually exclusively as follows:
+
+ (1) Hash: an item whose type is a subclass of dict.
+
+ (2) Object: an item that is neither a hash nor an instance of a
+     built-in type.
+
 """
 
 # This equals '__builtin__' in Python 2 and 'builtins' in Python 3.
@@ -22,7 +31,6 @@ class NotFound(object):
 _NOT_FOUND = NotFound()
 
 
-# TODO: document what a "context" is as opposed to a context stack.
 def _get_value(context, key):
     """
     Retrieve a key's value from a context item.
@@ -231,30 +239,21 @@ class ContextStack(object):
         If the key is not found in any item in the stack, then the default
         value is returned.  The default value defaults to None.
 
-        When speaking about returning values from a context, the Mustache
-        spec distinguishes between two types of context stack elements:
-        hashes and objects.
-
         In accordance with the spec, this method queries items in the
-        stack for a key in the following way.  For the purposes of querying,
-        each item is classified into one of the following three mutually
-        exclusive categories: a hash, an object, or neither:
+        stack for a key differently depending on whether the item is a
+        hash, object, or neither (as defined in the module docstring):
 
-        (1) Hash: if the item's type is a subclass of dict, then the item
-            is considered a hash (in the terminology of the spec), and
-            the key's value is the dictionary value of the key.  If the
-            dictionary doesn't contain the key, the key is not found.
+        (1) Hash: if the item is a hash, then the key's value is the
+            dictionary value of the key.  If the dictionary doesn't contain
+            the key, then the key is considered not found.
 
-        (2) Object: if the item isn't a hash and isn't an instance of a
-            built-in type, then the item is considered an object (again
-            using the language of the spec).  In this case, the method
-            looks for an attribute with the same name as the key.  If an
-            attribute with that name exists, the value of the attribute is
-            returned.  If the attribute is callable, however (i.e. if the
-            attribute is a method), then the attribute is called with no
-            arguments and instead that value returned.  If there is no
-            attribute with the same name as the key, then the key is
-            considered not found.
+        (2) Object: if the item is an an object, then the method looks for
+            an attribute with the same name as the key.  If an attribute
+            with that name exists, the value of the attribute is returned.
+            If the attribute is callable, however (i.e. if the attribute
+            is a method), then the attribute is called with no arguments
+            and that value is returned.  If there is no attribute with
+            the same name as the key, then the key is considered not found.
 
         (3) Neither: if the item is neither a hash nor an object, then
             the key is considered not found.
