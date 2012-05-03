@@ -123,6 +123,7 @@ class RenderEngine(object):
             Returns: a string of type unicode.
 
             """
+            # TODO: the parsing should be done before calling this function.
             return self._render(template, context)
 
         return get_partial
