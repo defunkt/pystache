@@ -173,65 +173,22 @@ class ContextStack(object):
 
         return context
 
-    # TODO: add some unit tests for this.
+    # TODO: add more unit tests for this.
+    # TODO: update the docstring for dotted names.
     def get(self, name, default=u''):
         """
         Resolve a dotted name against the current context stack.
 
-        This function follows the rules outlined in the section of the spec
-        regarding tag interpolation.
+        This function follows the rules outlined in the section of the
+        spec regarding tag interpolation.  This function returns the value
+        as is and does not coerce the return value to a string.
 
         Arguments:
 
           name: a dotted or non-dotted name.
 
           default: the value to return if name resolution fails at any point.
-            Defaults to the empty string since the Mustache spec says that if
-            name resolution fails at any point, the result should be considered
-            falsey, and should interpolate as the empty string.
-
-        This function does not coerce the return value to a string.
-
-        """
-        if name == '.':
-            # TODO: should we add a test case for an empty context stack?
-            return self.top()
-
-        parts = name.split('.')
-
-        result = self._get_simple(parts[0])
-
-        for part in parts[1:]:
-            # TODO: consider using EAFP here instead.
-            #   http://docs.python.org/glossary.html#term-eafp
-            if result is _NOT_FOUND:
-                break
-            # The full context stack is not used to resolve the remaining parts.
-            # From the spec--
-            #
-            #   5) If any name parts were retained in step 1, each should be
-            #   resolved against a context stack containing only the result
-            #   from the former resolution.  If any part fails resolution, the
-            #   result should be considered falsey, and should interpolate as
-            #   the empty string.
-            #
-            # TODO: make sure we have a test case for the above point.
-            result = _get_value(result, part)
-
-        if result is _NOT_FOUND:
-            return default
-
-        return result
-
-    # TODO: combine the docstring for this method with the docstring for
-    #   the get() method.
-    def _get_simple(self, key):
-        """
-        Query the stack for a non-dotted key, and return the resulting value.
-
-        Arguments:
-
-          key: a non-dotted name.
+            Defaults to the empty string per the Mustache spec.
 
         This method queries items in the stack in order from last-added
         objects to first (last in, first out).  The value returned is
@@ -287,16 +244,51 @@ class ContextStack(object):
           TODO: explain the rationale for this difference in treatment.
 
         """
-        val = _NOT_FOUND
+        if name == '.':
+            # TODO: should we add a test case for an empty context stack?
+            return self.top()
+
+        parts = name.split('.')
+
+        result = self._get_simple(parts[0])
+
+        for part in parts[1:]:
+            # TODO: consider using EAFP here instead.
+            #   http://docs.python.org/glossary.html#term-eafp
+            if result is _NOT_FOUND:
+                break
+            # The full context stack is not used to resolve the remaining parts.
+            # From the spec--
+            #
+            #   5) If any name parts were retained in step 1, each should be
+            #   resolved against a context stack containing only the result
+            #   from the former resolution.  If any part fails resolution, the
+            #   result should be considered falsey, and should interpolate as
+            #   the empty string.
+            #
+            # TODO: make sure we have a test case for the above point.
+            result = _get_value(result, part)
+
+        if result is _NOT_FOUND:
+            return default
+
+        return result
+
+    def _get_simple(self, name):
+        """
+        Query the stack for a non-dotted name.
+
+        """
+        result = _NOT_FOUND
 
         for item in reversed(self._stack):
-            val = _get_value(item, key)
-            if val is _NOT_FOUND:
+            result = _get_value(item, name)
+            if result is _NOT_FOUND:
                 continue
             # Otherwise, the key was found.
             break
 
-        return val
+        return result
 
     def push(self, item):
         """
