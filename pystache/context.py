@@ -22,11 +22,6 @@ class NotFound(object):
 _NOT_FOUND = NotFound()
 
 
-# TODO: share code with template.check_callable().
-def _is_callable(obj):
-    return hasattr(obj, '__call__')
-
-
 # TODO: document what a "context" is as opposed to a context stack.
 def _get_value(context, key):
     """
@@ -54,7 +49,9 @@ def _get_value(context, key):
         # are considered objects by the test above.
         if hasattr(context, key):
             attr = getattr(context, key)
-            if _is_callable(attr):
+            # TODO: consider using EAFP here instead.
+            #   http://docs.python.org/glossary.html#term-eafp
+            if callable(attr):
                 return attr()
             return attr
 
