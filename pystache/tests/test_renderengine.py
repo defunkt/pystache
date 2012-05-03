@@ -11,7 +11,7 @@ from pystache.context import ContextStack
 from pystache import defaults
 from pystache.parser import ParsingError
 from pystache.renderengine import RenderEngine
-from pystache.tests.common import AssertStringMixin
+from pystache.tests.common import AssertStringMixin, Attachable
 
 
 def mock_literal(s):
@@ -581,15 +581,77 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         self._assert_render(expected, '{{=$ $=}} {{foo}} ')
         self._assert_render(expected, '{{=$ $=}} {{foo}} $={{ }}=$')  # was yielding u'  '.
 
-    def test_dot_notation__forward_progress(self):
+    def test_dot_notation(self):
         """
-        Test that dotted name resolution makes "forward-only" progress.
+        Test simple dot notation cases.
 
-        This is equivalent to the test case in the following pull request:
+        Check that we can use dot notation when the variable is a dict,
+        user-defined object, or combination of both.
+
+        """
+        template = 'Hello, {{person.name}}. I see you are {{person.details.age}}.'
+        person = Attachable(name='Biggles', details={'age': 42})
+        context = {'person': person}
+        self._assert_render(u'Hello, Biggles. I see you are 42.', template, context)
+
+    def test_dot_notation__missing_attributes_or_keys(self):
+        """
+        Test dot notation with missing keys or attributes.
+
+        Check that if a key or attribute in a dotted name does not exist, then
+        the tag renders as the empty string.
+
+        """
+        template = """I cannot see {{person.name}}'s age: {{person.age}}.
+        Nor {{other_person.name}}'s: ."""
+        expected = u"""I cannot see Biggles's age: .
+        Nor Mr. Bradshaw's: ."""
+        context = {'person': {'name': 'Biggles'},
+                   'other_person': Attachable(name='Mr. Bradshaw')}
+        self._assert_render(expected, template, context)
+
+    def test_dot_notation__multiple_levels(self):
+        """
+        Test dot notation with multiple levels.
+
+        """
+        template = """Hello, Mr. {{person.name.lastname}}.
+        I see you're back from {{person.travels.last.country.city}}.
+        I'm missing some of your details: {{person.details.private.editor}}."""
+        expected = u"""Hello, Mr. Pither.
+        I see you're back from Cornwall.
+        I'm missing some of your details: ."""
+        context = {'person': {'name': {'firstname': 'unknown', 'lastname': 'Pither'},
+                            'travels': {'last': {'country': {'city': 'Cornwall'}}},
+                            'details': {'public': 'likes cycling'}}}
+        self._assert_render(expected, template, context)
+
+        # It should also work with user-defined objects
+        context = {'person': Attachable(name={'firstname': 'unknown', 'lastname': 'Pither'},
+                                        travels=Attachable(last=Attachable(country=Attachable(city='Cornwall'))),
+                                        details=Attachable())}
+        self._assert_render(expected, template, context)
+
+    def test_dot_notation__missing_part_terminates_search(self):
+        """
+        Test that dotted name resolution terminates on a later part not found.
+
+        Check that if a later dotted name part is not found in the result from
+        the former resolution, then name resolution terminates rather than
+        starting the search over with the next element of the context stack.
+        From the spec (interpolation section)--
+
+          5) If any name parts were retained in step 1, each should be resolved
+          against a context stack containing only the result from the former
+          resolution.  If any part fails resolution, the result should be considered
+          falsey, and should interpolate as the empty string.
+
+        This test case is equivalent to the test case in the following pull
+        request:
 
           https://github.com/mustache/spec/pull/48
 
         """
-        template = '{{a.b}} :: {{#c}}{{a}} :: {{a.b}}{{/c}}'
-        context = {'a': {'b': 'a.b found'}, 'c': {'a': 'a.b not found'} }
-        self._assert_render(u'a.b found :: a.b not found :: ', template, context)
+        template = '{{a.b}} :: ({{#c}}{{a}} :: {{a.b}}{{/c}})'
+        context = {'a': {'b': 'A.B'}, 'c': {'a': 'A'} }
+        self._assert_render(u'A.B :: (A :: )', template, context)

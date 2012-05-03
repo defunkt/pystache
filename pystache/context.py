@@ -205,9 +205,11 @@ class ContextStack(object):
             # The full context stack is not used to resolve the remaining parts.
             # From the spec--
             #
-            #   If any name parts were retained in step 1, each should be resolved
-            #   against a context stack containing only the result from the former
-            #   resolution.
+            #   5) If any name parts were retained in step 1, each should be
+            #   resolved against a context stack containing only the result
+            #   from the former resolution.  If any part fails resolution, the
+            #   result should be considered falsey, and should interpolate as
+            #   the empty string.
             #
             # TODO: make sure we have a test case for the above point.
             value = _get_value(value, part)
