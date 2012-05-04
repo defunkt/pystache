@@ -14,6 +14,7 @@ from examples.simple import Simple
 from pystache import Renderer
 from pystache import TemplateSpec
 from pystache.common import TemplateNotFoundError
+from pystache.context import ContextStack, KeyNotFoundError
 from pystache.loader import Loader
 
 from pystache.tests.common import get_data_path, AssertStringMixin, AssertExceptionMixin
@@ -461,7 +462,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertStringMixin, Asser
         self.assertEqual(actual, "abc")
         self.assertEqual(type(actual), unicode)
 
-    def test__resolve_partial__not_found__default(self):
+    def test__resolve_partial__not_found(self):
         """
         Check that resolve_partial returns the empty string when a template is not found.
 
@@ -473,7 +474,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertStringMixin, Asser
 
         self.assertString(resolve_partial('foo'), u'')
 
-    def test__resolve_partial__not_found__strict__default(self):
+    def test__resolve_partial__not_found__missing_tags_strict(self):
         """
         Check that resolve_partial provides a nice message when a template is not found.
 
@@ -487,7 +488,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertStringMixin, Asser
         self.assertException(TemplateNotFoundError, "File 'foo.mustache' not found in dirs: ['.']",
                              resolve_partial, "foo")
 
-    def test__resolve_partial__not_found__dict(self):
+    def test__resolve_partial__not_found__partials_dict(self):
         """
         Check that resolve_partial returns the empty string when a template is not found.
 
@@ -500,7 +501,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertStringMixin, Asser
 
         self.assertString(resolve_partial('foo'), u'')
 
-    def test__resolve_partial__not_found__strict__dict(self):
+    def test__resolve_partial__not_found__partials_dict__missing_tags_strict(self):
         """
         Check that resolve_partial provides a nice message when a template is not found.
 
@@ -638,3 +639,34 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertStringMixin, Asser
         self.assertTrue(isinstance(s, unicode))
         self.assertEqual(type(escape(s)), unicode)
 
+    ## Test the engine's resolve_context attribute.
+
+    def test__resolve_context(self):
+        """
+        Check resolve_context(): default arguments.
+
+        """
+        renderer = Renderer()
+
+        engine = renderer._make_render_engine()
+
+        stack = ContextStack({'foo': 'bar'})
+
+        self.assertEqual('bar', engine.resolve_context(stack, 'foo'))
+        self.assertString(u'', engine.resolve_context(stack, 'missing'))
+
+    def test__resolve_context__missing_tags_strict(self):
+        """
+        Check resolve_context(): missing_tags 'strict'.
+
+        """
+        renderer = Renderer()
+        renderer.missing_tags = 'strict'
+
+        engine = renderer._make_render_engine()
+
+        stack = ContextStack({'foo': 'bar'})
+
+        self.assertEqual('bar', engine.resolve_context(stack, 'foo'))
+        self.assertException(KeyNotFoundError, "Key 'missing' not found: first part",
+                             engine.resolve_context, stack, 'missing')

@@ -7,8 +7,15 @@ Defines a class responsible for rendering logic.
 
 import re
 
-from pystache.context import KeyNotFoundError
 from pystache.parser import Parser
+
+
+def context_get(stack, name):
+    """
+    Find and return a name from a ContextStack instance.
+
+    """
+    return stack.get(name)
 
 
 class RenderEngine(object):
@@ -30,13 +37,10 @@ class RenderEngine(object):
 
     """
 
-    def __init__(self, resolve_partial=None, literal=None, escape=None):
+    def __init__(self, literal=None, escape=None, resolve_context=None,
+                 resolve_partial=None):
         """
         Arguments:
-
-          resolve_partial: the function to call when loading a partial.
-            The function should accept a string template name and return a
-            template string of type unicode (not a subclass).
 
           literal: the function used to convert unescaped variable tag
             values to unicode, e.g. the value corresponding to a tag
@@ -59,17 +63,21 @@ class RenderEngine(object):
             incoming strings of type markupsafe.Markup differently
             from plain unicode strings.
 
+          resolve_context: the function to call to resolve a name against
+            a context stack.  The function should accept two positional
+            arguments: a ContextStack instance and a name to resolve.
+
+          resolve_partial: the function to call when loading a partial.
+            The function should accept a template name string and return a
+            template string of type unicode (not a subclass).
+
         """
         self.escape = escape
         self.literal = literal
+        self.resolve_context = resolve_context
         self.resolve_partial = resolve_partial
 
-    def resolve_context(self, stack, name):
-        try:
-            return stack.get(name)
-        except KeyNotFoundError:
-            return u''
-
+    # TODO: Rename context to stack throughout this module.
     def _get_string_value(self, context, tag_name):
         """
         Get a value from the given context as a basestring instance.

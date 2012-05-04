@@ -9,9 +9,9 @@ import sys
 
 from pystache import defaults
 from pystache.common import TemplateNotFoundError, MissingTags
-from pystache.context import ContextStack
+from pystache.context import ContextStack, KeyNotFoundError
 from pystache.loader import Loader
-from pystache.renderengine import RenderEngine
+from pystache.renderengine import context_get, RenderEngine
 from pystache.specloader import SpecLoader
 from pystache.template_spec import TemplateSpec
 
@@ -258,6 +258,13 @@ class Renderer(object):
 
         return load_partial
 
+    def _is_missing_tags_strict(self):
+        """
+        Return whether missing_tags is set to strict.
+
+        """
+        return self.missing_tags == MissingTags.strict
+
     def _make_resolve_partial(self):
         """
         Return the resolve_partial function to pass to RenderEngine.__init__().
@@ -265,7 +272,7 @@ class Renderer(object):
         """
         load_partial = self._make_load_partial()
 
-        if self.missing_tags == MissingTags.strict:
+        if self._is_missing_tags_strict():
             return load_partial
         # Otherwise, ignore missing tags.
 
@@ -277,16 +284,35 @@ class Renderer(object):
 
         return resolve_partial
 
+    def _make_resolve_context(self):
+        """
+        Return the resolve_context function to pass to RenderEngine.__init__().
+
+        """
+        if self._is_missing_tags_strict():
+            return context_get
+        # Otherwise, ignore missing tags.
+
+        def resolve_context(stack, name):
+            try:
+                return context_get(stack, name)
+            except KeyNotFoundError:
+                return u''
+
+        return resolve_context
+
     def _make_render_engine(self):
         """
         Return a RenderEngine instance for rendering.
 
         """
+        resolve_context = self._make_resolve_context()
         resolve_partial = self._make_resolve_partial()
 
-        engine = RenderEngine(resolve_partial=resolve_partial,
-                              literal=self._to_unicode_hard,
-                              escape=self._escape_to_unicode)
+        engine = RenderEngine(literal=self._to_unicode_hard,
+                              escape=self._escape_to_unicode,
+                              resolve_context=resolve_context,
+                              resolve_partial=resolve_partial)
         return engine
 
     # TODO: add unit tests for this method.
