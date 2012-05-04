@@ -124,6 +124,22 @@ class RendererInitTestCase(unittest.TestCase):
         renderer = Renderer(file_extension='foo')
         self.assertEqual(renderer.file_extension, 'foo')
 
+    def test_missing_tags(self):
+        """
+        Check that the missing_tags attribute is set correctly.
+
+        """
+        renderer = Renderer(missing_tags='foo')
+        self.assertEqual(renderer.missing_tags, 'foo')
+
+    def test_missing_tags__default(self):
+        """
+        Check the missing_tags default.
+
+        """
+        renderer = Renderer()
+        self.assertEqual(renderer.missing_tags, 'ignore')
+
     def test_search_dirs__default(self):
         """
         Check the search_dirs default.
@@ -457,19 +473,19 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertStringMixin, Asser
 
         self.assertString(resolve_partial('foo'), u'')
 
-# TODO: add this test case back when we add support to Renderer for strict mode.
-#    def test__resolve_partial__not_found__default(self):
-#        """
-#        Check that resolve_partial provides a nice message when a template is not found.
+    def test__resolve_partial__not_found__strict__default(self):
+        """
+        Check that resolve_partial provides a nice message when a template is not found.
 
-#        """
-#        renderer = Renderer()
+        """
+        renderer = Renderer()
+        renderer.missing_tags = 'strict'
 
-#        engine = renderer._make_render_engine()
-#        resolve_partial = engine.resolve_partial
+        engine = renderer._make_render_engine()
+        resolve_partial = engine.resolve_partial
 
-#        self.assertException(TemplateNotFoundError, "File 'foo.mustache' not found in dirs: ['.']",
-#                             resolve_partial, "foo")
+        self.assertException(TemplateNotFoundError, "File 'foo.mustache' not found in dirs: ['.']",
+                             resolve_partial, "foo")
 
     def test__resolve_partial__not_found__dict(self):
         """
@@ -484,22 +500,22 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertStringMixin, Asser
 
         self.assertString(resolve_partial('foo'), u'')
 
-# TODO: add this test case back when we add support to Renderer for strict mode.
-#    def test__resolve_partial__not_found__dict(self):
-#        """
-#        Check that resolve_partial provides a nice message when a template is not found.
+    def test__resolve_partial__not_found__strict__dict(self):
+        """
+        Check that resolve_partial provides a nice message when a template is not found.
 
-#        """
-#        renderer = Renderer()
-#        renderer.partials = {}
+        """
+        renderer = Renderer()
+        renderer.missing_tags = 'strict'
+        renderer.partials = {}
 
-#        engine = renderer._make_render_engine()
-#        resolve_partial = engine.resolve_partial
+        engine = renderer._make_render_engine()
+        resolve_partial = engine.resolve_partial
 
-        # Include dict directly since str(dict) is different in Python 2 and 3:
-        #   <type 'dict'> versus <class 'dict'>, respectively.
-#        self.assertException(TemplateNotFoundError, "Name 'foo' not found in partials: %s" % dict,
-#                             resolve_partial, "foo")
+       # Include dict directly since str(dict) is different in Python 2 and 3:
+       #   <type 'dict'> versus <class 'dict'>, respectively.
+        self.assertException(TemplateNotFoundError, "Name 'foo' not found in partials: %s" % dict,
+                             resolve_partial, "foo")
 
     ## Test the engine's literal attribute.
 

@@ -26,6 +26,14 @@ def read(path):
         f.close()
 
 
+class MissingTags(object):
+
+    """Contains the valid values for Renderer.missing_tags."""
+
+    ignore = 'ignore'
+    strict = 'strict'
+
+
 class PystacheError(Exception):
     """Base class for Pystache exceptions."""
     pass
