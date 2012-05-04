@@ -232,47 +232,48 @@ class Renderer(object):
 
         return load_template
 
-    # TODO: simplify this method.
+    def _make_load_partial(self):
+        """
+        Return a function that loads a partial by name.
+
+        """
+        if self.partials is None:
+            return self._make_load_template()
+
+        # Otherwise, create a function from the custom partial loader.
+        partials = self.partials
+
+        def load_partial(name):
+            # TODO: consider using EAFP here instead.
+            #     http://docs.python.org/glossary.html#term-eafp
+            #   This would mean requiring that the custom partial loader
+            #   raise a KeyError on name not found.
+            template = partials.get(name)
+            if template is None:
+                raise TemplateNotFoundError("Name %s not found in partials: %s" %
+                                            (repr(name), type(partials)))
+
+            # RenderEngine requires that the return value be unicode.
+            return self._to_unicode_hard(template)
+
+        return load_partial
+
     def _make_resolve_partial(self):
         """
         Return the resolve_partial function to pass to RenderEngine.__init__().
 
         """
-        if self.partials is None:
-            load_template = self._make_load_template()
-
-            if self.missing_tags == MissingTags.strict:
-                return load_template
-            # Otherwise, ignore missing tags.
-
-            def resolve_partial(name):
-                try:
-                    return load_template(name)
-                except TemplateNotFoundError:
-                    return u''
-
-            return resolve_partial
-
-        # Otherwise, create a resolve_partial function from the custom partial
-        # loader that satisfies RenderEngine requirements (and that provides
-        # a nicer exception, etc).
-        partials = self.partials
+        load_partial = self._make_load_partial()
 
         if self.missing_tags == MissingTags.strict:
-            def on_template_none(name, partials):
-                raise TemplateNotFoundError("Name %s not found in partials: %s" %
-                                            (repr(name), type(partials)))
-        else:
-            # Otherwise, ignore missing tags.
-            on_template_none = lambda name, partials: u''
+            return load_partial
+        # Otherwise, ignore missing tags.
 
         def resolve_partial(name):
-            template = partials.get(name)
-            if template is None:
-                return on_template_none(name, partials)
-
-            # RenderEngine requires that the return value be unicode.
-            return self._to_unicode_hard(template)
+            try:
+                return load_partial(name)
+            except TemplateNotFoundError:
+                return u''
 
         return resolve_partial
 
