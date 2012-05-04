@@ -14,6 +14,9 @@ spec, we define these categories mutually exclusively as follows:
 
 """
 
+from pystache.common import PystacheError
+
+
 # This equals '__builtin__' in Python 2 and 'builtins' in Python 3.
 _BUILTIN_MODULE = type(0).__module__
 
@@ -71,6 +74,21 @@ def _get_value(context, key):
             return attr
 
     return _NOT_FOUND
+
+
+class KeyNotFoundError(PystacheError):
+
+    """
+    An exception raised when a key is not found in a context stack.
+
+    """
+
+    def __init__(self, key, details):
+        self.key = key
+        self.details = details
+
+    def __str__(self):
+        return "Key %s not found: %s" % (repr(self.key), self.details)
 
 
 class ContextStack(object):
@@ -252,8 +270,10 @@ class ContextStack(object):
 
         """
         if name == '.':
-            # TODO: should we add a test case for an empty context stack?
-            return self.top()
+            try:
+                return self.top()
+            except IndexError:
+                raise KeyNotFoundError(".", "empty context stack")
 
         parts = name.split('.')
 

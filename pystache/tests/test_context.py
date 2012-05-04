@@ -8,10 +8,8 @@ Unit tests of context.py.
 from datetime import datetime
 import unittest
 
-from pystache.context import _NOT_FOUND
-from pystache.context import _get_value
-from pystache.context import ContextStack
-from pystache.tests.common import AssertIsMixin, AssertStringMixin, Attachable
+from pystache.context import _NOT_FOUND, _get_value, KeyNotFoundError, ContextStack
+from pystache.tests.common import AssertIsMixin, AssertStringMixin, AssertExceptionMixin, Attachable
 
 class SimpleObject(object):
 
@@ -39,7 +37,7 @@ class DictLike(object):
         return self._dict[key]
 
 
-class GetValueTests(unittest.TestCase, AssertIsMixin):
+class GetValueTestCase(unittest.TestCase, AssertIsMixin):
 
     """Test context._get_value()."""
 
@@ -224,7 +222,8 @@ class GetValueTests(unittest.TestCase, AssertIsMixin):
         self.assertNotFound(item2, 'pop')
 
 
-class ContextStackTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
+class ContextStackTestCase(unittest.TestCase, AssertIsMixin, AssertStringMixin,
+                           AssertExceptionMixin):
 
     """
     Test the ContextStack class.
@@ -325,6 +324,24 @@ class ContextStackTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         """
         context = ContextStack.create({'foo': 'bar'}, foo='buzz')
         self.assertEqual(context.get('foo'), 'buzz')
+
+    ## Test the get() method.
+
+    def test_get__single_dot(self):
+        """
+        Test getting a single dot (".").
+
+        """
+        context = ContextStack("a", "b")
+        self.assertEqual(context.get("."), "b")
+
+    def test_get__single_dot__missing(self):
+        """
+        Test getting a single dot (".") with an empty context stack.
+
+        """
+        context = ContextStack()
+        self.assertException(KeyNotFoundError, "Key '.' not found: empty context stack", context.get, ".", "b")
 
     def test_get__key_present(self):
         """
