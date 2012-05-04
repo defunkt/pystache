@@ -200,7 +200,7 @@ class ContextStack(object):
 
     # TODO: add more unit tests for this.
     # TODO: update the docstring for dotted names.
-    def get(self, name, default=u''):
+    def get(self, name):
         """
         Resolve a dotted name against the current context stack.
 
@@ -277,13 +277,12 @@ class ContextStack(object):
 
         parts = name.split('.')
 
-        result = self._get_simple(parts[0])
+        try:
+            result = self._get_simple(parts[0])
+        except KeyNotFoundError:
+            raise KeyNotFoundError(name, "first part")
 
         for part in parts[1:]:
-            # TODO: consider using EAFP here instead.
-            #   http://docs.python.org/glossary.html#term-eafp
-            if result is _NOT_FOUND:
-                break
             # The full context stack is not used to resolve the remaining parts.
             # From the spec--
             #
@@ -295,9 +294,10 @@ class ContextStack(object):
             #
             # TODO: make sure we have a test case for the above point.
             result = _get_value(result, part)
-
-        if result is _NOT_FOUND:
-            return default
+            # TODO: consider using EAFP here instead.
+            #   http://docs.python.org/glossary.html#term-eafp
+            if result is _NOT_FOUND:
+                raise KeyNotFoundError(name, "missing %s" % repr(part))
 
         return result
 
@@ -306,16 +306,12 @@ class ContextStack(object):
         Query the stack for a non-dotted name.
 
         """
-        result = _NOT_FOUND
-
         for item in reversed(self._stack):
             result = _get_value(item, name)
-            if result is _NOT_FOUND:
-                continue
-            # Otherwise, the key was found.
-            break
+            if result is not _NOT_FOUND:
+                return result
 
-        return result
+        raise KeyNotFoundError(name, "part missing")
 
     def push(self, item):
         """

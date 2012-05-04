@@ -8,6 +8,7 @@ Defines a class responsible for rendering logic.
 import re
 
 from pystache.common import TemplateNotFoundError
+from pystache.context import KeyNotFoundError
 from pystache.parser import Parser
 
 
@@ -66,7 +67,10 @@ class RenderEngine(object):
         self.load_partial = load_partial
 
     def resolve_context(self, stack, name):
-        return stack.get(name)
+        try:
+            return stack.get(name)
+        except KeyNotFoundError:
+            return u''
 
     def resolve_partial(self, key):
         try:

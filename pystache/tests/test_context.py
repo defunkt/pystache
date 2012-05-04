@@ -341,7 +341,7 @@ class ContextStackTestCase(unittest.TestCase, AssertIsMixin, AssertStringMixin,
 
         """
         context = ContextStack()
-        self.assertException(KeyNotFoundError, "Key '.' not found: empty context stack", context.get, ".", "b")
+        self.assertException(KeyNotFoundError, "Key '.' not found: empty context stack", context.get, ".")
 
     def test_get__key_present(self):
         """
@@ -357,15 +357,7 @@ class ContextStackTestCase(unittest.TestCase, AssertIsMixin, AssertStringMixin,
 
         """
         context = ContextStack()
-        self.assertString(context.get("foo"), u'')
-
-    def test_get__default(self):
-        """
-        Test that get() respects the default value.
-
-        """
-        context = ContextStack()
-        self.assertEqual(context.get("foo", "bar"), "bar")
+        self.assertException(KeyNotFoundError, "Key 'foo' not found: first part", context.get, "foo")
 
     def test_get__precedence(self):
         """
@@ -461,10 +453,10 @@ class ContextStackTestCase(unittest.TestCase, AssertIsMixin, AssertStringMixin,
     def test_dot_notation__missing_attr_or_key(self):
         name = "foo.bar.baz.bak"
         stack = ContextStack({"foo": {"bar": {}}})
-        self.assertString(stack.get(name), u'')
+        self.assertException(KeyNotFoundError, "Key 'foo.bar.baz.bak' not found: missing 'baz'", stack.get, name)
 
         stack = ContextStack({"foo": Attachable(bar=Attachable())})
-        self.assertString(stack.get(name), u'')
+        self.assertException(KeyNotFoundError, "Key 'foo.bar.baz.bak' not found: missing 'baz'", stack.get, name)
 
     def test_dot_notation__missing_part_terminates_search(self):
         """
@@ -488,7 +480,7 @@ class ContextStackTestCase(unittest.TestCase, AssertIsMixin, AssertStringMixin,
         """
         stack = ContextStack({'a': {'b': 'A.B'}}, {'a': 'A'})
         self.assertEqual(stack.get('a'), 'A')
-        self.assertString(stack.get('a.b'), u'')
+        self.assertException(KeyNotFoundError, "Key 'a.b' not found: missing 'b'", stack.get, "a.b")
         stack.pop()
         self.assertEqual(stack.get('a.b'), 'A.B')
 
