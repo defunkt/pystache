@@ -222,40 +222,49 @@ class Renderer(object):
 
         return load_template
 
-    def _make_load_partial(self):
+    # TODO: rename this to _make_resolve_partial().
+    def _make_resolve_partial(self):
         """
-        Return the load_partial function to pass to RenderEngine.__init__().
+        Return the resolve_partial function to pass to RenderEngine.__init__().
 
         """
         if self.partials is None:
             load_template = self._make_load_template()
-            return load_template
+            def resolve_partial(name):
+                try:
+                    return load_template(name)
+                except TemplateNotFoundError:
+                    return u''
 
-        # Otherwise, create a load_partial function from the custom partial
+            return resolve_partial
+
+        # Otherwise, create a resolve_partial function from the custom partial
         # loader that satisfies RenderEngine requirements (and that provides
         # a nicer exception, etc).
         partials = self.partials
 
-        def load_partial(name):
+        def resolve_partial(name):
             template = partials.get(name)
-
             if template is None:
-                raise TemplateNotFoundError("Name %s not found in partials: %s" %
-                                            (repr(name), type(partials)))
+                return u''
+
+#            if template is None:
+#                raise TemplateNotFoundError("Name %s not found in partials: %s" %
+#                                            (repr(name), type(partials)))
 
             # RenderEngine requires that the return value be unicode.
             return self._to_unicode_hard(template)
 
-        return load_partial
+        return resolve_partial
 
     def _make_render_engine(self):
         """
         Return a RenderEngine instance for rendering.
 
         """
-        load_partial = self._make_load_partial()
+        resolve_partial = self._make_resolve_partial()
 
-        engine = RenderEngine(load_partial=load_partial,
+        engine = RenderEngine(resolve_partial=resolve_partial,
                               literal=self._to_unicode_hard,
                               escape=self._escape_to_unicode)
         return engine

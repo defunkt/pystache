@@ -45,11 +45,11 @@ class RenderEngineTestCase(unittest.TestCase):
 
         """
         # In real-life, these arguments would be functions
-        engine = RenderEngine(load_partial="foo", literal="literal", escape="escape")
+        engine = RenderEngine(resolve_partial="foo", literal="literal", escape="escape")
 
         self.assertEqual(engine.escape, "escape")
         self.assertEqual(engine.literal, "literal")
-        self.assertEqual(engine.load_partial, "foo")
+        self.assertEqual(engine.resolve_partial, "foo")
 
 
 class RenderTests(unittest.TestCase, AssertStringMixin):
@@ -69,7 +69,7 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
 
         """
         escape = defaults.TAG_ESCAPE
-        engine = RenderEngine(literal=unicode, escape=escape, load_partial=None)
+        engine = RenderEngine(literal=unicode, escape=escape, resolve_partial=None)
         return engine
 
     def _assert_render(self, expected, template, *context, **kwargs):
@@ -81,7 +81,7 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         engine = kwargs.get('engine', self._engine())
 
         if partials is not None:
-            engine.load_partial = lambda key: unicode(partials[key])
+            engine.resolve_partial = lambda key: unicode(partials[key])
 
         context = ContextStack(*context)
 
@@ -92,14 +92,14 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
     def test_render(self):
         self._assert_render(u'Hi Mom', 'Hi {{person}}', {'person': 'Mom'})
 
-    def test__load_partial(self):
+    def test__resolve_partial(self):
         """
         Test that render() uses the load_template attribute.
 
         """
         engine = self._engine()
         partials = {'partial': u"{{person}}"}
-        engine.load_partial = lambda key: partials[key]
+        engine.resolve_partial = lambda key: partials[key]
 
         self._assert_render(u'Hi Mom', 'Hi {{>partial}}', {'person': 'Mom'}, engine=engine)
 
