@@ -56,6 +56,29 @@ class Renderer(object):
 
         Arguments:
 
+          file_encoding: the name of the encoding to use by default when
+            reading template files.  All templates are converted to unicode
+            prior to parsing.  Defaults to the package default.
+
+          string_encoding: the name of the encoding to use when converting
+            to unicode any byte strings (type str in Python 2) encountered
+            during the rendering process.  This name will be passed as the
+            encoding argument to the built-in function unicode().
+            Defaults to the package default.
+
+          decode_errors: the string to pass as the errors argument to the
+            built-in function unicode() when converting byte strings to
+            unicode.  Defaults to the package default.
+
+          search_dirs: the list of directories in which to search when
+            loading a template by name or file name.  If given a string,
+            the method interprets the string as a single directory.
+            Defaults to the package default.
+
+          file_extension: the template file extension.  Pass False for no
+            extension (i.e. to use extensionless template files).
+            Defaults to the package default.
+
           partials: an object (e.g. a dictionary) for custom partial loading
             during the rendering process.
                 The object should have a get() method that accepts a string
@@ -67,10 +90,6 @@ class Renderer(object):
             the normal procedure of locating and reading templates from
             the file system -- using relevant instance attributes like
             search_dirs, file_encoding, etc.
-
-          decode_errors: the string to pass as the errors argument to the
-            built-in function unicode() when converting str strings to
-            unicode.  Defaults to the package default.
 
           escape: the function used to escape variable tag values when
             rendering a template.  The function should accept a unicode
@@ -84,26 +103,6 @@ class Renderer(object):
             as the escape function, for example.  One may also wish to
             consider using markupsafe's escape function: markupsafe.escape().
             This argument defaults to the package default.
-
-          file_encoding: the name of the default encoding to use when reading
-            template files.  All templates are converted to unicode prior
-            to parsing.  This encoding is used when reading template files
-            and converting them to unicode.  Defaults to the package default.
-
-          file_extension: the template file extension.  Pass False for no
-            extension (i.e. to use extensionless template files).
-            Defaults to the package default.
-
-          search_dirs: the list of directories in which to search when
-            loading a template by name or file name.  If given a string,
-            the method interprets the string as a single directory.
-            Defaults to the package default.
-
-          string_encoding: the name of the encoding to use when converting
-            to unicode any strings of type str encountered during the
-            rendering process.  The name will be passed as the encoding
-            argument to the built-in function unicode().  Defaults to the
-            package default.
 
           missing_tags: a string specifying how to handle missing tags.
             If 'strict', an error is raised on a missing tag.  If 'ignore',
