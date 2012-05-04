@@ -222,8 +222,8 @@ class RenderEngine(object):
                     new_template = element(template[section_start_index:section_end_index])
                     # Make sure we are dealing with a unicode template string.
                     new_template = self.literal(new_template)
-                    new_parsed_template = self._parse(new_template, delimiters=delims)
-                    parts.append(new_parsed_template.render(context))
+                    rendered = self._render(new_template, context, delimiters=delims)
+                    parts.append(rendered)
                     continue
 
                 context.push(element)
@@ -248,7 +248,7 @@ class RenderEngine(object):
 
         return parser.parse(template=template)
 
-    def _render(self, template, context):
+    def _render(self, template, context, delimiters=None):
         """
         Returns: a string of type unicode.
 
@@ -265,7 +265,7 @@ class RenderEngine(object):
         if type(template) is not unicode:
             raise Exception("Argument 'template' not unicode: %s: %s" % (type(template), repr(template)))
 
-        parsed_template = self._parse(template)
+        parsed_template = self._parse(template, delimiters)
 
         return parsed_template.render(context)
 
