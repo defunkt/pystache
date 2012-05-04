@@ -10,4 +10,4 @@ from pystache.init import render, Renderer, TemplateSpec
 
 __all__ = ['render', 'Renderer', 'TemplateSpec']
 
-__version__ = '0.5.2-rc'  # Also change in setup.py.
+__version__ = '0.5.2-rc.1'  # Also change in setup.py.
