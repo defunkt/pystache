@@ -517,6 +517,21 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
 
         self._assert_render(u'<~bar~#bar#>', template, context)
 
+    def test_section__lambda__mixed_list(self):
+        """
+        Test a mixed list of lambdas and non-lambdas as a section value.
+
+        This test case is equivalent to a test submitted to the Mustache spec here:
+
+          https://github.com/mustache/spec/pull/47 .
+
+        """
+        template = '<{{#lambdas}}foo{{/lambdas}}>'
+        context = {'foo': 'bar',
+                   'lambdas': [lambda text: "~{{%s}}~" % text, 1]}
+
+        self._assert_render(u'<~bar~foo>', template, context)
+
     def test_section__lambda__not_on_context_stack(self):
         """
         Check that section lambdas are not pushed onto the context stack.

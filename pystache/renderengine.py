@@ -208,8 +208,8 @@ class RenderEngine(object):
                     #
                     # TODO: should we check the arity?
                     new_template = element(template)
-                    parsed_template = self._parse(new_template, delimiters=delims)
-                    parts.append(parsed_template.render(context))
+                    new_parsed_template = self._parse(new_template, delimiters=delims)
+                    parts.append(new_parsed_template.render(context))
                     continue
 
                 context.push(element)
