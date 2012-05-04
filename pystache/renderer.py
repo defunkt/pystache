@@ -263,7 +263,14 @@ class Renderer(object):
         Return whether missing_tags is set to strict.
 
         """
-        return self.missing_tags == MissingTags.strict
+        val = self.missing_tags
+
+        if val == MissingTags.strict:
+            return True
+        elif val == MissingTags.ignore:
+            return False
+
+        raise Exception("Unsupported 'missing_tags' value: %s" % repr(val))
 
     def _make_resolve_partial(self):
         """

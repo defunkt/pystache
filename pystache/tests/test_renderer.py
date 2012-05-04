@@ -639,6 +639,19 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertStringMixin, Asser
         self.assertTrue(isinstance(s, unicode))
         self.assertEqual(type(escape(s)), unicode)
 
+    ## Test the missing_tags attribute.
+
+    def test__missing_tags__unknown_value(self):
+        """
+        Check missing_tags attribute: setting an unknown value.
+
+        """
+        renderer = Renderer()
+        renderer.missing_tags = 'foo'
+
+        self.assertException(Exception, "Unsupported 'missing_tags' value: 'foo'",
+                             renderer._make_render_engine)
+
     ## Test the engine's resolve_context attribute.
 
     def test__resolve_context(self):
