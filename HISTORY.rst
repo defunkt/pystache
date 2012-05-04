@@ -8,6 +8,7 @@ History
   ``Renderer(missing_tags='strict')`` (issue #110).
 * Bugfix: exceptions raised from a property are no longer swallowed when
   getting a key from a context stack (issue #110).
+* Bugfix: lambda section values can now return non-ascii, non-unicode strings (issue #118).
 
 0.5.2 (2012-05-03)
 ------------------

@@ -220,6 +220,8 @@ class RenderEngine(object):
                     #
                     # TODO: should we check the arity?
                     new_template = element(template[section_start_index:section_end_index])
+                    # Make sure we are dealing with a unicode template string.
+                    new_template = self.literal(new_template)
                     new_parsed_template = self._parse(new_template, delimiters=delims)
                     parts.append(new_parsed_template.render(context))
                     continue

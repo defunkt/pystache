@@ -473,6 +473,23 @@ class RenderTests(unittest.TestCase, AssertStringMixin, AssertExceptionMixin):
         context = {'test': (lambda text: 'Hi %s' % text)}
         self._assert_render(u'Hi Mom', template, context)
 
+    def test_section__lambda__returning_nonascii_nonunicode(self):
+        """
+        Test a lambda section value returning a non-ascii, non-unicode string.
+
+        """
+        def literal(s):
+            if isinstance(s, unicode):
+                return s
+            return unicode(s, encoding='utf8')
+
+        engine = self._engine()
+        engine.literal = literal
+
+        template = '{{#lambda}}{{/lambda}}'
+        context = {'lambda': lambda text: u'abcdé'.encode('utf-8')}
+        self._assert_render(u'abcdé', template, context, engine=engine)
+
     def test_section__iterable(self):
         """
         Check that objects supporting iteration (aside from dicts) behave like lists.
