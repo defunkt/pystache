@@ -4,7 +4,8 @@ History
 0.5.3 (TBD)
 -----------
 
-* Added support for ``Renderer(missing_tags='strict')`` (issue #110).
+* Added option of raising errors on missing tags/partials:
+  ``Renderer(missing_tags='strict')`` (issue #110).
 * Bugfix: exceptions raised from a property are no longer swallowed when
   getting a key from a context stack (issue #110).
 
