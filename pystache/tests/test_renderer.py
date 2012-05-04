@@ -14,6 +14,7 @@ from examples.simple import Simple
 from pystache import Renderer
 from pystache import TemplateSpec
 from pystache.common import TemplateNotFoundError
+from pystache.context import ContextStack, KeyNotFoundError
 from pystache.loader import Loader
 
 from pystache.tests.common import get_data_path, AssertStringMixin, AssertExceptionMixin
@@ -123,6 +124,22 @@ class RendererInitTestCase(unittest.TestCase):
         """
         renderer = Renderer(file_extension='foo')
         self.assertEqual(renderer.file_extension, 'foo')
+
+    def test_missing_tags(self):
+        """
+        Check that the missing_tags attribute is set correctly.
+
+        """
+        renderer = Renderer(missing_tags='foo')
+        self.assertEqual(renderer.missing_tags, 'foo')
+
+    def test_missing_tags__default(self):
+        """
+        Check the missing_tags default.
+
+        """
+        renderer = Renderer()
+        self.assertEqual(renderer.missing_tags, 'ignore')
 
     def test_search_dirs__default(self):
         """
@@ -319,37 +336,37 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         renderer.string_encoding = 'utf_8'
         self.assertEqual(renderer.render(template), u"déf")
 
-    def test_make_load_partial(self):
+    def test_make_resolve_partial(self):
         """
-        Test the _make_load_partial() method.
+        Test the _make_resolve_partial() method.
 
         """
         renderer = Renderer()
         renderer.partials = {'foo': 'bar'}
-        load_partial = renderer._make_load_partial()
+        resolve_partial = renderer._make_resolve_partial()
 
-        actual = load_partial('foo')
+        actual = resolve_partial('foo')
         self.assertEqual(actual, 'bar')
         self.assertEqual(type(actual), unicode, "RenderEngine requires that "
-            "load_partial return unicode strings.")
+            "resolve_partial return unicode strings.")
 
-    def test_make_load_partial__unicode(self):
+    def test_make_resolve_partial__unicode(self):
         """
-        Test _make_load_partial(): that load_partial doesn't "double-decode" Unicode.
+        Test _make_resolve_partial(): that resolve_partial doesn't "double-decode" Unicode.
 
         """
         renderer = Renderer()
 
         renderer.partials = {'partial': 'foo'}
-        load_partial = renderer._make_load_partial()
-        self.assertEqual(load_partial("partial"), "foo")
+        resolve_partial = renderer._make_resolve_partial()
+        self.assertEqual(resolve_partial("partial"), "foo")
 
         # Now with a value that is already unicode.
         renderer.partials = {'partial': u'foo'}
-        load_partial = renderer._make_load_partial()
+        resolve_partial = renderer._make_resolve_partial()
         # If the next line failed, we would get the following error:
         #   TypeError: decoding Unicode is not supported
-        self.assertEqual(load_partial("partial"), "foo")
+        self.assertEqual(resolve_partial("partial"), "foo")
 
     def test_render_path(self):
         """
@@ -406,7 +423,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
 # we no longer need to exercise all rendering code paths through
 # the Renderer.  It suffices to test rendering paths through the
 # RenderEngine for the same amount of code coverage.
-class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertExceptionMixin):
+class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertStringMixin, AssertExceptionMixin):
 
     """
     Check the RenderEngine returned by Renderer._make_render_engine().
@@ -420,11 +437,11 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertExceptionMixin):
         """
         return _make_renderer()
 
-    ## Test the engine's load_partial attribute.
+    ## Test the engine's resolve_partial attribute.
 
-    def test__load_partial__returns_unicode(self):
+    def test__resolve_partial__returns_unicode(self):
         """
-        Check that load_partial returns unicode (and not a subclass).
+        Check that resolve_partial returns unicode (and not a subclass).
 
         """
         class MyUnicode(unicode):
@@ -436,43 +453,70 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertExceptionMixin):
 
         engine = renderer._make_render_engine()
 
-        actual = engine.load_partial('str')
+        actual = engine.resolve_partial('str')
         self.assertEqual(actual, "foo")
         self.assertEqual(type(actual), unicode)
 
         # Check that unicode subclasses are not preserved.
-        actual = engine.load_partial('subclass')
+        actual = engine.resolve_partial('subclass')
         self.assertEqual(actual, "abc")
         self.assertEqual(type(actual), unicode)
 
-    def test__load_partial__not_found__default(self):
+    def test__resolve_partial__not_found(self):
         """
-        Check that load_partial provides a nice message when a template is not found.
+        Check that resolve_partial returns the empty string when a template is not found.
 
         """
         renderer = Renderer()
 
         engine = renderer._make_render_engine()
-        load_partial = engine.load_partial
+        resolve_partial = engine.resolve_partial
+
+        self.assertString(resolve_partial('foo'), u'')
+
+    def test__resolve_partial__not_found__missing_tags_strict(self):
+        """
+        Check that resolve_partial provides a nice message when a template is not found.
+
+        """
+        renderer = Renderer()
+        renderer.missing_tags = 'strict'
+
+        engine = renderer._make_render_engine()
+        resolve_partial = engine.resolve_partial
 
         self.assertException(TemplateNotFoundError, "File 'foo.mustache' not found in dirs: ['.']",
-                             load_partial, "foo")
+                             resolve_partial, "foo")
 
-    def test__load_partial__not_found__dict(self):
+    def test__resolve_partial__not_found__partials_dict(self):
         """
-        Check that load_partial provides a nice message when a template is not found.
+        Check that resolve_partial returns the empty string when a template is not found.
 
         """
         renderer = Renderer()
         renderer.partials = {}
 
         engine = renderer._make_render_engine()
-        load_partial = engine.load_partial
+        resolve_partial = engine.resolve_partial
 
-        # Include dict directly since str(dict) is different in Python 2 and 3:
-        #   <type 'dict'> versus <class 'dict'>, respectively.
+        self.assertString(resolve_partial('foo'), u'')
+
+    def test__resolve_partial__not_found__partials_dict__missing_tags_strict(self):
+        """
+        Check that resolve_partial provides a nice message when a template is not found.
+
+        """
+        renderer = Renderer()
+        renderer.missing_tags = 'strict'
+        renderer.partials = {}
+
+        engine = renderer._make_render_engine()
+        resolve_partial = engine.resolve_partial
+
+       # Include dict directly since str(dict) is different in Python 2 and 3:
+       #   <type 'dict'> versus <class 'dict'>, respectively.
         self.assertException(TemplateNotFoundError, "Name 'foo' not found in partials: %s" % dict,
-                             load_partial, "foo")
+                             resolve_partial, "foo")
 
     ## Test the engine's literal attribute.
 
@@ -595,3 +639,34 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertExceptionMixin):
         self.assertTrue(isinstance(s, unicode))
         self.assertEqual(type(escape(s)), unicode)
 
+    ## Test the engine's resolve_context attribute.
+
+    def test__resolve_context(self):
+        """
+        Check resolve_context(): default arguments.
+
+        """
+        renderer = Renderer()
+
+        engine = renderer._make_render_engine()
+
+        stack = ContextStack({'foo': 'bar'})
+
+        self.assertEqual('bar', engine.resolve_context(stack, 'foo'))
+        self.assertString(u'', engine.resolve_context(stack, 'missing'))
+
+    def test__resolve_context__missing_tags_strict(self):
+        """
+        Check resolve_context(): missing_tags 'strict'.
+
+        """
+        renderer = Renderer()
+        renderer.missing_tags = 'strict'
+
+        engine = renderer._make_render_engine()
+
+        stack = ContextStack({'foo': 'bar'})
+
+        self.assertEqual('bar', engine.resolve_context(stack, 'foo'))
+        self.assertException(KeyNotFoundError, "Key 'missing' not found: first part",
+                             engine.resolve_context, stack, 'missing')

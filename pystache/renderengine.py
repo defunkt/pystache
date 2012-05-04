@@ -10,6 +10,14 @@ import re
 from pystache.parser import Parser
 
 
+def context_get(stack, name):
+    """
+    Find and return a name from a ContextStack instance.
+
+    """
+    return stack.get(name)
+
+
 class RenderEngine(object):
 
     """
@@ -29,14 +37,10 @@ class RenderEngine(object):
 
     """
 
-    def __init__(self, load_partial=None, literal=None, escape=None):
+    def __init__(self, literal=None, escape=None, resolve_context=None,
+                 resolve_partial=None):
         """
         Arguments:
-
-          load_partial: the function to call when loading a partial.  The
-            function should accept a string template name and return a
-            template string of type unicode (not a subclass).  If the
-            template is not found, it should raise a TemplateNotFoundError.
 
           literal: the function used to convert unescaped variable tag
             values to unicode, e.g. the value corresponding to a tag
@@ -59,18 +63,27 @@ class RenderEngine(object):
             incoming strings of type markupsafe.Markup differently
             from plain unicode strings.
 
+          resolve_context: the function to call to resolve a name against
+            a context stack.  The function should accept two positional
+            arguments: a ContextStack instance and a name to resolve.
+
+          resolve_partial: the function to call when loading a partial.
+            The function should accept a template name string and return a
+            template string of type unicode (not a subclass).
+
         """
         self.escape = escape
         self.literal = literal
-        self.load_partial = load_partial
+        self.resolve_context = resolve_context
+        self.resolve_partial = resolve_partial
 
-    # TODO: rename context to stack throughout this module.
+    # TODO: Rename context to stack throughout this module.
     def _get_string_value(self, context, tag_name):
         """
         Get a value from the given context as a basestring instance.
 
         """
-        val = context.get(tag_name)
+        val = self.resolve_context(context, tag_name)
 
         if callable(val):
             # According to the spec:
@@ -138,7 +151,7 @@ class RenderEngine(object):
             """
             # TODO: is there a bug because we are not using the same
             #   logic as in _get_string_value()?
-            data = context.get(name)
+            data = self.resolve_context(context, name)
             # Per the spec, lambdas in inverted sections are considered truthy.
             if data:
                 return u''
@@ -157,7 +170,7 @@ class RenderEngine(object):
             """
             template = template_
             parsed_template = parsed_template_
-            data = context.get(name)
+            data = self.resolve_context(context, name)
 
             # From the spec:
             #

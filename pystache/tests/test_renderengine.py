@@ -7,11 +7,11 @@ Unit tests of renderengine.py.
 
 import unittest
 
-from pystache.context import ContextStack
+from pystache.context import ContextStack, KeyNotFoundError
 from pystache import defaults
 from pystache.parser import ParsingError
-from pystache.renderengine import RenderEngine
-from pystache.tests.common import AssertStringMixin, Attachable
+from pystache.renderengine import context_get, RenderEngine
+from pystache.tests.common import AssertStringMixin, AssertExceptionMixin, Attachable
 
 
 def mock_literal(s):
@@ -45,14 +45,14 @@ class RenderEngineTestCase(unittest.TestCase):
 
         """
         # In real-life, these arguments would be functions
-        engine = RenderEngine(load_partial="foo", literal="literal", escape="escape")
+        engine = RenderEngine(resolve_partial="foo", literal="literal", escape="escape")
 
         self.assertEqual(engine.escape, "escape")
         self.assertEqual(engine.literal, "literal")
-        self.assertEqual(engine.load_partial, "foo")
+        self.assertEqual(engine.resolve_partial, "foo")
 
 
-class RenderTests(unittest.TestCase, AssertStringMixin):
+class RenderTests(unittest.TestCase, AssertStringMixin, AssertExceptionMixin):
 
     """
     Tests RenderEngine.render().
@@ -69,7 +69,10 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
 
         """
         escape = defaults.TAG_ESCAPE
-        engine = RenderEngine(literal=unicode, escape=escape, load_partial=None)
+
+        engine = RenderEngine(literal=unicode, escape=escape,
+                              resolve_context=context_get,
+                              resolve_partial=None)
         return engine
 
     def _assert_render(self, expected, template, *context, **kwargs):
@@ -81,7 +84,7 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         engine = kwargs.get('engine', self._engine())
 
         if partials is not None:
-            engine.load_partial = lambda key: unicode(partials[key])
+            engine.resolve_partial = lambda key: unicode(partials[key])
 
         context = ContextStack(*context)
 
@@ -92,14 +95,14 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
     def test_render(self):
         self._assert_render(u'Hi Mom', 'Hi {{person}}', {'person': 'Mom'})
 
-    def test__load_partial(self):
+    def test__resolve_partial(self):
         """
         Test that render() uses the load_template attribute.
 
         """
         engine = self._engine()
         partials = {'partial': u"{{person}}"}
-        engine.load_partial = lambda key: partials[key]
+        engine.resolve_partial = lambda key: partials[key]
 
         self._assert_render(u'Hi Mom', 'Hi {{>partial}}', {'person': 'Mom'}, engine=engine)
 
@@ -594,33 +597,15 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
         context = {'person': person}
         self._assert_render(u'Hello, Biggles. I see you are 42.', template, context)
 
-    def test_dot_notation__missing_attributes_or_keys(self):
-        """
-        Test dot notation with missing keys or attributes.
-
-        Check that if a key or attribute in a dotted name does not exist, then
-        the tag renders as the empty string.
-
-        """
-        template = """I cannot see {{person.name}}'s age: {{person.age}}.
-        Nor {{other_person.name}}'s: ."""
-        expected = u"""I cannot see Biggles's age: .
-        Nor Mr. Bradshaw's: ."""
-        context = {'person': {'name': 'Biggles'},
-                   'other_person': Attachable(name='Mr. Bradshaw')}
-        self._assert_render(expected, template, context)
-
     def test_dot_notation__multiple_levels(self):
         """
         Test dot notation with multiple levels.
 
         """
         template = """Hello, Mr. {{person.name.lastname}}.
-        I see you're back from {{person.travels.last.country.city}}.
-        I'm missing some of your details: {{person.details.private.editor}}."""
+        I see you're back from {{person.travels.last.country.city}}."""
         expected = u"""Hello, Mr. Pither.
-        I see you're back from Cornwall.
-        I'm missing some of your details: ."""
+        I see you're back from Cornwall."""
         context = {'person': {'name': {'firstname': 'unknown', 'lastname': 'Pither'},
                             'travels': {'last': {'country': {'city': 'Cornwall'}}},
                             'details': {'public': 'likes cycling'}}}
@@ -652,6 +637,14 @@ class RenderTests(unittest.TestCase, AssertStringMixin):
           https://github.com/mustache/spec/pull/48
 
         """
-        template = '{{a.b}} :: ({{#c}}{{a}} :: {{a.b}}{{/c}})'
         context = {'a': {'b': 'A.B'}, 'c': {'a': 'A'} }
-        self._assert_render(u'A.B :: (A :: )', template, context)
+
+        template = '{{a.b}}'
+        self._assert_render(u'A.B', template, context)
+
+        template = '{{#c}}{{a}}{{/c}}'
+        self._assert_render(u'A', template, context)
+
+        template = '{{#c}}{{a.b}}{{/c}}'
+        self.assertException(KeyNotFoundError, "Key u'a.b' not found: missing u'b'",
+                             self._assert_render, u'A.B :: (A :: )', template, context)

@@ -8,10 +8,10 @@ This module provides a Renderer class to render templates.
 import sys
 
 from pystache import defaults
-from pystache.common import TemplateNotFoundError
-from pystache.context import ContextStack
+from pystache.common import TemplateNotFoundError, MissingTags
+from pystache.context import ContextStack, KeyNotFoundError
 from pystache.loader import Loader
-from pystache.renderengine import RenderEngine
+from pystache.renderengine import context_get, RenderEngine
 from pystache.specloader import SpecLoader
 from pystache.template_spec import TemplateSpec
 
@@ -25,6 +25,7 @@ if sys.version_info < (3, ):
 else:
     # The latter evaluates to "bytes" in Python 3 -- even after conversion by 2to3.
     _STRING_TYPES = (unicode, type(u"a".encode('utf-8')))
+
 
 
 class Renderer(object):
@@ -49,7 +50,7 @@ class Renderer(object):
 
     def __init__(self, file_encoding=None, string_encoding=None,
                  decode_errors=None, search_dirs=None, file_extension=None,
-                 escape=None, partials=None):
+                 escape=None, partials=None, missing_tags=None):
         """
         Construct an instance.
 
@@ -104,6 +105,11 @@ class Renderer(object):
             argument to the built-in function unicode().  Defaults to the
             package default.
 
+          missing_tags: a string specifying how to handle missing tags.
+            If 'strict', an error is raised on a missing tag.  If 'ignore',
+            the value of the tag is the empty string.  Defaults to the
+            package default.
+
         """
         if decode_errors is None:
             decode_errors = defaults.DECODE_ERRORS
@@ -116,6 +122,9 @@ class Renderer(object):
 
         if file_extension is None:
             file_extension = defaults.TEMPLATE_EXTENSION
+
+        if missing_tags is None:
+            missing_tags = defaults.MISSING_TAGS
 
         if search_dirs is None:
             search_dirs = defaults.SEARCH_DIRS
@@ -131,6 +140,7 @@ class Renderer(object):
         self.escape = escape
         self.file_encoding = file_encoding
         self.file_extension = file_extension
+        self.missing_tags = missing_tags
         self.partials = partials
         self.search_dirs = search_dirs
         self.string_encoding = string_encoding
@@ -224,21 +234,21 @@ class Renderer(object):
 
     def _make_load_partial(self):
         """
-        Return the load_partial function to pass to RenderEngine.__init__().
+        Return a function that loads a partial by name.
 
         """
         if self.partials is None:
-            load_template = self._make_load_template()
-            return load_template
+            return self._make_load_template()
 
-        # Otherwise, create a load_partial function from the custom partial
-        # loader that satisfies RenderEngine requirements (and that provides
-        # a nicer exception, etc).
+        # Otherwise, create a function from the custom partial loader.
         partials = self.partials
 
         def load_partial(name):
+            # TODO: consider using EAFP here instead.
+            #     http://docs.python.org/glossary.html#term-eafp
+            #   This would mean requiring that the custom partial loader
+            #   raise a KeyError on name not found.
             template = partials.get(name)
-
             if template is None:
                 raise TemplateNotFoundError("Name %s not found in partials: %s" %
                                             (repr(name), type(partials)))
@@ -248,16 +258,61 @@ class Renderer(object):
 
         return load_partial
 
+    def _is_missing_tags_strict(self):
+        """
+        Return whether missing_tags is set to strict.
+
+        """
+        return self.missing_tags == MissingTags.strict
+
+    def _make_resolve_partial(self):
+        """
+        Return the resolve_partial function to pass to RenderEngine.__init__().
+
+        """
+        load_partial = self._make_load_partial()
+
+        if self._is_missing_tags_strict():
+            return load_partial
+        # Otherwise, ignore missing tags.
+
+        def resolve_partial(name):
+            try:
+                return load_partial(name)
+            except TemplateNotFoundError:
+                return u''
+
+        return resolve_partial
+
+    def _make_resolve_context(self):
+        """
+        Return the resolve_context function to pass to RenderEngine.__init__().
+
+        """
+        if self._is_missing_tags_strict():
+            return context_get
+        # Otherwise, ignore missing tags.
+
+        def resolve_context(stack, name):
+            try:
+                return context_get(stack, name)
+            except KeyNotFoundError:
+                return u''
+
+        return resolve_context
+
     def _make_render_engine(self):
         """
         Return a RenderEngine instance for rendering.
 
         """
-        load_partial = self._make_load_partial()
+        resolve_context = self._make_resolve_context()
+        resolve_partial = self._make_resolve_partial()
 
-        engine = RenderEngine(load_partial=load_partial,
-                              literal=self._to_unicode_hard,
-                              escape=self._escape_to_unicode)
+        engine = RenderEngine(literal=self._to_unicode_hard,
+                              escape=self._escape_to_unicode,
+                              resolve_context=resolve_context,
+                              resolve_partial=resolve_partial)
         return engine
 
     # TODO: add unit tests for this method.

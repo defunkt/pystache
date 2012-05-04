@@ -9,7 +9,6 @@ This module is only meant for internal use by the renderengine module.
 
 import re
 
-from pystache.common import TemplateNotFoundError
 from pystache.parsed import ParsedTemplate
 
 
@@ -216,15 +215,9 @@ class Parser(object):
 
         elif tag_type == '>':
 
-            try:
-                # TODO: make engine.load() and test it separately.
-                template = engine.load_partial(tag_key)
-            except TemplateNotFoundError:
-                template = u''
-
+            template = engine.resolve_partial(tag_key)
             # Indent before rendering.
             template = re.sub(NON_BLANK_RE, leading_whitespace + ur'\1', template)
-
             func = engine._make_get_partial(template)
 
         else:
