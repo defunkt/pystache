@@ -4,8 +4,8 @@ History
 0.5.3 (TBD)
 -----------
 
-* Bugfix: exceptions no longer swallowed when accessing from context a
-  property that raises an exception (issue #110).
+* Bugfix: exceptions raised from a property are no longer swallowed when
+  getting a key from a context stack (issue #110).
 
 0.5.2 (2012-05-03)
 ------------------
