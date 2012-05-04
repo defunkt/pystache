@@ -177,10 +177,10 @@ class Parser(object):
             including any trailing newlines).
 
         """
-        parsed_section, content_end_index, end_index = \
+        parsed_section, section_end_index, end_index = \
             self.parse(template=template, start_index=start_index, section_key=section_key)
 
-        return parsed_section, template[start_index:content_end_index], end_index
+        return parsed_section, section_end_index, end_index
 
     def _handle_tag_type(self, template, parse_tree, tag_type, tag_key, leading_whitespace, end_index):
 
@@ -205,12 +205,14 @@ class Parser(object):
 
         elif tag_type == '#':
 
-            parsed_section, section_contents, end_index = self._parse_section(template, end_index, tag_key)
-            func = engine._make_get_section(tag_key, parsed_section, section_contents, self._delimiters)
+            section_start_index = end_index
+            parsed_section, section_end_index, end_index = self._parse_section(template, end_index, tag_key)
+            func = engine._make_get_section(tag_key, parsed_section, self._delimiters,
+                                            template, section_start_index, section_end_index)
 
         elif tag_type == '^':
 
-            parsed_section, section_contents, end_index = self._parse_section(template, end_index, tag_key)
+            parsed_section, section_end_index, end_index = self._parse_section(template, end_index, tag_key)
             func = engine._make_get_inverse(tag_key, parsed_section)
 
         elif tag_type == '>':

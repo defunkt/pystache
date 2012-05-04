@@ -162,14 +162,13 @@ class RenderEngine(object):
     # TODO: the template_ and parsed_template_ arguments don't both seem
     # to be necessary.  Can we remove one of them?  For example, if
     # callable(data) is True, then the initial parsed_template isn't used.
-    def _make_get_section(self, name, parsed_template_, template_, delims):
+    def _make_get_section(self, name, parsed_template, delims,
+                          template, section_start_index, section_end_index):
         def get_section(context):
             """
             Returns: a string of type unicode.
 
             """
-            template = template_
-            parsed_template = parsed_template_
             data = self.resolve_context(context, name)
 
             # From the spec:
@@ -220,7 +219,7 @@ class RenderEngine(object):
                     #   https://github.com/defunkt/pystache/issues/113
                     #
                     # TODO: should we check the arity?
-                    new_template = element(template)
+                    new_template = element(template[section_start_index:section_end_index])
                     new_parsed_template = self._parse(new_template, delimiters=delims)
                     parts.append(new_parsed_template.render(context))
                     continue
