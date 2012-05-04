@@ -147,6 +147,26 @@ class GetValueTests(unittest.TestCase, AssertIsMixin):
         self.assertEqual(item["foo"], "bar")
         self.assertNotFound(item, "foo")
 
+    def test_object__property__raising_exception(self):
+        """
+        Test getting a property that raises an exception.
+
+        """
+        class Foo(object):
+
+            @property
+            def bar(self):
+                return 1
+
+            @property
+            def baz(self):
+                raise ValueError("test")
+
+        foo = Foo()
+        self.assertEqual(_get_value(foo, 'bar'), 1)
+        self.assertNotFound(foo, 'missing')
+        self.assertRaises(ValueError, _get_value, foo, 'baz')
+
     ### Case: the item is an instance of a built-in type.
 
     def test_built_in_type__integer(self):

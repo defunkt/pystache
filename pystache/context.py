@@ -55,8 +55,15 @@ def _get_value(context, key):
         # types like integers and strings as objects (cf. issue #81).
         # Instances of user-defined classes on the other hand, for example,
         # are considered objects by the test above.
-        if hasattr(context, key):
+        try:
             attr = getattr(context, key)
+        except AttributeError:
+            # TODO: distinguish the case of the attribute not existing from
+            #   an AttributeError being raised by the call to the attribute.
+            #   See the following issue for implementation ideas:
+            #     http://bugs.python.org/issue7559
+            pass
+        else:
             # TODO: consider using EAFP here instead.
             #   http://docs.python.org/glossary.html#term-eafp
             if callable(attr):
