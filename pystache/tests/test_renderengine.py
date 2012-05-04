@@ -5,6 +5,7 @@ Unit tests of renderengine.py.
 
 """
 
+import sys
 import unittest
 
 from pystache.context import ContextStack, KeyNotFoundError
@@ -12,6 +13,14 @@ from pystache import defaults
 from pystache.parser import ParsingError
 from pystache.renderengine import context_get, RenderEngine
 from pystache.tests.common import AssertStringMixin, AssertExceptionMixin, Attachable
+
+
+def _get_unicode_char():
+    if sys.version_info < (3, ):
+        return 'u'
+    return ''
+
+_UNICODE_CHAR = _get_unicode_char()
 
 
 def mock_literal(s):
@@ -646,5 +655,6 @@ class RenderTests(unittest.TestCase, AssertStringMixin, AssertExceptionMixin):
         self._assert_render(u'A', template, context)
 
         template = '{{#c}}{{a.b}}{{/c}}'
-        self.assertException(KeyNotFoundError, "Key u'a.b' not found: missing u'b'",
-                             self._assert_render, u'A.B :: (A :: )', template, context)
+        self.assertException(KeyNotFoundError, "Key %(unicode)s'a.b' not found: missing %(unicode)s'b'" %
+                             {'unicode': _UNICODE_CHAR},
+                             self._assert_render, 'A.B :: (A :: )', template, context)
