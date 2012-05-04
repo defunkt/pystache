@@ -437,18 +437,18 @@ class ContextStackTestCase(unittest.TestCase, AssertIsMixin, AssertStringMixin,
     def test_dot_notation__user_object(self):
         name = "foo.bar"
         stack = ContextStack({"foo": Attachable(bar="baz")})
-        self.assertEquals(stack.get(name), "baz")
+        self.assertEqual(stack.get(name), "baz")
 
         # Works on multiple levels, too
         name = "a.b.c.d.e.f.g"
         A = Attachable
         stack = ContextStack({"a": A(b=A(c=A(d=A(e=A(f=A(g="w00t!"))))))})
-        self.assertEquals(stack.get(name), "w00t!")
+        self.assertEqual(stack.get(name), "w00t!")
 
     def test_dot_notation__mixed_dict_and_obj(self):
         name = "foo.bar.baz.bak"
         stack = ContextStack({"foo": Attachable(bar={"baz": Attachable(bak=42)})})
-        self.assertEquals(stack.get(name), 42)
+        self.assertEqual(stack.get(name), 42)
 
     def test_dot_notation__missing_attr_or_key(self):
         name = "foo.bar.baz.bak"
@@ -489,11 +489,11 @@ class ContextStackTestCase(unittest.TestCase, AssertIsMixin, AssertStringMixin,
 
         # When any element in the path is callable, it should be automatically invoked
         stack = ContextStack({"foo": Attachable(bar=Attachable(baz=lambda: "Called!"))})
-        self.assertEquals(stack.get(name), "Called!")
+        self.assertEqual(stack.get(name), "Called!")
 
         class Foo(object):
             def bar(self):
                 return Attachable(baz='Baz')
 
         stack = ContextStack({"foo": Foo()})
-        self.assertEquals(stack.get(name), "Baz")
+        self.assertEqual(stack.get(name), "Baz")
