@@ -142,30 +142,27 @@ class Parser(object):
                 match_index += len(leading_whitespace)
                 leading_whitespace = ''
 
+            start_index = end_index
+
             if tag_type in ('#', '^'):
                 # Cache current state.
-                state = (tag_type, tag_key, leading_whitespace, end_index, section_key, parsed_template)
+                state = (tag_type, tag_key, end_index, section_key, parsed_template)
                 states.append(state)
 
                 # Initialize new state
-                start_index, section_key = end_index, tag_key
-                parsed_template = ParsedTemplate()
-                content_end_index, parsed_section = None, None
-
+                section_key, parsed_template = tag_key, ParsedTemplate()
                 continue
-
-            start_index = end_index
 
             if tag_type == '/':
                 if tag_key != section_key:
                     raise ParsingError("Section end tag mismatch: %s != %s" % (tag_key, section_key))
 
                 # Restore previous state with newly found section data.
-                content_end_index, parsed_section = match_index, parsed_template
+                parsed_section = parsed_template
 
-                (tag_type, tag_key, leading_whitespace, end_index, section_key, parsed_template) = states.pop()
+                (tag_type, tag_key, end_index, section_key, parsed_template) = states.pop()
                 node = self._make_section_node(template, tag_type, tag_key, parsed_section,
-                                               end_index, content_end_index)
+                                               end_index, match_index)
 
             else:
                 node = self._make_interpolation_node(tag_type, tag_key, leading_whitespace)
