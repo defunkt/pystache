@@ -154,20 +154,22 @@ class Parser(object):
 
                 continue
 
+            start_index = end_index
+
             if tag_type == '/':
                 if tag_key != section_key:
                     raise ParsingError("Section end tag mismatch: %s != %s" % (tag_key, section_key))
 
                 # Restore previous state with newly found section data.
-                start_index, content_end_index, parsed_section = end_index, match_index, parsed_template
+                content_end_index, parsed_section = match_index, parsed_template
 
                 (tag_type, tag_key, leading_whitespace, end_index, section_key, parsed_template) = states.pop()
+                node = self._make_section_node(template, tag_type, tag_key, parsed_section,
+                                               end_index, content_end_index)
 
             else:
-                start_index = end_index
+                node = self._make_interpolation_node(tag_type, tag_key, leading_whitespace)
 
-            node = self._make_node(template, tag_type, tag_key, leading_whitespace,
-                                   end_index, content_end_index, parsed_section)
             parsed_template.add(node)
 
         # Save the rest of the template.
@@ -175,8 +177,7 @@ class Parser(object):
 
         return parsed_template
 
-    def _make_node(self, template, tag_type, tag_key, leading_whitespace,
-                   section_start_index, section_end_index, parsed_section):
+    def _make_interpolation_node(self, tag_type, tag_key, leading_whitespace):
         """
         Create and return a node of the parse tree.
 
@@ -196,6 +197,17 @@ class Parser(object):
         if tag_type == '&':
             return self.engine._make_get_literal(tag_key)
 
+        if tag_type == '>':
+            return self.engine._make_get_partial(tag_key, leading_whitespace)
+
+        raise Exception("Invalid symbol for interpolation tag: %s" % repr(tag_type))
+
+    def _make_section_node(self, template, tag_type, tag_key, parsed_section,
+                           section_start_index, section_end_index):
+        """
+        Create and return a node of the parse tree.
+
+        """
         if tag_type == '#':
             return self.engine._make_get_section(tag_key, parsed_section, self._delimiters,
                                                  template, section_start_index, section_end_index)
@@ -203,7 +215,4 @@ class Parser(object):
         if tag_type == '^':
             return self.engine._make_get_inverse(tag_key, parsed_section)
 
-        if tag_type == '>':
-            return self.engine._make_get_partial(tag_key, leading_whitespace)
-
-        raise Exception("Unrecognized tag type: %s" % repr(tag_type))
+        raise Exception("Invalid symbol for section tag: %s" % repr(tag_type))
