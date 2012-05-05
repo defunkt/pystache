@@ -8,7 +8,7 @@ Defines a class responsible for rendering logic.
 import re
 
 from pystache.common import is_string
-from pystache.parser import Parser
+from pystache.parser import parse
 
 
 def context_get(stack, name):
@@ -165,7 +165,6 @@ class RenderEngine(object):
           context_stack: a ContextStack instance.
 
         """
-        parser = Parser(delimiters=delimiters)
-        parsed_template = parser.parse(template)
+        parsed_template = parse(template, delimiters)
 
         return self.render_parsed(parsed_template, context_stack)

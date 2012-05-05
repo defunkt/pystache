@@ -17,6 +17,15 @@ END_OF_LINE_CHARACTERS = [u'\r', u'\n']
 NON_BLANK_RE = re.compile(ur'^(.)', re.M)
 
 
+def parse(template, delimiters=None):
+    """
+    Parse a unicode template string and return a ParsedTemplate instance.
+
+    """
+    parser = _Parser(delimiters)
+    return parser.parse(template)
+
+
 def _compile_template_re(delimiters=None):
     """
     Return a regular expresssion object (re.RegexObject) instance.
@@ -56,13 +65,13 @@ class ParsingError(Exception):
 ## Node types
 
 
-class CommentNode(object):
+class _CommentNode(object):
 
     def render(self, engine, context):
         return u''
 
 
-class ChangeNode(object):
+class _ChangeNode(object):
 
     def __init__(self, delimiters):
         self.delimiters = delimiters
@@ -71,7 +80,7 @@ class ChangeNode(object):
         return u''
 
 
-class Tag(object):
+class _TagNode(object):
 
     def __init__(self, key):
         self.key = key
@@ -81,7 +90,7 @@ class Tag(object):
         return engine.escape(s)
 
 
-class LiteralNode(object):
+class _LiteralNode(object):
 
     def __init__(self, key):
         self.key = key
@@ -91,7 +100,7 @@ class LiteralNode(object):
         return engine.literal(s)
 
 
-class PartialNode(object):
+class _PartialNode(object):
 
     def __init__(self, key, indent):
         self.key = key
@@ -105,7 +114,7 @@ class PartialNode(object):
         return engine.render(template, context)
 
 
-class InvertedNode(object):
+class _InvertedNode(object):
 
     def __init__(self, key, parsed_section):
         self.key = key
@@ -122,7 +131,7 @@ class InvertedNode(object):
         return engine.render_parsed(self.parsed_section, context)
 
 
-class SectionNode(object):
+class _SectionNode(object):
 
     # TODO: the template_ and parsed_template_ arguments don't both seem
     # to be necessary.  Can we remove one of them?  For example, if
@@ -168,7 +177,7 @@ class SectionNode(object):
         return unicode(''.join(parts))
 
 
-class Parser(object):
+class _Parser(object):
 
     _delimiters = None
     _template_re = None
@@ -292,21 +301,21 @@ class Parser(object):
         """
         # TODO: switch to using a dictionary instead of a bunch of ifs and elifs.
         if tag_type == '!':
-            return CommentNode()
+            return _CommentNode()
 
         if tag_type == '=':
             delimiters = tag_key.split()
             self._change_delimiters(delimiters)
-            return ChangeNode(delimiters)
+            return _ChangeNode(delimiters)
 
         if tag_type == '':
-            return Tag(tag_key)
+            return _TagNode(tag_key)
 
         if tag_type == '&':
-            return LiteralNode(tag_key)
+            return _LiteralNode(tag_key)
 
         if tag_type == '>':
-            return PartialNode(tag_key, leading_whitespace)
+            return _PartialNode(tag_key, leading_whitespace)
 
         raise Exception("Invalid symbol for interpolation tag: %s" % repr(tag_type))
 
@@ -317,10 +326,10 @@ class Parser(object):
 
         """
         if tag_type == '#':
-            return SectionNode(tag_key, parsed_section, self._delimiters,
+            return _SectionNode(tag_key, parsed_section, self._delimiters,
                                template, section_start_index, section_end_index)
 
         if tag_type == '^':
-            return InvertedNode(tag_key, parsed_section)
+            return _InvertedNode(tag_key, parsed_section)
 
         raise Exception("Invalid symbol for section tag: %s" % repr(tag_type))
