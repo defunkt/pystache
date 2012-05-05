@@ -113,8 +113,9 @@ class Parser(object):
             match_index = match.start()
             end_index = match.end()
 
-            # Add string contents before the tag.
-            parsed_template.add(template[start_index:match_index])
+            # Avoid adding spurious empty strings to the parse tree.
+            if start_index != match_index:
+                parsed_template.add(template[start_index:match_index])
 
             matches = match.groupdict()
 
