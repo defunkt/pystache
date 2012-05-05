@@ -296,6 +296,16 @@ class RenderTests(unittest.TestCase, AssertStringMixin, AssertExceptionMixin):
         context = {'section': item, attr_name: 7}
         self._assert_render(u'7', template, context)
 
+    # This test is also important for testing 2to3.
+    def test_interpolation__nonascii_nonunicode(self):
+        """
+        Test a tag whose value is a non-ascii, non-unicode string.
+
+        """
+        template = '{{nonascii}}'
+        context = {'nonascii': u'abcdé'.encode('utf-8')}
+        self._assert_render(u'abcdé', template, context)
+
     def test_implicit_iterator__literal(self):
         """
         Test an implicit iterator in a literal tag.
@@ -353,6 +363,28 @@ class RenderTests(unittest.TestCase, AssertStringMixin, AssertExceptionMixin):
         context = {'foo': '<'}
 
         self._assert_render(u'unescaped: < escaped: &lt;', template, context, engine=engine, partials=partials)
+
+    ## Test cases related specifically to lambdas.
+
+    # This test is also important for testing 2to3.
+    def test_section__nonascii_nonunicode(self):
+        """
+        Test a section whose value is a non-ascii, non-unicode string.
+
+        """
+        template = '{{#nonascii}}{{.}}{{/nonascii}}'
+        context = {'nonascii': u'abcdé'.encode('utf-8')}
+        self._assert_render(u'abcdé', template, context)
+
+    # This test is also important for testing 2to3.
+    def test_lambda__returning_nonascii_nonunicode(self):
+        """
+        Test a lambda tag value returning a non-ascii, non-unicode string.
+
+        """
+        template = '{{lambda}}'
+        context = {'lambda': lambda: u'abcdé'.encode('utf-8')}
+        self._assert_render(u'abcdé', template, context)
 
     ## Test cases related specifically to sections.
 
@@ -472,22 +504,15 @@ class RenderTests(unittest.TestCase, AssertStringMixin, AssertExceptionMixin):
         context = {'test': (lambda text: 'Hi %s' % text)}
         self._assert_render(u'Hi Mom', template, context)
 
+    # This test is also important for testing 2to3.
     def test_section__lambda__returning_nonascii_nonunicode(self):
         """
         Test a lambda section value returning a non-ascii, non-unicode string.
 
         """
-        def literal(s):
-            if isinstance(s, unicode):
-                return s
-            return unicode(s, encoding='utf8')
-
-        engine = self._engine()
-        engine.literal = literal
-
         template = '{{#lambda}}{{/lambda}}'
         context = {'lambda': lambda text: u'abcdé'.encode('utf-8')}
-        self._assert_render(u'abcdé', template, context, engine=engine)
+        self._assert_render(u'abcdé', template, context)
 
     def test_section__lambda__returning_nonstring(self):
         """

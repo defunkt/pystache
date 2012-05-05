@@ -8,24 +8,12 @@ This module provides a Renderer class to render templates.
 import sys
 
 from pystache import defaults
-from pystache.common import TemplateNotFoundError, MissingTags
+from pystache.common import TemplateNotFoundError, MissingTags, is_string
 from pystache.context import ContextStack, KeyNotFoundError
 from pystache.loader import Loader
 from pystache.renderengine import context_get, RenderEngine
 from pystache.specloader import SpecLoader
 from pystache.template_spec import TemplateSpec
-
-
-# TODO: come up with a better solution for this.  One of the issues here
-#   is that in Python 3 there is no common base class for unicode strings
-#   and byte strings, and 2to3 seems to convert all of "str", "unicode",
-#   and "basestring" to Python 3's "str".
-if sys.version_info < (3, ):
-    _STRING_TYPES = basestring
-else:
-    # The latter evaluates to "bytes" in Python 3 -- even after conversion by 2to3.
-    _STRING_TYPES = (unicode, type(u"a".encode('utf-8')))
-
 
 
 class Renderer(object):
@@ -411,7 +399,7 @@ class Renderer(object):
             all items in the *context list.
 
         """
-        if isinstance(template, _STRING_TYPES):
+        if is_string(template):
             return self._render_string(template, *context, **kwargs)
         # Otherwise, we assume the template is an object.
 

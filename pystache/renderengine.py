@@ -7,6 +7,7 @@ Defines a class responsible for rendering logic.
 
 import re
 
+from pystache.common import is_string
 from pystache.parser import Parser
 
 
@@ -97,7 +98,7 @@ class RenderEngine(object):
             # Return because _render_value() is already a string.
             return self._render_value(val(), context)
 
-        if not isinstance(val, basestring):
+        if not is_string(val):
             return str(val)
 
         return val
@@ -190,7 +191,7 @@ class RenderEngine(object):
                     # Then the value does not support iteration.
                     data = [data]
                 else:
-                    if isinstance(data, (basestring, dict)):
+                    if is_string(data) or isinstance(data, dict):
                         # Do not treat strings and dicts (which are iterable) as lists.
                         data = [data]
                     # Otherwise, treat the value as a list.
@@ -245,7 +246,7 @@ class RenderEngine(object):
         Render an arbitrary value.
 
         """
-        if not isinstance(val, basestring):
+        if not is_string(val):
             # In case the template is an integer, for example.
             val = str(val)
         if type(val) is not unicode:
