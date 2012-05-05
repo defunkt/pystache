@@ -78,6 +78,14 @@ class RenderEngine(object):
         self.resolve_partial = resolve_partial
 
     # TODO: Rename context to stack throughout this module.
+
+    # From the spec:
+    #
+    #   When used as the data value for an Interpolation tag, the lambda
+    #   MUST be treatable as an arity 0 function, and invoked as such.
+    #   The returned value MUST be rendered against the default delimiters,
+    #   then interpolated in place of the lambda.
+    #
     def _get_string_value(self, context, tag_name):
         """
         Get a value from the given context as a basestring instance.
@@ -86,17 +94,11 @@ class RenderEngine(object):
         val = self.resolve_context(context, tag_name)
 
         if callable(val):
-            # According to the spec:
-            #
-            #     When used as the data value for an Interpolation tag,
-            #     the lambda MUST be treatable as an arity 0 function,
-            #     and invoked as such.  The returned value MUST be
-            #     rendered against the default delimiters, then
-            #     interpolated in place of the lambda.
-            val = self._render_value(val(), context)
+            # Return because _render_value() is already a string.
+            return self._render_value(val(), context)
 
         if not isinstance(val, basestring):
-            val = str(val)
+            return str(val)
 
         return val
 
@@ -107,8 +109,7 @@ class RenderEngine(object):
 
             """
             s = self._get_string_value(context, name)
-            s = self.literal(s)
-            return s
+            return self.literal(s)
 
         return get_literal
 
@@ -121,8 +122,7 @@ class RenderEngine(object):
 
             """
             s = self._get_string_value(context, name)
-            s = self.escape(s)
-            return s
+            return self.escape(s)
 
         return get_escaped
 
@@ -158,7 +158,7 @@ class RenderEngine(object):
     # callable(data) is True, then the initial parsed_template isn't used.
     def _make_get_section(self, name, parsed_template, delims,
                           template, section_start_index, section_end_index):
-        def get_section(context):
+        def get_section_value(context):
             """
             Returns: a string of type unicode.
 
@@ -224,7 +224,7 @@ class RenderEngine(object):
 
             return unicode(''.join(parts))
 
-        return get_section
+        return get_section_value
 
     def _parse(self, template, delimiters=None):
         """
