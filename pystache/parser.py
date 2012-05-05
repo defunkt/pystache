@@ -72,12 +72,12 @@ class Parser(object):
         self._delimiters = delimiters
         self.engine = engine
 
-    def compile_template_re(self):
+    def _compile_delimiters(self):
         self._template_re = _compile_template_re(self._delimiters)
 
     def _change_delimiters(self, delimiters):
         self._delimiters = delimiters
-        self.compile_template_re()
+        self._compile_delimiters()
 
     def parse(self, template):
         """
@@ -96,6 +96,8 @@ class Parser(object):
           a ParsedTemplate instance.
 
         """
+        self._compile_delimiters()
+
         start_index = 0
         content_end_index, parsed_section, section_key = None, None, None
         parsed_template = ParsedTemplate()

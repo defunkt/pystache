@@ -235,19 +235,15 @@ class RenderEngine(object):
 
         return get_section_value
 
-    def _parse(self, template, delimiters=None):
+    def _render_unicode(self, template, context, delimiters=None):
         """
-        Parse the given template, and return a ParsedTemplate instance.
-
-        Arguments:
-
-          template: a template string of type unicode.
+        Render a unicode template string.
 
         """
         parser = Parser(self, delimiters=delimiters)
-        parser.compile_template_re()
+        parsed_template = parser.parse(template)
 
-        return parser.parse(template=template)
+        return parsed_template.render(context)
 
     def _render_value(self, val, context, delimiters=None):
         """
@@ -278,9 +274,7 @@ class RenderEngine(object):
         if type(template) is not unicode:
             raise Exception("Argument 'template' not unicode: %s: %s" % (type(template), repr(template)))
 
-        parsed_template = self._parse(template, delimiters)
-
-        return parsed_template.render(context)
+        return self._render_unicode(template, context, delimiters)
 
     def render(self, template, context):
         """
@@ -299,4 +293,4 @@ class RenderEngine(object):
         # don't use self.literal).
         template = unicode(template)
 
-        return self._render(template, context)
+        return self._render_unicode(template, context)
