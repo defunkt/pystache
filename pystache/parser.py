@@ -14,6 +14,7 @@ from pystache.parsed import ParsedTemplate
 
 DEFAULT_DELIMITERS = (u'{{', u'}}')
 END_OF_LINE_CHARACTERS = [u'\r', u'\n']
+NON_BLANK_RE = re.compile(ur'^(.)', re.M)
 
 
 def _compile_template_re(delimiters=None):
@@ -52,13 +53,31 @@ class ParsingError(Exception):
     pass
 
 
+## Node types
+
+
+class CommentNode(object):
+
+    def render(self, engine, context):
+        return u''
+
+
+class ChangeNode(object):
+
+    def __init__(self, delimiters):
+        self.delimiters = delimiters
+
+    def render(self, engine, context):
+        return u''
+
+
 class VariableNode(object):
 
     def __init__(self, key):
         self.key = key
 
     def render(self, engine, context):
-        s = engine._get_string_value(context, self.key)
+        s = engine.fetch_string(context, self.key)
         return engine.escape(s)
 
 
@@ -68,8 +87,39 @@ class LiteralNode(object):
         self.key = key
 
     def render(self, engine, context):
-        s = engine._get_string_value(context, self.key)
+        s = engine.fetch_string(context, self.key)
         return engine.literal(s)
+
+
+class PartialNode(object):
+
+    def __init__(self, key, indent):
+        self.key = key
+        self.indent = indent
+
+    def render(self, engine, context):
+        template = engine.resolve_partial(self.key)
+        # Indent before rendering.
+        template = re.sub(NON_BLANK_RE, self.indent + ur'\1', template)
+
+        return engine.render(template, context)
+
+
+class InvertedNode(object):
+
+    def __init__(self, key, parsed_section):
+        self.key = key
+        self.parsed_section = parsed_section
+
+    def render(self, engine, context):
+        # TODO: is there a bug because we are not using the same
+        #   logic as in fetch_string()?
+        data = engine.resolve_context(context, self.key)
+        # Note that lambdas are considered truthy for inverted sections
+        # per the spec.
+        if data:
+            return u''
+        return engine._render_parsed(self.parsed_section, context)
 
 
 class Parser(object):
@@ -204,12 +254,12 @@ class Parser(object):
         """
         # TODO: switch to using a dictionary instead of a bunch of ifs and elifs.
         if tag_type == '!':
-            return u''
+            return CommentNode()
 
         if tag_type == '=':
             delimiters = tag_key.split()
             self._change_delimiters(delimiters)
-            return u''
+            return ChangeNode(delimiters)
 
         if tag_type == '':
             return VariableNode(tag_key)
@@ -218,7 +268,7 @@ class Parser(object):
             return LiteralNode(tag_key)
 
         if tag_type == '>':
-            return self.engine._make_get_partial(tag_key, leading_whitespace)
+            return PartialNode(tag_key, leading_whitespace)
 
         raise Exception("Invalid symbol for interpolation tag: %s" % repr(tag_type))
 
@@ -233,6 +283,6 @@ class Parser(object):
                                                  template, section_start_index, section_end_index)
 
         if tag_type == '^':
-            return self.engine._make_get_inverse(tag_key, parsed_section)
+            return InvertedNode(tag_key, parsed_section)
 
         raise Exception("Invalid symbol for section tag: %s" % repr(tag_type))

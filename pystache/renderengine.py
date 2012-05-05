@@ -11,9 +11,6 @@ from pystache.common import is_string
 from pystache.parser import Parser
 
 
-NON_BLANK_RE = re.compile(ur'^(.)', re.M)
-
-
 def context_get(stack, name):
     """
     Find and return a name from a ContextStack instance.
@@ -90,7 +87,7 @@ class RenderEngine(object):
     #   The returned value MUST be rendered against the default delimiters,
     #   then interpolated in place of the lambda.
     #
-    def _get_string_value(self, context, tag_name):
+    def fetch_string(self, context, tag_name):
         """
         Get a value from the given context as a basestring instance.
 
@@ -105,38 +102,6 @@ class RenderEngine(object):
             return str(val)
 
         return val
-
-    def _make_get_partial(self, tag_key, leading_whitespace):
-
-        template = self.resolve_partial(tag_key)
-        # Indent before rendering.
-        template = re.sub(NON_BLANK_RE, leading_whitespace + ur'\1', template)
-
-        def get_partial(context):
-            """
-            Returns: a string of type unicode.
-
-            """
-            # TODO: can we do the parsing before calling this function?
-            return self.render(template, context)
-
-        return get_partial
-
-    def _make_get_inverse(self, name, parsed_template):
-        def get_inverse(context):
-            """
-            Returns a string with type unicode.
-
-            """
-            # TODO: is there a bug because we are not using the same
-            #   logic as in _get_string_value()?
-            data = self.resolve_context(context, name)
-            # Per the spec, lambdas in inverted sections are considered truthy.
-            if data:
-                return u''
-            return self._render_parsed(parsed_template, context)
-
-        return get_inverse
 
     # TODO: the template_ and parsed_template_ arguments don't both seem
     # to be necessary.  Can we remove one of them?  For example, if
