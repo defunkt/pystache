@@ -79,7 +79,7 @@ class Parser(object):
         self._delimiters = delimiters
         self.compile_template_re()
 
-    def parse(self, template, start_index=0, section_key=None):
+    def parse(self, template):
         """
         Parse a template string starting at some index.
 
@@ -96,8 +96,9 @@ class Parser(object):
           a ParsedTemplate instance.
 
         """
+        start_index = 0
+        content_end_index, parsed_section, section_key = None, None, None
         parsed_template = ParsedTemplate()
-        content_end_index, parsed_section = None, None
 
         states = []
 
@@ -110,9 +111,8 @@ class Parser(object):
             match_index = match.start()
             end_index = match.end()
 
-            before_tag = template[start_index : match_index]
-
-            parsed_template.add(before_tag)
+            # Add string contents before the tag.
+            parsed_template.add(template[start_index:match_index])
 
             matches = match.groupdict()
 
@@ -169,7 +169,7 @@ class Parser(object):
 
             parsed_template.add(node)
 
-        # Save the rest of the template.
+        # Add the remainder of the template.
         parsed_template.add(template[start_index:])
 
         return parsed_template
