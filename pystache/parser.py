@@ -1,39 +1,41 @@
 # coding: utf-8
 
 """
-Provides a class for parsing template strings.
-
-This module is only meant for internal use by the renderengine module.
+Exposes a parse() function to parse template strings.
 
 """
 
 import re
 
+from pystache.defaults import DELIMITERS
 from pystache.parsed import ParsedTemplate
 
 
-DEFAULT_DELIMITERS = (u'{{', u'}}')
 END_OF_LINE_CHARACTERS = [u'\r', u'\n']
 NON_BLANK_RE = re.compile(ur'^(.)', re.M)
 
 
+# TODO: add some unit tests for this.
 def parse(template, delimiters=None):
     """
     Parse a unicode template string and return a ParsedTemplate instance.
+
+    Arguments:
+
+      template: a unicode template string.
+
+      delimiters: a 2-tuple of delimiters.  Defaults to the package default.
 
     """
     parser = _Parser(delimiters)
     return parser.parse(template)
 
 
-def _compile_template_re(delimiters=None):
+def _compile_template_re(delimiters):
     """
     Return a regular expresssion object (re.RegexObject) instance.
 
     """
-    if delimiters is None:
-        delimiters = DEFAULT_DELIMITERS
-
     # The possible tag type characters following the opening tag,
     # excluding "=" and "{".
     tag_types = "!>&/#^"
@@ -184,7 +186,7 @@ class _Parser(object):
 
     def __init__(self, delimiters=None):
         if delimiters is None:
-            delimiters = DEFAULT_DELIMITERS
+            delimiters = DELIMITERS
 
         self._delimiters = delimiters
 
