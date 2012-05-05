@@ -97,12 +97,11 @@ class Parser(object):
 
         """
         parse_tree = []
-        index = start_index
 
         content_end_index, parsed_section = None, None
 
         while True:
-            match = self._template_re.search(template, index)
+            match = self._template_re.search(template, start_index)
 
             if match is None:
                 break
@@ -110,7 +109,7 @@ class Parser(object):
             match_index = match.start()
             end_index = match.end()
 
-            before_tag = template[index : match_index]
+            before_tag = template[start_index : match_index]
 
             parse_tree.append(before_tag)
 
@@ -149,9 +148,9 @@ class Parser(object):
                 return end_index, match_index, ParsedTemplate(parse_tree)
 
             if tag_type in ('#', '^'):
-                index, content_end_index, parsed_section = self.parse(template, end_index, tag_key)
+                start_index, content_end_index, parsed_section = self.parse(template, end_index, tag_key)
             else:
-                index = end_index
+                start_index = end_index
             # Variable index is now the next character to process.
 
             node = self._make_node(template, tag_type, tag_key, leading_whitespace,
@@ -159,7 +158,7 @@ class Parser(object):
             parse_tree.append(node)
 
         # Save the rest of the template.
-        parse_tree.append(template[index:])
+        parse_tree.append(template[start_index:])
 
         return ParsedTemplate(parse_tree)
 
