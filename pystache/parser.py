@@ -144,87 +144,90 @@ class Parser(object):
                 if tag_key != section_key:
                     raise ParsingError("Section end tag mismatch: %s != %s" % (tag_key, section_key))
 
-                return ParsedTemplate(parse_tree), match_index, end_index
+                return end_index, ParsedTemplate(parse_tree), match_index
 
-            index = self._handle_tag_type(template, parse_tree, tag_type, tag_key, leading_whitespace, end_index)
+            index, parsed_section, content_end_index = \
+                self._parse_section(tag_type, tag_key, template, end_index)
+            # Variable index is now the next character to process.
+
+            self._handle_tag_type(template, parse_tree, tag_type, tag_key, leading_whitespace,
+                                  end_index, content_end_index, parsed_section)
 
         # Save the rest of the template.
         parse_tree.append(template[index:])
 
         return ParsedTemplate(parse_tree)
 
-    def _parse_section(self, template, start_index, section_key):
+    def _parse_section(self, tag_type, section_key, template, start_index):
         """
         Parse the contents of a template section.
 
         Arguments:
 
+          tag_type: the tag symbol.
+
+          section_key: the tag key of the section.
+
           template: a unicode template string.
 
           start_index: the string index at which the section contents begin.
 
-          section_key: the tag key of the section.
-
         Returns: a 3-tuple:
+
+          end_index: the string index after the closing section tag (and
+            including any trailing newlines), or the same index if there
+            is no section.
 
           parsed_section: the section contents parsed as a ParsedTemplate
             instance.
 
           content_end_index: the string index after the section contents.
 
-          end_index: the string index after the closing section tag (and
-            including any trailing newlines).
-
         """
-        parsed_section, section_end_index, end_index = \
-            self.parse(template=template, start_index=start_index, section_key=section_key)
+        if not tag_type in ('#', '^'):
+            return start_index, None, None
 
-        return parsed_section, section_end_index, end_index
+        # Returns:
+        #
+        #   end_index, parsed_section, section_end_index
+        #
+        return self.parse(template=template, start_index=start_index, section_key=section_key)
 
-    def _handle_tag_type(self, template, parse_tree, tag_type, tag_key, leading_whitespace, end_index):
+    def _handle_tag_type(self, template, parse_tree, tag_type, tag_key, leading_whitespace,
+                         section_start_index, section_end_index, parsed_section):
 
         # TODO: switch to using a dictionary instead of a bunch of ifs and elifs.
         if tag_type == '!':
-            return end_index
+            return
 
         if tag_type == '=':
             delimiters = tag_key.split()
             self._change_delimiters(delimiters)
-            return end_index
-
-        engine = self.engine
+            return
 
         if tag_type == '':
 
-            func = engine._make_get_escaped(tag_key)
+            func = self.engine._make_get_escaped(tag_key)
 
         elif tag_type == '&':
 
-            func = engine._make_get_literal(tag_key)
+            func = self.engine._make_get_literal(tag_key)
 
         elif tag_type == '#':
 
-            # TODO: move this code into RenderEngine.
-            section_start_index = end_index
-            parsed_section, section_end_index, end_index = self._parse_section(template, end_index, tag_key)
-            func = engine._make_get_section(tag_key, parsed_section, self._delimiters,
+            func = self.engine._make_get_section(tag_key, parsed_section, self._delimiters,
                                             template, section_start_index, section_end_index)
 
         elif tag_type == '^':
 
-            # TODO: move this code into RenderEngine.
-            parsed_section, section_end_index, end_index = self._parse_section(template, end_index, tag_key)
-            func = engine._make_get_inverse(tag_key, parsed_section)
+            func = self.engine._make_get_inverse(tag_key, parsed_section)
 
         elif tag_type == '>':
 
-            func = engine._make_get_partial(tag_key, leading_whitespace)
+            func = self.engine._make_get_partial(tag_key, leading_whitespace)
 
         else:
 
             raise Exception("Unrecognized tag type: %s" % repr(tag_type))
 
         parse_tree.append(func)
-
-        return end_index
-
