@@ -146,57 +146,52 @@ class Parser(object):
                 if tag_key != section_key:
                     raise ParsingError("Section end tag mismatch: %s != %s" % (tag_key, section_key))
 
-                return end_index, ParsedTemplate(parse_tree), match_index
+                return end_index, match_index, ParsedTemplate(parse_tree)
 
             if tag_type in ('#', '^'):
-                index, parsed_section, content_end_index = self.parse(template, end_index, tag_key)
+                index, content_end_index, parsed_section = self.parse(template, end_index, tag_key)
             else:
                 index = end_index
             # Variable index is now the next character to process.
 
-            self._handle_tag_type(template, parse_tree, tag_type, tag_key, leading_whitespace,
-                                  end_index, content_end_index, parsed_section)
+            node = self._make_node(template, tag_type, tag_key, leading_whitespace,
+                                   end_index, content_end_index, parsed_section)
+            parse_tree.append(node)
 
         # Save the rest of the template.
         parse_tree.append(template[index:])
 
         return ParsedTemplate(parse_tree)
 
-    def _handle_tag_type(self, template, parse_tree, tag_type, tag_key, leading_whitespace,
-                         section_start_index, section_end_index, parsed_section):
+    def _make_node(self, template, tag_type, tag_key, leading_whitespace,
+                   section_start_index, section_end_index, parsed_section):
+        """
+        Create and return a node of the parse tree.
 
+        """
         # TODO: switch to using a dictionary instead of a bunch of ifs and elifs.
         if tag_type == '!':
-            return
+            return u''
 
         if tag_type == '=':
             delimiters = tag_key.split()
             self._change_delimiters(delimiters)
-            return
+            return u''
 
         if tag_type == '':
+            return self.engine._make_get_escaped(tag_key)
 
-            func = self.engine._make_get_escaped(tag_key)
+        if tag_type == '&':
+            return self.engine._make_get_literal(tag_key)
 
-        elif tag_type == '&':
-
-            func = self.engine._make_get_literal(tag_key)
-
-        elif tag_type == '#':
-
-            func = self.engine._make_get_section(tag_key, parsed_section, self._delimiters,
+        if tag_type == '#':
+            return self.engine._make_get_section(tag_key, parsed_section, self._delimiters,
                                                  template, section_start_index, section_end_index)
 
-        elif tag_type == '^':
+        if tag_type == '^':
+            return self.engine._make_get_inverse(tag_key, parsed_section)
 
-            func = self.engine._make_get_inverse(tag_key, parsed_section)
+        if tag_type == '>':
+            return self.engine._make_get_partial(tag_key, leading_whitespace)
 
-        elif tag_type == '>':
-
-            func = self.engine._make_get_partial(tag_key, leading_whitespace)
-
-        else:
-
-            raise Exception("Unrecognized tag type: %s" % repr(tag_type))
-
-        parse_tree.append(func)
+        raise Exception("Unrecognized tag type: %s" % repr(tag_type))
