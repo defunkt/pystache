@@ -106,30 +106,6 @@ class RenderEngine(object):
 
         return val
 
-    def _make_get_literal(self, name):
-        def get_literal(context):
-            """
-            Returns: a string of type unicode.
-
-            """
-            s = self._get_string_value(context, name)
-            return self.literal(s)
-
-        return get_literal
-
-    def _make_get_escaped(self, name):
-        get_literal = self._make_get_literal(name)
-
-        def get_escaped(context):
-            """
-            Returns: a string of type unicode.
-
-            """
-            s = self._get_string_value(context, name)
-            return self.escape(s)
-
-        return get_escaped
-
     def _make_get_partial(self, tag_key, leading_whitespace):
 
         template = self.resolve_partial(tag_key)
@@ -158,7 +134,7 @@ class RenderEngine(object):
             # Per the spec, lambdas in inverted sections are considered truthy.
             if data:
                 return u''
-            return parsed_template.render(context)
+            return self._render_parsed(parsed_template, context)
 
         return get_inverse
 
@@ -228,12 +204,15 @@ class RenderEngine(object):
                     continue
 
                 context.push(val)
-                parts.append(parsed_template.render(context))
+                parts.append(self._render_parsed(parsed_template, context))
                 context.pop()
 
             return unicode(''.join(parts))
 
         return get_section_value
+
+    def _render_parsed(self, parsed_template, context_stack):
+        return parsed_template.render(self, context_stack)
 
     def _render_value(self, val, context, delimiters=None):
         """
@@ -262,4 +241,4 @@ class RenderEngine(object):
         parser = Parser(self, delimiters=delimiters)
         parsed_template = parser.parse(template)
 
-        return parsed_template.render(context_stack)
+        return self._render_parsed(parsed_template, context_stack)

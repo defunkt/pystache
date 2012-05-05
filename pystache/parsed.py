@@ -38,7 +38,7 @@ class ParsedTemplate(object):
     def add(self, node):
         self._parse_tree.append(node)
 
-    def render(self, context):
+    def render(self, engine, context):
         """
         Returns: a string of type unicode.
 
@@ -47,9 +47,10 @@ class ParsedTemplate(object):
         def get_unicode(val):
             if callable(val):
                 return val(context)
-            return val
+            if isinstance(val, basestring):
+                return val
+            return val.render(engine, context)
         parts = map(get_unicode, self._parse_tree)
         s = ''.join(parts)
 
         return unicode(s)
-

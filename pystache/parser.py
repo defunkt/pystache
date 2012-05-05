@@ -52,6 +52,26 @@ class ParsingError(Exception):
     pass
 
 
+class VariableNode(object):
+
+    def __init__(self, key):
+        self.key = key
+
+    def render(self, engine, context):
+        s = engine._get_string_value(context, self.key)
+        return engine.escape(s)
+
+
+class LiteralNode(object):
+
+    def __init__(self, key):
+        self.key = key
+
+    def render(self, engine, context):
+        s = engine._get_string_value(context, self.key)
+        return engine.literal(s)
+
+
 class Parser(object):
 
     _delimiters = None
@@ -192,10 +212,10 @@ class Parser(object):
             return u''
 
         if tag_type == '':
-            return self.engine._make_get_escaped(tag_key)
+            return VariableNode(tag_key)
 
         if tag_type == '&':
-            return self.engine._make_get_literal(tag_key)
+            return LiteralNode(tag_key)
 
         if tag_type == '>':
             return self.engine._make_get_partial(tag_key, leading_whitespace)
