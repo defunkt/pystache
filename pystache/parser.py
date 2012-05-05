@@ -176,7 +176,7 @@ class Parser(object):
 
     def _make_interpolation_node(self, tag_type, tag_key, leading_whitespace):
         """
-        Create and return a node of the parse tree.
+        Create and return a non-section node for the parse tree.
 
         """
         # TODO: switch to using a dictionary instead of a bunch of ifs and elifs.
@@ -202,7 +202,7 @@ class Parser(object):
     def _make_section_node(self, template, tag_type, tag_key, parsed_section,
                            section_start_index, section_end_index):
         """
-        Create and return a node of the parse tree.
+        Create and return a section node for the parse tree.
 
         """
         if tag_type == '#':
