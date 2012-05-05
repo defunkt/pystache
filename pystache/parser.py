@@ -141,14 +141,15 @@ class Parser(object):
                 match_index += len(leading_whitespace)
                 leading_whitespace = ''
 
-            if tag_type == '/':
+            if tag_type in ('#', '^'):
+                start_index, content_end_index, parsed_section = self.parse(template, end_index, tag_key)
+
+            elif tag_type == '/':
                 if tag_key != section_key:
                     raise ParsingError("Section end tag mismatch: %s != %s" % (tag_key, section_key))
 
                 return end_index, match_index, parsed_template
 
-            if tag_type in ('#', '^'):
-                start_index, content_end_index, parsed_section = self.parse(template, end_index, tag_key)
             else:
                 start_index = end_index
             # Variable index is now the next character to process.
