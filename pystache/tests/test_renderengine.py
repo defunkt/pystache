@@ -96,7 +96,8 @@ class RenderTests(unittest.TestCase, AssertStringMixin, AssertExceptionMixin):
 
         context = ContextStack(*context)
 
-        actual = engine.render(template, context)
+        # RenderEngine.render() only accepts unicode template strings.
+        actual = engine.render(unicode(template), context)
 
         self.assertString(actual=actual, expected=expected)
 

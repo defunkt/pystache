@@ -142,7 +142,7 @@ class RenderEngine(object):
 
             """
             # TODO: can we do the parsing before calling this function?
-            return self._render(template, context)
+            return self.render(template, context)
 
         return get_partial
 
@@ -235,16 +235,6 @@ class RenderEngine(object):
 
         return get_section_value
 
-    def _render_unicode(self, template, context, delimiters=None):
-        """
-        Render a unicode template string.
-
-        """
-        parser = Parser(self, delimiters=delimiters)
-        parsed_template = parser.parse(template)
-
-        return parsed_template.render(context)
-
     def _render_value(self, val, context, delimiters=None):
         """
         Render an arbitrary value.
@@ -255,42 +245,21 @@ class RenderEngine(object):
             val = str(val)
         if type(val) is not unicode:
             val = self.literal(val)
-        return self._render(val, context, delimiters)
+        return self.render(val, context, delimiters)
 
-    def _render(self, template, context, delimiters=None):
+    def render(self, template, context_stack, delimiters=None):
         """
-        Returns: a string of type unicode.
-
-        Arguments:
-
-          template: a template string of type unicode.
-          context: a ContextStack instance.
-
-        """
-        # We keep this type-check as an added check because this method is
-        # called with template strings coming from potentially externally-
-        # supplied functions like self.literal, self.load_partial, etc.
-        # Beyond this point, we have much better control over the type.
-        if type(template) is not unicode:
-            raise Exception("Argument 'template' not unicode: %s: %s" % (type(template), repr(template)))
-
-        return self._render_unicode(template, context, delimiters)
-
-    def render(self, template, context):
-        """
-        Return a template rendered as a string with type unicode.
+        Render a unicode template string, and return as unicode.
 
         Arguments:
 
           template: a template string of type unicode (but not a proper
             subclass of unicode).
 
-          context: a ContextStack instance.
+          context_stack: a ContextStack instance.
 
         """
-        # Be strict but not too strict.  In other words, accept str instead
-        # of unicode, but don't assume anything about the encoding (e.g.
-        # don't use self.literal).
-        template = unicode(template)
+        parser = Parser(self, delimiters=delimiters)
+        parsed_template = parser.parse(template)
 
-        return self._render_unicode(template, context)
+        return parsed_template.render(context_stack)
