@@ -14,7 +14,6 @@ from pystache.parsed import ParsedTemplate
 
 DEFAULT_DELIMITERS = (u'{{', u'}}')
 END_OF_LINE_CHARACTERS = [u'\r', u'\n']
-NON_BLANK_RE = re.compile(ur'^(.)', re.M)
 
 
 def _compile_template_re(delimiters=None):
@@ -205,6 +204,7 @@ class Parser(object):
 
         elif tag_type == '#':
 
+            # TODO: move this code into RenderEngine.
             section_start_index = end_index
             parsed_section, section_end_index, end_index = self._parse_section(template, end_index, tag_key)
             func = engine._make_get_section(tag_key, parsed_section, self._delimiters,
@@ -212,15 +212,13 @@ class Parser(object):
 
         elif tag_type == '^':
 
+            # TODO: move this code into RenderEngine.
             parsed_section, section_end_index, end_index = self._parse_section(template, end_index, tag_key)
             func = engine._make_get_inverse(tag_key, parsed_section)
 
         elif tag_type == '>':
 
-            template = engine.resolve_partial(tag_key)
-            # Indent before rendering.
-            template = re.sub(NON_BLANK_RE, leading_whitespace + ur'\1', template)
-            func = engine._make_get_partial(template)
+            func = engine._make_get_partial(tag_key, leading_whitespace)
 
         else:
 

@@ -11,6 +11,9 @@ from pystache.common import is_string
 from pystache.parser import Parser
 
 
+NON_BLANK_RE = re.compile(ur'^(.)', re.M)
+
+
 def context_get(stack, name):
     """
     Find and return a name from a ContextStack instance.
@@ -127,13 +130,18 @@ class RenderEngine(object):
 
         return get_escaped
 
-    def _make_get_partial(self, template):
+    def _make_get_partial(self, tag_key, leading_whitespace):
+
+        template = self.resolve_partial(tag_key)
+        # Indent before rendering.
+        template = re.sub(NON_BLANK_RE, leading_whitespace + ur'\1', template)
+
         def get_partial(context):
             """
             Returns: a string of type unicode.
 
             """
-            # TODO: the parsing should be done before calling this function.
+            # TODO: can we do the parsing before calling this function?
             return self._render(template, context)
 
         return get_partial
