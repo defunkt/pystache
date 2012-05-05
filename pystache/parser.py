@@ -71,7 +71,7 @@ class ChangeNode(object):
         return u''
 
 
-class VariableNode(object):
+class Tag(object):
 
     def __init__(self, key):
         self.key = key
@@ -119,7 +119,53 @@ class InvertedNode(object):
         # per the spec.
         if data:
             return u''
-        return engine._render_parsed(self.parsed_section, context)
+        return engine.render_parsed(self.parsed_section, context)
+
+
+class SectionNode(object):
+
+    # TODO: the template_ and parsed_template_ arguments don't both seem
+    # to be necessary.  Can we remove one of them?  For example, if
+    # callable(data) is True, then the initial parsed_template isn't used.
+    def __init__(self, key, parsed_contents, delimiters, template, section_begin_index, section_end_index):
+        self.delimiters = delimiters
+        self.key = key
+        self.parsed_contents = parsed_contents
+        self.template = template
+        self.section_begin_index = section_begin_index
+        self.section_end_index = section_end_index
+
+    def render(self, engine, context):
+        data = engine.fetch_section_data(context, self.key)
+
+        parts = []
+        for val in data:
+            if callable(val):
+                # Lambdas special case section rendering and bypass pushing
+                # the data value onto the context stack.  From the spec--
+                #
+                #   When used as the data value for a Section tag, the
+                #   lambda MUST be treatable as an arity 1 function, and
+                #   invoked as such (passing a String containing the
+                #   unprocessed section contents).  The returned value
+                #   MUST be rendered against the current delimiters, then
+                #   interpolated in place of the section.
+                #
+                #  Also see--
+                #
+                #   https://github.com/defunkt/pystache/issues/113
+                #
+                # TODO: should we check the arity?
+                val = val(self.template[self.section_begin_index:self.section_end_index])
+                val = engine._render_value(val, context, delimiters=self.delimiters)
+                parts.append(val)
+                continue
+
+            context.push(val)
+            parts.append(engine.render_parsed(self.parsed_contents, context))
+            context.pop()
+
+        return unicode(''.join(parts))
 
 
 class Parser(object):
@@ -127,20 +173,11 @@ class Parser(object):
     _delimiters = None
     _template_re = None
 
-    def __init__(self, engine, delimiters=None):
-        """
-        Construct an instance.
-
-        Arguments:
-
-          engine: a RenderEngine instance.
-
-        """
+    def __init__(self, delimiters=None):
         if delimiters is None:
             delimiters = DEFAULT_DELIMITERS
 
         self._delimiters = delimiters
-        self.engine = engine
 
     def _compile_delimiters(self):
         self._template_re = _compile_template_re(self._delimiters)
@@ -242,8 +279,9 @@ class Parser(object):
 
             parsed_template.add(node)
 
-        # Add the remainder of the template.
-        parsed_template.add(template[start_index:])
+        # Avoid adding spurious empty strings to the parse tree.
+        if start_index != len(template):
+            parsed_template.add(template[start_index:])
 
         return parsed_template
 
@@ -262,7 +300,7 @@ class Parser(object):
             return ChangeNode(delimiters)
 
         if tag_type == '':
-            return VariableNode(tag_key)
+            return Tag(tag_key)
 
         if tag_type == '&':
             return LiteralNode(tag_key)
@@ -279,8 +317,8 @@ class Parser(object):
 
         """
         if tag_type == '#':
-            return self.engine._make_get_section(tag_key, parsed_section, self._delimiters,
-                                                 template, section_start_index, section_end_index)
+            return SectionNode(tag_key, parsed_section, self._delimiters,
+                               template, section_start_index, section_end_index)
 
         if tag_type == '^':
             return InvertedNode(tag_key, parsed_section)

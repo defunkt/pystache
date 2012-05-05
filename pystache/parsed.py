@@ -45,9 +45,7 @@ class ParsedTemplate(object):
         """
         # We avoid use of the ternary operator for Python 2.4 support.
         def get_unicode(val):
-            if callable(val):
-                return val(context)
-            if isinstance(val, basestring):
+            if type(val) is unicode:
                 return val
             return val.render(engine, context)
         parts = map(get_unicode, self._parse_tree)

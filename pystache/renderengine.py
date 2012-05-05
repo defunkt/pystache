@@ -87,12 +87,12 @@ class RenderEngine(object):
     #   The returned value MUST be rendered against the default delimiters,
     #   then interpolated in place of the lambda.
     #
-    def fetch_string(self, context, tag_name):
+    def fetch_string(self, context, name):
         """
         Get a value from the given context as a basestring instance.
 
         """
-        val = self.resolve_context(context, tag_name)
+        val = self.resolve_context(context, name)
 
         if callable(val):
             # Return because _render_value() is already a string.
@@ -103,81 +103,40 @@ class RenderEngine(object):
 
         return val
 
-    # TODO: the template_ and parsed_template_ arguments don't both seem
-    # to be necessary.  Can we remove one of them?  For example, if
-    # callable(data) is True, then the initial parsed_template isn't used.
-    def _make_get_section(self, name, parsed_template, delims,
-                          template, section_start_index, section_end_index):
-        def get_section_value(context):
-            """
-            Returns: a string of type unicode.
+    def fetch_section_data(self, context, name):
+        data = self.resolve_context(context, name)
 
-            """
-            data = self.resolve_context(context, name)
-
-            # From the spec:
+        # From the spec:
+        #
+        #   If the data is not of a list type, it is coerced into a list
+        #   as follows: if the data is truthy (e.g. `!!data == true`),
+        #   use a single-element list containing the data, otherwise use
+        #   an empty list.
+        #
+        if not data:
+            data = []
+        else:
+            # The least brittle way to determine whether something
+            # supports iteration is by trying to call iter() on it:
             #
-            #   If the data is not of a list type, it is coerced into a list
-            #   as follows: if the data is truthy (e.g. `!!data == true`),
-            #   use a single-element list containing the data, otherwise use
-            #   an empty list.
+            #   http://docs.python.org/library/functions.html#iter
             #
-            if not data:
-                data = []
+            # It is not sufficient, for example, to check whether the item
+            # implements __iter__ () (the iteration protocol).  There is
+            # also __getitem__() (the sequence protocol).  In Python 2,
+            # strings do not implement __iter__(), but in Python 3 they do.
+            try:
+                iter(data)
+            except TypeError:
+                # Then the value does not support iteration.
+                data = [data]
             else:
-                # The least brittle way to determine whether something
-                # supports iteration is by trying to call iter() on it:
-                #
-                #   http://docs.python.org/library/functions.html#iter
-                #
-                # It is not sufficient, for example, to check whether the item
-                # implements __iter__ () (the iteration protocol).  There is
-                # also __getitem__() (the sequence protocol).  In Python 2,
-                # strings do not implement __iter__(), but in Python 3 they do.
-                try:
-                    iter(data)
-                except TypeError:
-                    # Then the value does not support iteration.
+                if is_string(data) or isinstance(data, dict):
+                    # Do not treat strings and dicts (which are iterable) as lists.
                     data = [data]
-                else:
-                    if is_string(data) or isinstance(data, dict):
-                        # Do not treat strings and dicts (which are iterable) as lists.
-                        data = [data]
-                    # Otherwise, treat the value as a list.
+                # Otherwise, treat the value as a list.
 
-            parts = []
-            for val in data:
-                if callable(val):
-                    # Lambdas special case section rendering and bypass pushing
-                    # the data value onto the context stack.  From the spec--
-                    #
-                    #   When used as the data value for a Section tag, the
-                    #   lambda MUST be treatable as an arity 1 function, and
-                    #   invoked as such (passing a String containing the
-                    #   unprocessed section contents).  The returned value
-                    #   MUST be rendered against the current delimiters, then
-                    #   interpolated in place of the section.
-                    #
-                    #  Also see--
-                    #
-                    #   https://github.com/defunkt/pystache/issues/113
-                    #
-                    # TODO: should we check the arity?
-                    val = val(template[section_start_index:section_end_index])
-                    val = self._render_value(val, context, delimiters=delims)
-                    parts.append(val)
-                    continue
-
-                context.push(val)
-                parts.append(self._render_parsed(parsed_template, context))
-                context.pop()
-
-            return unicode(''.join(parts))
-
-        return get_section_value
-
-    def _render_parsed(self, parsed_template, context_stack):
-        return parsed_template.render(self, context_stack)
+        return data
 
     def _render_value(self, val, context, delimiters=None):
         """
@@ -191,6 +150,9 @@ class RenderEngine(object):
             val = self.literal(val)
         return self.render(val, context, delimiters)
 
+    def render_parsed(self, parsed_template, context_stack):
+        return parsed_template.render(self, context_stack)
+
     def render(self, template, context_stack, delimiters=None):
         """
         Render a unicode template string, and return as unicode.
@@ -203,7 +165,7 @@ class RenderEngine(object):
           context_stack: a ContextStack instance.
 
         """
-        parser = Parser(self, delimiters=delimiters)
+        parser = Parser(delimiters=delimiters)
         parsed_template = parser.parse(template)
 
-        return self._render_parsed(parsed_template, context_stack)
+        return self.render_parsed(parsed_template, context_stack)
