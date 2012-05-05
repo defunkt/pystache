@@ -93,13 +93,7 @@ class RenderEngine(object):
             #     and invoked as such.  The returned value MUST be
             #     rendered against the default delimiters, then
             #     interpolated in place of the lambda.
-            template = val()
-            if not isinstance(template, basestring):
-                # In case the template is an integer, for example.
-                template = str(template)
-            if type(template) is not unicode:
-                template = self.literal(template)
-            val = self._render(template, context)
+            val = self._render_value(val(), context)
 
         if not isinstance(val, basestring):
             val = str(val)
@@ -202,8 +196,8 @@ class RenderEngine(object):
                     # Otherwise, treat the value as a list.
 
             parts = []
-            for element in data:
-                if callable(element):
+            for val in data:
+                if callable(val):
                     # Lambdas special case section rendering and bypass pushing
                     # the data value onto the context stack.  From the spec--
                     #
@@ -219,14 +213,12 @@ class RenderEngine(object):
                     #   https://github.com/defunkt/pystache/issues/113
                     #
                     # TODO: should we check the arity?
-                    new_template = element(template[section_start_index:section_end_index])
-                    # Make sure we are dealing with a unicode template string.
-                    new_template = self.literal(new_template)
-                    rendered = self._render(new_template, context, delimiters=delims)
-                    parts.append(rendered)
+                    val = val(template[section_start_index:section_end_index])
+                    val = self._render_value(val, context, delimiters=delims)
+                    parts.append(val)
                     continue
 
-                context.push(element)
+                context.push(val)
                 parts.append(parsed_template.render(context))
                 context.pop()
 
@@ -247,6 +239,18 @@ class RenderEngine(object):
         parser.compile_template_re()
 
         return parser.parse(template=template)
+
+    def _render_value(self, val, context, delimiters=None):
+        """
+        Render an arbitrary value.
+
+        """
+        if not isinstance(val, basestring):
+            # In case the template is an integer, for example.
+            val = str(val)
+        if type(val) is not unicode:
+            val = self.literal(val)
+        return self._render(val, context, delimiters)
 
     def _render(self, template, context, delimiters=None):
         """

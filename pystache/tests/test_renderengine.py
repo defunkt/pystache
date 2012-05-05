@@ -11,6 +11,7 @@ import unittest
 from pystache.context import ContextStack, KeyNotFoundError
 from pystache import defaults
 from pystache.parser import ParsingError
+from pystache.renderer import Renderer
 from pystache.renderengine import context_get, RenderEngine
 from pystache.tests.common import AssertStringMixin, AssertExceptionMixin, Attachable
 
@@ -77,11 +78,9 @@ class RenderTests(unittest.TestCase, AssertStringMixin, AssertExceptionMixin):
         Create and return a default RenderEngine for testing.
 
         """
-        escape = defaults.TAG_ESCAPE
+        renderer = Renderer(string_encoding='utf-8', missing_tags='strict')
+        engine = renderer._make_render_engine()
 
-        engine = RenderEngine(literal=unicode, escape=escape,
-                              resolve_context=context_get,
-                              resolve_partial=None)
         return engine
 
     def _assert_render(self, expected, template, *context, **kwargs):
@@ -489,6 +488,15 @@ class RenderTests(unittest.TestCase, AssertStringMixin, AssertExceptionMixin):
         template = '{{#lambda}}{{/lambda}}'
         context = {'lambda': lambda text: u'abcdé'.encode('utf-8')}
         self._assert_render(u'abcdé', template, context, engine=engine)
+
+    def test_section__lambda__returning_nonstring(self):
+        """
+        Test a lambda section value returning a non-string.
+
+        """
+        template = '{{#lambda}}foo{{/lambda}}'
+        context = {'lambda': lambda text: len(text)}
+        self._assert_render(u'3', template, context)
 
     def test_section__iterable(self):
         """
