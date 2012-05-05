@@ -97,8 +97,9 @@ class Parser(object):
 
         """
         parsed_template = ParsedTemplate()
-
         content_end_index, parsed_section = None, None
+
+        states = []
 
         while True:
             match = self._template_re.search(template, start_index)
@@ -142,17 +143,28 @@ class Parser(object):
                 leading_whitespace = ''
 
             if tag_type in ('#', '^'):
-                start_index, content_end_index, parsed_section = self.parse(template, end_index, tag_key)
+                # Cache current state.
+                state = (tag_type, tag_key, leading_whitespace, end_index, section_key, parsed_template)
+                states.append(state)
 
-            elif tag_type == '/':
+                # Initialize new state
+                start_index, section_key = end_index, tag_key
+                parsed_template = ParsedTemplate()
+                content_end_index, parsed_section = None, None
+
+                continue
+
+            if tag_type == '/':
                 if tag_key != section_key:
                     raise ParsingError("Section end tag mismatch: %s != %s" % (tag_key, section_key))
 
-                return end_index, match_index, parsed_template
+                # Restore previous state with newly found section data.
+                start_index, content_end_index, parsed_section = end_index, match_index, parsed_template
+
+                (tag_type, tag_key, leading_whitespace, end_index, section_key, parsed_template) = states.pop()
 
             else:
                 start_index = end_index
-            # Variable index is now the next character to process.
 
             node = self._make_node(template, tag_type, tag_key, leading_whitespace,
                                    end_index, content_end_index, parsed_section)
