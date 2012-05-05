@@ -10,7 +10,7 @@ This module is meant only for internal use.
 
 class ParsedTemplate(object):
 
-    def __init__(self, parse_tree):
+    def __init__(self):
         """
         Arguments:
 
@@ -30,10 +30,13 @@ class ParsedTemplate(object):
         * RenderEngine._make_get_section()
 
         """
-        self._parse_tree = parse_tree
+        self._parse_tree = []
 
     def __repr__(self):
         return "[%s]" % (", ".join([repr(part) for part in self._parse_tree]))
+
+    def add(self, node):
+        self._parse_tree.append(node)
 
     def render(self, context):
         """

@@ -96,7 +96,7 @@ class Parser(object):
           a ParsedTemplate instance.
 
         """
-        parse_tree = []
+        parsed_template = ParsedTemplate()
 
         content_end_index, parsed_section = None, None
 
@@ -111,7 +111,7 @@ class Parser(object):
 
             before_tag = template[start_index : match_index]
 
-            parse_tree.append(before_tag)
+            parsed_template.add(before_tag)
 
             matches = match.groupdict()
 
@@ -137,7 +137,7 @@ class Parser(object):
                 if end_index < len(template):
                     end_index += template[end_index] == '\n' and 1 or 0
             elif leading_whitespace:
-                parse_tree.append(leading_whitespace)
+                parsed_template.add(leading_whitespace)
                 match_index += len(leading_whitespace)
                 leading_whitespace = ''
 
@@ -145,7 +145,7 @@ class Parser(object):
                 if tag_key != section_key:
                     raise ParsingError("Section end tag mismatch: %s != %s" % (tag_key, section_key))
 
-                return end_index, match_index, ParsedTemplate(parse_tree)
+                return end_index, match_index, parsed_template
 
             if tag_type in ('#', '^'):
                 start_index, content_end_index, parsed_section = self.parse(template, end_index, tag_key)
@@ -155,12 +155,12 @@ class Parser(object):
 
             node = self._make_node(template, tag_type, tag_key, leading_whitespace,
                                    end_index, content_end_index, parsed_section)
-            parse_tree.append(node)
+            parsed_template.add(node)
 
         # Save the rest of the template.
-        parse_tree.append(template[start_index:])
+        parsed_template.add(template[start_index:])
 
-        return ParsedTemplate(parse_tree)
+        return parsed_template
 
     def _make_node(self, template, tag_type, tag_key, leading_whitespace,
                    section_start_index, section_end_index, parsed_section):
