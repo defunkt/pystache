@@ -146,7 +146,7 @@ class Parser(object):
 
             if tag_type in ('#', '^'):
                 # Cache current state.
-                state = (tag_type, tag_key, end_index, section_key, parsed_template)
+                state = (tag_type, end_index, section_key, parsed_template)
                 states.append(state)
 
                 # Initialize new state
@@ -160,9 +160,9 @@ class Parser(object):
                 # Restore previous state with newly found section data.
                 parsed_section = parsed_template
 
-                (tag_type, tag_key, end_index, section_key, parsed_template) = states.pop()
+                (tag_type, section_start_index, section_key, parsed_template) = states.pop()
                 node = self._make_section_node(template, tag_type, tag_key, parsed_section,
-                                               end_index, match_index)
+                                               section_start_index, match_index)
 
             else:
                 node = self._make_interpolation_node(tag_type, tag_key, leading_whitespace)
