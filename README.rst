@@ -101,6 +101,8 @@ You can also parse a template: ::
     [u'Hey ', _SectionNode(key=u'who', index_begin=12, index_end=18, parsed=[_EscapeNode(key=u'.'), u'!'])]
     >>> print renderer.render(parsed, {'who': 'Pops'})
     Hey Pops!
+    >>> print renderer.render(parsed, {'who': 'you'})
+    Hey you!
 
 
 Python 3
