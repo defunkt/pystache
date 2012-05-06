@@ -17,6 +17,7 @@ NON_BLANK_RE = re.compile(ur'^(.)', re.M)
 
 # TODO: add some unit tests for this.
 # TODO: add a test case that checks for spurious spaces.
+# TODO: add test cases for delimiters.
 def parse(template, delimiters=None):
     """
     Parse a unicode template string and return a ParsedTemplate instance.

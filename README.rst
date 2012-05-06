@@ -65,19 +65,18 @@ Use It
 
 You can also create dedicated view classes to hold your view logic.
 
-Here's your view class (in examples/readme.py)::
+Here's your view class (in .../examples/readme.py)::
 
     class SayHello(object):
-
         def to(self):
             return "Pizza"
 
-Like so::
+Instantiating like so::
 
     >>> from pystache.tests.examples.readme import SayHello
     >>> hello = SayHello()
 
-Then your template, say_hello.mustache (in the same directory by default
+Then your template, say_hello.mustache (by default in the same directory
 as your class definition)::
 
     Hello, {{to}}!
@@ -89,16 +88,15 @@ Pull it together::
     Hello, Pizza!
 
 For greater control over rendering (e.g. to specify a custom template directory),
-use the ``Renderer`` class directly.  One can pass attributes to the class's
-constructor or set them on an instance.
+use the ``Renderer`` class like above.  One can pass attributes to the
+Renderer class constructor or set them on a Renderer instance.
 To customize template loading on a per-view basis, subclass ``TemplateSpec``.
 See the docstrings of the Renderer_ class and TemplateSpec_ class for
 more information.
 
-Try parsing a template: ::
+You can also parse a template: ::
 
-    >>> from pystache import parse
-    >>> parse("Hey {{#you}}{{.}}!{{/you}}")
+    >>> pystache.parse("Hey {{#you}}{{.}}!{{/you}}")
     ['Hey ', _SectionNode(key='you', index_begin=12, index_end=18, parsed=[_EscapeNode(key='.'), '!'])]
 
 
