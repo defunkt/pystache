@@ -33,7 +33,7 @@ class ParsedTemplate(object):
         self._parse_tree = []
 
     def __repr__(self):
-        return "[%s]" % (", ".join([repr(part) for part in self._parse_tree]))
+        return repr(self._parse_tree)
 
     def add(self, node):
         self._parse_tree.append(node)
