@@ -231,10 +231,6 @@ class _Parser(object):
             match_index = match.start()
             end_index = match.end()
 
-            # Avoid adding spurious empty strings to the parse tree.
-            if start_index != match_index:
-                parsed_template.add(template[start_index:match_index])
-
             matches = match.groupdict()
 
             # Normalize the matches dictionary.
@@ -259,9 +255,12 @@ class _Parser(object):
                 if end_index < len(template):
                     end_index += template[end_index] == '\n' and 1 or 0
             elif leading_whitespace:
-                parsed_template.add(leading_whitespace)
                 match_index += len(leading_whitespace)
                 leading_whitespace = ''
+
+            # Avoid adding spurious empty strings to the parse tree.
+            if start_index != match_index:
+                parsed_template.add(template[start_index:match_index])
 
             start_index = end_index
 
