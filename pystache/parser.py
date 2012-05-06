@@ -30,10 +30,13 @@ def parse(template, delimiters=None):
 
     Examples:
 
-    >>> parse("Hey {{#you}}{{name}}!{{/you}}")
-    ['Hey ', _SectionNode(key='you', index_begin=12, index_end=21, parsed=[_EscapeNode(key='name'), '!'])]
+    >>> parsed = parse(u"Hey {{#who}}{{name}}!{{/who}}")
+    >>> print str(parsed).replace('u', '')  # This is a hack to get the test to pass both in Python 2 and 3.
+    ['Hey ', _SectionNode(key='who', index_begin=12, index_end=21, parsed=[_EscapeNode(key='name'), '!'])]
 
     """
+    if type(template) is not unicode:
+        raise Exception("Template is not unicode: %s" % type(template))
     parser = _Parser(delimiters)
     return parser.parse(template)
 

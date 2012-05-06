@@ -11,6 +11,7 @@ from pystache import defaults
 from pystache.common import TemplateNotFoundError, MissingTags, is_string
 from pystache.context import ContextStack, KeyNotFoundError
 from pystache.loader import Loader
+from pystache.parsed import ParsedTemplate
 from pystache.renderengine import context_get, RenderEngine
 from pystache.specloader import SpecLoader
 from pystache.template_spec import TemplateSpec
@@ -318,22 +319,6 @@ class Renderer(object):
         load_template = self._make_load_template()
         return load_template(template_name)
 
-    def _render_string(self, template, *context, **kwargs):
-        """
-        Render the given template string using the given context.
-
-        """
-        # RenderEngine.render() requires that the template string be unicode.
-        template = self._to_unicode_hard(template)
-
-        context = ContextStack.create(*context, **kwargs)
-        self._context = context
-
-        engine = self._make_render_engine()
-        rendered = engine.render(template, context)
-
-        return unicode(rendered)
-
     def _render_object(self, obj, *context, **kwargs):
         """
         Render the template associated with the given object.
@@ -368,24 +353,54 @@ class Renderer(object):
 
         return self._render_string(template, *context, **kwargs)
 
+    def _render_string(self, template, *context, **kwargs):
+        """
+        Render the given template string using the given context.
+
+        """
+        # RenderEngine.render() requires that the template string be unicode.
+        template = self._to_unicode_hard(template)
+
+        render_func = lambda engine, stack: engine.render(template, stack)
+
+        return self._render_final(render_func, *context, **kwargs)
+
+    # All calls to render() should end here because it prepares the
+    # context stack correctly.
+    def _render_final(self, render_func, *context, **kwargs):
+        """
+        Arguments:
+
+          render_func: a function that accepts a RenderEngine and ContextStack
+            instance and returns a template rendering as a unicode string.
+
+        """
+        stack = ContextStack.create(*context, **kwargs)
+        self._context = stack
+
+        engine = self._make_render_engine()
+
+        return render_func(engine, stack)
+
     def render(self, template, *context, **kwargs):
         """
-        Render the given template (or template object) using the given context.
+        Render the given template string, view template, or parsed template.
 
-        Returns the rendering as a unicode string.
+        Returns a unicode string.
 
-        Prior to rendering, templates of type str are converted to unicode
-        using the string_encoding and decode_errors attributes.  See the
-        constructor docstring for more information.
+        Prior to rendering, this method will convert a template that is a
+        byte string (type str in Python 2) to unicode using the string_encoding
+        and decode_errors attributes.  See the constructor docstring for
+        more information.
 
         Arguments:
 
-          template: a template string of type unicode or str, or an object
-            instance.  If the argument is an object, the function first looks
-            for the template associated to the object by calling this class's
-            get_associated_template() method.  The rendering process also
-            uses the passed object as the first element of the context stack
-            when rendering.
+          template: a template string that is unicode or a byte string,
+            a ParsedTemplate instance, or another object instance.  In the
+            final case, the function first looks for the template associated
+            to the object by calling this class's get_associated_template()
+            method.  The rendering process also uses the passed object as
+            the first element of the context stack when rendering.
 
           *context: zero or more dictionaries, ContextStack instances, or objects
             with which to populate the initial context stack.  None
@@ -401,6 +416,9 @@ class Renderer(object):
         """
         if is_string(template):
             return self._render_string(template, *context, **kwargs)
+        if isinstance(template, ParsedTemplate):
+            render_func = lambda engine, stack: template.render(engine, stack)
+            return self._render_final(render_func, *context, **kwargs)
         # Otherwise, we assume the template is an object.
 
         return self._render_object(template, *context, **kwargs)

@@ -96,8 +96,11 @@ more information.
 
 You can also parse a template: ::
 
-    >>> pystache.parse("Hey {{#you}}{{.}}!{{/you}}")
-    ['Hey ', _SectionNode(key='you', index_begin=12, index_end=18, parsed=[_EscapeNode(key='.'), '!'])]
+    >>> parsed = pystache.parse(u"Hey {{#who}}{{.}}!{{/who}}")
+    >>> print parsed
+    [u'Hey ', _SectionNode(key=u'who', index_begin=12, index_end=18, parsed=[_EscapeNode(key=u'.'), u'!'])]
+    >>> print renderer.render(parsed, {'who': 'Pops'})
+    Hey Pops!
 
 
 Python 3
