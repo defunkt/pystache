@@ -1,29 +1,41 @@
 # coding: utf-8
 
 """
-Provides a class for parsing template strings.
-
-This module is only meant for internal use by the renderengine module.
+Exposes a parse() function to parse template strings.
 
 """
 
 import re
 
+from pystache.defaults import DELIMITERS
 from pystache.parsed import ParsedTemplate
 
 
-DEFAULT_DELIMITERS = (u'{{', u'}}')
 END_OF_LINE_CHARACTERS = [u'\r', u'\n']
+NON_BLANK_RE = re.compile(ur'^(.)', re.M)
 
 
-def _compile_template_re(delimiters=None):
+# TODO: add some unit tests for this.
+def parse(template, delimiters=None):
+    """
+    Parse a unicode template string and return a ParsedTemplate instance.
+
+    Arguments:
+
+      template: a unicode template string.
+
+      delimiters: a 2-tuple of delimiters.  Defaults to the package default.
+
+    """
+    parser = _Parser(delimiters)
+    return parser.parse(template)
+
+
+def _compile_template_re(delimiters):
     """
     Return a regular expresssion object (re.RegexObject) instance.
 
     """
-    if delimiters is None:
-        delimiters = DEFAULT_DELIMITERS
-
     # The possible tag type characters following the opening tag,
     # excluding "=" and "{".
     tag_types = "!>&/#^"
@@ -52,25 +64,131 @@ class ParsingError(Exception):
     pass
 
 
-class Parser(object):
+## Node types
+
+
+class _CommentNode(object):
+
+    def render(self, engine, context):
+        return u''
+
+
+class _ChangeNode(object):
+
+    def __init__(self, delimiters):
+        self.delimiters = delimiters
+
+    def render(self, engine, context):
+        return u''
+
+
+class _TagNode(object):
+
+    def __init__(self, key):
+        self.key = key
+
+    def render(self, engine, context):
+        s = engine.fetch_string(context, self.key)
+        return engine.escape(s)
+
+
+class _LiteralNode(object):
+
+    def __init__(self, key):
+        self.key = key
+
+    def render(self, engine, context):
+        s = engine.fetch_string(context, self.key)
+        return engine.literal(s)
+
+
+class _PartialNode(object):
+
+    def __init__(self, key, indent):
+        self.key = key
+        self.indent = indent
+
+    def render(self, engine, context):
+        template = engine.resolve_partial(self.key)
+        # Indent before rendering.
+        template = re.sub(NON_BLANK_RE, self.indent + ur'\1', template)
+
+        return engine.render(template, context)
+
+
+class _InvertedNode(object):
+
+    def __init__(self, key, parsed_section):
+        self.key = key
+        self.parsed_section = parsed_section
+
+    def render(self, engine, context):
+        # TODO: is there a bug because we are not using the same
+        #   logic as in fetch_string()?
+        data = engine.resolve_context(context, self.key)
+        # Note that lambdas are considered truthy for inverted sections
+        # per the spec.
+        if data:
+            return u''
+        return engine.render_parsed(self.parsed_section, context)
+
+
+class _SectionNode(object):
+
+    # TODO: the template_ and parsed_template_ arguments don't both seem
+    # to be necessary.  Can we remove one of them?  For example, if
+    # callable(data) is True, then the initial parsed_template isn't used.
+    def __init__(self, key, parsed_contents, delimiters, template, section_begin_index, section_end_index):
+        self.delimiters = delimiters
+        self.key = key
+        self.parsed_contents = parsed_contents
+        self.template = template
+        self.section_begin_index = section_begin_index
+        self.section_end_index = section_end_index
+
+    def render(self, engine, context):
+        data = engine.fetch_section_data(context, self.key)
+
+        parts = []
+        for val in data:
+            if callable(val):
+                # Lambdas special case section rendering and bypass pushing
+                # the data value onto the context stack.  From the spec--
+                #
+                #   When used as the data value for a Section tag, the
+                #   lambda MUST be treatable as an arity 1 function, and
+                #   invoked as such (passing a String containing the
+                #   unprocessed section contents).  The returned value
+                #   MUST be rendered against the current delimiters, then
+                #   interpolated in place of the section.
+                #
+                #  Also see--
+                #
+                #   https://github.com/defunkt/pystache/issues/113
+                #
+                # TODO: should we check the arity?
+                val = val(self.template[self.section_begin_index:self.section_end_index])
+                val = engine._render_value(val, context, delimiters=self.delimiters)
+                parts.append(val)
+                continue
+
+            context.push(val)
+            parts.append(engine.render_parsed(self.parsed_contents, context))
+            context.pop()
+
+        return unicode(''.join(parts))
+
+
+class _Parser(object):
 
     _delimiters = None
     _template_re = None
 
-    def __init__(self, engine, delimiters=None):
-        """
-        Construct an instance.
-
-        Arguments:
-
-          engine: a RenderEngine instance.
-
-        """
+    def __init__(self, delimiters=None):
         if delimiters is None:
-            delimiters = DEFAULT_DELIMITERS
+            delimiters = DELIMITERS
 
         self._delimiters = delimiters
-        self.engine = engine
 
     def _compile_delimiters(self):
         self._template_re = _compile_template_re(self._delimiters)
@@ -172,8 +290,9 @@ class Parser(object):
 
             parsed_template.add(node)
 
-        # Add the remainder of the template.
-        parsed_template.add(template[start_index:])
+        # Avoid adding spurious empty strings to the parse tree.
+        if start_index != len(template):
+            parsed_template.add(template[start_index:])
 
         return parsed_template
 
@@ -184,21 +303,21 @@ class Parser(object):
         """
         # TODO: switch to using a dictionary instead of a bunch of ifs and elifs.
         if tag_type == '!':
-            return u''
+            return _CommentNode()
 
         if tag_type == '=':
             delimiters = tag_key.split()
             self._change_delimiters(delimiters)
-            return u''
+            return _ChangeNode(delimiters)
 
         if tag_type == '':
-            return self.engine._make_get_escaped(tag_key)
+            return _TagNode(tag_key)
 
         if tag_type == '&':
-            return self.engine._make_get_literal(tag_key)
+            return _LiteralNode(tag_key)
 
         if tag_type == '>':
-            return self.engine._make_get_partial(tag_key, leading_whitespace)
+            return _PartialNode(tag_key, leading_whitespace)
 
         raise Exception("Invalid symbol for interpolation tag: %s" % repr(tag_type))
 
@@ -209,10 +328,10 @@ class Parser(object):
 
         """
         if tag_type == '#':
-            return self.engine._make_get_section(tag_key, parsed_section, self._delimiters,
-                                                 template, section_start_index, section_end_index)
+            return _SectionNode(tag_key, parsed_section, self._delimiters,
+                               template, section_start_index, section_end_index)
 
         if tag_type == '^':
-            return self.engine._make_get_inverse(tag_key, parsed_section)
+            return _InvertedNode(tag_key, parsed_section)
 
         raise Exception("Invalid symbol for section tag: %s" % repr(tag_type))

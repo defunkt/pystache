@@ -38,18 +38,17 @@ class ParsedTemplate(object):
     def add(self, node):
         self._parse_tree.append(node)
 
-    def render(self, context):
+    def render(self, engine, context):
         """
         Returns: a string of type unicode.
 
         """
         # We avoid use of the ternary operator for Python 2.4 support.
         def get_unicode(val):
-            if callable(val):
-                return val(context)
-            return val
+            if type(val) is unicode:
+                return val
+            return val.render(engine, context)
         parts = map(get_unicode, self._parse_tree)
         s = ''.join(parts)
 
         return unicode(s)
-
