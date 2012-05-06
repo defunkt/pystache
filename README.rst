@@ -94,11 +94,14 @@ To customize template loading on a per-view basis, subclass ``TemplateSpec``.
 See the docstrings of the Renderer_ class and TemplateSpec_ class for
 more information.
 
-You can also parse a template: ::
+You can also pre-parse a template: ::
 
     >>> parsed = pystache.parse(u"Hey {{#who}}{{.}}!{{/who}}")
     >>> print parsed
     [u'Hey ', _SectionNode(key=u'who', index_begin=12, index_end=18, parsed=[_EscapeNode(key=u'.'), u'!'])]
+
+And then::
+
     >>> print renderer.render(parsed, {'who': 'Pops'})
     Hey Pops!
     >>> print renderer.render(parsed, {'who': 'you'})
