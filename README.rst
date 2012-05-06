@@ -95,6 +95,12 @@ To customize template loading on a per-view basis, subclass ``TemplateSpec``.
 See the docstrings of the Renderer_ class and TemplateSpec_ class for
 more information.
 
+Try parsing a template: ::
+
+    >>> from pystache import parse
+    >>> parse("Hey {{#you}}{{.}}!{{/you}}")
+    ['Hey ', _SectionNode(key='you', index_begin=12, index_end=18, parsed=[_EscapeNode(key='.'), '!'])]
+
 
 Python 3
 ========

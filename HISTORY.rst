@@ -6,6 +6,7 @@ History
 
 * Added option of raising errors on missing tags/partials:
   ``Renderer(missing_tags='strict')`` (issue #110).
+* Added a ``parse()`` function that yields a printable parse tree.
 * Bugfix: exceptions raised from a property are no longer swallowed when
   getting a key from a context stack (issue #110).
 * Bugfix: lambda section values can now return non-ascii, non-unicode strings (issue #118).

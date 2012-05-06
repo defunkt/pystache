@@ -5,6 +5,7 @@ This module contains the initialization logic called by __init__.py.
 
 """
 
+from pystache.parser import parse
 from pystache.renderer import Renderer
 from pystache.template_spec import TemplateSpec
 
