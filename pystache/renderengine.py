@@ -150,9 +150,6 @@ class RenderEngine(object):
             val = self.literal(val)
         return self.render(val, context, delimiters)
 
-    def render_parsed(self, parsed_template, context_stack):
-        return parsed_template.render(self, context_stack)
-
     def render(self, template, context_stack, delimiters=None):
         """
         Render a unicode template string, and return as unicode.
@@ -167,4 +164,4 @@ class RenderEngine(object):
         """
         parsed_template = parse(template, delimiters)
 
-        return self.render_parsed(parsed_template, context_stack)
+        return parsed_template.render(self, context_stack)

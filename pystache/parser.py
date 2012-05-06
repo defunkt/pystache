@@ -166,7 +166,7 @@ class _InvertedNode(object):
         # per the spec.
         if data:
             return u''
-        return engine.render_parsed(self.parsed_section, context)
+        return self.parsed_section.render(engine, context)
 
 
 class _SectionNode(object):
@@ -212,7 +212,7 @@ class _SectionNode(object):
                 continue
 
             context.push(val)
-            parts.append(engine.render_parsed(self.parsed, context))
+            parts.append(self.parsed.render(engine, context))
             context.pop()
 
         return unicode(''.join(parts))
