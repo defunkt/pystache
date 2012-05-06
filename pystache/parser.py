@@ -26,6 +26,11 @@ def parse(template, delimiters=None):
 
       delimiters: a 2-tuple of delimiters.  Defaults to the package default.
 
+    Examples:
+
+    >>> parse("Hey {{#you}}{{name}}!{{/you}}")
+    ['Hey ', _SectionNode(key='you', index_begin=12, index_end=21, parsed=[_EscapeNode(key='name'), '!'])]
+
     """
     parser = _Parser(delimiters)
     return parser.parse(template)
@@ -66,8 +71,22 @@ class ParsingError(Exception):
 
 ## Node types
 
+def _format(obj, exclude=None):
+    if exclude is None:
+        exclude = []
+    exclude.append('key')
+    attrs = obj.__dict__
+    names = list(set(attrs.keys()) - set(exclude))
+    names.sort()
+    names.insert(0, 'key')
+    args = ["%s=%s" % (name, repr(attrs[name])) for name in names]
+    return "%s(%s)" % (obj.__class__.__name__, ", ".join(args))
+
 
 class _CommentNode(object):
+
+    def __repr__(self):
+        return _format(self)
 
     def render(self, engine, context):
         return u''
@@ -78,14 +97,20 @@ class _ChangeNode(object):
     def __init__(self, delimiters):
         self.delimiters = delimiters
 
+    def __repr__(self):
+        return _format(self)
+
     def render(self, engine, context):
         return u''
 
 
-class _TagNode(object):
+class _EscapeNode(object):
 
     def __init__(self, key):
         self.key = key
+
+    def __repr__(self):
+        return _format(self)
 
     def render(self, engine, context):
         s = engine.fetch_string(context, self.key)
@@ -97,6 +122,9 @@ class _LiteralNode(object):
     def __init__(self, key):
         self.key = key
 
+    def __repr__(self):
+        return _format(self)
+
     def render(self, engine, context):
         s = engine.fetch_string(context, self.key)
         return engine.literal(s)
@@ -107,6 +135,9 @@ class _PartialNode(object):
     def __init__(self, key, indent):
         self.key = key
         self.indent = indent
+
+    def __repr__(self):
+        return _format(self)
 
     def render(self, engine, context):
         template = engine.resolve_partial(self.key)
@@ -121,6 +152,9 @@ class _InvertedNode(object):
     def __init__(self, key, parsed_section):
         self.key = key
         self.parsed_section = parsed_section
+
+    def __repr__(self):
+        return _format(self)
 
     def render(self, engine, context):
         # TODO: is there a bug because we are not using the same
@@ -138,13 +172,16 @@ class _SectionNode(object):
     # TODO: the template_ and parsed_template_ arguments don't both seem
     # to be necessary.  Can we remove one of them?  For example, if
     # callable(data) is True, then the initial parsed_template isn't used.
-    def __init__(self, key, parsed_contents, delimiters, template, section_begin_index, section_end_index):
+    def __init__(self, key, parsed, delimiters, template, index_begin, index_end):
         self.delimiters = delimiters
         self.key = key
-        self.parsed_contents = parsed_contents
+        self.parsed = parsed
         self.template = template
-        self.section_begin_index = section_begin_index
-        self.section_end_index = section_end_index
+        self.index_begin = index_begin
+        self.index_end = index_end
+
+    def __repr__(self):
+        return _format(self, exclude=['delimiters', 'template'])
 
     def render(self, engine, context):
         data = engine.fetch_section_data(context, self.key)
@@ -167,13 +204,13 @@ class _SectionNode(object):
                 #   https://github.com/defunkt/pystache/issues/113
                 #
                 # TODO: should we check the arity?
-                val = val(self.template[self.section_begin_index:self.section_end_index])
+                val = val(self.template[self.index_begin:self.index_end])
                 val = engine._render_value(val, context, delimiters=self.delimiters)
                 parts.append(val)
                 continue
 
             context.push(val)
-            parts.append(engine.render_parsed(self.parsed_contents, context))
+            parts.append(engine.render_parsed(self.parsed, context))
             context.pop()
 
         return unicode(''.join(parts))
@@ -310,7 +347,7 @@ class _Parser(object):
             return _ChangeNode(delimiters)
 
         if tag_type == '':
-            return _TagNode(tag_key)
+            return _EscapeNode(tag_key)
 
         if tag_type == '&':
             return _LiteralNode(tag_key)
