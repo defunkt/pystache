@@ -1,7 +1,7 @@
 Pystache
 ========
 
-![image](https://s3.amazonaws.com/webdev_bucket/pystache.png)
+![](https://s3.amazonaws.com/webdev_bucket/pystache.png "mustachioed, monocled snake by David Phillips")
 
 [Pystache](https://github.com/defunkt/pystache) is a Python
 implementation of [Mustache](http://mustache.github.com/). Mustache is a

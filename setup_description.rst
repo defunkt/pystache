@@ -5,9 +5,8 @@ Pystache
 
 .. figure:: https://s3.amazonaws.com/webdev_bucket/pystache.png
    :align: center
-   :alt: image
+   :alt: mustachioed, monocled snake by David Phillips
 
-   image
 `Pystache <https://github.com/defunkt/pystache>`_ is a Python
 implementation of `Mustache <http://mustache.github.com/>`_. Mustache is
 a framework-agnostic, logic-free templating system inspired by

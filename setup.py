@@ -95,7 +95,7 @@ README_PATH = 'README.md'
 HISTORY_PATH = 'HISTORY.md'
 LICENSE_PATH = 'LICENSE'
 
-DESCRIPTION_PATH = 'DESCRIPTION.rst'
+DESCRIPTION_PATH = 'setup_description.rst'
 
 CLASSIFIERS = (
     'Development Status :: 4 - Beta',
