@@ -2,6 +2,7 @@ Pystache
 ========
 
 ![image](https://s3.amazonaws.com/webdev_bucket/pystache.png)
+
 [Pystache](https://github.com/defunkt/pystache) is a Python
 implementation of [Mustache](http://mustache.github.com/). Mustache is a
 framework-agnostic, logic-free templating system inspired by
