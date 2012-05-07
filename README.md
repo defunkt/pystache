@@ -1,6 +1,9 @@
 Pystache
 ========
 
+<!-- We leave the brackets empty.  Otherwise, text shows up in the reST
+  version converted by pandoc. -->
+
 ![](https://s3.amazonaws.com/webdev_bucket/pystache.png "mustachioed, monocled snake by David Phillips")
 
 [Pystache](https://github.com/defunkt/pystache) is a Python

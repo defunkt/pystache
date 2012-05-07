@@ -3,6 +3,11 @@
 Pystache
 ========
 
+.. raw:: html
+
+   <!-- We leave the brackets empty.  Otherwise, text shows up in the reST
+     version converted by pandoc. -->
+
 .. figure:: https://s3.amazonaws.com/webdev_bucket/pystache.png
    :align: center
    :alt: mustachioed, monocled snake by David Phillips
