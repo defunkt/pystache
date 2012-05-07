@@ -114,6 +114,11 @@ def publish():
     Publish this package to PyPI (aka "the Cheeseshop").
 
     """
+    answer = raw_input("Are you sure (yes/no)?")
+
+    if answer != "yes":
+        exit("Aborted: nothing published")
+
     os.system('python setup.py sdist upload')
 
 
@@ -131,10 +136,6 @@ License
     sections = [read(README_PATH), read(HISTORY_PATH), license]
     return '\n\n'.join(sections)
 
-
-if sys.argv[-1] == 'publish':
-    publish()
-    sys.exit()
 
 # We follow the guidance here for compatibility with using setuptools instead
 # of Distribute under Python 2 (on the subject of new, unrecognized keyword
@@ -181,6 +182,10 @@ PACKAGES = [
 
 
 def main(sys_argv):
+
+    if sys.argv[-1] == 'publish':
+        publish()
+        sys.exit()
 
     long_description = make_long_description()
     template_files = ['*.mustache', '*.txt']
