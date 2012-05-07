@@ -97,6 +97,10 @@ LICENSE_PATH = 'LICENSE'
 
 DESCRIPTION_PATH = 'setup_description.rst'
 
+TEMP_REST_EXTENSION = '.temp.rst'
+
+PREP_COMMAND = 'prep'
+
 CLASSIFIERS = (
     'Development Status :: 4 - Beta',
     'License :: OSI Approved :: MIT License',
@@ -143,7 +147,13 @@ def write(u, path):
         f.close()
 
 
-def prep():
+def make_temp_path(path):
+    root, ext = os.path.splitext(path)
+    temp_path = root + TEMP_REST_EXTENSION
+    return temp_path
+
+
+def make_description_file(target_path):
     """
     Generate the long_description needed for setup.py.
 
@@ -170,15 +180,32 @@ License
 
     description = '\n'.join(sections)
 
-    write(description, DESCRIPTION_PATH)
+    write(description, target_path)
 
+
+def prep():
+    make_description_file(DESCRIPTION_PATH)
 
 def publish():
     """
     Publish this package to PyPI (aka "the Cheeseshop").
 
     """
-    answer = raw_input("Are you sure (yes/no)?")
+    temp_path = make_temp_path(DESCRIPTION_PATH)
+    make_description_file(temp_path)
+
+    if read(temp_path) != read(DESCRIPTION_PATH):
+        print("""\
+Description file not up-to-date: %s
+Run the following command and commit the changes--
+
+    python setup.py %s
+""" % (DESCRIPTION_PATH, PREP_COMMAND))
+        sys.exit()
+
+    print("Description up-to-date: %s" % DESCRIPTION_PATH)
+
+    answer = raw_input("Are you sure you want to publish to PyPI (yes/no)?")
 
     if answer != "yes":
         exit("Aborted: nothing published")
@@ -193,15 +220,14 @@ def convert_md_to_rst(path):
     Returns the new path.
 
     """
-    root, ext = os.path.splitext(path)
-    new_path = root + ".temp.rst"
-    print("Converting: %s to %s" % (path, new_path))
+    temp_path = make_temp_path(path)
+    print("Converting: %s to %s" % (path, temp_path))
 
     # Pandoc uses the UTF-8 character encoding for both input and output.
-    command = "pandoc --write=rst --output=%s %s" % (new_path, path)
+    command = "pandoc --write=rst --output=%s %s" % (temp_path, path)
     os.system(command)
 
-    return new_path
+    return temp_path
 
 
 # We follow the guidance here for compatibility with using setuptools instead
@@ -259,7 +285,7 @@ def main(sys_argv):
     if command == 'publish':
         publish()
         sys.exit()
-    elif command == 'prep':
+    elif command == PREP_COMMAND:
         prep()
         sys.exit()
 
