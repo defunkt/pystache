@@ -22,7 +22,7 @@ PROJECT_DIR = os.path.join(PACKAGE_DIR, '..')
 SPEC_TEST_DIR = os.path.join(PROJECT_DIR, 'ext', 'spec', 'specs')
 # TEXT_DOCTEST_PATHS: the paths to text files (i.e. non-module files)
 # containing doctests.  The paths should be relative to the project directory.
-TEXT_DOCTEST_PATHS = ['README.rst']
+TEXT_DOCTEST_PATHS = ['README.md']
 
 UNITTEST_FILE_PREFIX = "test_"
 

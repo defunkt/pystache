@@ -1,6 +1,7 @@
+include README.md
+include HISTORY.md
 include LICENSE
-include HISTORY.rst
-include README.rst
+include DESCRIPTION.rst
 include tox.ini
 include test_pystache.py
 # You cannot use package_data, for example, to include data files in a
