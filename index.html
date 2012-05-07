@@ -1,0 +1,286 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Pystache by cjerdonek</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/main.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+
+      <header>
+        <h1>Pystache</h1>
+        <p>Mustache in Python</p>
+      </header>
+
+      <div id="banner">
+        <span id="logo"></span>
+
+        <a href="https://github.com/cjerdonek/pystache" class="button fork"><strong>View On GitHub</strong></a>
+        <div class="downloads">
+          <span>Downloads:</span>
+          <ul>
+            <li><a href="https://github.com/cjerdonek/pystache/zipball/master" class="button">ZIP</a></li>
+            <li><a href="https://github.com/cjerdonek/pystache/tarball/master" class="button">TAR</a></li>
+          </ul>
+        </div>
+      </div><!-- end banner -->
+
+    <div class="wrapper">
+      <nav>
+        <ul></ul>
+      </nav>
+      <section>
+        <h1>Pystache</h1>
+
+<p><img src="https://s3.amazonaws.com/webdev_bucket/pystache.png" alt="" title="mustachioed, monocled snake by David Phillips"></p>
+
+<p><a href="https://github.com/defunkt/pystache">Pystache</a> is a Python
+implementation of <a href="http://mustache.github.com/">Mustache</a>. Mustache is a
+framework-agnostic, logic-free templating system inspired by
+<a href="http://code.google.com/p/google-ctemplate/">ctemplate</a> and
+<a href="http://www.ivan.fomichev.name/2008/05/erlang-template-engine-prototype.html">et</a>.
+Like ctemplate, Mustache "emphasizes separating logic from presentation:
+it is impossible to embed application logic in this template language."</p>
+
+<p>The <a href="http://mustache.github.com/mustache.5.html">mustache(5)</a> man page
+provides a good introduction to Mustache's syntax. For a more complete
+(and more current) description of Mustache's behavior, see the official
+<a href="https://github.com/mustache/spec">Mustache spec</a>.</p>
+
+<p>Pystache is <a href="http://semver.org">semantically versioned</a> and can be found
+on <a href="http://pypi.python.org/pypi/pystache">PyPI</a>. This version of
+Pystache passes all tests in <a href="https://github.com/mustache/spec/tree/v1.1.2">version
+1.1.2</a> of the spec.</p>
+
+<p>Logo: <a href="http://davidphillips.us/">David Phillips</a></p>
+
+<h2>Requirements</h2>
+
+<p>Pystache is tested with--</p>
+
+<ul>
+<li>  Python 2.4 (requires simplejson <a href="http://pypi.python.org/pypi/simplejson/2.0.9">version
+2.0.9</a> or earlier)</li>
+<li>  Python 2.5 (requires
+<a href="http://pypi.python.org/pypi/simplejson/">simplejson</a>)</li>
+<li>  Python 2.6</li>
+<li>  Python 2.7</li>
+<li>  Python 3.1</li>
+<li>  Python 3.2</li>
+</ul><p>JSON support is needed only for the command-line interface and to run
+the spec tests. We require simplejson for earlier versions of Python
+since Python's <a href="http://docs.python.org/library/json.html">json</a> module
+was added in Python 2.6.</p>
+
+<p>For Python 2.4 we require an earlier version of simplejson since
+simplejson stopped officially supporting Python 2.4 in simplejson
+version 2.1.0. Earlier versions of simplejson can be installed manually,
+as follows:</p>
+
+<pre><code>pip install 'simplejson&lt;2.1.0'
+</code></pre>
+
+<h2>Install It</h2>
+
+<pre><code>pip install pystache
+pystache-test
+</code></pre>
+
+<p>To install and test from source (e.g. from GitHub), see the Develop
+section.</p>
+
+<h2>Use It</h2>
+
+<pre><code>&gt;&gt;&gt; import pystache
+&gt;&gt;&gt; print pystache.render('Hi {{person}}!', {'person': 'Mom'})
+Hi Mom!
+</code></pre>
+
+<p>You can also create dedicated view classes to hold your view logic.</p>
+
+<p>Here's your view class (in .../examples/readme.py):</p>
+
+<pre><code>class SayHello(object):
+    def to(self):
+        return "Pizza"
+</code></pre>
+
+<p>Instantiating like so:</p>
+
+<pre><code>&gt;&gt;&gt; from pystache.tests.examples.readme import SayHello
+&gt;&gt;&gt; hello = SayHello()
+</code></pre>
+
+<p>Then your template, say_hello.mustache (by default in the same
+directory as your class definition):</p>
+
+<pre><code>Hello, {{to}}!
+</code></pre>
+
+<p>Pull it together:</p>
+
+<pre><code>&gt;&gt;&gt; renderer = pystache.Renderer()
+&gt;&gt;&gt; print renderer.render(hello)
+Hello, Pizza!
+</code></pre>
+
+<p>For greater control over rendering (e.g. to specify a custom template
+directory), use the <code>Renderer</code> class like above. One can pass attributes
+to the Renderer class constructor or set them on a Renderer instance. To
+customize template loading on a per-view basis, subclass <code>TemplateSpec</code>.
+See the docstrings of the
+<a href="https://github.com/defunkt/pystache/blob/master/pystache/renderer.py">Renderer</a>
+class and
+<a href="https://github.com/defunkt/pystache/blob/master/pystache/template_spec.py">TemplateSpec</a>
+class for more information.</p>
+
+<p>You can also pre-parse a template:</p>
+
+<pre><code>&gt;&gt;&gt; parsed = pystache.parse(u"Hey {{#who}}{{.}}!{{/who}}")
+&gt;&gt;&gt; print parsed
+[u'Hey ', _SectionNode(key=u'who', index_begin=12, index_end=18, parsed=[_EscapeNode(key=u'.'), u'!'])]
+</code></pre>
+
+<p>And then:</p>
+
+<pre><code>&gt;&gt;&gt; print renderer.render(parsed, {'who': 'Pops'})
+Hey Pops!
+&gt;&gt;&gt; print renderer.render(parsed, {'who': 'you'})
+Hey you!
+</code></pre>
+
+<h2>Python 3</h2>
+
+<p>Pystache has supported Python 3 since version 0.5.1. Pystache behaves
+slightly differently between Python 2 and 3, as follows:</p>
+
+<ul>
+<li>  In Python 2, the default html-escape function <code>cgi.escape()</code> does
+not escape single quotes; whereas in Python 3, the default escape
+function <code>html.escape()</code> does escape single quotes.</li>
+<li>  In both Python 2 and 3, the string and file encodings default to
+<code>sys.getdefaultencoding()</code>. However, this function can return
+different values under Python 2 and 3, even when run from the same
+system. Check your own system for the behavior on your system, or do
+not rely on the defaults by passing in the encodings explicitly
+(e.g. to the <code>Renderer</code> class).</li>
+</ul><h2>Unicode</h2>
+
+<p>This section describes how Pystache handles unicode, strings, and
+encodings.</p>
+
+<p>Internally, Pystache uses <a href="http://docs.python.org/howto/unicode.html#tips-for-writing-unicode-aware-programs">only unicode
+strings</a>
+(<code>str</code> in Python 3 and <code>unicode</code> in Python 2). For input, Pystache
+accepts both unicode strings and byte strings (<code>bytes</code> in Python 3 and
+<code>str</code> in Python 2). For output, Pystache's template rendering methods
+return only unicode.</p>
+
+<p>Pystache's <code>Renderer</code> class supports a number of attributes to control
+how Pystache converts byte strings to unicode on input. These include
+the <code>file_encoding</code>, <code>string_encoding</code>, and <code>decode_errors</code> attributes.</p>
+
+<p>The <code>file_encoding</code> attribute is the encoding the renderer uses to
+convert to unicode any files read from the file system. Similarly,
+<code>string_encoding</code> is the encoding the renderer uses to convert any other
+byte strings encountered during the rendering process into unicode (e.g.
+context values that are encoded byte strings).</p>
+
+<p>The <code>decode_errors</code> attribute is what the renderer passes as the
+<code>errors</code> argument to Python's built-in unicode-decoding function
+(<code>str()</code> in Python 3 and <code>unicode()</code> in Python 2). The valid values for
+this argument are <code>strict</code>, <code>ignore</code>, and <code>replace</code>.</p>
+
+<p>Each of these attributes can be set via the <code>Renderer</code> class's
+constructor using a keyword argument of the same name. See the Renderer
+class's docstrings for further details. In addition, the <code>file_encoding</code>
+attribute can be controlled on a per-view basis by subclassing the
+<code>TemplateSpec</code> class. When not specified explicitly, these attributes
+default to values set in Pystache's <code>defaults</code> module.</p>
+
+<h2>Develop</h2>
+
+<p>To test from a source distribution (without installing)--</p>
+
+<pre><code>python test_pystache.py
+</code></pre>
+
+<p>To test Pystache with multiple versions of Python (with a single
+command!), you can use <a href="http://pypi.python.org/pypi/tox">tox</a>:</p>
+
+<pre><code>pip install tox
+tox
+</code></pre>
+
+<p>If you do not have all Python versions listed in <code>tox.ini</code>--</p>
+
+<pre><code>tox -e py26,py32  # for example
+</code></pre>
+
+<p>The source distribution tests also include doctests and tests from the
+Mustache spec. To include tests from the Mustache spec in your test
+runs:</p>
+
+<pre><code>git submodule init
+git submodule update
+</code></pre>
+
+<p>The test harness parses the spec's (more human-readable) yaml files if
+<a href="http://pypi.python.org/pypi/PyYAML">PyYAML</a> is present. Otherwise, it
+parses the json files. To install PyYAML--</p>
+
+<pre><code>pip install pyyaml
+</code></pre>
+
+<p>To run a subset of the tests, you can use
+<a href="http://somethingaboutorange.com/mrl/projects/nose/0.11.1/testing.html">nose</a>:</p>
+
+<pre><code>pip install nose
+nosetests --tests pystache/tests/test_context.py:GetValueTests.test_dictionary__key_present
+</code></pre>
+
+<p><strong>Running Pystache from source with Python 3.</strong> Pystache is written in
+Python 2 and must be converted with
+<a href="http://docs.python.org/library/2to3.html">2to3</a> prior to running under
+Python 3. The installation process (and tox) do this conversion
+automatically.</p>
+
+<p>To <code>import pystache</code> from a source distribution while using Python 3, be
+sure that you are importing from a directory containing a converted
+version (e.g. from your site-packages directory after manually
+installing) and not from the original source directory. Otherwise, you
+will get a syntax error. You can help ensure this by not running the
+Python IDE from the project directory when importing Pystache.</p>
+
+<h2>Mailing List</h2>
+
+<p>There is a <a href="http://librelist.com/browser/pystache/">mailing list</a>. Note
+that there is a bit of a delay between posting a message and seeing it
+appear in the mailing list archive.</p>
+
+<h2>Authors</h2>
+
+<pre><code>&gt;&gt;&gt; context = { 'author': 'Chris Wanstrath', 'maintainer': 'Chris Jerdonek' }
+&gt;&gt;&gt; print pystache.render("Author: {{author}}\nMaintainer: {{maintainer}}", context)
+Author: Chris Wanstrath
+Maintainer: Chris Jerdonek
+</code></pre>
+      </section>
+      <footer>
+        <p>Project maintained by <a href="https://github.com/cjerdonek">cjerdonek</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
+    
+  </body>
+</html>
