@@ -2,7 +2,7 @@
 Pystache
 ========
 
-.. image:: https://s3.amazonaws.com/webdev_bucket/pystache.png
+.. image:: http://dl.dropbox.com/u/3251341/github/pystache.png
 
 Pystache_ is a Python implementation of Mustache_.
 Mustache is a framework-agnostic, logic-free templating system inspired
