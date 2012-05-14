@@ -24,6 +24,53 @@ from pystache.tests.spectesting import get_spec_tests
 FROM_SOURCE_OPTION = "--from-source"
 
 
+def make_test_program_class(text_doctest_dir, spec_test_dir):
+    """
+    Return a subclass of unittest.TestProgram.
+
+    """
+    # The function unittest.main() is an alias for unittest.TestProgram's
+    # constructor.  TestProgram's constructor does the following:
+    #
+    # 1. calls self.parseArgs(argv),
+    # 2. which in turn calls self.createTests().
+    # 3. then the constructor calls self.runTests().
+    #
+    # The createTests() method sets the self.test attribute by calling one
+    # of self.testLoader's "loadTests" methods.  Each loadTest method returns
+    # a unittest.TestSuite instance.  Thus, self.test is set to a TestSuite
+    # instance prior to calling runTests().
+    class PystacheTestProgram(TestProgram):
+
+        """
+        Instantiating an instance of this class runs all tests.
+
+        """
+
+        def createTests(self):
+            """
+            Load tests and set self.test to a unittest.TestSuite instance
+
+            Compare--
+
+              http://docs.python.org/library/unittest.html#unittest.TestSuite
+
+            """
+            super(PystacheTestProgram, self).createTests()
+
+            suite = self.test
+
+            if text_doctest_dir is not None:
+                doctest_suites = get_doctests(text_doctest_dir)
+                suite.addTests(doctest_suites)
+
+            if spec_test_dir is not None:
+                spec_testcases = get_spec_tests(spec_test_dir)
+                suite.addTests(spec_testcases)
+
+    return PystacheTestProgram
+
+
 # Do not include "test" in this function's name to avoid it getting
 # picked up by nosetests.
 def main(sys_argv):
@@ -71,16 +118,16 @@ def main(sys_argv):
             # Add the current module for unit tests contained here.
             sys_argv.append(__name__)
 
-    _PystacheTestProgram._text_doctest_dir = project_dir
-    _PystacheTestProgram._spec_test_dir = spec_test_dir
     SetupTests.project_dir = project_dir
+
+    test_program_class = make_test_program_class(project_dir, spec_test_dir)
 
     # We pass None for the module because we do not want the unittest
     # module to resolve module names relative to a given module.
     # (This would require importing all of the unittest modules from
     # this module.)  See the loadTestsFromName() method of the
     # unittest.TestLoader class for more details on this parameter.
-    _PystacheTestProgram(argv=sys_argv, module=None)
+    test_program_class(argv=sys_argv, module=None)
     # No need to return since unitttest.main() exits.
 
 
@@ -123,33 +170,3 @@ class SetupTests(unittest.TestCase):
             self.assertEqual(VERSION, pystache.__version__)
         finally:
             sys.path = original_path
-
-
-# The function unittest.main() is an alias for unittest.TestProgram's
-# constructor.  TestProgram's constructor calls self.runTests() as its
-# final step, which expects self.test to be set.  The constructor sets
-# the self.test attribute by calling one of self.testLoader's "loadTests"
-# methods prior to callint self.runTests().  Each loadTest method returns
-# a unittest.TestSuite instance.  Thus, self.test is set to a TestSuite
-# instance prior to calling runTests().
-class _PystacheTestProgram(TestProgram):
-
-    """
-    Instantiating an instance of this class runs all tests.
-
-    """
-
-    def runTests(self):
-        # self.test is a unittest.TestSuite instance:
-        #   http://docs.python.org/library/unittest.html#unittest.TestSuite
-        tests = self.test
-
-        if self._text_doctest_dir is not None:
-            doctest_suites = get_doctests(self._text_doctest_dir)
-            tests.addTests(doctest_suites)
-
-        if self._spec_test_dir is not None:
-            spec_testcases = get_spec_tests(self._spec_test_dir)
-            tests.addTests(spec_testcases)
-
-        TestProgram.runTests(self)
