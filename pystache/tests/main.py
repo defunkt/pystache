@@ -10,7 +10,7 @@ This module is for our test console script.
 import os
 import sys
 import unittest
-from unittest import TestProgram
+from unittest import TestCase, TestProgram
 
 import pystache
 from pystache.tests.common import PACKAGE_DIR, PROJECT_DIR, SPEC_TEST_DIR, UNITTEST_FILE_PREFIX
@@ -24,7 +24,21 @@ from pystache.tests.spectesting import get_spec_tests
 FROM_SOURCE_OPTION = "--from-source"
 
 
-def make_test_program_class(text_doctest_dir, spec_test_dir):
+def make_extra_tests(text_doctest_dir, spec_test_dir):
+    tests = []
+
+    if text_doctest_dir is not None:
+        doctest_suites = get_doctests(text_doctest_dir)
+        tests.extend(doctest_suites)
+
+    if spec_test_dir is not None:
+        spec_testcases = get_spec_tests(spec_test_dir)
+        tests.extend(spec_testcases)
+
+    return unittest.TestSuite(tests)
+
+
+def make_test_program_class(extra_tests):
     """
     Return a subclass of unittest.TestProgram.
 
@@ -57,16 +71,7 @@ def make_test_program_class(text_doctest_dir, spec_test_dir):
 
             """
             super(PystacheTestProgram, self).createTests()
-
-            suite = self.test
-
-            if text_doctest_dir is not None:
-                doctest_suites = get_doctests(text_doctest_dir)
-                suite.addTests(doctest_suites)
-
-            if spec_test_dir is not None:
-                spec_testcases = get_spec_tests(spec_test_dir)
-                suite.addTests(spec_testcases)
+            self.test.addTests(extra_tests)
 
     return PystacheTestProgram
 
@@ -120,7 +125,8 @@ def main(sys_argv):
 
     SetupTests.project_dir = project_dir
 
-    test_program_class = make_test_program_class(project_dir, spec_test_dir)
+    extra_tests = make_extra_tests(project_dir, spec_test_dir)
+    test_program_class = make_test_program_class(extra_tests)
 
     # We pass None for the module because we do not want the unittest
     # module to resolve module names relative to a given module.
@@ -150,7 +156,7 @@ def _discover_test_modules(package_dir):
     return names
 
 
-class SetupTests(unittest.TestCase):
+class SetupTests(TestCase):
 
     """Tests about setup.py."""
 
