@@ -9,6 +9,7 @@ History
 -   Added a `parse()` function that yields a printable, pre-compiled
     parse tree.
 -   Added support for rendering pre-compiled templates.
+-   Added --force2to3 option to setup.py (issue \#121).
 -   Bugfix: exceptions raised from a property are no longer swallowed
     when getting a key from a context stack (issue \#110).
 -   Bugfix: lambda section values can now return non-ascii, non-unicode
