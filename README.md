@@ -233,7 +233,7 @@ To convert the code without using setup.py, you can use
     2to3 --write --nobackups --no-diffs --doctests_only pystache
     2to3 --write --nobackups --no-diffs pystache
 
-This converts the code in-place.
+This converts the code (and doctests) in place.
 
 To `import pystache` from a source distribution while using Python 3, be
 sure that you are importing from a directory containing a converted
