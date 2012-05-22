@@ -40,6 +40,12 @@ Pystache is tested with--
 -   Python 3.1
 -   Python 3.2
 
+[Distribute](http://packages.python.org/distribute/) (the setuptools fork)
+is recommended over [setuptools](http://pypi.python.org/pypi/setuptools),
+and is required in some cases (e.g. for Python 3 support).
+If you use [pip](http://www.pip-installer.org/), you probably already satisfy
+this requirement.
+
 JSON support is needed only for the command-line interface and to run
 the spec tests. We require simplejson for earlier versions of Python
 since Python's [json](http://docs.python.org/library/json.html) module
@@ -56,6 +62,9 @@ Install It
 ----------
 
     pip install pystache
+
+And test it--
+
     pystache-test
 
 To install and test from source (e.g. from GitHub), see the Develop
@@ -122,8 +131,8 @@ Pystache has supported Python 3 since version 0.5.1. Pystache behaves
 slightly differently between Python 2 and 3, as follows:
 
 -   In Python 2, the default html-escape function `cgi.escape()` does
-    not escape single quotes; whereas in Python 3, the default escape
-    function `html.escape()` does escape single quotes.
+    not escape single quotes.  In Python 3, the default escape function
+    `html.escape()` does escape single quotes.
 -   In both Python 2 and 3, the string and file encodings default to
     `sys.getdefaultencoding()`. However, this function can return
     different values under Python 2 and 3, even when run from the same
@@ -202,18 +211,37 @@ To run a subset of the tests, you can use
     pip install nose
     nosetests --tests pystache/tests/test_context.py:GetValueTests.test_dictionary__key_present
 
-**Running Pystache from source with Python 3.** Pystache is written in
-Python 2 and must be converted with
-[2to3](http://docs.python.org/library/2to3.html) prior to running under
-Python 3. The installation process (and tox) do this conversion
+### Using Python 3 with Pystache from source
+
+Pystache is written in Python 2 and must be converted to Python 3 prior to
+using it with Python 3.  The installation process (and tox) do this
 automatically.
+
+To convert the code to Python 3 manually (while using Python 3)--
+
+    python setup.py build
+
+And while using Python 2--
+
+    python setup.py --force2to3 build
+
+Both of the above write the converted code to a subdirectory called `build`.
+
+To convert the code without using setup.py, you can use
+[2to3](http://docs.python.org/library/2to3.html) as follows (two steps)--
+
+    2to3 --write --nobackups --no-diffs --doctests_only pystache
+    2to3 --write --nobackups --no-diffs pystache
+
+This converts the code (and doctests) in place.
 
 To `import pystache` from a source distribution while using Python 3, be
 sure that you are importing from a directory containing a converted
-version (e.g. from your site-packages directory after manually
-installing) and not from the original source directory. Otherwise, you
-will get a syntax error. You can help ensure this by not running the
-Python IDE from the project directory when importing Pystache.
+version of the code (e.g. from the `build` directory after converting),
+and not from the original (unconverted) source directory.  Otherwise, you will
+get a syntax error.  You can help prevent this by not running the Python
+IDE from the project directory when importing Pystache while using Python 3.
+
 
 Mailing List
 ------------
