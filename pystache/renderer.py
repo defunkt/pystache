@@ -42,7 +42,7 @@ class Renderer(object):
     >>> partials = {'partial': 'Hello, {{thing}}!'}
     >>> renderer = Renderer(partials=partials)
     >>> # We apply print to make the test work in Python 3 after 2to3.
-    >>> print renderer.render('{{>partial}}', {'thing': 'world'})
+    >>> print (renderer.render('{{>partial}}', {'thing': 'world'}))
     Hello, world!
 
     """
