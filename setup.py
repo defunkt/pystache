@@ -73,6 +73,8 @@ import shutil
 import sys
 
 
+OPTION_FORCE_2TO3 = '--force2to3'
+
 py_version = sys.version_info
 
 # distutils does not seem to support the following setup() arguments.
@@ -247,20 +249,6 @@ def convert_md_to_rst(path):
     return temp_path
 
 
-# We follow the guidance here for compatibility with using setuptools instead
-# of Distribute under Python 2 (on the subject of new, unrecognized keyword
-# arguments to setup()):
-#
-#   http://packages.python.org/distribute/python3.html#note-on-compatibility-with-setuptools
-#
-if py_version < (3, ):
-    extra = {}
-else:
-    extra = {
-        # Causes 2to3 to be run during the build step.
-        'use_2to3': True,
-    }
-
 # We use the package simplejson for older Python versions since Python
 # does not contain the module json before 2.6:
 #
@@ -291,11 +279,46 @@ PACKAGES = [
 ]
 
 
+def parse_args(sys_argv):
+    """
+    Modify sys_argv in place and return whether to force use of 2to3.
+
+    """
+    should_force2to3 = False
+    if len(sys_argv) > 1 and sys_argv[1] == OPTION_FORCE_2TO3:
+        sys_argv.pop(1)
+        should_force2to3 = True
+
+    return should_force2to3
+
+
+# The purpose of this function is to follow the guidance suggested here:
+#
+#   http://packages.python.org/distribute/python3.html#note-on-compatibility-with-setuptools
+#
+# The guidance is for better compatibility when using setuptools (e.g. with
+# earlier versions of Python 2) instead of Distribute, because of new
+# keyword arguments to setup() that setuptools may not recognize.
+def get_extra_args(should_force2to3):
+    """
+    Return a dictionary of extra args to pass to setup().
+
+    """
+    extra = {}
+    if py_version >= (3, ) or should_force2to3:
+        # Causes 2to3 to be run during the build step.
+        extra['use_2to3'] = True
+
+    return extra
+
+
 def main(sys_argv):
 
     # TODO: use the logging module instead of printing.
     # TODO: include the following in a verbose mode.
     print("pystache: using: version %s of %s" % (repr(dist.__version__), repr(dist)))
+
+    should_force2to3 = parse_args(sys_argv)
 
     command = sys_argv[-1]
 
@@ -308,6 +331,7 @@ def main(sys_argv):
 
     long_description = read(DESCRIPTION_PATH)
     template_files = ['*.mustache', '*.txt']
+    extra_args = get_extra_args(should_force2to3)
 
     setup(name='pystache',
           version=VERSION,
@@ -334,7 +358,7 @@ def main(sys_argv):
             ],
           },
           classifiers = CLASSIFIERS,
-          **extra
+          **extra_args
     )
 
 

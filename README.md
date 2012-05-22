@@ -40,6 +40,11 @@ Pystache is tested with--
 -   Python 3.1
 -   Python 3.2
 
+[Distribute](http://packages.python.org/distribute/) (the setuptools fork)
+is recommended over setuptools, and is required in some cases (e.g. for
+Python 3 support).  If you use [pip](http://www.pip-installer.org/),
+you probably already satisfy this requirement.
+
 JSON support is needed only for the command-line interface and to run
 the spec tests. We require simplejson for earlier versions of Python
 since Python's [json](http://docs.python.org/library/json.html) module
@@ -202,18 +207,37 @@ To run a subset of the tests, you can use
     pip install nose
     nosetests --tests pystache/tests/test_context.py:GetValueTests.test_dictionary__key_present
 
-**Running Pystache from source with Python 3.** Pystache is written in
-Python 2 and must be converted with
-[2to3](http://docs.python.org/library/2to3.html) prior to running under
-Python 3. The installation process (and tox) do this conversion
+### Using Python 3 with Pystache from source
+
+Pystache is written in Python 2 and must be converted to Python 3 prior to
+running under Python 3.  The installation process (and tox) do this
 automatically.
+
+To convert the source code to Python 3 (while using Python 3)--
+
+    python setup.py build
+
+And while using Python 2--
+
+    python setup.py --force2to3 build
+
+These commands write the converted code to a subdirectory called `build`.
+
+To do this manually (without using setup.py), you can use
+[2to3](http://docs.python.org/library/2to3.html) in two steps--
+
+    2to3 --write --nobackups --no-diffs --doctests_only pystache
+    2to3 --write --nobackups --no-diffs pystache
+
+This converts the code in-place.
 
 To `import pystache` from a source distribution while using Python 3, be
 sure that you are importing from a directory containing a converted
-version (e.g. from your site-packages directory after manually
-installing) and not from the original source directory. Otherwise, you
-will get a syntax error. You can help ensure this by not running the
-Python IDE from the project directory when importing Pystache.
+version (e.g. from the `build` directory after converting), and not from
+the unconverted source directory.  Otherwise, you will get a syntax error.
+You can help ensure this by not running the Python IDE from the project
+directory when importing Pystache.
+
 
 Mailing List
 ------------
