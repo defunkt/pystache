@@ -10,6 +10,7 @@ History
     parse tree.
 -   Added support for rendering pre-compiled templates.
 -   Added --force2to3 option to setup.py (issue \#121).
+-   Added support for [Travis CI](http://travis-ci.org) (issue \#124). [msabramo]
 -   Bugfix: exceptions raised from a property are no longer swallowed
     when getting a key from a context stack (issue \#110).
 -   Bugfix: lambda section values can now return non-ascii, non-unicode
