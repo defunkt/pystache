@@ -39,6 +39,7 @@ Pystache is tested with--
 -   Python 2.7
 -   Python 3.1
 -   Python 3.2
+-   [PyPy](http://pypy.org/)
 
 [Distribute](http://packages.python.org/distribute/) (the setuptools fork)
 is recommended over [setuptools](http://pypi.python.org/pypi/setuptools),

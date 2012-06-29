@@ -53,7 +53,17 @@ class LocatorTests(unittest.TestCase, AssertExceptionMixin):
     def test_get_object_directory__not_hasattr_module(self):
         locator = Locator()
 
-        obj = datetime(2000, 1, 1)
+        # Previously, we used a genuine object -- a datetime instance --
+        # because datetime instances did not have the __module__ attribute
+        # in CPython.  See, for example--
+        #
+        #   http://bugs.python.org/issue15223
+        #
+        # However, since datetime instances do have the __module__ attribute
+        # in PyPy, we needed to switch to something else once we added
+        # support for PyPi.  This was so that our test runs would pass
+        # in all systems.
+        obj = "abc"
         self.assertFalse(hasattr(obj, '__module__'))
         self.assertEqual(locator.get_object_directory(obj), None)
 
