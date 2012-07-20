@@ -92,7 +92,8 @@ class Locator(object):
             template_extension = self.template_extension
 
         if template_extension is not False:
-            file_name += os.path.extsep + template_extension
+            if not file_name.endswith(template_extension):
+                file_name += os.path.extsep + template_extension
 
         return file_name
 
