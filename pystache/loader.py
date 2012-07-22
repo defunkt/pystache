@@ -120,9 +120,27 @@ class Loader(object):
         return self.unicode(b, encoding)
 
     # TODO: unit-test this method.
+    def load_file(self, file_name):
+        """
+        Find and return the template with the given file name.
+
+        Arguments:
+
+          file_name: the file name of the template.
+
+          search_dirs: the list of directories in which to search.
+
+        """
+        locator = self._make_locator()
+
+        path = locator.find_file(file_name, self.search_dirs)
+
+        return self.read(path)
+
+    # TODO: unit-test this method.
     def load_name(self, name):
         """
-        Find and return the template with the given name.
+        Find and return the template with the given template name.
 
         Arguments:
 
