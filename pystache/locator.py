@@ -91,7 +91,7 @@ class Locator(object):
         if template_extension is None:
             template_extension = self.template_extension
 
-        if template_extension is not False and not file_name.endswith(template_extension):
+        if template_extension is not False:
             file_name += os.path.extsep + template_extension
 
         return file_name
@@ -122,6 +122,13 @@ class Locator(object):
                                         (repr(file_name), repr(search_dirs)))
 
         return path
+
+    def find_file(self, template_file, search_dirs):
+        """
+        Return the path to a template with the given file name.
+
+        """
+        return self._find_path_required(search_dirs, template_file)
 
     def find_name(self, template_name, search_dirs):
         """
