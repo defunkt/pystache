@@ -61,5 +61,5 @@ SEARCH_DIRS = [os.curdir]  # i.e. ['.']
 #
 TAG_ESCAPE = lambda u: escape(u, quote=True)
 
-# The default template extension.
+# The default template extension, without the leading dot.
 TEMPLATE_EXTENSION = 'mustache'
