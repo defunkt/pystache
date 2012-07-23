@@ -222,11 +222,10 @@ To convert the code to Python 3 manually (while using Python 3)--
 
     python setup.py build
 
-And while using Python 2--
-
-    python setup.py --force2to3 build
-
-Both of the above write the converted code to a subdirectory called `build`.
+This writes the converted code to a subdirectory called `build`.
+By design, Python 3 builds
+[cannot](https://bitbucket.org/tarek/distribute/issue/292/allow-use_2to3-with-python-2)
+be created from Python 2.
 
 To convert the code without using setup.py, you can use
 [2to3](http://docs.python.org/library/2to3.html) as follows (two steps)--
