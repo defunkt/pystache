@@ -21,9 +21,9 @@ class Locator(object):
 
         Arguments:
 
-          extension: the template file extension.  Pass False for no
-            extension (i.e. to use extensionless template files).
-            Defaults to the package default.
+          extension: the template file extension, without the leading dot.
+            Pass False for no extension (e.g. to use extensionless template
+            files).  Defaults to the package default.
 
         """
         if extension is None:
@@ -123,9 +123,28 @@ class Locator(object):
 
         return path
 
+    def find_file(self, file_name, search_dirs):
+        """
+        Return the path to a template with the given file name.
+
+        Arguments:
+
+          file_name: the file name of the template.
+
+          search_dirs: the list of directories in which to search.
+
+        """
+        return self._find_path_required(search_dirs, file_name)
+
     def find_name(self, template_name, search_dirs):
         """
         Return the path to a template with the given name.
+
+        Arguments:
+
+          template_name: the name of the template.
+
+          search_dirs: the list of directories in which to search.
 
         """
         file_name = self.make_file_name(template_name)

@@ -6,6 +6,8 @@ History
 
 -   Added option of raising errors on missing tags/partials:
     `Renderer(missing_tags='strict')` (issue \#110).
+-   Added support for finding and loading templates by file name in
+    addition to by template name (issue \#127). [xgecko]
 -   Added a `parse()` function that yields a printable, pre-compiled
     parse tree.
 -   Added support for rendering pre-compiled templates.
