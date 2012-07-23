@@ -42,9 +42,9 @@ class Loader(object):
 
         Arguments:
 
-          extension: the template file extension.  Pass False for no
-            extension (i.e. to use extensionless template files).
-            Defaults to the package default.
+          extension: the template file extension, without the leading dot.
+            Pass False for no extension (e.g. to use extensionless template
+            files).  Defaults to the package default.
 
           file_encoding: the name of the encoding to use when converting file
             contents to unicode.  Defaults to the package default.
@@ -119,7 +119,6 @@ class Loader(object):
 
         return self.unicode(b, encoding)
 
-    # TODO: unit-test this method.
     def load_file(self, file_name):
         """
         Find and return the template with the given file name.
@@ -135,7 +134,6 @@ class Loader(object):
 
         return self.read(path)
 
-    # TODO: unit-test this method.
     def load_name(self, name):
         """
         Find and return the template with the given template name.
