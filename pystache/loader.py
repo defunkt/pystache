@@ -128,8 +128,6 @@ class Loader(object):
 
           file_name: the file name of the template.
 
-          search_dirs: the list of directories in which to search.
-
         """
         locator = self._make_locator()
 
@@ -145,8 +143,6 @@ class Loader(object):
         Arguments:
 
           name: the name of the template.
-
-          search_dirs: the list of directories in which to search.
 
         """
         locator = self._make_locator()
