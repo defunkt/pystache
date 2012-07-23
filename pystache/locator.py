@@ -123,16 +123,28 @@ class Locator(object):
 
         return path
 
-    def find_file(self, template_file, search_dirs):
+    def find_file(self, file_name, search_dirs):
         """
         Return the path to a template with the given file name.
 
+        Arguments:
+
+          file_name: the file name of the template.
+
+          search_dirs: the list of directories in which to search.
+
         """
-        return self._find_path_required(search_dirs, template_file)
+        return self._find_path_required(search_dirs, file_name)
 
     def find_name(self, template_name, search_dirs):
         """
         Return the path to a template with the given name.
+
+        Arguments:
+
+          template_name: the name of the template.
+
+          search_dirs: the list of directories in which to search.
 
         """
         file_name = self.make_file_name(template_name)
