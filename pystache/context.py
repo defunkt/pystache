@@ -61,6 +61,10 @@ def _get_value(context, key):
             #   http://docs.python.org/glossary.html#term-eafp
             if callable(attr):
                 return attr()
+
+            if attr == None:
+                return ''
+
             return attr
 
     return _NOT_FOUND
