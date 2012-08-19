@@ -49,7 +49,7 @@ class Renderer(object):
 
     def __init__(self, file_encoding=None, string_encoding=None,
                  decode_errors=None, search_dirs=None, file_extension=None,
-                 escape=None, partials=None):
+                 escape=None, partials=None, context_class=ContextStack):
         """
         Construct an instance.
 
@@ -127,6 +127,7 @@ class Renderer(object):
             search_dirs = [search_dirs]
 
         self._context = None
+        self.context_class = context_class
         self.decode_errors = decode_errors
         self.escape = escape
         self.file_encoding = file_encoding
@@ -277,7 +278,7 @@ class Renderer(object):
         # RenderEngine.render() requires that the template string be unicode.
         template = self._to_unicode_hard(template)
 
-        context = ContextStack.create(*context, **kwargs)
+        context = self.context_class.create(*context, **kwargs)
         self._context = context
 
         engine = self._make_render_engine()

@@ -26,10 +26,11 @@ _BUILTIN_MODULE = type(0).__module__
 # TODO: eliminate the need for a private global variable, e.g. by using the
 #   preferred Python approach of "easier to ask for forgiveness than permission":
 #     http://docs.python.org/glossary.html#term-eafp
+
 class NotFound(object):
     pass
-_NOT_FOUND = NotFound()
 
+_NOT_FOUND = NotFound()
 
 def _get_value(context, key):
     """
@@ -64,7 +65,6 @@ def _get_value(context, key):
             return attr
 
     return _NOT_FOUND
-
 
 class ContextStack(object):
 
@@ -117,8 +117,8 @@ class ContextStack(object):
         """
         return "%s%s" % (self.__class__.__name__, tuple(self._stack))
 
-    @staticmethod
-    def create(*context, **kwargs):
+    @classmethod
+    def create(cls, *context, **kwargs):
         """
         Build a ContextStack instance from a sequence of context-like items.
 
@@ -158,7 +158,7 @@ class ContextStack(object):
         """
         items = context
 
-        context = ContextStack()
+        context = cls()
 
         for item in items:
             if item is None:
@@ -172,6 +172,9 @@ class ContextStack(object):
             context.push(kwargs)
 
         return context
+
+    def get_value(self, context, key):
+        return _get_value(context, key)
 
     # TODO: add more unit tests for this.
     # TODO: update the docstring for dotted names.
@@ -267,7 +270,7 @@ class ContextStack(object):
             #   the empty string.
             #
             # TODO: make sure we have a test case for the above point.
-            result = _get_value(result, part)
+            result = self.get_value(result, part)
 
         if result is _NOT_FOUND:
             return default
@@ -282,7 +285,7 @@ class ContextStack(object):
         result = _NOT_FOUND
 
         for item in reversed(self._stack):
-            result = _get_value(item, name)
+            result = self.get_value(item, name)
             if result is _NOT_FOUND:
                 continue
             # Otherwise, the key was found.
