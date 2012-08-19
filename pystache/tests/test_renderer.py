@@ -595,3 +595,25 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertExceptionMixin):
         self.assertTrue(isinstance(s, unicode))
         self.assertEqual(type(escape(s)), unicode)
 
+    def test_override_context_class(self):
+        from pystache.context import ContextStack
+
+        class MyContext(ContextStack):
+            def get_value(self, context, key):
+                if key == 'foo':
+                    return 'bar'
+                else:
+                    return 'foo'
+
+        renderer = Renderer(context_class=MyContext)
+
+        template = "{{foo}} {{bar}}"
+
+        rendered_template = renderer.render(template, {
+                'foo': 'foo',
+                'bar': 'bar'
+            }
+        )
+
+        self.assertEqual(rendered_template, "bar foo")
+
