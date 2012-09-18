@@ -17,6 +17,7 @@ History
     when getting a key from a context stack (issue \#110).
 -   Bugfix: lambda section values can now return non-ascii, non-unicode
     strings (issue \#118).
+-   Convert HISTORY and README files from reST to Markdown.
 -   More robust handling of byte strings in Python 3.
 
 0.5.2 (2012-05-03)
