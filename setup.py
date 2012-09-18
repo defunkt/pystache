@@ -14,7 +14,7 @@ number in setup.py, etc.
 
 Generate the reStructuredText long_description using--
 
-    python setup.py prep
+    $ python setup.py prep
 
 and be sure this new version is checked in.  You must have pandoc installed
 to do this step:
@@ -24,6 +24,22 @@ to do this step:
 It helps to review this auto-generated file on GitHub prior to uploading
 because the long description will be sent to PyPI and appear there after
 publishing.
+
+To check in advance that PyPI will accept and parse the reST file as HTML,
+you can use the rst2html program installed by the docutils package
+(http://docutils.sourceforge.net/).  To install docutils:
+
+    $ pip install docutils
+
+You will want to issue a command like the following and check that no
+warnings are issued:
+
+    $ python setup.py --long-description | rst2html.py -v --no-raw > out.html
+
+See here for more information:
+
+    http://docs.python.org/distutils/uploading.html#pypi-package-display
+
 
 (2) Push to PyPI.  To release a new version of Pystache to PyPI--
 
