@@ -1,10 +1,14 @@
 Pystache
 ========
 
-<!-- We leave the brackets empty.  Otherwise, text shows up in the reST
-  version converted by pandoc. -->
+<!-- We strip out 1-line HTML comments prior to passing to pandoc because -->
+<!-- PyPI rejects reST long descriptions that contain HTML. -->
 
+<!-- We leave the leading brackets empty here.  Otherwise, unwanted -->
+<!-- caption text shows up in the reST version converted by pandoc. -->
 ![](https://s3.amazonaws.com/webdev_bucket/pystache.png "mustachioed, monocled snake by David Phillips")
+
+![](https://secure.travis-ci.org/defunkt/pystache.png?branch=master,development)
 
 [Pystache](https://github.com/defunkt/pystache) is a Python
 implementation of [Mustache](http://mustache.github.com/). Mustache is a
