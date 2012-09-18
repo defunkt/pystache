@@ -28,41 +28,33 @@ class TestDefaults(unittest.TestCase, AssertStringMixin):
     def test_tag_escape(self):
         """Test that TAG_ESCAPE default takes effect."""
         template = u"{{foo}}"
-        config = {'foo': '<'}
-        actual = pystache.render(template, config)
+        context = {'foo': '<'}
+        actual = pystache.render(template, context)
         self.assertString(actual, u"&lt;")
 
         pystache.defaults.TAG_ESCAPE = lambda u: u
-        actual = pystache.render(template, config)
+        actual = pystache.render(template, context)
         self.assertString(actual, u"<")
 
     def test_delimiters(self):
         """Test that DELIMITERS default takes effect."""
         template = u"[[foo]]{{foo}}"
-        config = {'foo': 'FOO'}
-        actual = pystache.render(template, config)
+        context = {'foo': 'FOO'}
+        actual = pystache.render(template, context)
         self.assertString(actual, u"[[foo]]FOO")
 
         pystache.defaults.DELIMITERS = ('[[', ']]')
-        actual = pystache.render(template, config)
+        actual = pystache.render(template, context)
         self.assertString(actual, u"FOO{{foo}}")
 
     def test_missing_tags(self):
         """Test that MISSING_TAGS default take effect."""
         template = u"{{foo}}"
-        config = {}
-        actual = pystache.render(template, config)
+        context = {}
+        actual = pystache.render(template, context)
         self.assertString(actual, u"")
 
         pystache.defaults.MISSING_TAGS = 'strict'
 
-        # In theory this should work, but for some reason doesn't,
-        # instead another exception is raised
-        # self.assertRaises(pystache.context.KeyNotFoundError,
-        #                  pystache.render, (template, config))
-        try:
-            pystache.render(template, config)
-        except pystache.context.KeyNotFoundError, e:
-            return
-
-        self.fail()
+        self.assertRaises(pystache.context.KeyNotFoundError,
+                          pystache.render, template, context)
