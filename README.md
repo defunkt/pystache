@@ -190,7 +190,8 @@ To test from a source distribution (without installing)--
 To test Pystache with multiple versions of Python (with a single
 command!), you can use [tox](http://pypi.python.org/pypi/tox):
 
-    pip install tox
+    pip install 'virtualenv<1.8'  # Version 1.8 dropped support for Python 2.4.
+    pip install 'tox<1.4'  # Version 1.4 dropped support for Python 2.4.
     tox
 
 If you do not have all Python versions listed in `tox.ini`--
