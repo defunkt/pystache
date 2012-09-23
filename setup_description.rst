@@ -4,18 +4,6 @@
 Pystache
 ========
 
-.. raw:: html
-
-   <!-- Since PyPI rejects reST long descriptions that contain HTML, -->
-   <!-- HTML comments must be removed when converting this file to reST. -->
-   <!-- For more information on PyPI's behavior in this regard, see: -->
-   <!-- http://docs.python.org/distutils/uploading.html#pypi-package-display -->
-   <!-- The Pystache setup script strips 1-line HTML comments prior -->
-   <!-- to converting to reST, so all HTML comments should be one line. -->
-
-   <!-- We leave the leading brackets empty here.  Otherwise, unwanted -->
-   <!-- caption text shows up in the reST version converted by pandoc. -->
-
 .. figure:: https://s3.amazonaws.com/webdev_bucket/pystache.png
    :align: center
    :alt: mustachioed, monocled snake by David Phillips
@@ -320,7 +308,6 @@ Authors
     Author: Chris Wanstrath
     Maintainer: Chris Jerdonek
 
-
 History
 =======
 
@@ -473,29 +460,28 @@ Bug fixes:
 
 -  First release
 
-
 License
 =======
 
-Copyright (C) 2012 Chris Jerdonek.  All rights reserved.
+Copyright (C) 2012 Chris Jerdonek. All rights reserved.
 
 Copyright (c) 2009 Chris Wanstrath
 
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the
 "Software"), to deal in the Software without restriction, including
 without limitation the rights to use, copy, modify, merge, publish,
 distribute, sublicense, and/or sell copies of the Software, and to
 permit persons to whom the Software is furnished to do so, subject to
 the following conditions:
 
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
