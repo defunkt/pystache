@@ -184,6 +184,32 @@ def make_temp_path(path):
     return temp_path
 
 
+def convert_md_to_rst(path):
+    """
+    Convert the given file from markdown to reStructuredText.
+
+    Returns the new path.
+
+    """
+    # We write the converted files to temp files to simplify debugging.
+    temp_path = make_temp_path(path)
+    print("Converting: %s to %s" % (path, temp_path))
+
+    if os.path.exists(temp_path):
+        os.remove(temp_path)
+
+    # Pandoc uses the UTF-8 character encoding for both input and output.
+    command = "pandoc --write=rst --output=%s %s" % (temp_path, path)
+    os.system(command)
+
+    if not os.path.exists(temp_path):
+        s = ("Error running: %s\n"
+             "  Did you install pandoc per the %s docstring?" % (command, __file__))
+        sys.exit(s)
+
+    return temp_path
+
+
 def write_long_description(target_path):
     """
     Generate the long_description for setup().
@@ -238,32 +264,6 @@ Run the following command and commit the changes--
         exit("Aborted: nothing published")
 
     os.system('python setup.py sdist upload')
-
-
-def convert_md_to_rst(path):
-    """
-    Convert the given file from markdown to reStructuredText.
-
-    Returns the new path.
-
-    """
-    # We write the converted files to temp files to simplify debugging.
-    temp_path = make_temp_path(path)
-    print("Converting: %s to %s" % (path, temp_path))
-
-    if os.path.exists(temp_path):
-        os.remove(temp_path)
-
-    # Pandoc uses the UTF-8 character encoding for both input and output.
-    command = "pandoc --write=rst --output=%s %s" % (temp_path, path)
-    os.system(command)
-
-    if not os.path.exists(temp_path):
-        s = ("Error running: %s\n"
-             "  Did you install pandoc per the %s docstring?" % (command, __file__))
-        sys.exit(s)
-
-    return temp_path
 
 
 # We use the package simplejson for older Python versions since Python
