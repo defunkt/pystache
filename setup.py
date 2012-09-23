@@ -188,7 +188,7 @@ def convert_md_to_rst(path):
     """
     Convert the given file from markdown to reStructuredText.
 
-    Returns the new path.
+    Returns the converted text as a unicode string.
 
     """
     # We write the converted files to temp files to simplify debugging.
@@ -207,7 +207,7 @@ def convert_md_to_rst(path):
              "  Did you install pandoc per the %s docstring?" % (command, __file__))
         sys.exit(s)
 
-    return temp_path
+    return read(temp_path)
 
 
 def write_long_description(target_path):
@@ -219,17 +219,19 @@ def write_long_description(target_path):
       http://docs.python.org/distutils/setupscript.html#additional-meta-data
 
     """
-    readme_path = convert_md_to_rst(README_PATH)
-    history_path = convert_md_to_rst(HISTORY_PATH)
+    readme_section = convert_md_to_rst(README_PATH)
+    history_section = convert_md_to_rst(HISTORY_PATH)
 
-    license = """\
+    license_section = """\
 License
 =======
 
 """ + read(LICENSE_PATH)
 
-    sections = [LONG_DESCRIPTION_INTRO, read(readme_path), read(history_path),
-                license]
+    sections = [LONG_DESCRIPTION_INTRO,
+                readme_section,
+                history_section,
+                license_section]
 
     description = '\n'.join(sections)
 
