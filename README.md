@@ -1,8 +1,12 @@
 Pystache
 ========
 
-<!-- We strip out 1-line HTML comments prior to passing to pandoc because -->
-<!-- PyPI rejects reST long descriptions that contain HTML. -->
+<!-- Since PyPI rejects reST long descriptions that contain HTML, -->
+<!-- HTML comments must be removed when converting this file to reST. -->
+<!-- For more information on PyPI's behavior in this regard, see: -->
+<!-- http://docs.python.org/distutils/uploading.html#pypi-package-display -->
+<!-- The Pystache setup script strips 1-line HTML comments prior -->
+<!-- to converting to reST, so all HTML comments should be one line. -->
 
 <!-- We leave the leading brackets empty here.  Otherwise, unwanted -->
 <!-- caption text shows up in the reST version converted by pandoc. -->
