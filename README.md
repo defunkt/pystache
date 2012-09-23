@@ -7,7 +7,7 @@ Pystache
 <!-- http://docs.python.org/distutils/uploading.html#pypi-package-display -->
 <!-- The Pystache setup script strips 1-line HTML comments prior -->
 <!-- to converting to reST, so all HTML comments should be one line. -->
-
+<!-- -->
 <!-- We leave the leading brackets empty here.  Otherwise, unwanted -->
 <!-- caption text shows up in the reST version converted by pandoc. -->
 ![](https://s3.amazonaws.com/webdev_bucket/pystache.png "mustachioed, monocled snake by David Phillips")
