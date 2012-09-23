@@ -184,7 +184,7 @@ def make_temp_path(path):
     return temp_path
 
 
-def convert_md_to_rst(path):
+def convert_md_to_rst(md_path):
     """
     Convert the given file from markdown to reStructuredText.
 
@@ -192,14 +192,14 @@ def convert_md_to_rst(path):
 
     """
     # We write the converted files to temp files to simplify debugging.
-    temp_path = make_temp_path(path)
-    print("Converting: %s to %s" % (path, temp_path))
+    temp_path = make_temp_path(md_path)
+    print("Converting: %s to %s" % (md_path, temp_path))
 
     if os.path.exists(temp_path):
         os.remove(temp_path)
 
     # Pandoc uses the UTF-8 character encoding for both input and output.
-    command = "pandoc --write=rst --output=%s %s" % (temp_path, path)
+    command = "pandoc --write=rst --output=%s %s" % (temp_path, md_path)
     os.system(command)
 
     if not os.path.exists(temp_path):
@@ -210,13 +210,17 @@ def convert_md_to_rst(path):
     return read(temp_path)
 
 
-def write_long_description(target_path):
+# The long_description needs to be formatted as reStructuredText.
+# See the following for more information:
+#
+#   http://docs.python.org/distutils/setupscript.html#additional-meta-data
+#   http://docs.python.org/distutils/uploading.html#pypi-package-display
+#
+def make_long_description():
     """
-    Generate the long_description for setup().
+    Generate the long_description for setup() from source files.
 
-    The long description needs to be formatted as reStructuredText:
-
-      http://docs.python.org/distutils/setupscript.html#additional-meta-data
+    Returns the long_description as a unicode string.
 
     """
     readme_section = convert_md_to_rst(README_PATH)
@@ -233,23 +237,22 @@ License
                 history_section,
                 license_section]
 
-    description = '\n'.join(sections)
-
-    write(description, target_path)
+    return '\n'.join(sections)
 
 
 def prep():
-    write_long_description(DESCRIPTION_PATH)
+    long_description = make_long_description()
+    write(long_description, DESCRIPTION_PATH)
+
 
 def publish():
     """
     Publish this package to PyPI (aka "the Cheeseshop").
 
     """
-    temp_path = make_temp_path(DESCRIPTION_PATH)
-    write_long_description(temp_path)
+    long_description = make_long_description()
 
-    if read(temp_path) != read(DESCRIPTION_PATH):
+    if long_description != read(DESCRIPTION_PATH):
         print("""\
 Description file not up-to-date: %s
 Run the following command and commit the changes--
