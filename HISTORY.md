@@ -4,6 +4,8 @@ History
 0.5.3 (TBD)
 -----------
 
+-   Added TemplateSpec.template_path to specify an absolute path to a
+    template (issue \#41).
 -   Added option of raising errors on missing tags/partials:
     `Renderer(missing_tags='strict')` (issue \#110).
 -   Added support for finding and loading templates by file name in
