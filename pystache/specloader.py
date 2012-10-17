@@ -55,6 +55,9 @@ class SpecLoader(object):
         Find and return the path to the template associated to the instance.
 
         """
+        if spec.template_path is not None:
+            return spec.template_path
+
         dir_path, file_name = self._find_relative(spec)
 
         locator = self.loader._make_locator()
