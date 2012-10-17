@@ -30,6 +30,14 @@ class Thing(object):
     pass
 
 
+class AssertPathsMixin:
+
+    """A unittest.TestCase mixin to check path equality."""
+
+    def assertPaths(self, actual, expected):
+        self.assertEqual(actual, expected)
+
+
 class ViewTestCase(unittest.TestCase, AssertStringMixin):
 
     def test_template_rel_directory(self):
@@ -174,7 +182,8 @@ def _make_specloader():
     return SpecLoader(loader=loader)
 
 
-class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
+class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin,
+                      AssertPathsMixin):
 
     """
     Tests template_spec.SpecLoader.
@@ -288,13 +297,21 @@ class SpecLoaderTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         self.assertEqual(loader.s, "template-foo")
         self.assertEqual(loader.encoding, "encoding-foo")
 
+    def test_find__template_path(self):
+        """Test _find() with TemplateSpec.template_path."""
+        loader = self._make_specloader()
+        custom = TemplateSpec()
+        custom.template_path = "path/foo"
+        actual = loader._find(custom)
+        self.assertPaths(actual, "path/foo")
+
 
 # TODO: migrate these tests into the SpecLoaderTests class.
 # TODO: rename the get_template() tests to test load().
 # TODO: condense, reorganize, and rename the tests so that it is
 #   clear whether we have full test coverage (e.g. organized by
 #   TemplateSpec attributes or something).
-class TemplateSpecTests(unittest.TestCase):
+class TemplateSpecTests(unittest.TestCase, AssertPathsMixin):
 
     def _make_loader(self):
         return _make_specloader()
@@ -358,13 +375,6 @@ class TemplateSpecTests(unittest.TestCase):
         view.template_extension = 'txt'
         self._assert_template_location(view, (None, 'sample_view.txt'))
 
-    def _assert_paths(self, actual, expected):
-        """
-        Assert that two paths are the same.
-
-        """
-        self.assertEqual(actual, expected)
-
     def test_find__with_directory(self):
         """
         Test _find() with a view that has a directory specified.
@@ -379,7 +389,7 @@ class TemplateSpecTests(unittest.TestCase):
         actual = loader._find(view)
         expected = os.path.join(DATA_DIR, 'foo/bar.txt')
 
-        self._assert_paths(actual, expected)
+        self.assertPaths(actual, expected)
 
     def test_find__without_directory(self):
         """
@@ -394,7 +404,7 @@ class TemplateSpecTests(unittest.TestCase):
         actual = loader._find(view)
         expected = os.path.join(DATA_DIR, 'sample_view.mustache')
 
-        self._assert_paths(actual, expected)
+        self.assertPaths(actual, expected)
 
     def _assert_get_template(self, custom, expected):
         loader = self._make_loader()

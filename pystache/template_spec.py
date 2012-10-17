@@ -34,6 +34,8 @@ class TemplateSpec(object):
 
       template_name: the name of the template.
 
+      template_path: absolute path to the template.
+
       template_rel_directory: the directory containing the template file,
         relative to the directory containing the module defining the class.
 
@@ -46,5 +48,6 @@ class TemplateSpec(object):
     template_encoding = None
     template_extension = None
     template_name = None
+    template_path = None
     template_rel_directory = None
     template_rel_path = None
