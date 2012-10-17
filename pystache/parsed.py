@@ -8,6 +8,16 @@ Exposes a class that represents a parsed (or compiled) template.
 
 class ParsedTemplate(object):
 
+    """
+    Represents a parsed or compiled template.
+
+    An instance wraps a list of unicode strings and node objects.  A node
+    object must have a `render(engine, stack)` method that accepts a
+    RenderEngine instance and a ContextStack instance and returns a unicode
+    string.
+
+    """
+
     def __init__(self):
         self._parse_tree = []
 
@@ -18,10 +28,8 @@ class ParsedTemplate(object):
         """
         Arguments:
 
-          node: a unicode string or node object instance.  A node object
-            instance must have a `render(engine, stack)` method that
-            accepts a RenderEngine instance and a ContextStack instance and
-            returns a unicode string.
+          node: a unicode string or node object instance.  See the class
+            docstring for information.
 
         """
         self._parse_tree.append(node)
