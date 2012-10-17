@@ -33,6 +33,8 @@ class Loader(object):
     """
     Loads the template associated to a name or user-defined object.
 
+    All load_*() methods return the template as a unicode string.
+
     """
 
     def __init__(self, file_encoding=None, extension=None, to_unicode=None,

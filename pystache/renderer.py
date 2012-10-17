@@ -341,6 +341,17 @@ class Renderer(object):
 
         return self._render_string(template, *context, **kwargs)
 
+    def render_name(self, template_name, *context, **kwargs):
+        """
+        Render the template with the given name using the given context.
+
+        See the render() docstring for more information.
+
+        """
+        loader = self._make_loader()
+        template = loader.load_name(template_name)
+        return self._render_string(template, *context, **kwargs)
+
     def render_path(self, template_path, *context, **kwargs):
         """
         Render the template at the given path using the given context.

@@ -368,6 +368,13 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         #   TypeError: decoding Unicode is not supported
         self.assertEqual(resolve_partial("partial"), "foo")
 
+    def test_render_name(self):
+        """Test the render_name() method."""
+        data_dir = get_data_path()
+        renderer = Renderer(search_dirs=data_dir)
+        actual = renderer.render_name("say_hello", to='foo')
+        self.assertString(actual, u"Hello, foo")
+
     def test_render_path(self):
         """
         Test the render_path() method.

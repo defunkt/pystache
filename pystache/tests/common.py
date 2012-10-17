@@ -43,7 +43,10 @@ def html_escape(u):
     return u.replace("'", '&#x27;')
 
 
-def get_data_path(file_name):
+def get_data_path(file_name=None):
+    """Return the path to a file in the test data directory."""
+    if file_name is None:
+        file_name = ""
     return os.path.join(DATA_DIR, file_name)
 
 
@@ -139,8 +142,7 @@ class AssertStringMixin:
             format = "%s"
 
         # Show both friendly and literal versions.
-        details = """String mismatch: %%s\
-
+        details = """String mismatch: %%s
 
         Expected: \"""%s\"""
         Actual:   \"""%s\"""

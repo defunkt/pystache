@@ -4,6 +4,7 @@ History
 0.5.3 (TBD)
 -----------
 
+-   Added Renderer.render_name() to render a template by name (issue \#122).
 -   Added TemplateSpec.template_path to specify an absolute path to a
     template (issue \#41).
 -   Added option of raising errors on missing tags/partials:
