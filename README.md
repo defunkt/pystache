@@ -32,7 +32,11 @@ on [PyPI](http://pypi.python.org/pypi/pystache). This version of
 Pystache passes all tests in [version
 1.1.2](https://github.com/mustache/spec/tree/v1.1.2) of the spec.
 
-Logo: [David Phillips](http://davidphillips.us/)
+![](http://i.creativecommons.org/l/by-sa/3.0/88x31.png "Creative
+Commons Attribution-ShareAlike 3.0 Unported License")
+Logo by [David Phillips](http://davidphillips.us/) licensed under a
+[Creative Commons license](http://creativecommons.org/licenses/by-sa/3.0/deed.en_US).
+
 
 Requirements
 ------------
