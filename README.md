@@ -32,11 +32,6 @@ on [PyPI](http://pypi.python.org/pypi/pystache). This version of
 Pystache passes all tests in [version
 1.1.2](https://github.com/mustache/spec/tree/v1.1.2) of the spec.
 
-![](http://i.creativecommons.org/l/by-sa/3.0/88x31.png "Creative
-Commons Attribution-ShareAlike 3.0 Unported License")
-Logo by [David Phillips](http://davidphillips.us/) licensed under a
-[Creative Commons license](http://creativecommons.org/licenses/by-sa/3.0/deed.en_US).
-
 
 Requirements
 ------------
@@ -263,10 +258,16 @@ There is a [mailing list](http://librelist.com/browser/pystache/). Note
 that there is a bit of a delay between posting a message and seeing it
 appear in the mailing list archive.
 
-Authors
+Credits
 -------
 
     >>> context = { 'author': 'Chris Wanstrath', 'maintainer': 'Chris Jerdonek' }
     >>> print pystache.render("Author: {{author}}\nMaintainer: {{maintainer}}", context)
     Author: Chris Wanstrath
     Maintainer: Chris Jerdonek
+
+![](http://i.creativecommons.org/l/by-sa/3.0/88x31.png "Creative
+Commons Attribution-ShareAlike 3.0 Unported License")
+Pystache logo is by [David Phillips](http://davidphillips.us/) and licensed
+under a [Creative Commons Attribution-ShareAlike 3.0 Unported
+License](http://creativecommons.org/licenses/by-sa/3.0/deed.en_US).
