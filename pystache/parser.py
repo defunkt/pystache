@@ -189,10 +189,10 @@ class _SectionNode(object):
         return _format(self, exclude=['delimiters', 'template'])
 
     def render(self, engine, context):
-        data = engine.fetch_section_data(context, self.key)
+        values = engine.fetch_section_data(context, self.key)
 
         parts = []
-        for val in data:
+        for val in values:
             if callable(val):
                 # Lambdas special case section rendering and bypass pushing
                 # the data value onto the context stack.  From the spec--

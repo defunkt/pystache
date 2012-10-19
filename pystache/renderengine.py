@@ -108,6 +108,10 @@ class RenderEngine(object):
         return val
 
     def fetch_section_data(self, context, name):
+        """
+        Fetch the value of a section as a list.
+
+        """
         data = self.resolve_context(context, name)
 
         # From the spec:
