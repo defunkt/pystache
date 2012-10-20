@@ -266,8 +266,8 @@ Credits
     Author: Chris Wanstrath
     Maintainer: Chris Jerdonek
 
-![](http://i.creativecommons.org/l/by-sa/3.0/88x31.png "Creative
-Commons Attribution-ShareAlike 3.0 Unported License")
-Pystache logo is by [David Phillips](http://davidphillips.us/) and licensed
+Pystache logo by [David Phillips](http://davidphillips.us/) and licensed
 under a [Creative Commons Attribution-ShareAlike 3.0 Unported
 License](http://creativecommons.org/licenses/by-sa/3.0/deed.en_US).
+![](http://i.creativecommons.org/l/by-sa/3.0/88x31.png "Creative
+Commons Attribution-ShareAlike 3.0 Unported License")
