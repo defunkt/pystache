@@ -425,6 +425,39 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         actual = renderer.render(view)
         self.assertEqual('Hi pizza!', actual)
 
+    def test_custom_string_coercion_via_assignment(self):
+        """
+        Test that string coercion can be customized via attribute assignment.
+
+        """
+        renderer = self._renderer()
+        def to_str(val):
+            if not val:
+                return ''
+            else:
+                return str(val)
+
+        self.assertEqual(renderer.render('{{value}}', value=None), 'None')
+        renderer.str_coerce = to_str
+        self.assertEqual(renderer.render('{{value}}', value=None), '')
+
+    def test_custom_string_coercion_via_subclassing(self):
+        """
+        Test that string coercion can be customized via subclassing.
+
+        """
+        class MyRenderer(Renderer):
+            def str_coerce(self, val):
+                if not val:
+                    return ''
+                else:
+                    return str(val)
+        renderer1 = Renderer()
+        renderer2 = MyRenderer()
+
+        self.assertEqual(renderer1.render('{{value}}', value=None), 'None')
+        self.assertEqual(renderer2.render('{{value}}', value=None), '')
+
 
 # By testing that Renderer.render() constructs the right RenderEngine,
 # we no longer need to exercise all rendering code paths through

@@ -4,6 +4,8 @@ History
 0.5.3 (TBD)
 -----------
 
+-   Added ability to customize string coercion (e.g. to have None render as
+    `''`) (issue \#130).
 -   Added Renderer.render_name() to render a template by name (issue \#122).
 -   Added TemplateSpec.template_path to specify an absolute path to a
     template (issue \#41).

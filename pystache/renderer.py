@@ -23,17 +23,27 @@ class Renderer(object):
     A class for rendering mustache templates.
 
     This class supports several rendering options which are described in
-    the constructor's docstring.  Among these, the constructor supports
-    passing a custom partial loader.
+    the constructor's docstring.  Other behavior can be customized by
+    subclassing this class.
 
-    Here is an example of rendering a template using a custom partial loader
-    that loads partials from a string-string dictionary.
+    For example, one can pass a string-string dictionary to the constructor
+    to bypass loading partials from the file system:
 
     >>> partials = {'partial': 'Hello, {{thing}}!'}
     >>> renderer = Renderer(partials=partials)
     >>> # We apply print to make the test work in Python 3 after 2to3.
     >>> print renderer.render('{{>partial}}', {'thing': 'world'})
     Hello, world!
+
+    To customize string coercion (e.g. to render False values as ''), one can
+    subclass this class.  For example:
+
+        class MyRenderer(Renderer):
+            def str_coerce(self, val):
+                if not val:
+                    return ''
+                else:
+                    return str(val)
 
     """
 
@@ -145,6 +155,20 @@ class Renderer(object):
 
         """
         return self._context
+
+    # We could not choose str() as the name because 2to3 renames the unicode()
+    # method of this class to str().
+    def str_coerce(self, val):
+        """
+        Coerce a non-string value to a string.
+
+        This method is called whenever a non-string is encountered during the
+        rendering process when a string is needed (e.g. if a context value
+        for string interpolation is not a string).  To customize string
+        coercion, you can override this method.
+
+        """
+        return str(val)
 
     def _to_unicode_soft(self, s):
         """
@@ -307,7 +331,8 @@ class Renderer(object):
         engine = RenderEngine(literal=self._to_unicode_hard,
                               escape=self._escape_to_unicode,
                               resolve_context=resolve_context,
-                              resolve_partial=resolve_partial)
+                              resolve_partial=resolve_partial,
+                              to_str=self.str_coerce)
         return engine
 
     # TODO: add unit tests for this method.

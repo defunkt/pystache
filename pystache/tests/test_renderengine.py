@@ -55,11 +55,13 @@ class RenderEngineTestCase(unittest.TestCase):
 
         """
         # In real-life, these arguments would be functions
-        engine = RenderEngine(resolve_partial="foo", literal="literal", escape="escape")
+        engine = RenderEngine(resolve_partial="foo", literal="literal",
+                              escape="escape", to_str="str")
 
         self.assertEqual(engine.escape, "escape")
         self.assertEqual(engine.literal, "literal")
         self.assertEqual(engine.resolve_partial, "foo")
+        self.assertEqual(engine.to_str, "str")
 
 
 class RenderTests(unittest.TestCase, AssertStringMixin, AssertExceptionMixin):
@@ -181,6 +183,47 @@ class RenderTests(unittest.TestCase, AssertStringMixin, AssertExceptionMixin):
         context = {'foo1': MyUnicode('bar'), 'foo2': 'bar'}
 
         self._assert_render(u'**bar bar**', template, context, engine=engine)
+
+    # Custom to_str for testing purposes.
+    def _to_str(self, val):
+        if not val:
+            return ''
+        else:
+            return str(val)
+
+    def test_to_str(self):
+        """Test the to_str attribute."""
+        engine = self._engine()
+        template = '{{value}}'
+        context = {'value': None}
+
+        self._assert_render(u'None', template, context, engine=engine)
+        engine.to_str = self._to_str
+        self._assert_render(u'', template, context, engine=engine)
+
+    def test_to_str__lambda(self):
+        """Test the to_str attribute for a lambda."""
+        engine = self._engine()
+        template = '{{value}}'
+        context = {'value': lambda: None}
+
+        self._assert_render(u'None', template, context, engine=engine)
+        engine.to_str = self._to_str
+        self._assert_render(u'', template, context, engine=engine)
+
+    def test_to_str__section_list(self):
+        """Test the to_str attribute for a section list."""
+        engine = self._engine()
+        template = '{{#list}}{{.}}{{/list}}'
+        context = {'list': [None, None]}
+
+        self._assert_render(u'NoneNone', template, context, engine=engine)
+        engine.to_str = self._to_str
+        self._assert_render(u'', template, context, engine=engine)
+
+    def test_to_str__section_lambda(self):
+        # TODO: add a test for a "method with an arity of 1".
+        pass
 
     def test__non_basestring__literal_and_escaped(self):
         """

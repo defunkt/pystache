@@ -43,7 +43,7 @@ class RenderEngine(object):
     #   that encapsulates the customizable aspects of converting
     #   strings and resolving partials and names from context.
     def __init__(self, literal=None, escape=None, resolve_context=None,
-                 resolve_partial=None):
+                 resolve_partial=None, to_str=None):
         """
         Arguments:
 
@@ -76,11 +76,17 @@ class RenderEngine(object):
             The function should accept a template name string and return a
             template string of type unicode (not a subclass).
 
+          to_str: a function that accepts an object and returns a string (e.g.
+            the built-in function str).  This function is used for string
+            coercion whenever a string is required (e.g. for converting None
+            or 0 to a string).
+
         """
         self.escape = escape
         self.literal = literal
         self.resolve_context = resolve_context
         self.resolve_partial = resolve_partial
+        self.to_str = to_str
 
     # TODO: Rename context to stack throughout this module.
 
@@ -103,7 +109,7 @@ class RenderEngine(object):
             return self._render_value(val(), context)
 
         if not is_string(val):
-            return str(val)
+            return self.to_str(val)
 
         return val
 
@@ -153,7 +159,7 @@ class RenderEngine(object):
         """
         if not is_string(val):
             # In case the template is an integer, for example.
-            val = str(val)
+            val = self.to_str(val)
         if type(val) is not unicode:
             val = self.literal(val)
         return self.render(val, context, delimiters)
