@@ -8,23 +8,13 @@ This module provides a Renderer class to render templates.
 import sys
 
 from pystache import defaults
-from pystache.common import TemplateNotFoundError
-from pystache.context import ContextStack
+from pystache.common import TemplateNotFoundError, MissingTags, is_string
+from pystache.context import ContextStack, KeyNotFoundError
 from pystache.loader import Loader
-from pystache.renderengine import RenderEngine
+from pystache.parsed import ParsedTemplate
+from pystache.renderengine import context_get, RenderEngine
 from pystache.specloader import SpecLoader
 from pystache.template_spec import TemplateSpec
-
-
-# TODO: come up with a better solution for this.  One of the issues here
-#   is that in Python 3 there is no common base class for unicode strings
-#   and byte strings, and 2to3 seems to convert all of "str", "unicode",
-#   and "basestring" to Python 3's "str".
-if sys.version_info < (3, ):
-    _STRING_TYPES = basestring
-else:
-    # The latter evaluates to "bytes" in Python 3 -- even after conversion by 2to3.
-    _STRING_TYPES = (unicode, type(u"a".encode('utf-8')))
 
 
 class Renderer(object):
@@ -33,11 +23,11 @@ class Renderer(object):
     A class for rendering mustache templates.
 
     This class supports several rendering options which are described in
-    the constructor's docstring.  Among these, the constructor supports
-    passing a custom partial loader.
+    the constructor's docstring.  Other behavior can be customized by
+    subclassing this class.
 
-    Here is an example of rendering a template using a custom partial loader
-    that loads partials from a string-string dictionary.
+    For example, one can pass a string-string dictionary to the constructor
+    to bypass loading partials from the file system:
 
     >>> partials = {'partial': 'Hello, {{thing}}!'}
     >>> renderer = Renderer(partials=partials)
@@ -45,15 +35,48 @@ class Renderer(object):
     >>> print renderer.render('{{>partial}}', {'thing': 'world'})
     Hello, world!
 
+    To customize string coercion (e.g. to render False values as ''), one can
+    subclass this class.  For example:
+
+        class MyRenderer(Renderer):
+            def str_coerce(self, val):
+                if not val:
+                    return ''
+                else:
+                    return str(val)
+
     """
 
     def __init__(self, file_encoding=None, string_encoding=None,
                  decode_errors=None, search_dirs=None, file_extension=None,
-                 escape=None, partials=None):
+                 escape=None, partials=None, missing_tags=None):
         """
         Construct an instance.
 
         Arguments:
+
+          file_encoding: the name of the encoding to use by default when
+            reading template files.  All templates are converted to unicode
+            prior to parsing.  Defaults to the package default.
+
+          string_encoding: the name of the encoding to use when converting
+            to unicode any byte strings (type str in Python 2) encountered
+            during the rendering process.  This name will be passed as the
+            encoding argument to the built-in function unicode().
+            Defaults to the package default.
+
+          decode_errors: the string to pass as the errors argument to the
+            built-in function unicode() when converting byte strings to
+            unicode.  Defaults to the package default.
+
+          search_dirs: the list of directories in which to search when
+            loading a template by name or file name.  If given a string,
+            the method interprets the string as a single directory.
+            Defaults to the package default.
+
+          file_extension: the template file extension.  Pass False for no
+            extension (i.e. to use extensionless template files).
+            Defaults to the package default.
 
           partials: an object (e.g. a dictionary) for custom partial loading
             during the rendering process.
@@ -66,10 +89,6 @@ class Renderer(object):
             the normal procedure of locating and reading templates from
             the file system -- using relevant instance attributes like
             search_dirs, file_encoding, etc.
-
-          decode_errors: the string to pass as the errors argument to the
-            built-in function unicode() when converting str strings to
-            unicode.  Defaults to the package default.
 
           escape: the function used to escape variable tag values when
             rendering a template.  The function should accept a unicode
@@ -84,24 +103,9 @@ class Renderer(object):
             consider using markupsafe's escape function: markupsafe.escape().
             This argument defaults to the package default.
 
-          file_encoding: the name of the default encoding to use when reading
-            template files.  All templates are converted to unicode prior
-            to parsing.  This encoding is used when reading template files
-            and converting them to unicode.  Defaults to the package default.
-
-          file_extension: the template file extension.  Pass False for no
-            extension (i.e. to use extensionless template files).
-            Defaults to the package default.
-
-          search_dirs: the list of directories in which to search when
-            loading a template by name or file name.  If given a string,
-            the method interprets the string as a single directory.
-            Defaults to the package default.
-
-          string_encoding: the name of the encoding to use when converting
-            to unicode any strings of type str encountered during the
-            rendering process.  The name will be passed as the encoding
-            argument to the built-in function unicode().  Defaults to the
+          missing_tags: a string specifying how to handle missing tags.
+            If 'strict', an error is raised on a missing tag.  If 'ignore',
+            the value of the tag is the empty string.  Defaults to the
             package default.
 
         """
@@ -117,6 +121,9 @@ class Renderer(object):
         if file_extension is None:
             file_extension = defaults.TEMPLATE_EXTENSION
 
+        if missing_tags is None:
+            missing_tags = defaults.MISSING_TAGS
+
         if search_dirs is None:
             search_dirs = defaults.SEARCH_DIRS
 
@@ -131,6 +138,7 @@ class Renderer(object):
         self.escape = escape
         self.file_encoding = file_encoding
         self.file_extension = file_extension
+        self.missing_tags = missing_tags
         self.partials = partials
         self.search_dirs = search_dirs
         self.string_encoding = string_encoding
@@ -147,6 +155,20 @@ class Renderer(object):
 
         """
         return self._context
+
+    # We could not choose str() as the name because 2to3 renames the unicode()
+    # method of this class to str().
+    def str_coerce(self, val):
+        """
+        Coerce a non-string value to a string.
+
+        This method is called whenever a non-string is encountered during the
+        rendering process when a string is needed (e.g. if a context value
+        for string interpolation is not a string).  To customize string
+        coercion, you can override this method.
+
+        """
+        return str(val)
 
     def _to_unicode_soft(self, s):
         """
@@ -224,21 +246,21 @@ class Renderer(object):
 
     def _make_load_partial(self):
         """
-        Return the load_partial function to pass to RenderEngine.__init__().
+        Return a function that loads a partial by name.
 
         """
         if self.partials is None:
-            load_template = self._make_load_template()
-            return load_template
+            return self._make_load_template()
 
-        # Otherwise, create a load_partial function from the custom partial
-        # loader that satisfies RenderEngine requirements (and that provides
-        # a nicer exception, etc).
+        # Otherwise, create a function from the custom partial loader.
         partials = self.partials
 
         def load_partial(name):
+            # TODO: consider using EAFP here instead.
+            #     http://docs.python.org/glossary.html#term-eafp
+            #   This would mean requiring that the custom partial loader
+            #   raise a KeyError on name not found.
             template = partials.get(name)
-
             if template is None:
                 raise TemplateNotFoundError("Name %s not found in partials: %s" %
                                             (repr(name), type(partials)))
@@ -248,16 +270,69 @@ class Renderer(object):
 
         return load_partial
 
+    def _is_missing_tags_strict(self):
+        """
+        Return whether missing_tags is set to strict.
+
+        """
+        val = self.missing_tags
+
+        if val == MissingTags.strict:
+            return True
+        elif val == MissingTags.ignore:
+            return False
+
+        raise Exception("Unsupported 'missing_tags' value: %s" % repr(val))
+
+    def _make_resolve_partial(self):
+        """
+        Return the resolve_partial function to pass to RenderEngine.__init__().
+
+        """
+        load_partial = self._make_load_partial()
+
+        if self._is_missing_tags_strict():
+            return load_partial
+        # Otherwise, ignore missing tags.
+
+        def resolve_partial(name):
+            try:
+                return load_partial(name)
+            except TemplateNotFoundError:
+                return u''
+
+        return resolve_partial
+
+    def _make_resolve_context(self):
+        """
+        Return the resolve_context function to pass to RenderEngine.__init__().
+
+        """
+        if self._is_missing_tags_strict():
+            return context_get
+        # Otherwise, ignore missing tags.
+
+        def resolve_context(stack, name):
+            try:
+                return context_get(stack, name)
+            except KeyNotFoundError:
+                return u''
+
+        return resolve_context
+
     def _make_render_engine(self):
         """
         Return a RenderEngine instance for rendering.
 
         """
-        load_partial = self._make_load_partial()
+        resolve_context = self._make_resolve_context()
+        resolve_partial = self._make_resolve_partial()
 
-        engine = RenderEngine(load_partial=load_partial,
-                              literal=self._to_unicode_hard,
-                              escape=self._escape_to_unicode)
+        engine = RenderEngine(literal=self._to_unicode_hard,
+                              escape=self._escape_to_unicode,
+                              resolve_context=resolve_context,
+                              resolve_partial=resolve_partial,
+                              to_str=self.str_coerce)
         return engine
 
     # TODO: add unit tests for this method.
@@ -268,22 +343,6 @@ class Renderer(object):
         """
         load_template = self._make_load_template()
         return load_template(template_name)
-
-    def _render_string(self, template, *context, **kwargs):
-        """
-        Render the given template string using the given context.
-
-        """
-        # RenderEngine.render() requires that the template string be unicode.
-        template = self._to_unicode_hard(template)
-
-        context = ContextStack.create(*context, **kwargs)
-        self._context = context
-
-        engine = self._make_render_engine()
-        rendered = engine.render(template, context)
-
-        return unicode(rendered)
 
     def _render_object(self, obj, *context, **kwargs):
         """
@@ -307,6 +366,17 @@ class Renderer(object):
 
         return self._render_string(template, *context, **kwargs)
 
+    def render_name(self, template_name, *context, **kwargs):
+        """
+        Render the template with the given name using the given context.
+
+        See the render() docstring for more information.
+
+        """
+        loader = self._make_loader()
+        template = loader.load_name(template_name)
+        return self._render_string(template, *context, **kwargs)
+
     def render_path(self, template_path, *context, **kwargs):
         """
         Render the template at the given path using the given context.
@@ -319,24 +389,54 @@ class Renderer(object):
 
         return self._render_string(template, *context, **kwargs)
 
+    def _render_string(self, template, *context, **kwargs):
+        """
+        Render the given template string using the given context.
+
+        """
+        # RenderEngine.render() requires that the template string be unicode.
+        template = self._to_unicode_hard(template)
+
+        render_func = lambda engine, stack: engine.render(template, stack)
+
+        return self._render_final(render_func, *context, **kwargs)
+
+    # All calls to render() should end here because it prepares the
+    # context stack correctly.
+    def _render_final(self, render_func, *context, **kwargs):
+        """
+        Arguments:
+
+          render_func: a function that accepts a RenderEngine and ContextStack
+            instance and returns a template rendering as a unicode string.
+
+        """
+        stack = ContextStack.create(*context, **kwargs)
+        self._context = stack
+
+        engine = self._make_render_engine()
+
+        return render_func(engine, stack)
+
     def render(self, template, *context, **kwargs):
         """
-        Render the given template (or template object) using the given context.
+        Render the given template string, view template, or parsed template.
 
-        Returns the rendering as a unicode string.
+        Returns a unicode string.
 
-        Prior to rendering, templates of type str are converted to unicode
-        using the string_encoding and decode_errors attributes.  See the
-        constructor docstring for more information.
+        Prior to rendering, this method will convert a template that is a
+        byte string (type str in Python 2) to unicode using the string_encoding
+        and decode_errors attributes.  See the constructor docstring for
+        more information.
 
         Arguments:
 
-          template: a template string of type unicode or str, or an object
-            instance.  If the argument is an object, the function first looks
-            for the template associated to the object by calling this class's
-            get_associated_template() method.  The rendering process also
-            uses the passed object as the first element of the context stack
-            when rendering.
+          template: a template string that is unicode or a byte string,
+            a ParsedTemplate instance, or another object instance.  In the
+            final case, the function first looks for the template associated
+            to the object by calling this class's get_associated_template()
+            method.  The rendering process also uses the passed object as
+            the first element of the context stack when rendering.
 
           *context: zero or more dictionaries, ContextStack instances, or objects
             with which to populate the initial context stack.  None
@@ -350,8 +450,11 @@ class Renderer(object):
             all items in the *context list.
 
         """
-        if isinstance(template, _STRING_TYPES):
+        if is_string(template):
             return self._render_string(template, *context, **kwargs)
+        if isinstance(template, ParsedTemplate):
+            render_func = lambda engine, stack: template.render(engine, stack)
+            return self._render_final(render_func, *context, **kwargs)
         # Otherwise, we assume the template is an object.
 
         return self._render_object(template, *context, **kwargs)

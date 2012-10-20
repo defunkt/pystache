@@ -8,10 +8,8 @@ Unit tests of context.py.
 from datetime import datetime
 import unittest
 
-from pystache.context import _NOT_FOUND
-from pystache.context import _get_value
-from pystache.context import ContextStack
-from pystache.tests.common import AssertIsMixin, AssertStringMixin, Attachable
+from pystache.context import _NOT_FOUND, _get_value, KeyNotFoundError, ContextStack
+from pystache.tests.common import AssertIsMixin, AssertStringMixin, AssertExceptionMixin, Attachable
 
 class SimpleObject(object):
 
@@ -39,7 +37,7 @@ class DictLike(object):
         return self._dict[key]
 
 
-class GetValueTests(unittest.TestCase, AssertIsMixin):
+class GetValueTestCase(unittest.TestCase, AssertIsMixin):
 
     """Test context._get_value()."""
 
@@ -147,6 +145,26 @@ class GetValueTests(unittest.TestCase, AssertIsMixin):
         self.assertEqual(item["foo"], "bar")
         self.assertNotFound(item, "foo")
 
+    def test_object__property__raising_exception(self):
+        """
+        Test getting a property that raises an exception.
+
+        """
+        class Foo(object):
+
+            @property
+            def bar(self):
+                return 1
+
+            @property
+            def baz(self):
+                raise ValueError("test")
+
+        foo = Foo()
+        self.assertEqual(_get_value(foo, 'bar'), 1)
+        self.assertNotFound(foo, 'missing')
+        self.assertRaises(ValueError, _get_value, foo, 'baz')
+
     ### Case: the item is an instance of a built-in type.
 
     def test_built_in_type__integer(self):
@@ -204,7 +222,8 @@ class GetValueTests(unittest.TestCase, AssertIsMixin):
         self.assertNotFound(item2, 'pop')
 
 
-class ContextStackTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
+class ContextStackTestCase(unittest.TestCase, AssertIsMixin, AssertStringMixin,
+                           AssertExceptionMixin):
 
     """
     Test the ContextStack class.
@@ -306,6 +325,24 @@ class ContextStackTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         context = ContextStack.create({'foo': 'bar'}, foo='buzz')
         self.assertEqual(context.get('foo'), 'buzz')
 
+    ## Test the get() method.
+
+    def test_get__single_dot(self):
+        """
+        Test getting a single dot (".").
+
+        """
+        context = ContextStack("a", "b")
+        self.assertEqual(context.get("."), "b")
+
+    def test_get__single_dot__missing(self):
+        """
+        Test getting a single dot (".") with an empty context stack.
+
+        """
+        context = ContextStack()
+        self.assertException(KeyNotFoundError, "Key '.' not found: empty context stack", context.get, ".")
+
     def test_get__key_present(self):
         """
         Test getting a key.
@@ -320,15 +357,7 @@ class ContextStackTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
 
         """
         context = ContextStack()
-        self.assertString(context.get("foo"), u'')
-
-    def test_get__default(self):
-        """
-        Test that get() respects the default value.
-
-        """
-        context = ContextStack()
-        self.assertEqual(context.get("foo", "bar"), "bar")
+        self.assertException(KeyNotFoundError, "Key 'foo' not found: first part", context.get, "foo")
 
     def test_get__precedence(self):
         """
@@ -424,10 +453,10 @@ class ContextStackTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
     def test_dot_notation__missing_attr_or_key(self):
         name = "foo.bar.baz.bak"
         stack = ContextStack({"foo": {"bar": {}}})
-        self.assertString(stack.get(name), u'')
+        self.assertException(KeyNotFoundError, "Key 'foo.bar.baz.bak' not found: missing 'baz'", stack.get, name)
 
         stack = ContextStack({"foo": Attachable(bar=Attachable())})
-        self.assertString(stack.get(name), u'')
+        self.assertException(KeyNotFoundError, "Key 'foo.bar.baz.bak' not found: missing 'baz'", stack.get, name)
 
     def test_dot_notation__missing_part_terminates_search(self):
         """
@@ -451,7 +480,7 @@ class ContextStackTests(unittest.TestCase, AssertIsMixin, AssertStringMixin):
         """
         stack = ContextStack({'a': {'b': 'A.B'}}, {'a': 'A'})
         self.assertEqual(stack.get('a'), 'A')
-        self.assertString(stack.get('a.b'), u'')
+        self.assertException(KeyNotFoundError, "Key 'a.b' not found: missing 'b'", stack.get, "a.b")
         stack.pop()
         self.assertEqual(stack.get('a.b'), 'A.B')
 

@@ -14,6 +14,9 @@ spec, we define these categories mutually exclusively as follows:
 
 """
 
+from pystache.common import PystacheError
+
+
 # This equals '__builtin__' in Python 2 and 'builtins' in Python 3.
 _BUILTIN_MODULE = type(0).__module__
 
@@ -55,8 +58,15 @@ def _get_value(context, key):
         # types like integers and strings as objects (cf. issue #81).
         # Instances of user-defined classes on the other hand, for example,
         # are considered objects by the test above.
-        if hasattr(context, key):
+        try:
             attr = getattr(context, key)
+        except AttributeError:
+            # TODO: distinguish the case of the attribute not existing from
+            #   an AttributeError being raised by the call to the attribute.
+            #   See the following issue for implementation ideas:
+            #     http://bugs.python.org/issue7559
+            pass
+        else:
             # TODO: consider using EAFP here instead.
             #   http://docs.python.org/glossary.html#term-eafp
             if callable(attr):
@@ -64,6 +74,21 @@ def _get_value(context, key):
             return attr
 
     return _NOT_FOUND
+
+
+class KeyNotFoundError(PystacheError):
+
+    """
+    An exception raised when a key is not found in a context stack.
+
+    """
+
+    def __init__(self, key, details):
+        self.key = key
+        self.details = details
+
+    def __str__(self):
+        return "Key %s not found: %s" % (repr(self.key), self.details)
 
 
 class ContextStack(object):
@@ -175,7 +200,7 @@ class ContextStack(object):
 
     # TODO: add more unit tests for this.
     # TODO: update the docstring for dotted names.
-    def get(self, name, default=u''):
+    def get(self, name):
         """
         Resolve a dotted name against the current context stack.
 
@@ -245,18 +270,19 @@ class ContextStack(object):
 
         """
         if name == '.':
-            # TODO: should we add a test case for an empty context stack?
-            return self.top()
+            try:
+                return self.top()
+            except IndexError:
+                raise KeyNotFoundError(".", "empty context stack")
 
         parts = name.split('.')
 
-        result = self._get_simple(parts[0])
+        try:
+            result = self._get_simple(parts[0])
+        except KeyNotFoundError:
+            raise KeyNotFoundError(name, "first part")
 
         for part in parts[1:]:
-            # TODO: consider using EAFP here instead.
-            #   http://docs.python.org/glossary.html#term-eafp
-            if result is _NOT_FOUND:
-                break
             # The full context stack is not used to resolve the remaining parts.
             # From the spec--
             #
@@ -268,9 +294,10 @@ class ContextStack(object):
             #
             # TODO: make sure we have a test case for the above point.
             result = _get_value(result, part)
-
-        if result is _NOT_FOUND:
-            return default
+            # TODO: consider using EAFP here instead.
+            #   http://docs.python.org/glossary.html#term-eafp
+            if result is _NOT_FOUND:
+                raise KeyNotFoundError(name, "missing %s" % repr(part))
 
         return result
 
@@ -279,16 +306,12 @@ class ContextStack(object):
         Query the stack for a non-dotted name.
 
         """
-        result = _NOT_FOUND
-
         for item in reversed(self._stack):
             result = _get_value(item, name)
-            if result is _NOT_FOUND:
-                continue
-            # Otherwise, the key was found.
-            break
+            if result is not _NOT_FOUND:
+                return result
 
-        return result
+        raise KeyNotFoundError(name, "part missing")
 
     def push(self, item):
         """

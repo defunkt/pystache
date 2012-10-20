@@ -7,7 +7,16 @@ Defines a class responsible for rendering logic.
 
 import re
 
-from pystache.parser import Parser
+from pystache.common import is_string
+from pystache.parser import parse
+
+
+def context_get(stack, name):
+    """
+    Find and return a name from a ContextStack instance.
+
+    """
+    return stack.get(name)
 
 
 class RenderEngine(object):
@@ -29,14 +38,14 @@ class RenderEngine(object):
 
     """
 
-    def __init__(self, load_partial=None, literal=None, escape=None):
+    # TODO: it would probably be better for the constructor to accept
+    #   and set as an attribute a single RenderResolver instance
+    #   that encapsulates the customizable aspects of converting
+    #   strings and resolving partials and names from context.
+    def __init__(self, literal=None, escape=None, resolve_context=None,
+                 resolve_partial=None, to_str=None):
         """
         Arguments:
-
-          load_partial: the function to call when loading a partial.  The
-            function should accept a string template name and return a
-            template string of type unicode (not a subclass).  If the
-            template is not found, it should raise a TemplateNotFoundError.
 
           literal: the function used to convert unescaped variable tag
             values to unicode, e.g. the value corresponding to a tag
@@ -59,217 +68,114 @@ class RenderEngine(object):
             incoming strings of type markupsafe.Markup differently
             from plain unicode strings.
 
+          resolve_context: the function to call to resolve a name against
+            a context stack.  The function should accept two positional
+            arguments: a ContextStack instance and a name to resolve.
+
+          resolve_partial: the function to call when loading a partial.
+            The function should accept a template name string and return a
+            template string of type unicode (not a subclass).
+
+          to_str: a function that accepts an object and returns a string (e.g.
+            the built-in function str).  This function is used for string
+            coercion whenever a string is required (e.g. for converting None
+            or 0 to a string).
+
         """
         self.escape = escape
         self.literal = literal
-        self.load_partial = load_partial
+        self.resolve_context = resolve_context
+        self.resolve_partial = resolve_partial
+        self.to_str = to_str
 
-    # TODO: rename context to stack throughout this module.
-    def _get_string_value(self, context, tag_name):
+    # TODO: Rename context to stack throughout this module.
+
+    # From the spec:
+    #
+    #   When used as the data value for an Interpolation tag, the lambda
+    #   MUST be treatable as an arity 0 function, and invoked as such.
+    #   The returned value MUST be rendered against the default delimiters,
+    #   then interpolated in place of the lambda.
+    #
+    def fetch_string(self, context, name):
         """
         Get a value from the given context as a basestring instance.
 
         """
-        val = context.get(tag_name)
+        val = self.resolve_context(context, name)
 
         if callable(val):
-            # According to the spec:
-            #
-            #     When used as the data value for an Interpolation tag,
-            #     the lambda MUST be treatable as an arity 0 function,
-            #     and invoked as such.  The returned value MUST be
-            #     rendered against the default delimiters, then
-            #     interpolated in place of the lambda.
-            template = val()
-            if not isinstance(template, basestring):
-                # In case the template is an integer, for example.
-                template = str(template)
-            if type(template) is not unicode:
-                template = self.literal(template)
-            val = self._render(template, context)
+            # Return because _render_value() is already a string.
+            return self._render_value(val(), context)
 
-        if not isinstance(val, basestring):
-            val = str(val)
+        if not is_string(val):
+            return self.to_str(val)
 
         return val
 
-    def _make_get_literal(self, name):
-        def get_literal(context):
-            """
-            Returns: a string of type unicode.
+    def fetch_section_data(self, context, name):
+        """
+        Fetch the value of a section as a list.
 
-            """
-            s = self._get_string_value(context, name)
-            s = self.literal(s)
-            return s
+        """
+        data = self.resolve_context(context, name)
 
-        return get_literal
-
-    def _make_get_escaped(self, name):
-        get_literal = self._make_get_literal(name)
-
-        def get_escaped(context):
-            """
-            Returns: a string of type unicode.
-
-            """
-            s = self._get_string_value(context, name)
-            s = self.escape(s)
-            return s
-
-        return get_escaped
-
-    def _make_get_partial(self, template):
-        def get_partial(context):
-            """
-            Returns: a string of type unicode.
-
-            """
-            # TODO: the parsing should be done before calling this function.
-            return self._render(template, context)
-
-        return get_partial
-
-    def _make_get_inverse(self, name, parsed_template):
-        def get_inverse(context):
-            """
-            Returns a string with type unicode.
-
-            """
-            # TODO: is there a bug because we are not using the same
-            #   logic as in _get_string_value()?
-            data = context.get(name)
-            # Per the spec, lambdas in inverted sections are considered truthy.
-            if data:
-                return u''
-            return parsed_template.render(context)
-
-        return get_inverse
-
-    # TODO: the template_ and parsed_template_ arguments don't both seem
-    # to be necessary.  Can we remove one of them?  For example, if
-    # callable(data) is True, then the initial parsed_template isn't used.
-    def _make_get_section(self, name, parsed_template_, template_, delims):
-        def get_section(context):
-            """
-            Returns: a string of type unicode.
-
-            """
-            template = template_
-            parsed_template = parsed_template_
-            data = context.get(name)
-
-            # From the spec:
+        # From the spec:
+        #
+        #   If the data is not of a list type, it is coerced into a list
+        #   as follows: if the data is truthy (e.g. `!!data == true`),
+        #   use a single-element list containing the data, otherwise use
+        #   an empty list.
+        #
+        if not data:
+            data = []
+        else:
+            # The least brittle way to determine whether something
+            # supports iteration is by trying to call iter() on it:
             #
-            #   If the data is not of a list type, it is coerced into a list
-            #   as follows: if the data is truthy (e.g. `!!data == true`),
-            #   use a single-element list containing the data, otherwise use
-            #   an empty list.
+            #   http://docs.python.org/library/functions.html#iter
             #
-            if not data:
-                data = []
+            # It is not sufficient, for example, to check whether the item
+            # implements __iter__ () (the iteration protocol).  There is
+            # also __getitem__() (the sequence protocol).  In Python 2,
+            # strings do not implement __iter__(), but in Python 3 they do.
+            try:
+                iter(data)
+            except TypeError:
+                # Then the value does not support iteration.
+                data = [data]
             else:
-                # The least brittle way to determine whether something
-                # supports iteration is by trying to call iter() on it:
-                #
-                #   http://docs.python.org/library/functions.html#iter
-                #
-                # It is not sufficient, for example, to check whether the item
-                # implements __iter__ () (the iteration protocol).  There is
-                # also __getitem__() (the sequence protocol).  In Python 2,
-                # strings do not implement __iter__(), but in Python 3 they do.
-                try:
-                    iter(data)
-                except TypeError:
-                    # Then the value does not support iteration.
+                if is_string(data) or isinstance(data, dict):
+                    # Do not treat strings and dicts (which are iterable) as lists.
                     data = [data]
-                else:
-                    if isinstance(data, (basestring, dict)):
-                        # Do not treat strings and dicts (which are iterable) as lists.
-                        data = [data]
-                    # Otherwise, treat the value as a list.
+                # Otherwise, treat the value as a list.
 
-            parts = []
-            for element in data:
-                if callable(element):
-                    # Lambdas special case section rendering and bypass pushing
-                    # the data value onto the context stack.  From the spec--
-                    #
-                    #   When used as the data value for a Section tag, the
-                    #   lambda MUST be treatable as an arity 1 function, and
-                    #   invoked as such (passing a String containing the
-                    #   unprocessed section contents).  The returned value
-                    #   MUST be rendered against the current delimiters, then
-                    #   interpolated in place of the section.
-                    #
-                    #  Also see--
-                    #
-                    #   https://github.com/defunkt/pystache/issues/113
-                    #
-                    # TODO: should we check the arity?
-                    new_template = element(template)
-                    new_parsed_template = self._parse(new_template, delimiters=delims)
-                    parts.append(new_parsed_template.render(context))
-                    continue
+        return data
 
-                context.push(element)
-                parts.append(parsed_template.render(context))
-                context.pop()
-
-            return unicode(''.join(parts))
-
-        return get_section
-
-    def _parse(self, template, delimiters=None):
+    def _render_value(self, val, context, delimiters=None):
         """
-        Parse the given template, and return a ParsedTemplate instance.
-
-        Arguments:
-
-          template: a template string of type unicode.
+        Render an arbitrary value.
 
         """
-        parser = Parser(self, delimiters=delimiters)
-        parser.compile_template_re()
+        if not is_string(val):
+            # In case the template is an integer, for example.
+            val = self.to_str(val)
+        if type(val) is not unicode:
+            val = self.literal(val)
+        return self.render(val, context, delimiters)
 
-        return parser.parse(template=template)
-
-    def _render(self, template, context):
+    def render(self, template, context_stack, delimiters=None):
         """
-        Returns: a string of type unicode.
-
-        Arguments:
-
-          template: a template string of type unicode.
-          context: a ContextStack instance.
-
-        """
-        # We keep this type-check as an added check because this method is
-        # called with template strings coming from potentially externally-
-        # supplied functions like self.literal, self.load_partial, etc.
-        # Beyond this point, we have much better control over the type.
-        if type(template) is not unicode:
-            raise Exception("Argument 'template' not unicode: %s: %s" % (type(template), repr(template)))
-
-        parsed_template = self._parse(template)
-
-        return parsed_template.render(context)
-
-    def render(self, template, context):
-        """
-        Return a template rendered as a string with type unicode.
+        Render a unicode template string, and return as unicode.
 
         Arguments:
 
           template: a template string of type unicode (but not a proper
             subclass of unicode).
 
-          context: a ContextStack instance.
+          context_stack: a ContextStack instance.
 
         """
-        # Be strict but not too strict.  In other words, accept str instead
-        # of unicode, but don't assume anything about the encoding (e.g.
-        # don't use self.literal).
-        template = unicode(template)
+        parsed_template = parse(template, delimiters)
 
-        return self._render(template, context)
+        return parsed_template.render(self, context_stack)

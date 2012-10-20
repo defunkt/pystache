@@ -33,6 +33,8 @@ class Loader(object):
     """
     Loads the template associated to a name or user-defined object.
 
+    All load_*() methods return the template as a unicode string.
+
     """
 
     def __init__(self, file_encoding=None, extension=None, to_unicode=None,
@@ -42,9 +44,9 @@ class Loader(object):
 
         Arguments:
 
-          extension: the template file extension.  Pass False for no
-            extension (i.e. to use extensionless template files).
-            Defaults to the package default.
+          extension: the template file extension, without the leading dot.
+            Pass False for no extension (e.g. to use extensionless template
+            files).  Defaults to the package default.
 
           file_encoding: the name of the encoding to use when converting file
             contents to unicode.  Defaults to the package default.
@@ -119,16 +121,28 @@ class Loader(object):
 
         return self.unicode(b, encoding)
 
-    # TODO: unit-test this method.
+    def load_file(self, file_name):
+        """
+        Find and return the template with the given file name.
+
+        Arguments:
+
+          file_name: the file name of the template.
+
+        """
+        locator = self._make_locator()
+
+        path = locator.find_file(file_name, self.search_dirs)
+
+        return self.read(path)
+
     def load_name(self, name):
         """
-        Find and return the template with the given name.
+        Find and return the template with the given template name.
 
         Arguments:
 
           name: the name of the template.
-
-          search_dirs: the list of directories in which to search.
 
         """
         locator = self._make_locator()

@@ -14,6 +14,10 @@ from pystache import defaults
 from pystache.loader import Loader
 
 
+# We use the same directory as the locator tests for now.
+LOADER_DATA_DIR = os.path.join(DATA_DIR, 'locator')
+
+
 class LoaderTests(unittest.TestCase, AssertStringMixin, SetupDefaults):
 
     def setUp(self):
@@ -178,7 +182,7 @@ class LoaderTests(unittest.TestCase, AssertStringMixin, SetupDefaults):
         actual = loader.read(path, encoding='utf-8')
         self.assertString(actual, u'non-ascii: é')
 
-    def test_loader__to_unicode__attribute(self):
+    def test_read__to_unicode__attribute(self):
         """
         Test read(): to_unicode attribute respected.
 
@@ -191,4 +195,15 @@ class LoaderTests(unittest.TestCase, AssertStringMixin, SetupDefaults):
         #loader.decode_errors = 'ignore'
         #actual = loader.read(path)
         #self.assertString(actual, u'non-ascii: ')
+
+    def test_load_file(self):
+        loader = Loader(search_dirs=[DATA_DIR, LOADER_DATA_DIR])
+        template = loader.load_file('template.txt')
+        self.assertEqual(template, 'Test template file\n')
+
+    def test_load_name(self):
+        loader = Loader(search_dirs=[DATA_DIR, LOADER_DATA_DIR],
+                        extension='txt')
+        template = loader.load_name('template')
+        self.assertEqual(template, 'Test template file\n')
 

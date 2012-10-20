@@ -17,6 +17,8 @@ except ImportError:
 import os
 import sys
 
+from pystache.common import MissingTags
+
 
 # How to handle encoding errors when decoding strings from str to unicode.
 #
@@ -36,6 +38,12 @@ STRING_ENCODING = sys.getdefaultencoding()
 # strings that arise from files.
 FILE_ENCODING = sys.getdefaultencoding()
 
+# The delimiters to start with when parsing.
+DELIMITERS = (u'{{', u'}}')
+
+# How to handle missing tags when rendering a template.
+MISSING_TAGS = MissingTags.ignore
+
 # The starting list of directories in which to search for templates when
 # loading a template by file name.
 SEARCH_DIRS = [os.curdir]  # i.e. ['.']
@@ -53,5 +61,5 @@ SEARCH_DIRS = [os.curdir]  # i.e. ['.']
 #
 TAG_ESCAPE = lambda u: escape(u, quote=True)
 
-# The default template extension.
+# The default template extension, without the leading dot.
 TEMPLATE_EXTENSION = 'mustache'

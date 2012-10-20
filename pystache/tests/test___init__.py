@@ -23,7 +23,7 @@ class InitTests(unittest.TestCase):
 
         """
         actual = set(GLOBALS_PYSTACHE_IMPORTED) - set(GLOBALS_INITIAL)
-        expected = set(['render', 'Renderer', 'TemplateSpec', 'GLOBALS_INITIAL'])
+        expected = set(['parse', 'render', 'Renderer', 'TemplateSpec', 'GLOBALS_INITIAL'])
 
         self.assertEqual(actual, expected)
 

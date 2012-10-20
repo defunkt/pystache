@@ -19,6 +19,9 @@ from pystache.tests.common import DATA_DIR, EXAMPLES_DIR, AssertExceptionMixin
 from pystache.tests.data.views import SayHello
 
 
+LOCATOR_DATA_DIR = os.path.join(DATA_DIR, 'locator')
+
+
 class LocatorTests(unittest.TestCase, AssertExceptionMixin):
 
     def _locator(self):
@@ -53,7 +56,17 @@ class LocatorTests(unittest.TestCase, AssertExceptionMixin):
     def test_get_object_directory__not_hasattr_module(self):
         locator = Locator()
 
-        obj = datetime(2000, 1, 1)
+        # Previously, we used a genuine object -- a datetime instance --
+        # because datetime instances did not have the __module__ attribute
+        # in CPython.  See, for example--
+        #
+        #   http://bugs.python.org/issue15223
+        #
+        # However, since datetime instances do have the __module__ attribute
+        # in PyPy, we needed to switch to something else once we added
+        # support for PyPi.  This was so that our test runs would pass
+        # in all systems.
+        obj = "abc"
         self.assertFalse(hasattr(obj, '__module__'))
         self.assertEqual(locator.get_object_directory(obj), None)
 
@@ -77,6 +90,13 @@ class LocatorTests(unittest.TestCase, AssertExceptionMixin):
 
         self.assertEqual(locator.make_file_name('foo', template_extension='bar'), 'foo.bar')
 
+    def test_find_file(self):
+        locator = Locator()
+        path = locator.find_file('template.txt', [LOCATOR_DATA_DIR])
+
+        expected_path = os.path.join(LOCATOR_DATA_DIR, 'template.txt')
+        self.assertEqual(path, expected_path)
+
     def test_find_name(self):
         locator = Locator()
         path = locator.find_name(search_dirs=[EXAMPLES_DIR], template_name='simple')
@@ -97,7 +117,7 @@ class LocatorTests(unittest.TestCase, AssertExceptionMixin):
         locator = Locator()
 
         dir1 = DATA_DIR
-        dir2 = os.path.join(DATA_DIR, 'locator')
+        dir2 = LOCATOR_DATA_DIR
 
         self.assertTrue(locator.find_name(search_dirs=[dir1], template_name='duplicate'))
         self.assertTrue(locator.find_name(search_dirs=[dir2], template_name='duplicate'))
