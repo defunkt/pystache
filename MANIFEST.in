@@ -1,6 +1,7 @@
 include README.md
 include HISTORY.md
 include LICENSE
+include TODO.md
 include setup_description.rst
 include tox.ini
 include test_pystache.py
