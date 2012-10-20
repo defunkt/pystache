@@ -17,7 +17,10 @@ History
     parse tree.
 -   Added support for rendering pre-compiled templates.
 -   Added support for [PyPy](http://pypy.org/) (issue \#125).
--   Added support for [Travis CI](http://travis-ci.org) (issue \#124). [msabramo]
+-   Added support for [Travis CI](http://travis-ci.org) (issue \#124).
+    [msabramo]
+-   Bugfix: `defaults.DELIMITERS` can now be changed at runtime (issue \#135).
+    [bennoleslie]
 -   Bugfix: exceptions raised from a property are no longer swallowed
     when getting a key from a context stack (issue \#110).
 -   Bugfix: lambda section values can now return non-ascii, non-unicode
