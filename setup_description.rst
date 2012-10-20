@@ -30,8 +30,6 @@ found on `PyPI <http://pypi.python.org/pypi/pystache>`_. This version of
 Pystache passes all tests in `version
 1.1.2 <https://github.com/mustache/spec/tree/v1.1.2>`_ of the spec.
 
-Logo: `David Phillips <http://davidphillips.us/>`_
-
 Requirements
 ------------
 
@@ -298,7 +296,7 @@ There is a `mailing list <http://librelist.com/browser/pystache/>`_.
 Note that there is a bit of a delay between posting a message and seeing
 it appear in the mailing list archive.
 
-Authors
+Credits
 -------
 
 ::
@@ -308,12 +306,23 @@ Authors
     Author: Chris Wanstrath
     Maintainer: Chris Jerdonek
 
+Pystache logo by `David Phillips <http://davidphillips.us/>`_ and
+licensed under a `Creative Commons Attribution-ShareAlike 3.0 Unported
+License <http://creativecommons.org/licenses/by-sa/3.0/deed.en_US>`_.
+|image0|
+
 History
 =======
 
 0.5.3 (TBD)
 -----------
 
+-  Added ability to customize string coercion (e.g. to have None render
+   as ``''``) (issue #130).
+-  Added Renderer.render\_name() to render a template by name (issue
+   #122).
+-  Added TemplateSpec.template\_path to specify an absolute path to a
+   template (issue #41).
 -  Added option of raising errors on missing tags/partials:
    ``Renderer(missing_tags='strict')`` (issue #110).
 -  Added support for finding and loading templates by file name in
@@ -324,12 +333,15 @@ History
 -  Added support for `PyPy <http://pypy.org/>`_ (issue #125).
 -  Added support for `Travis CI <http://travis-ci.org>`_ (issue #124).
    [msabramo]
+-  Bugfix: ``defaults.DELIMITERS`` can now be changed at runtime (issue
+   #135). [bennoleslie]
 -  Bugfix: exceptions raised from a property are no longer swallowed
    when getting a key from a context stack (issue #110).
 -  Bugfix: lambda section values can now return non-ascii, non-unicode
    strings (issue #118).
 -  Convert HISTORY and README files from reST to Markdown.
 -  More robust handling of byte strings in Python 3.
+-  Added Creative Commons license for David Phillips's logo.
 
 0.5.2 (2012-05-03)
 ------------------
@@ -485,3 +497,5 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+.. |image0| image:: http://i.creativecommons.org/l/by-sa/3.0/88x31.png
