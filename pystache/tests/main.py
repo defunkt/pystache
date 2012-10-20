@@ -1,7 +1,7 @@
 # coding: utf-8
 
 """
-Exposes a run_tests() function that runs all tests in the project.
+Exposes a main() function that runs all tests in the project.
 
 This module is for our test console script.
 
@@ -104,7 +104,14 @@ def main(sys_argv):
         sys_argv.pop(1)
     except IndexError:
         if should_source_exist:
-            spec_test_dir = SPEC_TEST_DIR
+            if not os.path.exists(SPEC_TEST_DIR):
+                # Then the user is probably using a downloaded sdist rather
+                # than a repository clone (since the sdist does not include
+                # the spec test directory).
+                print("pystache: skipping spec tests: spec test directory "
+                      "not found")
+            else:
+                spec_test_dir = SPEC_TEST_DIR
 
     try:
         # TODO: use optparse command options instead.
