@@ -7,7 +7,7 @@ Exposes a parse() function to parse template strings.
 
 import re
 
-from pystache.defaults import DELIMITERS
+from pystache import defaults
 from pystache.parsed import ParsedTemplate
 
 
@@ -228,7 +228,7 @@ class _Parser(object):
 
     def __init__(self, delimiters=None):
         if delimiters is None:
-            delimiters = DELIMITERS
+            delimiters = defaults.DELIMITERS
 
         self._delimiters = delimiters
 
