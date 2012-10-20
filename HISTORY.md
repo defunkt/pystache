@@ -24,6 +24,7 @@ History
     strings (issue \#118).
 -   Convert HISTORY and README files from reST to Markdown.
 -   More robust handling of byte strings in Python 3.
+-   Added Creative Commons license for logo by David Phillip.
 
 0.5.2 (2012-05-03)
 ------------------
