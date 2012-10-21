@@ -14,7 +14,7 @@ Pystache
 
 ![](https://secure.travis-ci.org/defunkt/pystache.png)
 
-[Pystache](https://github.com/defunkt/pystache) is a Python
+[Pystache](http://defunkt.github.com/pystache) is a Python
 implementation of [Mustache](http://mustache.github.com/). Mustache is a
 framework-agnostic, logic-free templating system inspired by
 [ctemplate](http://code.google.com/p/google-ctemplate/) and
