@@ -10,7 +10,7 @@ Pystache
 <!-- -->
 <!-- We leave the leading brackets empty here.  Otherwise, unwanted -->
 <!-- caption text shows up in the reST version converted by pandoc. -->
-![](https://s3.amazonaws.com/webdev_bucket/pystache.png "mustachioed, monocled snake by David Phillips")
+![](https://raw.github.com/defunkt/pystache/master/gh/images/logo_phillips.png "mustachioed, monocled snake by David Phillips")
 
 ![](https://secure.travis-ci.org/defunkt/pystache.png)
 
