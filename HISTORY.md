@@ -1,6 +1,8 @@
 History
 =======
 
+**Note:** Official support for Python 2.4 will be dropped in v0.6.0.
+
 0.5.3 (TBD)
 -----------
 
@@ -16,6 +18,7 @@ History
 -   Added a `parse()` function that yields a printable, pre-compiled
     parse tree.
 -   Added support for rendering pre-compiled templates.
+-   Added Python 3.3 to the list of supported versions.
 -   Added support for [PyPy](http://pypy.org/) (issue \#125).
 -   Added support for [Travis CI](http://travis-ci.org) (issue \#124).
     [msabramo]

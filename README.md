@@ -67,6 +67,8 @@ as follows:
 
     pip install 'simplejson<2.1.0'
 
+Official support for Python 2.4 will end with Pystache version 0.6.0.
+
 Install It
 ----------
 
