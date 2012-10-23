@@ -1,7 +1,7 @@
 History
 =======
 
-**Note:** Official support for Python 2.4 will be dropped in v0.6.0.
+**Note:** Official support for Python 2.4 will end with Pystache version 0.6.0.
 
 0.5.3 (TBD)
 -----------
