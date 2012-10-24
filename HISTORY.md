@@ -1,6 +1,8 @@
 History
 =======
 
+**Note:** Official support for Python 2.4 will end with Pystache version 0.6.0.
+
 0.5.3 (TBD)
 -----------
 
@@ -16,6 +18,7 @@ History
 -   Added a `parse()` function that yields a printable, pre-compiled
     parse tree.
 -   Added support for rendering pre-compiled templates.
+-   Added Python 3.3 to the list of supported versions.
 -   Added support for [PyPy](http://pypy.org/) (issue \#125).
 -   Added support for [Travis CI](http://travis-ci.org) (issue \#124).
     [msabramo]
@@ -25,6 +28,8 @@ History
     when getting a key from a context stack (issue \#110).
 -   Bugfix: lambda section values can now return non-ascii, non-unicode
     strings (issue \#118).
+-   Bugfix: running `test_pystache.py` from a downloaded sdist no longer
+    requires a spec test directory to pass.
 -   Convert HISTORY and README files from reST to Markdown.
 -   More robust handling of byte strings in Python 3.
 -   Added Creative Commons license for David Phillips's logo.

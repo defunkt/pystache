@@ -10,11 +10,11 @@ Pystache
 <!-- -->
 <!-- We leave the leading brackets empty here.  Otherwise, unwanted -->
 <!-- caption text shows up in the reST version converted by pandoc. -->
-![](https://raw.github.com/defunkt/pystache/master/gh/images/logo_phillips.png "mustachioed, monocled snake by David Phillips")
+![](http://defunkt.github.com/pystache/images/logo_phillips.png "mustachioed, monocled snake by David Phillips")
 
 ![](https://secure.travis-ci.org/defunkt/pystache.png)
 
-[Pystache](https://github.com/defunkt/pystache) is a Python
+[Pystache](http://defunkt.github.com/pystache) is a Python
 implementation of [Mustache](http://mustache.github.com/). Mustache is a
 framework-agnostic, logic-free templating system inspired by
 [ctemplate](http://code.google.com/p/google-ctemplate/) and
@@ -66,6 +66,8 @@ version 2.1.0. Earlier versions of simplejson can be installed manually,
 as follows:
 
     pip install 'simplejson<2.1.0'
+
+Official support for Python 2.4 will end with Pystache version 0.6.0.
 
 Install It
 ----------

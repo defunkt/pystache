@@ -1,11 +1,6 @@
 TODO
 ====
 
-In master branch, after merging to master:
-
-* Enable web page after merging.
-* Change README to link to the repo version of the logo.
-
 In development branch:
 
 * End support for Python 2.4.
