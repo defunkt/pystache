@@ -10,7 +10,7 @@ to release a new version of Pystache.
 (1) Prepare the release.
 
 Make sure the code is finalized and merged to master.  Bump the version
-number in setup.py, etc.
+number in setup.py, update the release date in the HISTORY file, etc.
 
 Generate the reStructuredText long_description using--
 

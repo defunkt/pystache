@@ -3,8 +3,8 @@ History
 
 **Note:** Official support for Python 2.4 will end with Pystache version 0.6.0.
 
-0.5.3 (TBD)
------------
+0.5.3 (2012-11-03)
+------------------
 
 -   Added ability to customize string coercion (e.g. to have None render as
     `''`) (issue \#130).
