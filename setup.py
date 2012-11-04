@@ -365,7 +365,7 @@ def main(sys_argv):
 
     # TODO: use the logging module instead of printing.
     # TODO: include the following in a verbose mode.
-    print("pystache: using: version %s of %s" % (repr(dist.__version__), repr(dist)))
+    sys.stderr.write("pystache: using: version %s of %s\n" % (repr(dist.__version__), repr(dist)))
 
     command = sys_argv[-1]
 
