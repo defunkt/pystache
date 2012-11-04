@@ -346,8 +346,8 @@ History
    when getting a key from a context stack (issue #110).
 -  Bugfix: lambda section values can now return non-ascii, non-unicode
    strings (issue #118).
--  Bugfix: running ``test_pystache.py`` from a downloaded sdist no
-   longer requires a spec test directory to pass.
+-  Bugfix: allow ``test_pystache.py`` and ``tox`` to pass when run from
+   a downloaded sdist (i.e. without the spec test directory).
 -  Convert HISTORY and README files from reST to Markdown.
 -  More robust handling of byte strings in Python 3.
 -  Added Creative Commons license for David Phillips's logo.

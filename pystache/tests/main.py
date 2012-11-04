@@ -13,8 +13,8 @@ import unittest
 from unittest import TestCase, TestProgram
 
 import pystache
-from pystache.tests.common import PACKAGE_DIR, PROJECT_DIR, SPEC_TEST_DIR, UNITTEST_FILE_PREFIX
-from pystache.tests.common import get_module_names
+from pystache.tests.common import PACKAGE_DIR, PROJECT_DIR, UNITTEST_FILE_PREFIX
+from pystache.tests.common import get_module_names, get_spec_test_dir
 from pystache.tests.doctesting import get_doctests
 from pystache.tests.spectesting import get_spec_tests
 
@@ -87,31 +87,18 @@ def main(sys_argv):
       sys_argv: a reference to sys.argv.
 
     """
+    # TODO: use logging module
+    print "pystache: running tests: argv: %s" % repr(sys_argv)
+
     should_source_exist = False
     spec_test_dir = None
     project_dir = None
 
     if len(sys_argv) > 1 and sys_argv[1] == FROM_SOURCE_OPTION:
+        # This usually means the test_pystache.py convenience script
+        # in the source directory was run.
         should_source_exist = True
         sys_argv.pop(1)
-
-    # TODO: use logging module
-    print "pystache: running tests: expecting source: %s" % should_source_exist
-
-    try:
-        # TODO: use optparse command options instead.
-        spec_test_dir = sys_argv[1]
-        sys_argv.pop(1)
-    except IndexError:
-        if should_source_exist:
-            if not os.path.exists(SPEC_TEST_DIR):
-                # Then the user is probably using a downloaded sdist rather
-                # than a repository clone (since the sdist does not include
-                # the spec test directory).
-                print("pystache: skipping spec tests: spec test directory "
-                      "not found")
-            else:
-                spec_test_dir = SPEC_TEST_DIR
 
     try:
         # TODO: use optparse command options instead.
@@ -121,13 +108,31 @@ def main(sys_argv):
         if should_source_exist:
             project_dir = PROJECT_DIR
 
+    try:
+        # TODO: use optparse command options instead.
+        spec_test_dir = sys_argv[1]
+        sys_argv.pop(1)
+    except IndexError:
+        if project_dir is not None:
+            # Then auto-detect the spec test directory.
+            _spec_test_dir = get_spec_test_dir(project_dir)
+            if not os.path.exists(_spec_test_dir):
+                # Then the user is probably using a downloaded sdist rather
+                # than a repository clone (since the sdist does not include
+                # the spec test directory).
+                print("pystache: skipping spec tests: spec test directory "
+                      "not found")
+            else:
+                spec_test_dir = _spec_test_dir
+
     if len(sys_argv) <= 1 or sys_argv[-1].startswith("-"):
         # Then no explicit module or test names were provided, so
         # auto-detect all unit tests.
         module_names = _discover_test_modules(PACKAGE_DIR)
         sys_argv.extend(module_names)
         if project_dir is not None:
-            # Add the current module for unit tests contained here.
+            # Add the current module for unit tests contained here (e.g.
+            # to include SetupTests).
             sys_argv.append(__name__)
 
     SetupTests.project_dir = project_dir
