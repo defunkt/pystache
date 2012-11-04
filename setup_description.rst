@@ -5,12 +5,10 @@ Pystache
 ========
 
 .. figure:: http://defunkt.github.com/pystache/images/logo_phillips.png
-   :align: center
    :alt: mustachioed, monocled snake by David Phillips
 
 .. figure:: https://secure.travis-ci.org/defunkt/pystache.png
-   :align: center
-   :alt: 
+   :alt: Travis CI current build status
 
 `Pystache <http://defunkt.github.com/pystache>`_ is a Python
 implementation of `Mustache <http://mustache.github.com/>`_. Mustache is
