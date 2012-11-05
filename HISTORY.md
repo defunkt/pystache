@@ -3,6 +3,11 @@ History
 
 **Note:** Official support for Python 2.4 will end with Pystache version 0.6.0.
 
+0.6.0 (TBD)
+-----------
+
+-   TODO
+
 0.5.3 (2012-11-03)
 ------------------
 

@@ -112,7 +112,7 @@ else:
     setup = dist.setup
 
 
-VERSION = '0.5.3'  # Also change in pystache/__init__.py.
+VERSION = '0.6.0-alpha'  # Also change in pystache/__init__.py.
 
 FILE_ENCODING = 'utf-8'
 
