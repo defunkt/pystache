@@ -19,12 +19,15 @@ DATA_DIR = os.path.join(_TESTS_DIR, 'data')  # i.e. 'pystache/tests/data'.
 EXAMPLES_DIR = os.path.dirname(examples.__file__)
 PACKAGE_DIR = os.path.dirname(pystache.__file__)
 PROJECT_DIR = os.path.join(PACKAGE_DIR, '..')
-SPEC_TEST_DIR = os.path.join(PROJECT_DIR, 'ext', 'spec', 'specs')
 # TEXT_DOCTEST_PATHS: the paths to text files (i.e. non-module files)
 # containing doctests.  The paths should be relative to the project directory.
 TEXT_DOCTEST_PATHS = ['README.md']
 
 UNITTEST_FILE_PREFIX = "test_"
+
+
+def get_spec_test_dir(project_dir):
+    return os.path.join(project_dir, 'ext', 'spec', 'specs')
 
 
 def html_escape(u):

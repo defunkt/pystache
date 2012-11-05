@@ -4,15 +4,13 @@
 Pystache
 ========
 
-.. figure:: https://s3.amazonaws.com/webdev_bucket/pystache.png
-   :align: center
+.. figure:: http://defunkt.github.com/pystache/images/logo_phillips.png
    :alt: mustachioed, monocled snake by David Phillips
 
-.. figure:: https://secure.travis-ci.org/defunkt/pystache.png?branch=master,development
-   :align: center
-   :alt: 
+.. figure:: https://secure.travis-ci.org/defunkt/pystache.png
+   :alt: Travis CI current build status
 
-`Pystache <https://github.com/defunkt/pystache>`_ is a Python
+`Pystache <http://defunkt.github.com/pystache>`_ is a Python
 implementation of `Mustache <http://mustache.github.com/>`_. Mustache is
 a framework-agnostic, logic-free templating system inspired by
 `ctemplate <http://code.google.com/p/google-ctemplate/>`_ and
@@ -43,6 +41,7 @@ Pystache is tested with--
 -  Python 2.7
 -  Python 3.1
 -  Python 3.2
+-  Python 3.3
 -  `PyPy <http://pypy.org/>`_
 
 `Distribute <http://packages.python.org/distribute/>`_ (the setuptools
@@ -65,6 +64,8 @@ as follows:
 ::
 
     pip install 'simplejson<2.1.0'
+
+Official support for Python 2.4 will end with Pystache version 0.6.0.
 
 Install It
 ----------
@@ -306,7 +307,7 @@ Credits
     Author: Chris Wanstrath
     Maintainer: Chris Jerdonek
 
-Pystache logo by `David Phillips <http://davidphillips.us/>`_ and
+Pystache logo by `David Phillips <http://davidphillips.us/>`_ is
 licensed under a `Creative Commons Attribution-ShareAlike 3.0 Unported
 License <http://creativecommons.org/licenses/by-sa/3.0/deed.en_US>`_.
 |image0|
@@ -314,8 +315,11 @@ License <http://creativecommons.org/licenses/by-sa/3.0/deed.en_US>`_.
 History
 =======
 
-0.5.3 (TBD)
------------
+**Note:** Official support for Python 2.4 will end with Pystache version
+0.6.0.
+
+0.5.3 (2012-11-03)
+------------------
 
 -  Added ability to customize string coercion (e.g. to have None render
    as ``''``) (issue #130).
@@ -330,6 +334,7 @@ History
 -  Added a ``parse()`` function that yields a printable, pre-compiled
    parse tree.
 -  Added support for rendering pre-compiled templates.
+-  Added Python 3.3 to the list of supported versions.
 -  Added support for `PyPy <http://pypy.org/>`_ (issue #125).
 -  Added support for `Travis CI <http://travis-ci.org>`_ (issue #124).
    [msabramo]
@@ -339,6 +344,8 @@ History
    when getting a key from a context stack (issue #110).
 -  Bugfix: lambda section values can now return non-ascii, non-unicode
    strings (issue #118).
+-  Bugfix: allow ``test_pystache.py`` and ``tox`` to pass when run from
+   a downloaded sdist (i.e. without the spec test directory).
 -  Convert HISTORY and README files from reST to Markdown.
 -  More robust handling of byte strings in Python 3.
 -  Added Creative Commons license for David Phillips's logo.

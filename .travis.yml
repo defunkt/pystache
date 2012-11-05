@@ -12,4 +12,4 @@ script:
   - python setup.py install
   # Include the spec tests directory for Mustache spec tests and the
   # project directory for doctests.
-  - pystache-test ext/spec/specs .
+  - pystache-test . ext/spec/specs

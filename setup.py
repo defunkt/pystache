@@ -10,7 +10,7 @@ to release a new version of Pystache.
 (1) Prepare the release.
 
 Make sure the code is finalized and merged to master.  Bump the version
-number in setup.py, etc.
+number in setup.py, update the release date in the HISTORY file, etc.
 
 Generate the reStructuredText long_description using--
 
@@ -112,7 +112,7 @@ else:
     setup = dist.setup
 
 
-VERSION = '0.5.3-rc'  # Also change in pystache/__init__.py.
+VERSION = '0.5.3'  # Also change in pystache/__init__.py.
 
 FILE_ENCODING = 'utf-8'
 
@@ -365,7 +365,7 @@ def main(sys_argv):
 
     # TODO: use the logging module instead of printing.
     # TODO: include the following in a verbose mode.
-    print("pystache: using: version %s of %s" % (repr(dist.__version__), repr(dist)))
+    sys.stderr.write("pystache: using: version %s of %s\n" % (repr(dist.__version__), repr(dist)))
 
     command = sys_argv[-1]
 
