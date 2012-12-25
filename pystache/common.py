@@ -7,14 +7,16 @@ Exposes functionality needed throughout the project.
 
 from sys import version_info
 
+
 def _get_string_types():
     # TODO: come up with a better solution for this.  One of the issues here
     #   is that in Python 3 there is no common base class for unicode strings
     #   and byte strings, and 2to3 seems to convert all of "str", "unicode",
     #   and "basestring" to Python 3's "str".
     if version_info < (3, ):
-         return basestring
-    # The latter evaluates to "bytes" in Python 3 -- even after conversion by 2to3.
+        return basestring
+    # The latter evaluates to "bytes" in Python 3
+    # even after conversion by 2to3.
     return (unicode, type(u"a".encode('utf-8')))
 
 
