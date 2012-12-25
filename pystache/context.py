@@ -27,8 +27,8 @@ _BUILTIN_MODULE = type(0).__module__
 # without having to rely on exceptions (e.g. KeyError) for flow control.
 #
 # TODO: eliminate the need for a private global variable, e.g. by using the
-#   preferred Python approach of "easier to ask for forgiveness than permission":
-#     http://docs.python.org/glossary.html#term-eafp
+#       preferred Python approach of "easier to ask for forgiveness than
+#       permission": http://docs.python.org/glossary.html#term-eafp
 class NotFound(object):
     pass
 _NOT_FOUND = NotFound()
@@ -40,7 +40,8 @@ def _get_value(context, key):
 
     Returns _NOT_FOUND if the key does not exist.
 
-    The ContextStack.get() docstring documents this function's intended behavior.
+    The ContextStack.get() docstring documents this function's intended
+    behavior.
 
     """
     if isinstance(context, dict):
@@ -153,7 +154,7 @@ class ContextStack(object):
 
         Here is an example illustrating various aspects of this method:
 
-        >>> obj1 = {'animal': 'cat', 'vegetable': 'carrot', 'mineral': 'copper'}
+        >>> obj1 = {'animal': 'cat', 'vegetable': 'carrot', 'mineral': 'topaz'}
         >>> obj2 = ContextStack({'vegetable': 'spinach', 'mineral': 'silver'})
         >>>
         >>> context = ContextStack.create(obj1, None, obj2, mineral='gold')
@@ -167,8 +168,8 @@ class ContextStack(object):
 
         Arguments:
 
-          *context: zero or more dictionaries, ContextStack instances, or objects
-            with which to populate the initial context stack.  None
+          *context: zero or more dictionaries, ContextStack instances, or
+            objects with which to populate the initial context stack.  None
             arguments will be skipped.  Items in the *context list are
             added to the stack in order so that later items in the argument
             list take precedence over earlier items.  This behavior is the
@@ -283,7 +284,7 @@ class ContextStack(object):
             raise KeyNotFoundError(name, "first part")
 
         for part in parts[1:]:
-            # The full context stack is not used to resolve the remaining parts.
+            # The full context stack isn't used to resolve the remaining parts.
             # From the spec--
             #
             #   5) If any name parts were retained in step 1, each should be
@@ -295,7 +296,7 @@ class ContextStack(object):
             # TODO: make sure we have a test case for the above point.
             result = _get_value(result, part)
             # TODO: consider using EAFP here instead.
-            #   http://docs.python.org/glossary.html#term-eafp
+            #       http://docs.python.org/glossary.html#term-eafp
             if result is _NOT_FOUND:
                 raise KeyNotFoundError(name, "missing %s" % repr(part))
 
