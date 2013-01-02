@@ -5,6 +5,7 @@ Exposes a parse() function to parse template strings.
 
 """
 
+import bisect
 import re
 
 from pystache import defaults
@@ -13,6 +14,29 @@ from pystache.parsed import ParsedTemplate
 
 END_OF_LINE_CHARACTERS = [u'\r', u'\n']
 NON_BLANK_RE = re.compile(ur'^(.)', re.M)
+
+
+class Location(object):
+    def __init__(self, name, line, col):
+        self.name = name
+        self.line = line
+        self.col = col
+
+    def __str__(self):
+        return "{}:{}.{}".format(self.name, self.line, self.col)
+
+
+class Locator(object):
+    def __init__(self, data, name):
+        self.line_offsets = [0]
+        self.name = name
+        for line_len in map(len, data.splitlines(True)):
+            self.line_offsets.append(self.line_offsets[-1] + line_len)
+
+    def locate(self, offset):
+        line = bisect.bisect_right(self.line_offsets, offset)
+        col = offset - self.line_offsets[line - 1]
+        return Location(self.name, line, col)
 
 
 # TODO: add some unit tests for this.
@@ -78,7 +102,7 @@ class ParsingError(Exception):
 
 def _format(obj, exclude=None):
     if exclude is None:
-        exclude = []
+        exclude = ['location']
     exclude.append('key')
     attrs = obj.__dict__
     names = list(set(attrs.keys()) - set(exclude))
@@ -111,41 +135,44 @@ class _ChangeNode(object):
 
 class _EscapeNode(object):
 
-    def __init__(self, key):
+    def __init__(self, key, location):
         self.key = key
+        self.location = location
 
     def __repr__(self):
         return _format(self)
 
     def render(self, engine, context):
-        s = engine.fetch_string(context, self.key)
+        s = engine.fetch_string(context, self.key, self.location)
         return engine.escape(s)
 
 
 class _LiteralNode(object):
 
-    def __init__(self, key):
+    def __init__(self, key, location):
         self.key = key
+        self.location = location
 
     def __repr__(self):
         return _format(self)
 
     def render(self, engine, context):
-        s = engine.fetch_string(context, self.key)
+        s = engine.fetch_string(context, self.key, self.location)
         return engine.literal(s)
 
 
 class _PartialNode(object):
 
-    def __init__(self, key, indent):
+    def __init__(self, key, indent, location):
         self.key = key
         self.indent = indent
+        self.location = location
 
     def __repr__(self):
         return _format(self)
 
     def render(self, engine, context):
-        template = engine.resolve_partial(self.key)
+        template = engine.resolve_partial(self.key, self.location)
         # Indent before rendering.
         template = re.sub(NON_BLANK_RE, self.indent + ur'\1', template)
 
@@ -154,9 +181,10 @@ class _PartialNode(object):
 
 class _InvertedNode(object):
 
-    def __init__(self, key, parsed_section):
+    def __init__(self, key, parsed_section, location):
         self.key = key
         self.parsed_section = parsed_section
+        self.location = location
 
     def __repr__(self):
         return _format(self)
@@ -164,7 +192,7 @@ class _InvertedNode(object):
     def render(self, engine, context):
         # TODO: is there a bug because we are not using the same
         #   logic as in fetch_string()?
-        data = engine.resolve_context(context, self.key)
+        data = engine.resolve_context(context, self.key, self.location)
         # Note that lambdas are considered truthy for inverted sections
         # per the spec.
         if data:
@@ -177,19 +205,20 @@ class _SectionNode(object):
     # TODO: the template_ and parsed_template_ arguments don't both seem
     # to be necessary.  Can we remove one of them?  For example, if
     # callable(data) is True, then the initial parsed_template isn't used.
-    def __init__(self, key, parsed, delimiters, template, index_begin, index_end):
+    def __init__(self, key, parsed, delimiters, template, index_begin, index_end, location):
         self.delimiters = delimiters
         self.key = key
         self.parsed = parsed
         self.template = template
         self.index_begin = index_begin
         self.index_end = index_end
+        self.location = location
 
     def __repr__(self):
-        return _format(self, exclude=['delimiters', 'template'])
+        return _format(self, exclude=['delimiters', 'template', 'location'])
 
     def render(self, engine, context):
-        values = engine.fetch_section_data(context, self.key)
+        values = engine.fetch_section_data(context, self.key, self.location)
 
         parts = []
         for val in values:
@@ -239,9 +268,12 @@ class _Parser(object):
         self._delimiters = delimiters
         self._compile_delimiters()
 
-    def parse(self, template):
+    def parse(self, template, name='<string>'):
         """
         Parse a template string starting at some index.
+
+        Name is used to provide detailed information the name of the
+        template which is used in debug messages.
 
         This method uses the current tag delimiter.
 
@@ -263,6 +295,8 @@ class _Parser(object):
         parsed_template = ParsedTemplate()
 
         states = []
+
+        locator = Locator(template, name)
 
         while True:
             match = self._template_re.search(template, start_index)
@@ -300,6 +334,10 @@ class _Parser(object):
                 match_index += len(leading_whitespace)
                 leading_whitespace = ''
 
+            # Do this after match_index has been updated to take
+            # whitespace into account
+            location = locator.locate(match_index)
+
             # Avoid adding spurious empty strings to the parse tree.
             if start_index != match_index:
                 parsed_template.add(template[start_index:match_index])
@@ -324,10 +362,10 @@ class _Parser(object):
 
                 (tag_type, section_start_index, section_key, parsed_template) = states.pop()
                 node = self._make_section_node(template, tag_type, tag_key, parsed_section,
-                                               section_start_index, match_index)
+                                               section_start_index, match_index, location)
 
             else:
-                node = self._make_interpolation_node(tag_type, tag_key, leading_whitespace)
+                node = self._make_interpolation_node(tag_type, tag_key, leading_whitespace, location)
 
             parsed_template.add(node)
 
@@ -337,7 +375,7 @@ class _Parser(object):
 
         return parsed_template
 
-    def _make_interpolation_node(self, tag_type, tag_key, leading_whitespace):
+    def _make_interpolation_node(self, tag_type, tag_key, leading_whitespace, location):
         """
         Create and return a non-section node for the parse tree.
 
@@ -352,27 +390,27 @@ class _Parser(object):
             return _ChangeNode(delimiters)
 
         if tag_type == '':
-            return _EscapeNode(tag_key)
+            return _EscapeNode(tag_key, location)
 
         if tag_type == '&':
-            return _LiteralNode(tag_key)
+            return _LiteralNode(tag_key, location)
 
         if tag_type == '>':
-            return _PartialNode(tag_key, leading_whitespace)
+            return _PartialNode(tag_key, leading_whitespace, location)
 
         raise Exception("Invalid symbol for interpolation tag: %s" % repr(tag_type))
 
     def _make_section_node(self, template, tag_type, tag_key, parsed_section,
-                           section_start_index, section_end_index):
+                           section_start_index, section_end_index, location):
         """
         Create and return a section node for the parse tree.
 
         """
         if tag_type == '#':
             return _SectionNode(tag_key, parsed_section, self._delimiters,
-                               template, section_start_index, section_end_index)
+                               template, section_start_index, section_end_index, location)
 
         if tag_type == '^':
-            return _InvertedNode(tag_key, parsed_section)
+            return _InvertedNode(tag_key, parsed_section, location)
 
         raise Exception("Invalid symbol for section tag: %s" % repr(tag_type))

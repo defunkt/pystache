@@ -94,7 +94,7 @@ class RenderTests(unittest.TestCase, AssertStringMixin, AssertExceptionMixin):
         engine = kwargs.get('engine', self._engine())
 
         if partials is not None:
-            engine.resolve_partial = lambda key: unicode(partials[key])
+            engine.resolve_partial = lambda key, location: unicode(partials[key])
 
         context = ContextStack(*context)
 
@@ -113,7 +113,7 @@ class RenderTests(unittest.TestCase, AssertStringMixin, AssertExceptionMixin):
         """
         engine = self._engine()
         partials = {'partial': u"{{person}}"}
-        engine.resolve_partial = lambda key: partials[key]
+        engine.resolve_partial = lambda key, location: partials[key]
 
         self._assert_render(u'Hi Mom', 'Hi {{>partial}}', {'person': 'Mom'}, engine=engine)
 

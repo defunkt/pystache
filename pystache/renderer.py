@@ -291,34 +291,48 @@ class Renderer(object):
         """
         load_partial = self._make_load_partial()
 
-        if self._is_missing_tags_strict():
-            return load_partial
-        # Otherwise, ignore missing tags.
+        def resolve_partial_add_loc(name, location=None):
+            try:
+                return load_partial(name)
+            except TemplateNotFoundError as e:
+                if location:
+                    e.location = location
+                raise
 
-        def resolve_partial(name):
+        def resolve_partial_squelch(name, location=None):
             try:
                 return load_partial(name)
             except TemplateNotFoundError:
                 return u''
 
-        return resolve_partial
+        if self._is_missing_tags_strict():
+            return resolve_partial_add_loc
+        else:
+            return resolve_partial_squelch
 
     def _make_resolve_context(self):
         """
         Return the resolve_context function to pass to RenderEngine.__init__().
 
         """
-        if self._is_missing_tags_strict():
-            return context_get
-        # Otherwise, ignore missing tags.
-
-        def resolve_context(stack, name):
+        def resolve_context_squelch(stack, name, location=None):
             try:
                 return context_get(stack, name)
             except KeyNotFoundError:
                 return u''
 
-        return resolve_context
+        def resolve_context_add_loc(stack, name, location=None):
+            try:
+                return context_get(stack, name)
+            except KeyNotFoundError as e:
+                if location:
+                    e.location = location
+                raise
+
+        if self._is_missing_tags_strict():
+            return resolve_context_add_loc
+        else:
+            return resolve_context_squelch
 
     def _make_render_engine(self):
         """

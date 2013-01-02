@@ -97,12 +97,12 @@ class RenderEngine(object):
     #   The returned value MUST be rendered against the default delimiters,
     #   then interpolated in place of the lambda.
     #
-    def fetch_string(self, context, name):
+    def fetch_string(self, context, name, location):
         """
         Get a value from the given context as a basestring instance.
 
         """
-        val = self.resolve_context(context, name)
+        val = self.resolve_context(context, name, location)
 
         if callable(val):
             # Return because _render_value() is already a string.
@@ -113,12 +113,12 @@ class RenderEngine(object):
 
         return val
 
-    def fetch_section_data(self, context, name):
+    def fetch_section_data(self, context, name, location):
         """
         Fetch the value of a section as a list.
 
         """
-        data = self.resolve_context(context, name)
+        data = self.resolve_context(context, name, location)
 
         # From the spec:
         #
