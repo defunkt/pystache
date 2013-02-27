@@ -505,8 +505,10 @@ class ContextStackTestCase(unittest.TestCase, AssertIsMixin, AssertStringMixin,
         self.assertEqual(stack.get(name), "Baz")
 
     def test_dot_notation__list(self):
-        name = "foo.1"
+        """ Test that an index interger after a dot correctly grabs the item
+        if the parent is a list.
 
-        # When any element in the path is callable, it should be automatically invoked
+        """
+        name = "foo.1"
         stack = ContextStack({"foo": ['Ignore me.', 'Choose me!']})
         self.assertEqual(stack.get(name), "Choose me!")
