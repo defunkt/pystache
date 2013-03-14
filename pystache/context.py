@@ -7,12 +7,14 @@ The Mustache spec makes a special distinction between two types of context
 stack elements: hashes and objects.  For the purposes of interpreting the
 spec, we define these categories mutually exclusively as follows:
 
- (1) Hash: an item whose type is a subclass of dict.
+ (1) Hash: an item whose type is a subclass of collections.Mapping.
 
  (2) Object: an item that is neither a hash nor an instance of a
      built-in type.
 
 """
+
+import collections
 
 from pystache.common import PystacheError
 
@@ -43,7 +45,7 @@ def _get_value(context, key):
     The ContextStack.get() docstring documents this function's intended behavior.
 
     """
-    if isinstance(context, dict):
+    if isinstance(context, collections.Mapping):
         # Then we consider the argument a "hash" for the purposes of the spec.
         #
         # We do a membership test to avoid using exceptions for flow control
