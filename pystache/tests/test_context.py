@@ -7,6 +7,7 @@ Unit tests of context.py.
 
 from datetime import datetime
 import unittest
+import collections
 
 from pystache.context import _NOT_FOUND, _get_value, KeyNotFoundError, ContextStack
 from pystache.tests.common import AssertIsMixin, AssertStringMixin, AssertExceptionMixin, Attachable
@@ -100,6 +101,51 @@ class GetValueTestCase(unittest.TestCase, AssertIsMixin):
         item = DictSubclass()
         item["foo"] = "bar"
 
+        self.assertEqual(_get_value(item, "foo"), "bar")
+
+    def test_dictionary__mapping_implementation(self):
+        """
+        Test that registered implementations of collections.Mapping are treated as dictionaries.
+
+        See https://github.com/defunkt/pystache/pull/144
+
+        """
+        class MappingSubclass(collections.Mapping):
+
+            def __init__(self, *args, **kwargs):
+                self._mapping = dict(*args, **kwargs)
+                super(MappingSubclass, self).__init__()
+
+            def __getitem__(self, key):
+                return self._mapping[key]
+
+            def __iter__(self):
+                return iter(self._mapping)
+
+            def __len__(self):
+                return len(self._mapping)
+
+        class RegisteredMapping(object):
+
+            def __init__(self, *args, **kwargs):
+                self._mapping = dict(*args, **kwargs)
+                super(RegisteredMapping, self).__init__()
+
+            def __getitem__(self, key):
+                return self._mapping[key]
+
+            def __iter__(self):
+                return iter(self._mapping)
+
+            def __len__(self):
+                return len(self._mapping)
+
+        collections.Mapping.register(RegisteredMapping)
+
+        item = MappingSubclass(foo="bar")
+        self.assertEqual(_get_value(item, "foo"), "bar")
+
+        item = RegisteredMapping(foo="bar")
         self.assertEqual(_get_value(item, "foo"), "bar")
 
     ### Case: the item is an object.
