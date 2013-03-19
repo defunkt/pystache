@@ -9,6 +9,12 @@ spec, we define these categories mutually exclusively as follows:
 
  (1) Hash: an item whose type is a subclass of collections.Mapping.
 
+    .. note::
+
+        collections.Mapping is used instead of a dict in order to allow other
+        mapping types to be valid contexts. See 
+        `Issue 144 <https://github.com/defunkt/pystache/pull/144>`
+
  (2) Object: an item that is neither a hash nor an instance of a
      built-in type.
 
@@ -47,6 +53,9 @@ def _get_value(context, key):
     """
     if isinstance(context, collections.Mapping):
         # Then we consider the argument a "hash" for the purposes of the spec.
+        # Using collections.Mapping allows other mapping types to be registered 
+        # as valid "hash" contexts. See 
+        # `Issue 144 <https://github.com/defunkt/pystache/pull/144>`
         #
         # We do a membership test to avoid using exceptions for flow control
         # (e.g. catching KeyError).
