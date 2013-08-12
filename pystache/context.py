@@ -275,7 +275,16 @@ class ContextStack(object):
             except IndexError:
                 raise KeyNotFoundError(".", "empty context stack")
 
-        parts = name.split('.')
+        # Allow a "part" to contain a "." by escaping it in the raw template.
+        parts = []
+        ref_blocks = name.split('\\.')
+        for i in range(len(ref_blocks)):
+          block_parts = ref_blocks[i].split('.')
+          if i > 0:
+            parts[-1] += '.%s' % block_parts[0]
+            parts += block_parts[1:]
+          else:
+            parts += block_parts
 
         try:
             result = self._get_simple(parts[0])
