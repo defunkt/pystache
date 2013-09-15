@@ -232,6 +232,8 @@ class Attachable(object):
             setattr(self, arg, value)
 
     def __repr__(self):
+        # Sort self.__args__.iteritems() so that repr() does not depend on
+        # Python's hash seed (e.g. PYTHONHASHSEED).
         return "%s(%s)" % (self.__class__.__name__,
-                           ", ".join("%s=%s" % (k, repr(v))
-                                     for k, v in self.__args__.iteritems()))
+                           ", ".join("%s=%s" % (k, repr(v)) for k, v in
+                                     sorted(self.__args__.iteritems())))

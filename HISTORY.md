@@ -8,7 +8,10 @@ History
 
 -   Added [`PYTHONHASHSEED`](http://docs.python.org/using/cmdline.html#envvar-PYTHONHASHSEED)
     to the test output.
--   TODO
+-   Added `test_pystache.sh` wrapper script for testing different
+    PYTHONHASHSEED values.
+-   Bugfix: fixed a flaky doctest by making `repr()` deterministic for the
+    `Attachable` class in `pystache.tests.common`
 
 0.5.3 (2012-11-03)
 ------------------
