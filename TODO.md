@@ -8,6 +8,7 @@ In development branch:
 * Add a unit test for the change made in 7ea8e7180c41.  This is with regard
   to not requiring spec tests when running tests from a downloaded sdist.
 * Finish removing references to Python 2.4 and noting end of support.
+* In the README, state which version of tox is expected.
 * Look into bypassing the _PartialNode class so that partials can be loaded
   and parsed at parse-time instead of at render-time.
 * Turn the benchmarking script at pystache/tests/benchmark.py into a command
