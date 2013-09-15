@@ -6,6 +6,8 @@ History
 0.6.0 (TBD)
 -----------
 
+-   Added [`PYTHONHASHSEED`](http://docs.python.org/using/cmdline.html#envvar-PYTHONHASHSEED)
+    to the test output.
 -   TODO
 
 0.5.3 (2012-11-03)
