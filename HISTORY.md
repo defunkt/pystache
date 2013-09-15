@@ -10,6 +10,7 @@ History
     to the test output.
 -   Added `test_pystache.sh` wrapper script for testing different
     PYTHONHASHSEED values.
+-   Set PYTHONHASHSEED to "random" when running tox.
 -   Bugfix: fixed a flaky doctest by making `repr()` deterministic for the
     `Attachable` class in `pystache.tests.common`
 
