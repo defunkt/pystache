@@ -12,7 +12,7 @@ from pystache.parsed import ParsedTemplate
 
 
 END_OF_LINE_CHARACTERS = [u'\r', u'\n']
-NON_BLANK_RE = re.compile(ur'^(.)', re.M)
+NON_BLANK_RE = re.compile(u'^(.)', re.M)
 
 
 # TODO: add some unit tests for this.
