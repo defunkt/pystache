@@ -5,7 +5,6 @@ In development branch:
 
 * Randomize PYTHONHASHSEED when running tests in tox.
 * Randomize PYTHONHASHSEED when running tests in Travis CI.
-* Figure out a way to suppress center alignment of images in reST output.
 * Add a unit test for the change made in 7ea8e7180c41.  This is with regard
   to not requiring spec tests when running tests from a downloaded sdist.
 * End support for Python 2.4.
