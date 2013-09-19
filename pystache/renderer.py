@@ -49,7 +49,7 @@ class Renderer(object):
 
     def __init__(self, file_encoding=None, string_encoding=None,
                  decode_errors=None, search_dirs=None, file_extension=None,
-                 escape=None, partials=None, missing_tags=None):
+                 escape=None, partials=None, missing_tags=None, loader=None):
         """
         Construct an instance.
 
@@ -77,6 +77,10 @@ class Renderer(object):
           file_extension: the template file extension.  Pass False for no
             extension (i.e. to use extensionless template files).
             Defaults to the package default.
+            
+          loader: the loader instance to use when loading a template by name.
+             If this is set, the options search_dirs, file_extension and 
+             file_encoding are ignored.
 
           partials: an object (e.g. a dictionary) for custom partial loading
             during the rendering process.
@@ -142,6 +146,7 @@ class Renderer(object):
         self.partials = partials
         self.search_dirs = search_dirs
         self.string_encoding = string_encoding
+        self.loader = loader
 
     # This is an experimental way of giving views access to the current context.
     # TODO: consider another approach of not giving access via a property,
@@ -229,8 +234,11 @@ class Renderer(object):
         Create a Loader instance using current attributes.
 
         """
-        return Loader(file_encoding=self.file_encoding, extension=self.file_extension,
-                      to_unicode=self.unicode, search_dirs=self.search_dirs)
+        if self.loader:
+            return loader
+        else:
+            return Loader(file_encoding=self.file_encoding, extension=self.file_extension,
+                          to_unicode=self.unicode, search_dirs=self.search_dirs)
 
     def _make_load_template(self):
         """
