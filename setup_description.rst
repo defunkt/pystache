@@ -10,23 +10,23 @@ Pystache
 .. figure:: https://secure.travis-ci.org/defunkt/pystache.png
    :alt: Travis CI current build status
 
-`Pystache <http://defunkt.github.com/pystache>`_ is a Python
-implementation of `Mustache <http://mustache.github.com/>`_. Mustache is
-a framework-agnostic, logic-free templating system inspired by
-`ctemplate <http://code.google.com/p/google-ctemplate/>`_ and
-`et <http://www.ivan.fomichev.name/2008/05/erlang-template-engine-prototype.html>`_.
+`Pystache <http://defunkt.github.com/pystache>`__ is a Python
+implementation of `Mustache <http://mustache.github.com/>`__. Mustache
+is a framework-agnostic, logic-free templating system inspired by
+`ctemplate <http://code.google.com/p/google-ctemplate/>`__ and
+`et <http://www.ivan.fomichev.name/2008/05/erlang-template-engine-prototype.html>`__.
 Like ctemplate, Mustache "emphasizes separating logic from presentation:
 it is impossible to embed application logic in this template language."
 
-The `mustache(5) <http://mustache.github.com/mustache.5.html>`_ man page
-provides a good introduction to Mustache's syntax. For a more complete
-(and more current) description of Mustache's behavior, see the official
-`Mustache spec <https://github.com/mustache/spec>`_.
+The `mustache(5) <http://mustache.github.com/mustache.5.html>`__ man
+page provides a good introduction to Mustache's syntax. For a more
+complete (and more current) description of Mustache's behavior, see the
+official `Mustache spec <https://github.com/mustache/spec>`__.
 
-Pystache is `semantically versioned <http://semver.org>`_ and can be
-found on `PyPI <http://pypi.python.org/pypi/pystache>`_. This version of
-Pystache passes all tests in `version
-1.1.2 <https://github.com/mustache/spec/tree/v1.1.2>`_ of the spec.
+Pystache is `semantically versioned <http://semver.org>`__ and can be
+found on `PyPI <http://pypi.python.org/pypi/pystache>`__. This version
+of Pystache passes all tests in `version
+1.1.2 <https://github.com/mustache/spec/tree/v1.1.2>`__ of the spec.
 
 Requirements
 ------------
@@ -34,27 +34,27 @@ Requirements
 Pystache is tested with--
 
 -  Python 2.4 (requires simplejson `version
-   2.0.9 <http://pypi.python.org/pypi/simplejson/2.0.9>`_ or earlier)
+   2.0.9 <http://pypi.python.org/pypi/simplejson/2.0.9>`__ or earlier)
 -  Python 2.5 (requires
-   `simplejson <http://pypi.python.org/pypi/simplejson/>`_)
+   `simplejson <http://pypi.python.org/pypi/simplejson/>`__)
 -  Python 2.6
 -  Python 2.7
 -  Python 3.1
 -  Python 3.2
 -  Python 3.3
--  `PyPy <http://pypy.org/>`_
+-  `PyPy <http://pypy.org/>`__
 
-`Distribute <http://packages.python.org/distribute/>`_ (the setuptools
+`Distribute <http://packages.python.org/distribute/>`__ (the setuptools
 fork) is recommended over
-`setuptools <http://pypi.python.org/pypi/setuptools>`_, and is required
+`setuptools <http://pypi.python.org/pypi/setuptools>`__, and is required
 in some cases (e.g. for Python 3 support). If you use
-`pip <http://www.pip-installer.org/>`_, you probably already satisfy
+`pip <http://www.pip-installer.org/>`__, you probably already satisfy
 this requirement.
 
 JSON support is needed only for the command-line interface and to run
 the spec tests. We require simplejson for earlier versions of Python
-since Python's `json <http://docs.python.org/library/json.html>`_ module
-was added in Python 2.6.
+since Python's `json <http://docs.python.org/library/json.html>`__
+module was added in Python 2.6.
 
 For Python 2.4 we require an earlier version of simplejson since
 simplejson stopped officially supporting Python 2.4 in simplejson
@@ -129,9 +129,9 @@ directory), use the ``Renderer`` class like above. One can pass
 attributes to the Renderer class constructor or set them on a Renderer
 instance. To customize template loading on a per-view basis, subclass
 ``TemplateSpec``. See the docstrings of the
-`Renderer <https://github.com/defunkt/pystache/blob/master/pystache/renderer.py>`_
+`Renderer <https://github.com/defunkt/pystache/blob/master/pystache/renderer.py>`__
 class and
-`TemplateSpec <https://github.com/defunkt/pystache/blob/master/pystache/template_spec.py>`_
+`TemplateSpec <https://github.com/defunkt/pystache/blob/master/pystache/template_spec.py>`__
 class for more information.
 
 You can also pre-parse a template:
@@ -174,7 +174,7 @@ This section describes how Pystache handles unicode, strings, and
 encodings.
 
 Internally, Pystache uses `only unicode
-strings <http://docs.python.org/howto/unicode.html#tips-for-writing-unicode-aware-programs>`_
+strings <http://docs.python.org/howto/unicode.html#tips-for-writing-unicode-aware-programs>`__
 (``str`` in Python 3 and ``unicode`` in Python 2). For input, Pystache
 accepts both unicode strings and byte strings (``bytes`` in Python 3 and
 ``str`` in Python 2). For output, Pystache's template rendering methods
@@ -214,7 +214,7 @@ To test from a source distribution (without installing)--
     python test_pystache.py
 
 To test Pystache with multiple versions of Python (with a single
-command!), you can use `tox <http://pypi.python.org/pypi/tox>`_:
+command!), you can use `tox <http://pypi.python.org/pypi/tox>`__:
 
 ::
 
@@ -238,15 +238,15 @@ runs:
     git submodule update
 
 The test harness parses the spec's (more human-readable) yaml files if
-`PyYAML <http://pypi.python.org/pypi/PyYAML>`_ is present. Otherwise, it
-parses the json files. To install PyYAML--
+`PyYAML <http://pypi.python.org/pypi/PyYAML>`__ is present. Otherwise,
+it parses the json files. To install PyYAML--
 
 ::
 
     pip install pyyaml
 
 To run a subset of the tests, you can use
-`nose <http://somethingaboutorange.com/mrl/projects/nose/0.11.1/testing.html>`_:
+`nose <http://somethingaboutorange.com/mrl/projects/nose/0.11.1/testing.html>`__:
 
 ::
 
@@ -268,11 +268,11 @@ To convert the code to Python 3 manually (while using Python 3)--
 
 This writes the converted code to a subdirectory called ``build``. By
 design, Python 3 builds
-`cannot <https://bitbucket.org/tarek/distribute/issue/292/allow-use_2to3-with-python-2>`_
+`cannot <https://bitbucket.org/tarek/distribute/issue/292/allow-use_2to3-with-python-2>`__
 be created from Python 2.
 
 To convert the code without using setup.py, you can use
-`2to3 <http://docs.python.org/library/2to3.html>`_ as follows (two
+`2to3 <http://docs.python.org/library/2to3.html>`__ as follows (two
 steps)--
 
 ::
@@ -293,7 +293,7 @@ Pystache while using Python 3.
 Mailing List
 ------------
 
-There is a `mailing list <http://librelist.com/browser/pystache/>`_.
+There is a `mailing list <http://librelist.com/browser/pystache/>`__.
 Note that there is a bit of a delay between posting a message and seeing
 it appear in the mailing list archive.
 
@@ -307,9 +307,9 @@ Credits
     Author: Chris Wanstrath
     Maintainer: Chris Jerdonek
 
-Pystache logo by `David Phillips <http://davidphillips.us/>`_ is
+Pystache logo by `David Phillips <http://davidphillips.us/>`__ is
 licensed under a `Creative Commons Attribution-ShareAlike 3.0 Unported
-License <http://creativecommons.org/licenses/by-sa/3.0/deed.en_US>`_.
+License <http://creativecommons.org/licenses/by-sa/3.0/deed.en_US>`__.
 |image0|
 
 History
@@ -335,8 +335,8 @@ History
    parse tree.
 -  Added support for rendering pre-compiled templates.
 -  Added Python 3.3 to the list of supported versions.
--  Added support for `PyPy <http://pypy.org/>`_ (issue #125).
--  Added support for `Travis CI <http://travis-ci.org>`_ (issue #124).
+-  Added support for `PyPy <http://pypy.org/>`__ (issue #125).
+-  Added support for `Travis CI <http://travis-ci.org>`__ (issue #124).
    [msabramo]
 -  Bugfix: ``defaults.DELIMITERS`` can now be changed at runtime (issue
    #135). [bennoleslie]
@@ -385,7 +385,7 @@ Below is a selection of some of the changes (not exhaustive).
 Highlights:
 
 -  Pystache now passes all tests in version 1.0.3 of the `Mustache
-   spec <https://github.com/mustache/spec>`_. [pvande]
+   spec <https://github.com/mustache/spec>`__. [pvande]
 -  Removed View class: it is no longer necessary to subclass from View
    or from any other class to create a view.
 -  Replaced Template with Renderer class: template rendering behavior
@@ -395,7 +395,7 @@ Highlights:
    per-view basis by subclassing from TemplateSpec.
 -  Introduced separation of concerns and removed circular dependencies
    (e.g. between Template and View classes, cf. `issue
-   #13 <https://github.com/defunkt/pystache/issues/13>`_).
+   #13 <https://github.com/defunkt/pystache/issues/13>`__).
 -  Unicode now used consistently throughout the rendering process.
 -  Expanded test coverage: nosetests now runs doctests and ~105 test
    cases from the Mustache spec (increasing the number of tests from 56
