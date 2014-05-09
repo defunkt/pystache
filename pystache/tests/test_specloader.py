@@ -383,11 +383,11 @@ class TemplateSpecTests(unittest.TestCase, AssertPathsMixin):
         loader = self._make_loader()
 
         view = SampleView()
-        view.template_rel_path = 'foo/bar.txt'
+        view.template_rel_path = os.path.join('foo', 'bar.txt')
         self.assertTrue(loader._find_relative(view)[0] is not None)
 
         actual = loader._find(view)
-        expected = os.path.join(DATA_DIR, 'foo/bar.txt')
+        expected = os.path.join(DATA_DIR, 'foo', 'bar.txt')
 
         self.assertPaths(actual, expected)
 
