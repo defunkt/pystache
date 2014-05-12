@@ -14,6 +14,11 @@ History
 -   Bugfix: fixed a flaky doctest by making `repr()` deterministic for the
     `Attachable` class in `pystache.tests.common`
 
+0.5.4 (2014-07-11)
+------------------
+
+-   Bugfix: made test with filenames OS agnostic (issue \#162).
+
 0.5.3 (2012-11-03)
 ------------------
 
