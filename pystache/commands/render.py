@@ -27,7 +27,7 @@ except:
 # The optparse module is deprecated in Python 2.7 in favor of argparse.
 # However, argparse is not available in Python 2.6 and earlier.
 from optparse import OptionParser
-import sys
+import sys, os
 
 # We use absolute imports here to allow use of this script from its
 # location in source control (e.g. for development purposes).
@@ -58,7 +58,10 @@ def parse_args(sys_argv, usage):
 
     parser = OptionParser(usage=usage)
     parser.add_option("-m", "--multiple", dest="multiple",
-                  help="render the template for each context children, writing output to FIELD file (with no warning if file already exists)", metavar="FIELD")
+                  help="""render the template for each context children,
+writing output to KEY file (with no warning if file already exists).
+If KEY is not a key of context children, then it is used as file output name,
+and suffixed with a 3 digit incremental counter.""", metavar="KEY")
     options, args = parser.parse_args(args)
 
     try:
@@ -99,11 +102,12 @@ def main(sys_argv=sys.argv):
 
     if (multiple):
         print ("multiple render on field %s" % multiple)
+        fileName, fileExt = os.path.splitext(multiple)
         for i,c in enumerate(context):
-            if c[multiple]:
+            if multiple in c:
                 f_name = str(c[multiple])
-            else:
-                f_name = "%s%03d" (multiple, i)
+            else:                
+                f_name = "%s-%03d%s" % (fileName, i, fileExt)
             with open(f_name, "w") as f: # mode "wx" could be used to prevent overwriting, + pass IOError, adding "--force" option to override.
                 rendered = renderer.render(template, c)
                 f.write(rendered)
