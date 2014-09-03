@@ -99,8 +99,11 @@ def main(sys_argv=sys.argv):
 
     if (multiple):
         print ("multiple render on field %s" % multiple)
-        for c in context:
-            f_name = str(c[multiple])
+        for i,c in enumerate(context):
+            if c[multiple]:
+                f_name = str(c[multiple])
+            else:
+                f_name = "%s%03d" (multiple, i)
             with open(f_name, "w") as f: # mode "wx" could be used to prevent overwriting, + pass IOError, adding "--force" option to override.
                 rendered = renderer.render(template, c)
                 f.write(rendered)
