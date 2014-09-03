@@ -28,6 +28,7 @@ except:
 # However, argparse is not available in Python 2.6 and earlier.
 from optparse import OptionParser
 import sys, os
+import csv
 
 # We use absolute imports here to allow use of this script from its
 # location in source control (e.g. for development purposes).
@@ -46,7 +47,7 @@ Render a mustache template with the given context.
 
 positional arguments:
   template    A filename or template string.
-  context     A filename or JSON string."""
+  context     A JSON string, or a JSON or CSV filename."""
 
 
 def parse_args(sys_argv, usage):
@@ -57,6 +58,9 @@ def parse_args(sys_argv, usage):
     args = sys_argv[1:]
 
     parser = OptionParser(usage=usage)
+    parser.add_option("-f", "--format", dest="format",
+                  help="format of the context string of filename (choose from: 'json', 'csv'). Default is JSON, unless context is a filename with .csv extension.",
+                  choices=("json","csv"))
     parser.add_option("-m", "--multiple", dest="multiple",
                   help="""render the template for each context children,
 writing output to KEY file (with no warning if file already exists).
@@ -74,7 +78,7 @@ and suffixed with a 3 digit incremental counter.""", metavar="KEY")
         print('ERROR: %s' % e)
         exit(1)
 
-    return template, context, options.multiple
+    return template, context, options.format, options.multiple
 
 
 # TODO: verify whether the setup() method's entry_points argument
@@ -83,7 +87,7 @@ and suffixed with a 3 digit incremental counter.""", metavar="KEY")
 #     http://packages.python.org/distribute/setuptools.html#automatic-script-creation
 #
 def main(sys_argv=sys.argv):
-    template, context, multiple = parse_args(sys_argv, USAGE)
+    template, context, c_format, multiple = parse_args(sys_argv, USAGE)
 
     if template.endswith('.mustache'):
         template = template[:-9]
@@ -95,10 +99,20 @@ def main(sys_argv=sys.argv):
     except TemplateNotFoundError:
         pass
 
-    try:
-        context = json.load(open(context))
-    except IOError:
-        context = json.loads(context)
+    if context.endswith(".csv") or (c_format and (c_format == "csv")):
+        try:
+            context = csv.DictReader(open(context, 'rb'))#, delimiter=',', quotechar='"')
+        except IOError:
+            print('ERROR: Could not parse context as CSV file. Check usage for input format options')
+            exit(-1)            
+    else:
+        try:
+            context = json.load(open(context))
+        except IOError:
+            context = json.loads(context)
+        except ValueError: #likely a not well-formed JSON string, or user forgot -f csv.
+            print('ERROR: Could not parse context as JSON file or text, check usage for input format options')
+            exit(1)
 
     if (multiple):
         print ("multiple render on field %s" % multiple)
