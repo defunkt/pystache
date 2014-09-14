@@ -9,6 +9,7 @@ import re
 
 from pystache import defaults
 from pystache.parsed import ParsedTemplate
+from pystache.common import _BaseNode
 
 
 END_OF_LINE_CHARACTERS = [u'\r', u'\n']
@@ -88,7 +89,7 @@ def _format(obj, exclude=None):
     return "%s(%s)" % (obj.__class__.__name__, ", ".join(args))
 
 
-class _CommentNode(object):
+class _CommentNode(_BaseNode):
 
     def __repr__(self):
         return _format(self)
@@ -97,7 +98,7 @@ class _CommentNode(object):
         return u''
 
 
-class _ChangeNode(object):
+class _ChangeNode(_BaseNode):
 
     def __init__(self, delimiters):
         self.delimiters = delimiters
@@ -109,7 +110,7 @@ class _ChangeNode(object):
         return u''
 
 
-class _EscapeNode(object):
+class _EscapeNode(_BaseNode):
 
     def __init__(self, key):
         self.key = key
@@ -122,7 +123,7 @@ class _EscapeNode(object):
         return engine.escape(s)
 
 
-class _LiteralNode(object):
+class _LiteralNode(_BaseNode):
 
     def __init__(self, key):
         self.key = key
@@ -135,7 +136,7 @@ class _LiteralNode(object):
         return engine.literal(s)
 
 
-class _PartialNode(object):
+class _PartialNode(_BaseNode):
 
     def __init__(self, key, indent):
         self.key = key
@@ -152,7 +153,7 @@ class _PartialNode(object):
         return engine.render(template, context)
 
 
-class _InvertedNode(object):
+class _InvertedNode(_BaseNode):
 
     def __init__(self, key, parsed_section):
         self.key = key
@@ -172,7 +173,7 @@ class _InvertedNode(object):
         return self.parsed_section.render(engine, context)
 
 
-class _SectionNode(object):
+class _SectionNode(_BaseNode):
 
     # TODO: the template_ and parsed_template_ arguments don't both seem
     # to be necessary.  Can we remove one of them?  For example, if

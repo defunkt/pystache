@@ -16,7 +16,7 @@ from examples.delimiters import Delimiters
 from examples.unicode_output import UnicodeOutput
 from examples.unicode_input import UnicodeInput
 from examples.nested_context import NestedContext
-from pystache import Renderer
+from pystache import Renderer, parse
 from pystache.tests.common import EXAMPLES_DIR
 from pystache.tests.common import AssertStringMixin
 
@@ -101,6 +101,15 @@ Again, Welcome!""")
 
         actual = renderer.render(view, {'prop': 'derp'})
         self.assertEqual(actual, 'Hi derp!')
+
+    def test_node_as_template(self):
+        renderer = Renderer(search_dirs=EXAMPLES_DIR)
+
+        full_template = parse(renderer.load_template('node_as_template'))
+        node_template = full_template.get_node('bar').as_template()
+
+        actual = renderer.render(node_template, {'bar': {'name': 'Chris'}})
+        self.assertEqual(actual, 'Hello Chris!')
 
 if __name__ == '__main__':
     unittest.main()
