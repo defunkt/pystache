@@ -14,6 +14,7 @@ from pystache.parser import ParsingError
 from pystache.renderer import Renderer
 from pystache.renderengine import context_get, RenderEngine
 from pystache.tests.common import AssertStringMixin, AssertExceptionMixin, Attachable
+import collections
 
 
 def _get_unicode_char():
@@ -294,7 +295,7 @@ class RenderTests(unittest.TestCase, AssertStringMixin, AssertExceptionMixin):
     def _assert_builtin_attr(self, item, attr_name, expected_attr):
         self.assertTrue(hasattr(item, attr_name))
         actual = getattr(item, attr_name)
-        if callable(actual):
+        if isinstance(actual, collections.Callable):
             actual = actual()
         self.assertEqual(actual, expected_attr)
 
@@ -440,7 +441,7 @@ class RenderTests(unittest.TestCase, AssertStringMixin, AssertExceptionMixin):
         template = '{{/section}}'
         try:
             self._assert_render(None, template)
-        except ParsingError, err:
+        except ParsingError as err:
             self.assertEqual(str(err), "Section end tag mismatch: section != None")
 
     def test_section__end_tag_mismatch(self):
@@ -451,7 +452,7 @@ class RenderTests(unittest.TestCase, AssertStringMixin, AssertExceptionMixin):
         template = '{{#section_start}}{{/section_end}}'
         try:
             self._assert_render(None, template)
-        except ParsingError, err:
+        except ParsingError as err:
             self.assertEqual(str(err), "Section end tag mismatch: section_end != section_start")
 
     def test_section__context_values(self):
@@ -577,7 +578,7 @@ class RenderTests(unittest.TestCase, AssertStringMixin, AssertExceptionMixin):
         context = {'iterable': (i for i in range(3))}  # type 'generator'
         self._assert_render(u'012', template, context)
 
-        context = {'iterable': xrange(4)}  # type 'xrange'
+        context = {'iterable': range(4)}  # type 'xrange'
         self._assert_render(u'0123', template, context)
 
         d = {'foo': 0, 'bar': 0}
@@ -586,8 +587,8 @@ class RenderTests(unittest.TestCase, AssertStringMixin, AssertExceptionMixin):
         #  "If items(), keys(), values(), iteritems(), iterkeys(), and
         #   itervalues() are called with no intervening modifications to
         #   the dictionary, the lists will directly correspond."
-        expected = u''.join(d.keys())
-        context = {'iterable': d.iterkeys()}  # type 'dictionary-keyiterator'
+        expected = u''.join(list(d.keys()))
+        context = {'iterable': iter(d.keys())}  # type 'dictionary-keyiterator'
         self._assert_render(expected, template, context)
 
     def test_section__lambda__tag_in_output(self):

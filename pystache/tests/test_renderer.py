@@ -10,7 +10,7 @@ import os
 import sys
 import unittest
 
-from examples.simple import Simple
+from .examples.simple import Simple
 from pystache import Renderer
 from pystache import TemplateSpec
 from pystache.common import TemplateNotFoundError

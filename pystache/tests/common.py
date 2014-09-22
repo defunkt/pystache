@@ -72,8 +72,8 @@ def _find_files(root_dir, should_include):
     #   http://docs.python.org/library/os.html#os.walk
     for dir_path, dir_names, file_names in os.walk(root_dir):
         new_paths = [os.path.join(dir_path, file_name) for file_name in file_names]
-        new_paths = filter(is_module, new_paths)
-        new_paths = filter(should_include, new_paths)
+        new_paths = list(filter(is_module, new_paths))
+        new_paths = list(filter(should_include, new_paths))
         paths.extend(new_paths)
 
     return paths
@@ -183,7 +183,7 @@ class AssertExceptionMixin:
         try:
             callable(*args, **kwds)
             raise Exception("Expected exception: %s: %s" % (exception_type, repr(msg)))
-        except exception_type, err:
+        except exception_type as err:
             self.assertEqual(str(err), msg)
 
 
@@ -228,10 +228,10 @@ class Attachable(object):
     """
     def __init__(self, **kwargs):
         self.__args__ = kwargs
-        for arg, value in kwargs.iteritems():
+        for arg, value in kwargs.items():
             setattr(self, arg, value)
 
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__,
                            ", ".join("%s=%s" % (k, repr(v))
-                                     for k, v in self.__args__.iteritems()))
+                                     for k, v in self.__args__.items()))

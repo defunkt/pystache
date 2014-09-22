@@ -44,7 +44,7 @@ class ParsedTemplate(object):
             if type(node) is unicode:
                 return node
             return node.render(engine, context)
-        parts = map(get_unicode, self._parse_tree)
+        parts = list(map(get_unicode, self._parse_tree))
         s = ''.join(parts)
 
         return unicode(s)

@@ -37,7 +37,7 @@ except ImportError:
             from sys import exc_info
             ex_type, ex_value, tb = exc_info()
             new_ex = Exception("%s: %s" % (ex_type.__name__, ex_value))
-            raise new_ex.__class__, new_ex, tb
+            raise new_ex.__class__(new_ex).with_traceback(tb)
     file_extension = 'json'
     parser = json
 else:
@@ -62,7 +62,7 @@ def get_spec_tests(spec_test_dir):
 
     """
     # TODO: use logging module instead.
-    print "pystache: spec tests: using %s" % _get_parser_info()
+    print("pystache: spec tests: using %s" % _get_parser_info())
 
     cases = []
 
@@ -133,7 +133,7 @@ def _convert_children(node):
         return
     # Otherwise, node is a dict, so attempt the conversion.
 
-    for key in node.keys():
+    for key in list(node.keys()):
         val = node[key]
 
         if not isinstance(val, dict) or val.get('__tag__') != 'code':
@@ -160,7 +160,7 @@ def _deserialize_spec_test(data, file_path):
     # PyYAML seems to leave ASCII strings as byte strings.
     expected = unicode(data['expected'])
     # TODO: switch to using dict.get().
-    partials = data.has_key('partials') and data['partials'] or {}
+    partials = 'partials' in data and data['partials'] or {}
     template = data['template']
     test_name = data['name']
 

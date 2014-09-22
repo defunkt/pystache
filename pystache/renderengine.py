@@ -9,6 +9,7 @@ import re
 
 from pystache.common import is_string
 from pystache.parser import parse
+import collections
 
 
 def context_get(stack, name):
@@ -104,7 +105,7 @@ class RenderEngine(object):
         """
         val = self.resolve_context(context, name)
 
-        if callable(val):
+        if isinstance(val, collections.Callable):
             # Return because _render_value() is already a string.
             return self._render_value(val(), context)
 

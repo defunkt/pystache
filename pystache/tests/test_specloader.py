@@ -9,11 +9,11 @@ import os.path
 import sys
 import unittest
 
-import examples
-from examples.simple import Simple
-from examples.complex import Complex
-from examples.lambdas import Lambdas
-from examples.inverted import Inverted, InvertedLists
+from . import examples
+from .examples.simple import Simple
+from .examples.complex import Complex
+from .examples.lambdas import Lambdas
+from .examples.inverted import Inverted, InvertedLists
 from pystache import Renderer
 from pystache import TemplateSpec
 from pystache.common import TemplateNotFoundError
