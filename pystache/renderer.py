@@ -16,6 +16,12 @@ from pystache.renderengine import context_get, RenderEngine
 from pystache.specloader import SpecLoader
 from pystache.template_spec import TemplateSpec
 
+try:
+    unicode
+except:
+    unicode = str
+    basestring = str
+
 
 class Renderer(object):
 

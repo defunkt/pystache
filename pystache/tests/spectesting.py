@@ -55,6 +55,11 @@ from pystache import common
 from pystache.renderer import Renderer
 from pystache.tests.common import AssertStringMixin
 
+try:
+    unicode
+except:
+    unicode = str
+
 
 def get_spec_tests(spec_test_dir):
     """

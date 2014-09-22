@@ -16,6 +16,11 @@ from pystache.renderengine import context_get, RenderEngine
 from pystache.tests.common import AssertStringMixin, AssertExceptionMixin, Attachable
 import collections
 
+try:
+    unicode
+except:
+    unicode = str
+
 
 def _get_unicode_char():
     if sys.version_info < (3, ):

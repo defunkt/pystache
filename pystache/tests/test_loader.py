@@ -13,6 +13,11 @@ from pystache.tests.common import AssertStringMixin, DATA_DIR, SetupDefaults
 from pystache import defaults
 from pystache.loader import Loader
 
+try:
+    unicode
+except:
+    unicode = str
+
 
 # We use the same directory as the locator tests for now.
 LOADER_DATA_DIR = os.path.join(DATA_DIR, 'locator')

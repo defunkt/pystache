@@ -12,6 +12,11 @@ from pystache import common
 from pystache import defaults
 from pystache.locator import Locator
 
+try:
+    unicode
+except:
+    unicode = str
+
 
 # We make a function so that the current defaults take effect.
 # TODO: revisit whether this is necessary.

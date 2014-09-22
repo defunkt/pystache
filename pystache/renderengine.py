@@ -11,6 +11,11 @@ from pystache.common import is_string
 from pystache.parser import parse
 import collections
 
+try:
+    unicode
+except:
+    unicode = str
+
 
 def context_get(stack, name):
     """

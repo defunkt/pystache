@@ -25,6 +25,11 @@ from pystache.tests.common import AssertIsMixin, AssertStringMixin
 from pystache.tests.data.views import SampleView
 from pystache.tests.data.views import NonAscii
 
+try:
+    unicode
+except:
+    unicode = str
+
 
 class Thing(object):
     pass

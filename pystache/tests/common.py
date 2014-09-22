@@ -234,4 +234,4 @@ class Attachable(object):
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__,
                            ", ".join("%s=%s" % (k, repr(v))
-                                     for k, v in self.__args__.items()))
+                                     for k, v in sorted(self.__args__.items())))

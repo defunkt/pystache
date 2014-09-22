@@ -5,6 +5,11 @@ Exposes a class that represents a parsed (or compiled) template.
 
 """
 
+try:
+    unicode
+except:
+    unicode = str
+
 
 class ParsedTemplate(object):
 
