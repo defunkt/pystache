@@ -1,8 +1,7 @@
 language: python
 
-# Travis CI has no plans to support Python 2.4 and Jython.
+# Travis CI has no plans to support Jython and no longer supports Python 2.5.
 python:
-  - 2.5
   - 2.6
   - 2.7
   - 3.2
