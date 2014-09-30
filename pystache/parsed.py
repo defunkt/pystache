@@ -5,6 +5,11 @@ Exposes a class that represents a parsed (or compiled) template.
 
 """
 
+try:
+    unicode
+except:
+    unicode = str
+
 
 class ParsedTemplate(object):
 
@@ -44,7 +49,7 @@ class ParsedTemplate(object):
             if type(node) is unicode:
                 return node
             return node.render(engine, context)
-        parts = map(get_unicode, self._parse_tree)
+        parts = list(map(get_unicode, self._parse_tree))
         s = ''.join(parts)
 
         return unicode(s)

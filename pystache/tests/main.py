@@ -88,7 +88,7 @@ def main(sys_argv):
 
     """
     # TODO: use logging module
-    print "pystache: running tests: argv: %s" % repr(sys_argv)
+    print("pystache: running tests: argv: %s" % repr(sys_argv))
 
     should_source_exist = False
     spec_test_dir = None

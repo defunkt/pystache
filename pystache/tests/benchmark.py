@@ -76,17 +76,17 @@ def main(sys_argv):
     args = sys_argv[1:]
     count = int(args[0])
 
-    print "Benchmarking: %sx" % count
-    print
+    print("Benchmarking: %sx" % count)
+    print()
 
     for example in examples:
 
         test = make_test_function(example)
 
         t = Timer(test,)
-        print min(t.repeat(repeat=3, number=count))
+        print(min(t.repeat(repeat=3, number=count)))
 
-    print "Done"
+    print("Done")
 
 
 if __name__ == '__main__':

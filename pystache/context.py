@@ -15,6 +15,7 @@ spec, we define these categories mutually exclusively as follows:
 """
 
 from pystache.common import PystacheError
+import collections
 
 
 # This equals '__builtin__' in Python 2 and 'builtins' in Python 3.
@@ -69,7 +70,7 @@ def _get_value(context, key):
         else:
             # TODO: consider using EAFP here instead.
             #   http://docs.python.org/glossary.html#term-eafp
-            if callable(attr):
+            if isinstance(attr, collections.Callable):
                 return attr()
             return attr
 

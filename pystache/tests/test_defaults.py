@@ -31,7 +31,7 @@ class DefaultsConfigurableTestCase(unittest.TestCase, AssertStringMixin):
             self.saved[e] = getattr(pystache.defaults, e)
 
     def tearDown(self):
-        for key, value in self.saved.items():
+        for key, value in list(self.saved.items()):
             setattr(pystache.defaults, key, value)
 
     def test_tag_escape(self):

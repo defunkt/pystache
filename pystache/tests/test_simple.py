@@ -2,11 +2,11 @@ import unittest
 
 import pystache
 from pystache import Renderer
-from examples.nested_context import NestedContext
-from examples.complex import Complex
-from examples.lambdas import Lambdas
-from examples.template_partial import TemplatePartial
-from examples.simple import Simple
+from .examples.nested_context import NestedContext
+from .examples.complex import Complex
+from .examples.lambdas import Lambdas
+from .examples.template_partial import TemplatePartial
+from .examples.simple import Simple
 
 from pystache.tests.common import EXAMPLES_DIR
 from pystache.tests.common import AssertStringMixin

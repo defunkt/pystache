@@ -7,6 +7,12 @@ Exposes functionality needed throughout the project.
 
 from sys import version_info
 
+try:
+    unicode
+except:
+    unicode = str
+
+
 def _get_string_types():
     # TODO: come up with a better solution for this.  One of the issues here
     #   is that in Python 3 there is no common base class for unicode strings
