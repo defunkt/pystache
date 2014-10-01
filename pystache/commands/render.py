@@ -27,7 +27,8 @@ except:
 # The optparse module is deprecated in Python 2.7 in favor of argparse.
 # However, argparse is not available in Python 2.6 and earlier.
 from optparse import OptionParser
-import sys
+import sys, os
+import csv
 
 # We use absolute imports here to allow use of this script from its
 # location in source control (e.g. for development purposes).
@@ -40,13 +41,13 @@ from pystache.renderer import Renderer
 
 
 USAGE = """\
-%prog [-h] template context
+%prog [options] template context
 
 Render a mustache template with the given context.
 
 positional arguments:
   template    A filename or template string.
-  context     A filename or JSON string."""
+  context     A JSON string, or a JSON or CSV filename."""
 
 
 def parse_args(sys_argv, usage):
@@ -57,11 +58,27 @@ def parse_args(sys_argv, usage):
     args = sys_argv[1:]
 
     parser = OptionParser(usage=usage)
+    parser.add_option("-f", "--format", dest="format",
+                  help="format of the context string of filename (choose from: 'json', 'csv'). Default is JSON, unless context is a filename with .csv extension.",
+                  choices=("json","csv"))
+    parser.add_option("-m", "--multiple", dest="multiple",
+                  help="""render the template for each context children,
+writing output to KEY file (with no warning if file already exists).
+If KEY is not a key of context children, then it is used as file output name,
+and suffixed with a 3 digit incremental counter.""", metavar="KEY")
     options, args = parser.parse_args(args)
 
-    template, context = args
+    try:
+        template, context = args
+    except ValueError as e:
+        print('ERROR: %s\n' % e)
+        parser.print_help()
+        exit(1)
+    except UnboundLocalError as e:
+        print('ERROR: %s' % e)
+        exit(1)
 
-    return template, context
+    return template, context, options.format, options.multiple
 
 
 # TODO: verify whether the setup() method's entry_points argument
@@ -70,7 +87,7 @@ def parse_args(sys_argv, usage):
 #     http://packages.python.org/distribute/setuptools.html#automatic-script-creation
 #
 def main(sys_argv=sys.argv):
-    template, context = parse_args(sys_argv, USAGE)
+    template, context, c_format, multiple = parse_args(sys_argv, USAGE)
 
     if template.endswith('.mustache'):
         template = template[:-9]
@@ -82,14 +99,36 @@ def main(sys_argv=sys.argv):
     except TemplateNotFoundError:
         pass
 
-    try:
-        context = json.load(open(context))
-    except IOError:
-        context = json.loads(context)
+    if context.endswith(".csv") or (c_format and (c_format == "csv")):
+        try:
+            context = csv.DictReader(open(context, 'rb'))#, delimiter=',', quotechar='"')
+        except IOError:
+            print('ERROR: Could not parse context as CSV file. Check usage for input format options')
+            exit(-1)            
+    else:
+        try:
+            context = json.load(open(context))
+        except IOError:
+            context = json.loads(context)
+        except ValueError: #likely a not well-formed JSON string, or user forgot -f csv.
+            print('ERROR: Could not parse context as JSON file or text, check usage for input format options')
+            exit(1)
 
-    rendered = renderer.render(template, context)
-    print rendered
-
+    if (multiple):
+        print ("multiple render on field %s" % multiple)
+        fileName, fileExt = os.path.splitext(multiple)
+        for i,c in enumerate(context):
+            if multiple in c:
+                f_name = str(c[multiple])
+            else:                
+                f_name = "%s-%03d%s" % (fileName, i, fileExt)
+            with open(f_name, "w") as f: # mode "wx" could be used to prevent overwriting, + pass IOError, adding "--force" option to override.
+                rendered = renderer.render(template, c)
+                f.write(rendered)
+                print ("%s done") % f_name
+    else:
+        rendered = renderer.render(template, context)
+        print rendered
 
 if __name__=='__main__':
     main()
