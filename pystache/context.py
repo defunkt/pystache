@@ -50,7 +50,17 @@ def _get_value(context, key):
         # (e.g. catching KeyError).
         if key in context:
             return context[key]
-    elif type(context).__module__ != _BUILTIN_MODULE:
+    if isinstance(context, list):
+        # If we're dealing with a list or a list subclass attempt to use the key
+        # as an index on the list.
+        #
+        # We pass on ValueError (the key is not an int) or IndexError (the key/int
+        # is not in the list). And continue with normal processing.
+        try:
+            return context[int(key)]
+        except (ValueError, IndexError):
+            pass
+    if type(context).__module__ != _BUILTIN_MODULE:
         # Then we consider the argument an "object" for the purposes of
         # the spec.
         #

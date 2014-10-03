@@ -221,6 +221,12 @@ class GetValueTestCase(unittest.TestCase, AssertIsMixin):
         self.assertEqual(_get_value(item1, 'pop'), 2)
         self.assertNotFound(item2, 'pop')
 
+        # get list items by index
+        self.assertEqual(_get_value(item2, '0'), 1)
+
+        # Don't throw errors if we pass a non-int to a list.
+        self.assertNotFound(item2, 'numberone')
+
 
 class ContextStackTestCase(unittest.TestCase, AssertIsMixin, AssertStringMixin,
                            AssertExceptionMixin):
@@ -497,3 +503,12 @@ class ContextStackTestCase(unittest.TestCase, AssertIsMixin, AssertStringMixin,
 
         stack = ContextStack({"foo": Foo()})
         self.assertEqual(stack.get(name), "Baz")
+
+    def test_dot_notation__list(self):
+        """ Test that an index interger after a dot correctly grabs the item
+        if the parent is a list.
+
+        """
+        name = "foo.1"
+        stack = ContextStack({"foo": ['Ignore me.', 'Choose me!']})
+        self.assertEqual(stack.get(name), "Choose me!")
