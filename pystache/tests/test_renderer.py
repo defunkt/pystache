@@ -12,6 +12,7 @@ import unittest
 
 from examples.simple import Simple
 from pystache import Renderer
+from pystache.parser import parse
 from pystache import TemplateSpec
 from pystache.common import TemplateNotFoundError
 from pystache.context import ContextStack, KeyNotFoundError
@@ -367,6 +368,16 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         # If the next line failed, we would get the following error:
         #   TypeError: decoding Unicode is not supported
         self.assertEqual(resolve_partial("partial"), "foo")
+
+    def test_make_resolve_partial__parsed(self):
+        """
+        Test _make_resolve_partial__parsed(): that we can take ParsedTemplates as partials
+
+        """
+        partials = {"partial": parse(u"Hello, {{person}}")}
+        renderer = Renderer(partials=partials)
+        actual = renderer.render(u"{{>partial}}", {"person": "foo"})
+        self.assertString(actual, u"Hello, foo")
 
     def test_render_name(self):
         """Test the render_name() method."""
