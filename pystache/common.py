@@ -53,6 +53,10 @@ def read(path):
         f.close()
 
 
+class _BaseNode(object):
+    pass
+
+
 class MissingTags(object):
 
     """Contains the valid values for Renderer.missing_tags."""
