@@ -9,6 +9,7 @@ import re
 
 from pystache.common import is_string
 from pystache.parser import parse
+from pystache.parsed import ParsedTemplate
 
 
 def context_get(stack, name):
@@ -176,6 +177,9 @@ class RenderEngine(object):
           context_stack: a ContextStack instance.
 
         """
-        parsed_template = parse(template, delimiters)
+        if isinstance(template, ParsedTemplate):
+            parsed_template = template
+        else:
+            parsed_template = parse(template, delimiters)
 
         return parsed_template.render(self, context_stack)
