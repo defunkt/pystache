@@ -147,7 +147,8 @@ class _PartialNode(object):
     def render(self, engine, context):
         template = engine.resolve_partial(self.key)
         # Indent before rendering.
-        template = re.sub(NON_BLANK_RE, self.indent + ur'\1', template)
+        if not isinstance(template, ParsedTemplate):
+            template = re.sub(NON_BLANK_RE, self.indent + ur'\1', template)
 
         return engine.render(template, context)
 
