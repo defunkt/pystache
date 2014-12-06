@@ -66,6 +66,10 @@ def _get_value(context, key):
             #   See the following issue for implementation ideas:
             #     http://bugs.python.org/issue7559
             pass
+        except UnicodeEncodeError:
+           # we managed to get a tag that has unicode in it, and getattr()
+           # doesn't support that
+           pass
         else:
             # TODO: consider using EAFP here instead.
             #   http://docs.python.org/glossary.html#term-eafp
