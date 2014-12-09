@@ -317,7 +317,10 @@ class _Parser(object):
                 continue
 
             if tag_type == '/':
-                if tag_key != section_key:
+                parsed_section_key = section_key.split("|")[0]
+                if parsed_section_key:
+                    parsed_section_key = parsed_section_key.strip()
+                if tag_key != parsed_section_key:
                     raise ParsingError("Section end tag mismatch: %s != %s" % (tag_key, section_key))
 
                 # Restore previous state with newly found section data.
