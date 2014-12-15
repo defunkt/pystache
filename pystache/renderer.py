@@ -265,7 +265,9 @@ class Renderer(object):
                 raise TemplateNotFoundError("Name %s not found in partials: %s" %
                                             (repr(name), type(partials)))
 
-            # RenderEngine requires that the return value be unicode.
+            # RenderEngine requires that the return value be unicode or a parsed template.
+            if isinstance(template, ParsedTemplate):            
+                return template
             return self._to_unicode_hard(template)
 
         return load_partial

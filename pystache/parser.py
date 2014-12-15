@@ -18,7 +18,7 @@ NON_BLANK_RE = re.compile(ur'^(.)', re.M)
 # TODO: add some unit tests for this.
 # TODO: add a test case that checks for spurious spaces.
 # TODO: add test cases for delimiters.
-def parse(template, delimiters=None):
+def parse(template, delimiters=None, liberal_sections=False):
     """
     Parse a unicode template string and return a ParsedTemplate instance.
 
@@ -37,7 +37,7 @@ def parse(template, delimiters=None):
     """
     if type(template) is not unicode:
         raise Exception("Template is not unicode: %s" % type(template))
-    parser = _Parser(delimiters)
+    parser = _Parser(delimiters, liberal_sections=liberal_sections)
     return parser.parse(template)
 
 
@@ -147,7 +147,8 @@ class _PartialNode(object):
     def render(self, engine, context):
         template = engine.resolve_partial(self.key)
         # Indent before rendering.
-        template = re.sub(NON_BLANK_RE, self.indent + ur'\1', template)
+        if not isinstance(template, ParsedTemplate):
+            template = re.sub(NON_BLANK_RE, self.indent + ur'\1', template)
 
         return engine.render(template, context)
 
@@ -226,11 +227,12 @@ class _Parser(object):
     _delimiters = None
     _template_re = None
 
-    def __init__(self, delimiters=None):
+    def __init__(self, delimiters=None, liberal_sections=False):
         if delimiters is None:
             delimiters = defaults.DELIMITERS
 
         self._delimiters = delimiters
+        self.liberal_sections = liberal_sections
 
     def _compile_delimiters(self):
         self._template_re = _compile_template_re(self._delimiters)
@@ -316,9 +318,15 @@ class _Parser(object):
                 continue
 
             if tag_type == '/':
-                if tag_key != section_key:
-                    raise ParsingError("Section end tag mismatch: %s != %s" % (tag_key, section_key))
-
+                if tag_key is not None and section_key is not None and tag_key.lower() != section_key.lower():
+                    parsed_section_key = section_key.split("|")[0]
+                    if parsed_section_key:
+                        parsed_section_key = parsed_section_key.strip()
+                    if tag_key.lower() != parsed_section_key.lower():
+                        if not self.liberal_sections:
+                            raise ParsingError("Section end tag mismatch: %s != %s" % (tag_key, section_key))
+                        else:
+                            tag_key = parsed_section_key
                 # Restore previous state with newly found section data.
                 parsed_section = parsed_template
 
