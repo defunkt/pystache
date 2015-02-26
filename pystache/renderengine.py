@@ -7,8 +7,8 @@ Defines a class responsible for rendering logic.
 
 import re
 
-from pystache.common import is_string
-from pystache.parser import parse
+from .common import is_string
+from .parser import parse
 
 
 def context_get(stack, name):

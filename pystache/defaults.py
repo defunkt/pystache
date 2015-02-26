@@ -17,7 +17,7 @@ except ImportError:
 import os
 import sys
 
-from pystache.common import MissingTags
+from .common import MissingTags
 
 
 # How to handle encoding errors when decoding strings from str to unicode.
