@@ -7,7 +7,7 @@ This module supports customized (aka special or specified) template loading.
 
 import os.path
 
-from pystache.loader import Loader
+from .loader import Loader
 
 
 # TODO: add test cases for this class.

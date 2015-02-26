@@ -7,8 +7,8 @@ Exposes a parse() function to parse template strings.
 
 import re
 
-from pystache import defaults
-from pystache.parsed import ParsedTemplate
+from . import defaults
+from .parsed import ParsedTemplate
 
 
 END_OF_LINE_CHARACTERS = [u'\r', u'\n']
