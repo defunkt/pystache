@@ -57,7 +57,14 @@ def parse_args(sys_argv, usage):
     args = sys_argv[1:]
 
     parser = OptionParser(usage=usage)
+    parser.add_option('-v', '--version', action="store_true",
+                      dest="show_version", default=False,
+                      help="show version and exit")
     options, args = parser.parse_args(args)
+    if options.show_version:
+        import pystache
+        print("pystache %s" % pystache.__version__)
+        sys.exit(0)
 
     template, context = args
 
