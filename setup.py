@@ -317,7 +317,7 @@ Run the following command and commit the changes--
 #
 #   https://github.com/simplejson/simplejson/blob/master/CHANGES.txt
 #
-requires = []
+requires = ['PyYAML==3.11']
 if py_version < (2, 5):
     requires.append('simplejson<2.1')
 elif py_version < (2, 6):
