@@ -385,7 +385,7 @@ class Renderer(object):
 
         """
         loader = self._make_loader()
-        template = loader.read(template_path)
+        template = loader.load_file(template_path)
 
         return self._render_string(template, *context, **kwargs)
 
