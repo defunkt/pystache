@@ -434,6 +434,16 @@ class ContextStackTestCase(unittest.TestCase, AssertIsMixin, AssertStringMixin,
         stack = ContextStack({"a": {"b": {"c": {"d": {"e": {"f": {"g": "w00t!"}}}}}}})
         self.assertEqual(stack.get(name), "w00t!")
 
+    def test_dot_notation_escaped(self):
+        name = "foo\.bar"
+        stack = ContextStack({"foo.bar": "baz"})
+        self.assertEqual(stack.get(name), "baz")
+
+        # Works at any component depth.
+        name = "zoo.foo\.bar"
+        stack = ContextStack({"zoo": {"foo.bar": "baz"}})
+        self.assertEqual(stack.get(name), "baz")
+
     def test_dot_notation__user_object(self):
         name = "foo.bar"
         stack = ContextStack({"foo": Attachable(bar="baz")})
