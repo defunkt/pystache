@@ -17,6 +17,7 @@ class SimpleObject(object):
 
     def __init__(self):
         self.foo = "bar"
+        self.bar = None
 
     def foo_callable(self):
         return "called..."
@@ -111,6 +112,14 @@ class GetValueTestCase(unittest.TestCase, AssertIsMixin):
         """
         item = SimpleObject()
         self.assertEqual(_get_value(item, "foo"), "bar")
+
+    def test_object__attribute_none(self):
+        """
+        Test getting an attribute from an object.
+
+        """
+        item = SimpleObject()
+        self.assertEqual(_get_value(item, "bar"), "")
 
     def test_object__attribute_missing(self):
         """
