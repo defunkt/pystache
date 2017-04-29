@@ -127,7 +127,7 @@ def get_module_names(package_dir=None, should_include=None):
     return names
 
 
-class AssertStringMixin:
+class AssertStringMixin(object):
 
     """A unittest.TestCase mixin to check string equality."""
 
@@ -163,7 +163,7 @@ class AssertStringMixin:
         self.assertEqual(type(expected), type(actual), make_message(reason))
 
 
-class AssertIsMixin:
+class AssertIsMixin(object):
 
     """A unittest.TestCase mixin adding assertIs()."""
 
@@ -173,7 +173,7 @@ class AssertIsMixin:
         self.assertTrue(first is second, msg="%s is not %s" % (repr(first), repr(second)))
 
 
-class AssertExceptionMixin:
+class AssertExceptionMixin(object):
 
     """A unittest.TestCase mixin adding assertException()."""
 

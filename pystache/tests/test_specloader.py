@@ -30,7 +30,7 @@ class Thing(object):
     pass
 
 
-class AssertPathsMixin:
+class AssertPathsMixin(object):
 
     """A unittest.TestCase mixin to check path equality."""
 
