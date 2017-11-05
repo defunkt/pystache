@@ -45,7 +45,7 @@ def read(path):
     # read() method returns byte strings (strings of type `str` in Python 2),
     # whereas in Python 3, the file object returns unicode strings (strings
     # of type `str` in Python 3).
-    f = open(path, 'rb')
+    f = open(path, 'rbU')
     # We avoid use of the with keyword for Python 2.4 support.
     try:
         return f.read()
