@@ -91,7 +91,7 @@ class Locator(object):
         if template_extension is None:
             template_extension = self.template_extension
 
-        if template_extension is not False:
+        if template_extension:
             file_name += os.path.extsep + template_extension
 
         return file_name
