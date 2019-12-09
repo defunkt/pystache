@@ -152,7 +152,7 @@ class _PartialNode(object):
         template = engine.resolve_partial(self.key)
 
         # Indent before rendering.
-        template = re.sub(NON_BLANK_RE, self.indent + u'\1', template)
+        template = re.sub(NON_BLANK_RE, self.indent + u'\\1', template)
 
         return engine.render(template, context)
 
