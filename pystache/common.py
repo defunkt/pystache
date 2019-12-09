@@ -14,6 +14,8 @@ def _get_string_types():
     #   and "basestring" to Python 3's "str".
     if version_info < (3, ):
          return basestring
+    else:
+         unicode = str
     # The latter evaluates to "bytes" in Python 3 -- even after conversion by 2to3.
     return (unicode, type(u"a".encode('utf-8')))
 
