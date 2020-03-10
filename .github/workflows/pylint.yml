@@ -1,0 +1,18 @@
+name: pylint
+
+on:
+ push:
+   paths: 
+   - "**.py"
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: GitHub Action for pylint
+      uses: cclauss/GitHub-Action-for-pylint@0.7.0
+      with:
+        args: "pylint **.py"
