@@ -6,6 +6,7 @@ This module provides a Renderer class to render templates.
 """
 
 import sys
+import os
 
 from pystache import defaults
 from pystache.common import TemplateNotFoundError, MissingTags, is_string
@@ -450,6 +451,8 @@ class Renderer(object):
             all items in the *context list.
 
         """
+        if is_string(template) and os.path.isfile(template) and os.access(template, os.R_OK):
+            return self.render_path(self, template, *context, **kwargs)
         if is_string(template):
             return self._render_string(template, *context, **kwargs)
         if isinstance(template, ParsedTemplate):
