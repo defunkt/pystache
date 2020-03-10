@@ -452,6 +452,7 @@ class Renderer(object):
 
         """
         if is_string(template) and os.path.isfile(template) and os.access(template, os.R_OK):
+            # should self be the first arg in the function call?
             return self.render_path(self, template, *context, **kwargs)
         if is_string(template):
             return self._render_string(template, *context, **kwargs)
