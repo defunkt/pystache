@@ -11,8 +11,8 @@ from pystache import defaults
 from pystache.parsed import ParsedTemplate
 
 
-END_OF_LINE_CHARACTERS = [u'\r', u'\n']
-NON_BLANK_RE = re.compile(ur'^(.)', re.M)
+END_OF_LINE_CHARACTERS = ['\r', '\n']
+NON_BLANK_RE = re.compile(r'^(.)', re.M)
 
 
 # TODO: add some unit tests for this.
@@ -30,12 +30,12 @@ def parse(template, delimiters=None):
 
     Examples:
 
-    >>> parsed = parse(u"Hey {{#who}}{{name}}!{{/who}}")
-    >>> print str(parsed).replace('u', '')  # This is a hack to get the test to pass both in Python 2 and 3.
+    >>> parsed = parse("Hey {{#who}}{{name}}!{{/who}}")
+    >>> print(str(parsed).replace('u', ''))  # This is an old hack.
     ['Hey ', _SectionNode(key='who', index_begin=12, index_end=21, parsed=[_EscapeNode(key='name'), '!'])]
 
     """
-    if type(template) is not unicode:
+    if type(template) is not str:
         raise Exception("Template is not unicode: %s" % type(template))
     parser = _Parser(delimiters)
     return parser.parse(template)
@@ -94,7 +94,7 @@ class _CommentNode(object):
         return _format(self)
 
     def render(self, engine, context):
-        return u''
+        return ''
 
 
 class _ChangeNode(object):
@@ -106,7 +106,7 @@ class _ChangeNode(object):
         return _format(self)
 
     def render(self, engine, context):
-        return u''
+        return ''
 
 
 class _EscapeNode(object):
@@ -147,7 +147,7 @@ class _PartialNode(object):
     def render(self, engine, context):
         template = engine.resolve_partial(self.key)
         # Indent before rendering.
-        template = re.sub(NON_BLANK_RE, self.indent + ur'\1', template)
+        template = re.sub(NON_BLANK_RE, self.indent + r'\1', template)
 
         return engine.render(template, context)
 
@@ -168,7 +168,7 @@ class _InvertedNode(object):
         # Note that lambdas are considered truthy for inverted sections
         # per the spec.
         if data:
-            return u''
+            return ''
         return self.parsed_section.render(engine, context)
 
 
@@ -218,7 +218,7 @@ class _SectionNode(object):
             parts.append(self.parsed.render(engine, context))
             context.pop()
 
-        return unicode(''.join(parts))
+        return str(''.join(parts))
 
 
 class _Parser(object):

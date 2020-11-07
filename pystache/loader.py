@@ -6,6 +6,7 @@ This module provides a Loader class for locating and reading templates.
 """
 
 import os
+import platform
 import sys
 
 from pystache import common
@@ -24,7 +25,7 @@ def _make_to_unicode():
         """
         if encoding is None:
             encoding = defaults.STRING_ENCODING
-        return unicode(s, encoding, defaults.DECODE_ERRORS)
+        return str(s, encoding, defaults.DECODE_ERRORS)
     return to_unicode
 
 
@@ -86,7 +87,7 @@ class Loader(object):
     def _make_locator(self):
         return Locator(extension=self.extension)
 
-    def unicode(self, s, encoding=None):
+    def str(self, s, encoding=None):
         """
         Convert a string to unicode using the given encoding, and return it.
 
@@ -104,8 +105,8 @@ class Loader(object):
             Defaults to None.
 
         """
-        if isinstance(s, unicode):
-            return unicode(s)
+        if isinstance(s, str):
+            return str(s)
 
         return self.to_unicode(s, encoding)
 
@@ -118,8 +119,9 @@ class Loader(object):
 
         if encoding is None:
             encoding = self.file_encoding
-
-        return self.unicode(b, encoding)
+        if platform.system() == "Windows":
+            return self.str(b, encoding).replace('\r', '')
+        return self.str(b, encoding)
 
     def load_file(self, file_name):
         """

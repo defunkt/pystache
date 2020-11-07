@@ -15,3 +15,5 @@ build
 dist
 MANIFEST
 pystache.egg-info
+coverage.xml
+.coverage

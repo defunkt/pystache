@@ -71,14 +71,14 @@ class PystacheTests(unittest.TestCase):
         template = "{{#stats}}({{key}} & {{value}}){{/stats}}"
         stats = []
         stats.append({'key': 123, 'value': ['something']})
-        stats.append({'key': u"chris", 'value': 0.900})
+        stats.append({'key': "chris", 'value': 0.900})
         context = { 'stats': stats }
         self._assert_rendered(self.non_strings_expected, template, context)
 
     def test_unicode(self):
         template = 'Name: {{name}}; Age: {{age}}'
-        context = {'name': u'Henri Poincaré', 'age': 156 }
-        self._assert_rendered(u'Name: Henri Poincaré; Age: 156', template, context)
+        context = {'name': 'Henri Poincaré', 'age': 156}
+        self._assert_rendered('Name: Henri Poincaré; Age: 156', template, context)
 
     def test_sections(self):
         template = """<ul>{{#users}}<li>{{name}}</li>{{/users}}</ul>"""

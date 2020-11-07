@@ -4,13 +4,17 @@
 Pystache
 ========
 
-.. figure:: http://defunkt.github.com/pystache/images/logo_phillips.png
-   :alt: mustachioed, monocled snake by David Phillips
+|ci| |Conda| |Wheels| |Release| |Python|
 
-.. figure:: https://secure.travis-ci.org/defunkt/pystache.png
-   :alt: Travis CI current build status
+|Latest release| |License| |Maintainability| |codecov|
 
-`Pystache <http://defunkt.github.com/pystache>`__ is a Python
+This updated fork of Pystache is currently tested on Python 3.6+ and in
+Conda, on Linux, Macos, and Windows (Python 2.7 support has been
+removed).
+
+|image9|
+
+`Pystache <http://sarnold.github.com/pystache>`__ is a Python
 implementation of `Mustache <http://mustache.github.com/>`__. Mustache
 is a framework-agnostic, logic-free templating system inspired by
 `ctemplate <http://code.google.com/p/google-ctemplate/>`__ and
@@ -23,62 +27,45 @@ page provides a good introduction to Mustache's syntax. For a more
 complete (and more current) description of Mustache's behavior, see the
 official `Mustache spec <https://github.com/mustache/spec>`__.
 
-Pystache is `semantically versioned <http://semver.org>`__ and can be
-found on `PyPI <http://pypi.python.org/pypi/pystache>`__. This version
-of Pystache passes all tests in `version
-1.1.2 <https://github.com/mustache/spec/tree/v1.1.2>`__ of the spec.
+Pystache is `semantically versioned <http://semver.org>`__ and older
+versions can still be found on
+`PyPI <http://pypi.python.org/pypi/pystache>`__. This version of
+Pystache now passes all tests in `version
+1.1.3 <https://github.com/mustache/spec/tree/v1.1.3>`__ of the spec.
 
 Requirements
 ------------
 
 Pystache is tested with--
 
--  Python 2.4 (requires simplejson `version
-   2.0.9 <http://pypi.python.org/pypi/simplejson/2.0.9>`__ or earlier)
--  Python 2.5 (requires
-   `simplejson <http://pypi.python.org/pypi/simplejson/>`__)
--  Python 2.6
--  Python 2.7
--  Python 3.1
--  Python 3.2
--  Python 3.3
--  `PyPy <http://pypy.org/>`__
+-  Python 3.6
+-  Python 3.7
+-  Python 3.8
+-  Python 3.9
+-  Conda (py36-py39)
 
 `Distribute <http://packages.python.org/distribute/>`__ (the setuptools
-fork) is recommended over
-`setuptools <http://pypi.python.org/pypi/setuptools>`__, and is required
-in some cases (e.g. for Python 3 support). If you use
-`pip <http://www.pip-installer.org/>`__, you probably already satisfy
-this requirement.
+fork) is no longer required over
+`setuptools <http://pypi.python.org/pypi/setuptools>`__, as the current
+packaging is now PEP517-compliant.
 
 JSON support is needed only for the command-line interface and to run
-the spec tests. We require simplejson for earlier versions of Python
-since Python's `json <http://docs.python.org/library/json.html>`__
-module was added in Python 2.6.
+the spec tests; PyYAML can still be used (see the Develop section).
 
-For Python 2.4 we require an earlier version of simplejson since
-simplejson stopped officially supporting Python 2.4 in simplejson
-version 2.1.0. Earlier versions of simplejson can be installed manually,
-as follows:
-
-::
-
-    pip install 'simplejson<2.1.0'
-
-Official support for Python 2.4 will end with Pystache version 0.6.0.
+Official support for Python 2 will end with Pystache version 0.6.0.
 
 Install It
 ----------
 
 ::
 
-    pip install pystache
+   pip install -U pystache -f https://github.com/sarnold/pystache/releases/
 
 And test it--
 
 ::
 
-    pystache-test
+   pystache-test
 
 To install and test from source (e.g. from GitHub), see the Develop
 section.
@@ -88,68 +75,68 @@ Use It
 
 ::
 
-    >>> import pystache
-    >>> print pystache.render('Hi {{person}}!', {'person': 'Mom'})
-    Hi Mom!
+   >>> import pystache
+   >>> print(pystache.render('Hi {{person}}!', {'person': 'Mom'}))
+   Hi Mom!
 
 You can also create dedicated view classes to hold your view logic.
 
-Here's your view class (in .../examples/readme.py):
+Here's your view class (in ../pystache/tests/examples/readme.py):
 
 ::
 
-    class SayHello(object):
-        def to(self):
-            return "Pizza"
+   class SayHello(object):
+       def to(self):
+           return "Pizza"
 
 Instantiating like so:
 
 ::
 
-    >>> from pystache.tests.examples.readme import SayHello
-    >>> hello = SayHello()
+   >>> from pystache.tests.examples.readme import SayHello
+   >>> hello = SayHello()
 
-Then your template, say\_hello.mustache (by default in the same
-directory as your class definition):
+Then your template, say_hello.mustache (by default in the same directory
+as your class definition):
 
 ::
 
-    Hello, {{to}}!
+   Hello, {{to}}!
 
 Pull it together:
 
 ::
 
-    >>> renderer = pystache.Renderer()
-    >>> print renderer.render(hello)
-    Hello, Pizza!
+   >>> renderer = pystache.Renderer()
+   >>> print(renderer.render(hello))
+   Hello, Pizza!
 
 For greater control over rendering (e.g. to specify a custom template
 directory), use the ``Renderer`` class like above. One can pass
 attributes to the Renderer class constructor or set them on a Renderer
 instance. To customize template loading on a per-view basis, subclass
 ``TemplateSpec``. See the docstrings of the
-`Renderer <https://github.com/defunkt/pystache/blob/master/pystache/renderer.py>`__
+`Renderer <https://github.com/sarnold/pystache/blob/master/pystache/renderer.py>`__
 class and
-`TemplateSpec <https://github.com/defunkt/pystache/blob/master/pystache/template_spec.py>`__
+`TemplateSpec <https://github.com/sarnold/pystache/blob/master/pystache/template_spec.py>`__
 class for more information.
 
 You can also pre-parse a template:
 
 ::
 
-    >>> parsed = pystache.parse(u"Hey {{#who}}{{.}}!{{/who}}")
-    >>> print parsed
-    [u'Hey ', _SectionNode(key=u'who', index_begin=12, index_end=18, parsed=[_EscapeNode(key=u'.'), u'!'])]
+   >>> parsed = pystache.parse(u"Hey {{#who}}{{.}}!{{/who}}")
+   >>> print(parsed)
+   ['Hey ', _SectionNode(key='who', index_begin=12, index_end=18, parsed=[_EscapeNode(key='.'), '!'])]
 
 And then:
 
 ::
 
-    >>> print renderer.render(parsed, {'who': 'Pops'})
-    Hey Pops!
-    >>> print renderer.render(parsed, {'who': 'you'})
-    Hey you!
+   >>> print(renderer.render(parsed, {'who': 'Pops'}))
+   Hey Pops!
+   >>> print(renderer.render(parsed, {'who': 'you'}))
+   Hey you!
 
 Python 3
 --------
@@ -211,22 +198,24 @@ To test from a source distribution (without installing)--
 
 ::
 
-    python test_pystache.py
+   python test_pystache.py
 
 To test Pystache with multiple versions of Python (with a single
-command!), you can use `tox <http://pypi.python.org/pypi/tox>`__:
+command!) and different platforms, you can use
+`tox <http://pypi.python.org/pypi/tox>`__:
 
 ::
 
-    pip install 'virtualenv<1.8'  # Version 1.8 dropped support for Python 2.4.
-    pip install 'tox<1.4'  # Version 1.4 dropped support for Python 2.4.
-    tox
+   pip install tox
+   tox -e setup
 
-If you do not have all Python versions listed in ``tox.ini``--
+To run tests on multiple versions with coverage, run:
 
 ::
 
-    tox -e py26,py32  # for example
+   tox -e py38-linux,py39-linux  # for example
+
+(substitute your platform above, eg, macos or windows)
 
 The source distribution tests also include doctests and tests from the
 Mustache spec. To include tests from the Mustache spec in your test
@@ -234,8 +223,8 @@ runs:
 
 ::
 
-    git submodule init
-    git submodule update
+   git submodule init
+   git submodule update
 
 The test harness parses the spec's (more human-readable) yaml files if
 `PyYAML <http://pypi.python.org/pypi/PyYAML>`__ is present. Otherwise,
@@ -243,94 +232,113 @@ it parses the json files. To install PyYAML--
 
 ::
 
-    pip install pyyaml
+   pip install pyyaml
+
+Once the submodule is available, you can run the full test set with:
+
+::
+
+   tox -e setup . ext/spec/specs
 
 To run a subset of the tests, you can use
 `nose <http://somethingaboutorange.com/mrl/projects/nose/0.11.1/testing.html>`__:
 
 ::
 
-    pip install nose
-    nosetests --tests pystache/tests/test_context.py:GetValueTests.test_dictionary__key_present
+   pip install nose
+   nosetests --tests pystache/tests/test_context.py:GetValueTests.test_dictionary__key_present
 
-Using Python 3 with Pystache from source
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Mailing List (old)
+------------------
 
-Pystache is written in Python 2 and must be converted to Python 3 prior
-to using it with Python 3. The installation process (and tox) do this
-automatically.
-
-To convert the code to Python 3 manually (while using Python 3)--
-
-::
-
-    python setup.py build
-
-This writes the converted code to a subdirectory called ``build``. By
-design, Python 3 builds
-`cannot <https://bitbucket.org/tarek/distribute/issue/292/allow-use_2to3-with-python-2>`__
-be created from Python 2.
-
-To convert the code without using setup.py, you can use
-`2to3 <http://docs.python.org/library/2to3.html>`__ as follows (two
-steps)--
-
-::
-
-    2to3 --write --nobackups --no-diffs --doctests_only pystache
-    2to3 --write --nobackups --no-diffs pystache
-
-This converts the code (and doctests) in place.
-
-To ``import pystache`` from a source distribution while using Python 3,
-be sure that you are importing from a directory containing a converted
-version of the code (e.g. from the ``build`` directory after
-converting), and not from the original (unconverted) source directory.
-Otherwise, you will get a syntax error. You can help prevent this by not
-running the Python IDE from the project directory when importing
-Pystache while using Python 3.
-
-Mailing List
-------------
-
-There is a `mailing list <http://librelist.com/browser/pystache/>`__.
-Note that there is a bit of a delay between posting a message and seeing
-it appear in the mailing list archive.
+There is(was) a `mailing
+list <http://librelist.com/browser/pystache/>`__. Note that there is a
+bit of a delay between posting a message and seeing it appear in the
+mailing list archive.
 
 Credits
 -------
 
 ::
 
-    >>> context = { 'author': 'Chris Wanstrath', 'maintainer': 'Chris Jerdonek' }
-    >>> print pystache.render("Author: {{author}}\nMaintainer: {{maintainer}}", context)
-    Author: Chris Wanstrath
-    Maintainer: Chris Jerdonek
+   >>> import pystache
+   >>> context = { 'author': 'Chris Wanstrath', 'maintainer': 'Chris Jerdonek','refurbisher': 'Steve Arnold' }
+   >>> print(pystache.render("Author: {{author}}\nMaintainer: {{maintainer}}\nRefurbisher: {{refurbisher}}", context))
+   Author: Chris Wanstrath
+   Maintainer: Chris Jerdonek
+   Refurbisher: Steve Arnold
 
 Pystache logo by `David Phillips <http://davidphillips.us/>`__ is
 licensed under a `Creative Commons Attribution-ShareAlike 3.0 Unported
 License <http://creativecommons.org/licenses/by-sa/3.0/deed.en_US>`__.
-|image0|
+|image10|
 
 History
 =======
 
-**Note:** Official support for Python 2.4 will end with Pystache version
+**Note:** Official support for Python 2.7 will end with Pystache version
 0.6.0.
+
+0.6.0 (2021-03-04)
+------------------
+
+-  Bump spec versions to latest => v1.1.3
+-  Modernize python and CI tools, update docs/doctests
+-  Update unicode conversion test for py3-only
+-  Add pep8speaks cfg, cleanup warnings
+-  Remove superfluous setup test/unused imports
+-  Add conda recipe/CI build
+
+.. _section-1:
+
+0.5.6 (2021-02-28)
+------------------
+
+-  Use correct wheel name in release workflow, limit wheels
+-  Add install check/test of downloaded wheel
+-  Update/add ci workflows and tox cfg, bump to next dev0 version
+
+.. _section-2:
+
+0.5.5 (2020-12-16)
+------------------
+
+-  fix document processing, update pandoc args and history
+-  add release.yml to CI, test env settings
+-  fix bogus commit message, update versions and tox cf
+-  add post-test steps for building pkgs with/without doc updates
+-  add CI build check, fix MANIFEST.in pruning
+
+.. _section-3:
+
+0.5.4-2 (2020-11-09)
+--------------------
+
+-  Merge pull request #1 from sarnold/rebase-up
+-  Bugfix: test_specloader.py: fix test_find__with_directory on other
+   OSs
+-  Bugfix: pystache/loader.py: remove stray windows line-endings
+-  fix crufty (and insecure) http urls
+-  Bugfix: modernize python versions (keep py27) and fix spec_test load
+   cmd
+
+.. _section-4:
 
 0.5.4 (2014-07-11)
 ------------------
 
 -  Bugfix: made test with filenames OS agnostic (issue #162).
 
+.. _section-5:
+
 0.5.3 (2012-11-03)
 ------------------
 
 -  Added ability to customize string coercion (e.g. to have None render
    as ``''``) (issue #130).
--  Added Renderer.render\_name() to render a template by name (issue
+-  Added Renderer.render_name() to render a template by name (issue
    #122).
--  Added TemplateSpec.template\_path to specify an absolute path to a
+-  Added TemplateSpec.template_path to specify an absolute path to a
    template (issue #41).
 -  Added option of raising errors on missing tags/partials:
    ``Renderer(missing_tags='strict')`` (issue #110).
@@ -355,6 +363,8 @@ History
 -  More robust handling of byte strings in Python 3.
 -  Added Creative Commons license for David Phillips's logo.
 
+.. _section-6:
+
 0.5.2 (2012-05-03)
 ------------------
 
@@ -367,15 +377,19 @@ History
    context stack (issue #113).
 -  Bugfix: lists of lambdas for sections were not rendered (issue #114).
 
+.. _section-7:
+
 0.5.1 (2012-04-24)
 ------------------
 
 -  Added support for Python 3.1 and 3.2.
 -  Added tox support to test multiple Python versions.
 -  Added test script entry point: pystache-test.
--  Added \_\_version\_\_ package attribute.
+-  Added \__version_\_ package attribute.
 -  Test harness now supports both YAML and JSON forms of Mustache spec.
 -  Test harness no longer requires nose.
+
+.. _section-8:
 
 0.5.0 (2012-04-03)
 ------------------
@@ -435,10 +449,14 @@ Bug fixes:
 -  Passing ``**kwargs`` to ``Template()`` with no context no longer
    raises an exception.
 
+.. _section-9:
+
 0.4.1 (2012-03-25)
 ------------------
 
 -  Added support for Python 2.4. [wangtz, jvantuyl]
+
+.. _section-10:
 
 0.4.0 (2011-01-12)
 ------------------
@@ -447,18 +465,24 @@ Bug fixes:
 -  Add support for inverted lists
 -  Decoupled template loading
 
+.. _section-11:
+
 0.3.1 (2010-05-07)
 ------------------
 
 -  Fix package
 
+.. _section-12:
+
 0.3.0 (2010-05-03)
 ------------------
 
--  View.template\_path can now hold a list of path
+-  View.template_path can now hold a list of path
 -  Add {{& blah}} as an alias for {{{ blah }}}
 -  Higher Order Sections
 -  Inverted sections
+
+.. _section-13:
 
 0.2.0 (2010-02-15)
 ------------------
@@ -473,11 +497,15 @@ Bug fixes:
    [enaeseth]
 -  Template file encoding awareness. [enaeseth]
 
+.. _section-14:
+
 0.1.1 (2009-11-13)
 ------------------
 
 -  Ensure we're dealing with strings, always
 -  Tests can be run by executing the test file directly
+
+.. _section-15:
 
 0.1.0 (2009-11-12)
 ------------------
@@ -510,4 +538,23 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-.. |image0| image:: http://i.creativecommons.org/l/by-sa/3.0/88x31.png
+.. |ci| image:: https://github.com/sarnold/pystache/actions/workflows/ci.yml/badge.svg
+   :target: https://github.com/sarnold/pystache/actions/workflows/ci.yml
+.. |Conda| image:: https://github.com/sarnold/pystache/actions/workflows/conda.yml/badge.svg
+   :target: https://github.com/sarnold/pystache/actions/workflows/conda.yml
+.. |Wheels| image:: https://github.com/sarnold/pystache/actions/workflows/wheels.yml/badge.svg
+   :target: https://github.com/sarnold/pystache/actions/workflows/wheels.yml
+.. |Release| image:: https://github.com/sarnold/pystache/actions/workflows/release.yml/badge.svg
+   :target: https://github.com/sarnold/pystache/actions/workflows/release.yml
+.. |Python| image:: https://img.shields.io/badge/python-3.6+-blue.svg
+   :target: https://www.python.org/downloads/
+.. |Latest release| image:: https://img.shields.io/github/v/release/sarnold/pystache?include_prereleases
+   :target: https://github.com/sarnold/pystache/releases/latest
+.. |License| image:: https://img.shields.io/github/license/sarnold/pystache
+   :target: https://github.com/sarnold/pystache/blob/master/LICENSE
+.. |Maintainability| image:: https://api.codeclimate.com/v1/badges/a8fa1bf4638bfc6581b6/maintainability
+   :target: https://codeclimate.com/github/sarnold/pystache/maintainability
+.. |codecov| image:: https://codecov.io/gh/sarnold/pystache/branch/master/graph/badge.svg?token=5PZNMZBI6K
+   :target: https://codecov.io/gh/sarnold/pystache
+.. |image9| image:: gh/images/logo_phillips_small.png
+.. |image10| image:: http://i.creativecommons.org/l/by-sa/3.0/88x31.png

@@ -39,7 +39,7 @@ STRING_ENCODING = sys.getdefaultencoding()
 FILE_ENCODING = sys.getdefaultencoding()
 
 # The delimiters to start with when parsing.
-DELIMITERS = (u'{{', u'}}')
+DELIMITERS = ('{{', '}}')
 
 # How to handle missing tags when rendering a template.
 MISSING_TAGS = MissingTags.ignore
