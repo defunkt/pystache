@@ -238,7 +238,7 @@ def parse(u):
         return eval(value['python'], {})
 
     yaml.add_constructor(u'!code', code_constructor)
-    return yaml.load(u)
+    return yaml.full_load(u)
 
 
 class SpecTestBase(unittest.TestCase, AssertStringMixin):
