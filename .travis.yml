@@ -1,3 +1,4 @@
+dist: xenial
 language: python
 
 # Travis CI has no plans to support Jython and no longer supports Python 2.5.
@@ -10,10 +11,38 @@ python:
   - "3.9-dev"
   - "nightly"
 
+matrix:
+  fast_finish: true
+  include:
+    - os: osx
+      # osx is goofy, ``python`` is always py2, images mutate fast
+      language: shell
+      before_install:
+        - pip3 install --upgrade pip wheel
+      install:
+        - python3 setup.py install
+      script:
+        - pystache-test . ext/spec/specs
+    - os: windows
+      # windows is even goofier, install path is different for python/python3
+      # but either way you get python3 and the cmd is always ``python``  o.O 
+      # (also versions mutuate like bacteria)
+      language: shell
+      before_install:
+        - choco install python3 --params "/InstallDir:C:\\Python"
+        - python -m pip install --upgrade pip wheel
+      env: PATH="/c/Python:/c/Python/Scripts:$PATH"
+      install:
+        - python setup.py install
+      script:
+        - pystache-test . ext/spec/specs
+  allow_failures:
+    - python: "nightly"
 
 # command to install dependencies
 install:
-  - pip install tox-travis codecov
+  - pip install --upgrade pip
+  - pip install codecov
 
 script:
   - python setup.py install
