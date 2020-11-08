@@ -388,7 +388,7 @@ def main(sys_argv):
           author_email='chris@ozmm.org',
           maintainer='Chris Jerdonek',
           maintainer_email='chris.jerdonek@gmail.com',
-          url='http://github.com/defunkt/pystache',
+          url='https://github.com/defunkt/pystache',
           install_requires=INSTALL_REQUIRES,
           packages=PACKAGES,
           package_data = {
