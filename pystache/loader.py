@@ -6,6 +6,7 @@ This module provides a Loader class for locating and reading templates.
 """
 
 import os
+import platform
 import sys
 
 from pystache import common
@@ -118,7 +119,8 @@ class Loader(object):
 
         if encoding is None:
             encoding = self.file_encoding
-
+        if platform.system() == "Windows":
+            return self.unicode(b, encoding).replace('\r', '')
         return self.unicode(b, encoding)
 
     def load_file(self, file_name):
