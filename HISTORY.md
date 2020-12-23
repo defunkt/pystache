@@ -3,6 +3,17 @@ History
 
 **Note:** Official support for Python 2.4 will end with Pystache version 0.6.0.
 
+0.6.0 (TBD)
+-----------
+
+-   Added [`PYTHONHASHSEED`](http://docs.python.org/using/cmdline.html#envvar-PYTHONHASHSEED)
+    to the test output.
+-   Added `test_pystache.sh` wrapper script for testing different
+    PYTHONHASHSEED values.
+-   Set PYTHONHASHSEED to "random" when running tox.
+-   Bugfix: fixed a flaky doctest by making `repr()` deterministic for the
+    `Attachable` class in `pystache.tests.common`
+
 0.5.4 (2014-07-11)
 ------------------
 

@@ -52,6 +52,11 @@ Pystache can grant you those permissions.
 
 When you have permissions, run the following:
 
+    # This uploads the version metadata.
+    # TODO: update our custom publish command to include register.
+    python setup.py register
+
+    # This uploads the *.tar.gz file.
     python setup.py publish
 
 If you get an error like the following--
@@ -112,7 +117,7 @@ else:
     setup = dist.setup
 
 
-VERSION = '0.5.4'  # Also change in pystache/__init__.py.
+VERSION = '0.6.0-alpha'  # Also change in pystache/__init__.py.
 
 FILE_ENCODING = 'utf-8'
 

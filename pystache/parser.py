@@ -12,7 +12,7 @@ from pystache.parsed import ParsedTemplate
 
 
 END_OF_LINE_CHARACTERS = [u'\r', u'\n']
-NON_BLANK_RE = re.compile(ur'^(.)', re.M)
+NON_BLANK_RE = re.compile(u'^(.)', re.M)
 
 
 # TODO: add some unit tests for this.
@@ -147,7 +147,7 @@ class _PartialNode(object):
     def render(self, engine, context):
         template = engine.resolve_partial(self.key)
         # Indent before rendering.
-        template = re.sub(NON_BLANK_RE, self.indent + ur'\1', template)
+        template = re.sub(NON_BLANK_RE, self.indent + u'\\1', template)
 
         return engine.render(template, context)
 
