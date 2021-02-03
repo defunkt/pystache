@@ -1,3 +1,8 @@
+# This project is abandoned
+
+Try this instead: https://github.com/noahmorrison/chevron
+
+
 Pystache
 ========
 
