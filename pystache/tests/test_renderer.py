@@ -10,7 +10,7 @@ import os
 import sys
 import unittest
 
-from examples.simple import Simple
+from .examples.simple import Simple
 from pystache import Renderer
 from pystache import TemplateSpec
 from pystache.common import TemplateNotFoundError
@@ -33,7 +33,7 @@ def _make_renderer():
 def mock_unicode(b, encoding=None):
     if encoding is None:
         encoding = 'ascii'
-    u = unicode(b, encoding=encoding)
+    u = str(b, encoding=encoding)
     return u.upper()
 
 
@@ -197,13 +197,13 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
 
         """
         renderer = self._renderer()
-        b = u"é".encode('utf-8')
+        b = "é".encode('utf-8')
 
         renderer.string_encoding = "ascii"
-        self.assertRaises(UnicodeDecodeError, renderer.unicode, b)
+        self.assertRaises(UnicodeDecodeError, renderer.str, b)
 
         renderer.string_encoding = "utf-8"
-        self.assertEqual(renderer.unicode(b), u"é")
+        self.assertEqual(renderer.str(b), "é")
 
     def test_unicode__decode_errors(self):
         """
@@ -212,14 +212,14 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         """
         renderer = self._renderer()
         renderer.string_encoding = "ascii"
-        b = u"déf".encode('utf-8')
+        b = "déf".encode('utf-8')
 
         renderer.decode_errors = "ignore"
-        self.assertEqual(renderer.unicode(b), "df")
+        self.assertEqual(renderer.str(b), "df")
 
         renderer.decode_errors = "replace"
         # U+FFFD is the official Unicode replacement character.
-        self.assertEqual(renderer.unicode(b), u'd\ufffd\ufffdf')
+        self.assertEqual(renderer.str(b), u'd\ufffd\ufffdf')
 
     ## Test the _make_loader() method.
 
@@ -243,7 +243,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         renderer = self._renderer()
         renderer.file_encoding = 'enc'
         renderer.file_extension = 'ext'
-        renderer.unicode = unicode_
+        renderer.str = unicode_
 
         loader = renderer._make_loader()
 
@@ -260,12 +260,12 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         """
         renderer = self._renderer()
         rendered = renderer.render('foo')
-        self.assertEqual(type(rendered), unicode)
+        self.assertEqual(type(rendered), str)
 
     def test_render__unicode(self):
         renderer = self._renderer()
-        actual = renderer.render(u'foo')
-        self.assertEqual(actual, u'foo')
+        actual = renderer.render('foo')
+        self.assertEqual(actual, 'foo')
 
     def test_render__str(self):
         renderer = self._renderer()
@@ -274,8 +274,8 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
 
     def test_render__non_ascii_character(self):
         renderer = self._renderer()
-        actual = renderer.render(u'Poincaré')
-        self.assertEqual(actual, u'Poincaré')
+        actual = renderer.render('Poincaré')
+        self.assertEqual(actual, 'Poincaré')
 
     def test_render__context(self):
         """
@@ -326,7 +326,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
 
         """
         renderer = _make_renderer()
-        template = u"déf".encode("utf-8")
+        template = "déf".encode("utf-8")
 
         # Check that decode_errors and string_encoding are both respected.
         renderer.decode_errors = 'ignore'
@@ -334,7 +334,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         self.assertEqual(renderer.render(template), "df")
 
         renderer.string_encoding = 'utf_8'
-        self.assertEqual(renderer.render(template), u"déf")
+        self.assertEqual(renderer.render(template), "déf")
 
     def test_make_resolve_partial(self):
         """
@@ -347,7 +347,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
 
         actual = resolve_partial('foo')
         self.assertEqual(actual, 'bar')
-        self.assertEqual(type(actual), unicode, "RenderEngine requires that "
+        self.assertEqual(type(actual), str, "RenderEngine requires that "
             "resolve_partial return unicode strings.")
 
     def test_make_resolve_partial__unicode(self):
@@ -362,7 +362,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         self.assertEqual(resolve_partial("partial"), "foo")
 
         # Now with a value that is already unicode.
-        renderer.partials = {'partial': u'foo'}
+        renderer.partials = {'partial': 'foo'}
         resolve_partial = renderer._make_resolve_partial()
         # If the next line failed, we would get the following error:
         #   TypeError: decoding Unicode is not supported
@@ -373,7 +373,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
         data_dir = get_data_path()
         renderer = Renderer(search_dirs=data_dir)
         actual = renderer.render_name("say_hello", to='foo')
-        self.assertString(actual, u"Hello, foo")
+        self.assertString(actual, "Hello, foo")
 
     def test_render_path(self):
         """
@@ -412,7 +412,7 @@ class RendererTests(unittest.TestCase, AssertStringMixin):
 
         spec = Spec()
         actual = renderer.render(spec)
-        self.assertString(actual, u'hello, world')
+        self.assertString(actual, 'hello, world')
 
     def test_render__view(self):
         """
@@ -484,7 +484,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertStringMixin, Asser
         Check that resolve_partial returns unicode (and not a subclass).
 
         """
-        class MyUnicode(unicode):
+        class MyUnicode(str):
             pass
 
         renderer = Renderer()
@@ -495,12 +495,12 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertStringMixin, Asser
 
         actual = engine.resolve_partial('str')
         self.assertEqual(actual, "foo")
-        self.assertEqual(type(actual), unicode)
+        self.assertEqual(type(actual), str)
 
         # Check that unicode subclasses are not preserved.
         actual = engine.resolve_partial('subclass')
         self.assertEqual(actual, "abc")
-        self.assertEqual(type(actual), unicode)
+        self.assertEqual(type(actual), str)
 
     def test__resolve_partial__not_found(self):
         """
@@ -512,7 +512,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertStringMixin, Asser
         engine = renderer._make_render_engine()
         resolve_partial = engine.resolve_partial
 
-        self.assertString(resolve_partial('foo'), u'')
+        self.assertString(resolve_partial('foo'), '')
 
     def test__resolve_partial__not_found__missing_tags_strict(self):
         """
@@ -539,7 +539,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertStringMixin, Asser
         engine = renderer._make_render_engine()
         resolve_partial = engine.resolve_partial
 
-        self.assertString(resolve_partial('foo'), u'')
+        self.assertString(resolve_partial('foo'), '')
 
     def test__resolve_partial__not_found__partials_dict__missing_tags_strict(self):
         """
@@ -566,12 +566,12 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertStringMixin, Asser
 
         """
         renderer = self._make_renderer()
-        renderer.unicode = mock_unicode
+        renderer.str = mock_unicode
 
         engine = renderer._make_render_engine()
         literal = engine.literal
 
-        b = u"foo".encode("ascii")
+        b = "foo".encode("ascii")
         self.assertEqual(literal(b), "FOO")
 
     def test__literal__handles_unicode(self):
@@ -585,7 +585,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertStringMixin, Asser
         engine = renderer._make_render_engine()
         literal = engine.literal
 
-        self.assertEqual(literal(u"foo"), "foo")
+        self.assertEqual(literal("foo"), "foo")
 
     def test__literal__returns_unicode(self):
         """
@@ -598,16 +598,16 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertStringMixin, Asser
         engine = renderer._make_render_engine()
         literal = engine.literal
 
-        self.assertEqual(type(literal("foo")), unicode)
+        self.assertEqual(type(literal("foo")), str)
 
-        class MyUnicode(unicode):
+        class MyUnicode(str):
             pass
 
         s = MyUnicode("abc")
 
         self.assertEqual(type(s), MyUnicode)
-        self.assertTrue(isinstance(s, unicode))
-        self.assertEqual(type(literal(s)), unicode)
+        self.assertTrue(isinstance(s, str))
+        self.assertEqual(type(literal(s)), str)
 
     ## Test the engine's escape attribute.
 
@@ -630,12 +630,12 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertStringMixin, Asser
 
         """
         renderer = Renderer()
-        renderer.unicode = mock_unicode
+        renderer.str = mock_unicode
 
         engine = renderer._make_render_engine()
         escape = engine.escape
 
-        b = u"foo".encode('ascii')
+        b = "foo".encode('ascii')
         self.assertEqual(escape(b), "FOO")
 
     def test__escape__has_access_to_original_unicode_subclass(self):
@@ -644,16 +644,16 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertStringMixin, Asser
 
         """
         renderer = Renderer()
-        renderer.escape = lambda s: unicode(type(s).__name__)
+        renderer.escape = lambda s: str(type(s).__name__)
 
         engine = renderer._make_render_engine()
         escape = engine.escape
 
-        class MyUnicode(unicode):
+        class MyUnicode(str):
             pass
 
-        self.assertEqual(escape(u"foo".encode('ascii')), unicode.__name__)
-        self.assertEqual(escape(u"foo"), unicode.__name__)
+        self.assertEqual(escape("foo".encode('ascii')), str.__name__)
+        self.assertEqual(escape("foo"), str.__name__)
         self.assertEqual(escape(MyUnicode("foo")), MyUnicode.__name__)
 
     def test__escape__returns_unicode(self):
@@ -667,17 +667,17 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertStringMixin, Asser
         engine = renderer._make_render_engine()
         escape = engine.escape
 
-        self.assertEqual(type(escape("foo")), unicode)
+        self.assertEqual(type(escape("foo")), str)
 
         # Check that literal doesn't preserve unicode subclasses.
-        class MyUnicode(unicode):
+        class MyUnicode(str):
             pass
 
         s = MyUnicode("abc")
 
         self.assertEqual(type(s), MyUnicode)
-        self.assertTrue(isinstance(s, unicode))
-        self.assertEqual(type(escape(s)), unicode)
+        self.assertTrue(isinstance(s, str))
+        self.assertEqual(type(escape(s)), str)
 
     ## Test the missing_tags attribute.
 
@@ -706,7 +706,7 @@ class Renderer_MakeRenderEngineTests(unittest.TestCase, AssertStringMixin, Asser
         stack = ContextStack({'foo': 'bar'})
 
         self.assertEqual('bar', engine.resolve_context(stack, 'foo'))
-        self.assertString(u'', engine.resolve_context(stack, 'missing'))
+        self.assertString('', engine.resolve_context(stack, 'missing'))
 
     def test__resolve_context__missing_tags_strict(self):
         """

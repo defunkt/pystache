@@ -1,7 +1,42 @@
 History
 =======
 
-**Note:** Official support for Python 2.4 will end with Pystache version 0.6.0.
+**Note:** Official support for Python 2.7 will end with Pystache version 0.6.0.
+
+0.6.0 (2021-03-04)
+------------------
+
+-   Bump spec versions to latest => v1.1.3
+-   Modernize python and CI tools, update docs/doctests
+-   Update unicode conversion test for py3-only
+-   Add pep8speaks cfg, cleanup warnings
+-   Remove superfluous setup test/unused imports
+-   Add conda recipe/CI build
+
+0.5.6 (2021-02-28)
+------------------
+
+-   Use correct wheel name in release workflow, limit wheels
+-   Add install check/test of downloaded wheel
+-   Update/add ci workflows and tox cfg, bump to next dev0 version
+
+0.5.5 (2020-12-16)
+------------------
+
+-   fix document processing, update pandoc args and history
+-   add release.yml to CI, test env settings
+-   fix bogus commit message, update versions and tox cf
+-   add post-test steps for building pkgs with/without doc updates
+-   add CI build check, fix MANIFEST.in pruning
+
+0.5.4-2 (2020-11-09)
+--------------------
+
+-   Merge pull request #1 from sarnold/rebase-up
+-   Bugfix: test_specloader.py: fix test_find__with_directory on other OSs
+-   Bugfix: pystache/loader.py: remove stray windows line-endings
+-   fix crufty (and insecure) http urls
+-   Bugfix: modernize python versions (keep py27) and fix spec_test load cmd
 
 0.5.4 (2014-07-11)
 ------------------

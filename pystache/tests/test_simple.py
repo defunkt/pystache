@@ -2,11 +2,11 @@ import unittest
 
 import pystache
 from pystache import Renderer
-from examples.nested_context import NestedContext
-from examples.complex import Complex
-from examples.lambdas import Lambdas
-from examples.template_partial import TemplatePartial
-from examples.simple import Simple
+from .examples.nested_context import NestedContext
+from .examples.complex import Complex
+from .examples.lambdas import Lambdas
+from .examples.template_partial import TemplatePartial
+from .examples.simple import Simple
 
 from pystache.tests.common import EXAMPLES_DIR
 from pystache.tests.common import AssertStringMixin
@@ -20,7 +20,7 @@ class TestSimple(unittest.TestCase, AssertStringMixin):
         view.template = '{{#foo}}{{thing1}} and {{thing2}} and {{outer_thing}}{{/foo}}{{^foo}}Not foo!{{/foo}}'
 
         actual = renderer.render(view)
-        self.assertString(actual, u"one and foo and two")
+        self.assertString(actual, "one and foo and two")
 
     def test_looping_and_negation_context(self):
         template = '{{#item}}{{header}}: {{name}} {{/item}}{{^item}} Shouldnt see me{{/item}}'
@@ -40,7 +40,7 @@ class TestSimple(unittest.TestCase, AssertStringMixin):
 
         renderer = Renderer()
         actual = renderer.render(view)
-        self.assertString(actual, u'bar != bar. oh, it does!')
+        self.assertString(actual, 'bar != bar. oh, it does!')
 
     def test_rendering_partial(self):
         renderer = Renderer(search_dirs=EXAMPLES_DIR)
@@ -49,11 +49,11 @@ class TestSimple(unittest.TestCase, AssertStringMixin):
         view.template = '{{>inner_partial}}'
 
         actual = renderer.render(view)
-        self.assertString(actual, u'Again, Welcome!')
+        self.assertString(actual, 'Again, Welcome!')
 
         view.template = '{{#looping}}{{>inner_partial}} {{/looping}}'
         actual = renderer.render(view)
-        self.assertString(actual, u"Again, Welcome! Again, Welcome! Again, Welcome! ")
+        self.assertString(actual, "Again, Welcome! Again, Welcome! Again, Welcome! ")
 
     def test_non_existent_value_renders_blank(self):
         view = Simple()
@@ -77,7 +77,7 @@ class TestSimple(unittest.TestCase, AssertStringMixin):
         view = TemplatePartial(renderer=renderer)
 
         actual = renderer.render(view)
-        self.assertString(actual, u"""Welcome
+        self.assertString(actual, """Welcome
 -------
 
 ## Again, Welcome! ##""")

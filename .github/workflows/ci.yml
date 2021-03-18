@@ -1,0 +1,73 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: ci
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      OS: ${{ matrix.os }}
+      PYTHON: ${{ matrix.python-version }}
+      PYTHONIOENCODING: utf-8
+      PIP_DOWNLOAD_CACHE: ${{ github.workspace }}/../.pip_download_cache
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04, macos-latest, windows-latest]
+        python-version: [3.6, 3.7, 3.8, 3.9]
+    steps:
+    - name: Set git crlf/eol
+      run: |
+        git config --global core.autocrlf false
+        git config --global core.eol lf
+
+    - uses: actions/checkout@v2
+      with:
+        submodules: True
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install tox tox-gh-actions
+
+    - name: Run tests with coverage
+      run: |
+        tox
+      env:
+        PLATFORM: ${{ matrix.os }}
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        env_vars: OS,PYTHON
+
+    - name: Test with specs and pystache-test
+      run: |
+        tox -e setup . ext/spec/specs
+
+    - name: Check pkg builds
+      run: |
+        tox -e deploy
+
+    - name: Check docs
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get -qq update
+        sudo apt-get install -y pandoc
+        tox -e docs

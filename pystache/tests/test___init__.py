@@ -6,9 +6,9 @@ Tests of __init__.py.
 """
 
 # Calling "import *" is allowed only at the module level.
-GLOBALS_INITIAL = globals().keys()
+GLOBALS_INITIAL = list(globals().keys())
 from pystache import *
-GLOBALS_PYSTACHE_IMPORTED = globals().keys()
+GLOBALS_PYSTACHE_IMPORTED = list(globals().keys())
 
 import unittest
 

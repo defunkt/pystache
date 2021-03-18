@@ -32,7 +32,7 @@ class Renderer(object):
     >>> partials = {'partial': 'Hello, {{thing}}!'}
     >>> renderer = Renderer(partials=partials)
     >>> # We apply print to make the test work in Python 3 after 2to3.
-    >>> print renderer.render('{{>partial}}', {'thing': 'world'})
+    >>> print(renderer.render('{{>partial}}', {'thing': 'world'}))
     Hello, world!
 
     To customize string coercion (e.g. to render False values as ''), one can
@@ -130,7 +130,7 @@ class Renderer(object):
         if string_encoding is None:
             string_encoding = defaults.STRING_ENCODING
 
-        if isinstance(search_dirs, basestring):
+        if isinstance(search_dirs, str):
             search_dirs = [search_dirs]
 
         self._context = None
@@ -177,16 +177,16 @@ class Renderer(object):
         """
         # We type-check to avoid "TypeError: decoding Unicode is not supported".
         # We avoid the Python ternary operator for Python 2.4 support.
-        if isinstance(s, unicode):
+        if isinstance(s, str):
             return s
-        return self.unicode(s)
+        return self.str(s)
 
     def _to_unicode_hard(self, s):
         """
         Convert a basestring to a string with type unicode (not subclass).
 
         """
-        return unicode(self._to_unicode_soft(s))
+        return str(self._to_unicode_soft(s))
 
     def _escape_to_unicode(self, s):
         """
@@ -195,9 +195,9 @@ class Renderer(object):
         Returns a unicode string (not subclass).
 
         """
-        return unicode(self.escape(self._to_unicode_soft(s)))
+        return str(self.escape(self._to_unicode_soft(s)))
 
-    def unicode(self, b, encoding=None):
+    def str(self, b, encoding=None):
         """
         Convert a byte string to unicode, using string_encoding and decode_errors.
 
@@ -222,7 +222,7 @@ class Renderer(object):
 
         # TODO: Wrap UnicodeDecodeErrors with a message about setting
         # the string_encoding and decode_errors attributes.
-        return unicode(b, encoding, self.decode_errors)
+        return str(b, encoding, self.decode_errors)
 
     def _make_loader(self):
         """
@@ -230,7 +230,7 @@ class Renderer(object):
 
         """
         return Loader(file_encoding=self.file_encoding, extension=self.file_extension,
-                      to_unicode=self.unicode, search_dirs=self.search_dirs)
+                      to_unicode=self.str, search_dirs=self.search_dirs)
 
     def _make_load_template(self):
         """
@@ -299,7 +299,7 @@ class Renderer(object):
             try:
                 return load_partial(name)
             except TemplateNotFoundError:
-                return u''
+                return ''
 
         return resolve_partial
 
@@ -316,7 +316,7 @@ class Renderer(object):
             try:
                 return context_get(stack, name)
             except KeyNotFoundError:
-                return u''
+                return ''
 
         return resolve_context
 

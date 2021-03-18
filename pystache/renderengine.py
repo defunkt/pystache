@@ -160,7 +160,7 @@ class RenderEngine(object):
         if not is_string(val):
             # In case the template is an integer, for example.
             val = self.to_str(val)
-        if type(val) is not unicode:
+        if type(val) is not str:
             val = self.literal(val)
         return self.render(val, context, delimiters)
 

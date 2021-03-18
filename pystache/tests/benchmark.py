@@ -13,6 +13,13 @@ tests/benchmark.py 10000
 import sys
 from timeit import Timer
 
+try:
+    import chevron as pystache
+    print('Using module: chevron')
+except (ImportError):
+    import pystache
+    print('Using module: pystache')
+
 import pystache
 
 # TODO: make the example realistic.
@@ -76,17 +83,17 @@ def main(sys_argv):
     args = sys_argv[1:]
     count = int(args[0])
 
-    print "Benchmarking: %sx" % count
-    print
+    print("Benchmarking: %sx" % count)
+    print()
 
     for example in examples:
 
         test = make_test_function(example)
 
         t = Timer(test,)
-        print min(t.repeat(repeat=3, number=count))
+        print(min(t.repeat(repeat=3, number=count)))
 
-    print "Done"
+    print("Done")
 
 
 if __name__ == '__main__':

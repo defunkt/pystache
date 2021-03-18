@@ -88,7 +88,7 @@ def main(sys_argv):
 
     """
     # TODO: use logging module
-    print "pystache: running tests: argv: %s" % repr(sys_argv)
+    print("pystache: running tests: argv: %s" % repr(sys_argv))
 
     should_source_exist = False
     spec_test_dir = None
@@ -131,11 +131,9 @@ def main(sys_argv):
         module_names = _discover_test_modules(PACKAGE_DIR)
         sys_argv.extend(module_names)
         if project_dir is not None:
-            # Add the current module for unit tests contained here (e.g.
-            # to include SetupTests).
+            # Add the current module for unit tests contained here
             sys_argv.append(__name__)
 
-    SetupTests.project_dir = project_dir
 
     extra_tests = make_extra_tests(project_dir, spec_test_dir)
     test_program_class = make_test_program_class(extra_tests)
@@ -166,25 +164,3 @@ def _discover_test_modules(package_dir):
         raise Exception("No unit-test modules found--\n  in %s" % package_dir)
 
     return names
-
-
-class SetupTests(TestCase):
-
-    """Tests about setup.py."""
-
-    project_dir = None
-
-    def test_version(self):
-        """
-        Test that setup.py's version matches the package's version.
-
-        """
-        original_path = list(sys.path)
-
-        sys.path.insert(0, self.project_dir)
-
-        try:
-            from setup import VERSION
-            self.assertEqual(VERSION, pystache.__version__)
-        finally:
-            sys.path = original_path
