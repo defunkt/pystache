@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-
+# This is a very amazing project !!
 """
 This script supports publishing Pystache to PyPI.
 
